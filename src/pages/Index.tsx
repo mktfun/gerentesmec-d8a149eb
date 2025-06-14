@@ -13,6 +13,9 @@ export interface SimulationData {
   postContemplationPayment: number;
   finalTerm: number;
   bidValue: number;
+  embeddedBidValue: number;
+  ownResourcesBidValue: number;
+  availableCredit: number;
   totalPaid: number;
   totalInvested: number;
   reducedPaymentEnabled?: boolean;

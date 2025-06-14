@@ -55,7 +55,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     adminRate: '18',
     reserveFundRate: '1',
     insuranceRate: '1',
-    bidPercentage: '',
+    embeddedBidPercentage: '',
+    ownResourcesBidPercentage: '',
     bidDiscountType: 'reducePayment',
     reducedPaymentEnabled: false,
     reducedPaymentPercentage: '50'
@@ -85,7 +86,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     const adminRate = parseFloat(formData.adminRate);
     const reserveFundRate = parseFloat(formData.reserveFundRate);
     const insuranceRate = parseFloat(formData.insuranceRate);
-    const bidPercentage = parseFloat(formData.bidPercentage) || 0;
+    const embeddedBidPercentage = parseFloat(formData.embeddedBidPercentage) || 0;
+    const ownResourcesBidPercentage = parseFloat(formData.ownResourcesBidPercentage) || 0;
     const reducedPaymentPercentage = parseFloat(formData.reducedPaymentPercentage);
 
     if (!creditValue || !installments || !contemplationTime || 
@@ -100,7 +102,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
       adminRate,
       reserveFundRate,
       insuranceRate,
-      bidPercentage,
+      embeddedBidPercentage,
+      ownResourcesBidPercentage,
       bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment',
       reducedPaymentEnabled: formData.reducedPaymentEnabled,
       reducedPaymentPercentage
@@ -112,7 +115,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
   const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime &&
                      formData.adminRate && formData.reserveFundRate && formData.insuranceRate;
 
-  const hasBid = parseFloat(formData.bidPercentage) > 0;
+  const hasBid = (parseFloat(formData.embeddedBidPercentage) || 0) + (parseFloat(formData.ownResourcesBidPercentage) || 0) > 0;
 
   return (
     <Card className="glass-card p-8 apple-shadow-lg">
@@ -277,21 +280,40 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
             <h3 className="text-lg font-semibold text-slate-900 mb-3">Lance (Opcional)</h3>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="bidPercentage" className="text-sm font-medium text-slate-700">
-              Valor do Lance (% do crédito)
-            </Label>
-            <Input
-              id="bidPercentage"
-              type="number"
-              placeholder="0"
-              value={formData.bidPercentage}
-              onChange={(e) => handleInputChange('bidPercentage', e.target.value)}
-              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
-              min="0"
-              max="50"
-              step="0.1"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="embeddedBidPercentage" className="text-sm font-medium text-slate-700">
+                Lance Embutido (% do crédito)
+              </Label>
+              <Input
+                id="embeddedBidPercentage"
+                type="number"
+                placeholder="0"
+                value={formData.embeddedBidPercentage}
+                onChange={(e) => handleInputChange('embeddedBidPercentage', e.target.value)}
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                min="0"
+                max="30"
+                step="0.1"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ownResourcesBidPercentage" className="text-sm font-medium text-slate-700">
+                Lance com Recursos Próprios (%)
+              </Label>
+              <Input
+                id="ownResourcesBidPercentage"
+                type="number"
+                placeholder="0"
+                value={formData.ownResourcesBidPercentage}
+                onChange={(e) => handleInputChange('ownResourcesBidPercentage', e.target.value)}
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                min="0"
+                max="50"
+                step="0.1"
+              />
+            </div>
           </div>
 
           {hasBid && (

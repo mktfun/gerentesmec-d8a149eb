@@ -8,7 +8,8 @@ interface CalculationInput {
   adminRate: number;
   reserveFundRate: number;
   insuranceRate: number;
-  bidPercentage?: number;
+  embeddedBidPercentage?: number;
+  ownResourcesBidPercentage?: number;
   bidDiscountType?: 'reduceTerm' | 'reducePayment';
   reducedPaymentEnabled?: boolean;
   reducedPaymentPercentage?: number;
@@ -22,7 +23,8 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     adminRate, 
     reserveFundRate, 
     insuranceRate,
-    bidPercentage = 0,
+    embeddedBidPercentage = 0,
+    ownResourcesBidPercentage = 0,
     bidDiscountType = 'reducePayment',
     reducedPaymentEnabled = false,
     reducedPaymentPercentage = 50
@@ -36,7 +38,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   const totalCreditWithTaxes = creditValue + adminValue + reserveFundValue + insuranceValue;
   let monthlyPayment = totalCreditWithTaxes / installments;
   
-  // Aplicar parcela reduzida se habilitada
+  // Aplicar parcela reduzida se habilitada (CORRIGIDO)
   let actualMonthlyPayment = monthlyPayment;
   let compensationAmount = 0;
   
@@ -47,7 +49,13 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   }
   
   // Cálculos de lance
-  const bidValue = creditValue * (bidPercentage / 100);
+  const embeddedBidValue = creditValue * (embeddedBidPercentage / 100);
+  const ownResourcesBidValue = creditValue * (ownResourcesBidPercentage / 100);
+  const bidValue = embeddedBidValue + ownResourcesBidValue;
+  
+  // CÁLCULO CRÍTICO: Crédito disponível após lance embutido
+  const availableCredit = creditValue - embeddedBidValue;
+  
   const remainingInstallments = installments - contemplationTime;
   
   let postContemplationPayment = monthlyPayment;
@@ -73,27 +81,27 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   }
   
   // Total a ser pago
-  const totalPaid = (actualMonthlyPayment * contemplationTime) + (postContemplationPayment * finalTerm) + bidValue;
+  const totalPaid = (actualMonthlyPayment * contemplationTime) + (postContemplationPayment * finalTerm) + ownResourcesBidValue;
   
-  // Valor pago até a contemplação (CORRIGIDO)
-  const paidUntilContemplation = actualMonthlyPayment * contemplationTime;
+  // Total investido até a contemplação (CORRIGIDO)
+  const totalInvested = actualMonthlyPayment * contemplationTime;
   
   // Cenário 1: Venda da Cota (FÓRMULA CORRIGIDA)
   const quotaSaleAgio = 15; // 15% de ágio
   // Lucro Líquido = Apenas o ágio como lucro (CORRIGIDO)
   const quotaSaleProfit = creditValue * (quotaSaleAgio / 100);
   // Retorno Total = Total Investido + Lucro Líquido (CORRIGIDO)
-  const quotaSaleValue = paidUntilContemplation + quotaSaleProfit;
-  const quotaSaleProfitPercentage = (quotaSaleProfit / paidUntilContemplation) * 100;
+  const quotaSaleValue = totalInvested + quotaSaleProfit;
+  const quotaSaleProfitPercentage = (quotaSaleProfit / totalInvested) * 100;
   
-  // Cenário 2: Aquisição de Imóvel (lógica mantida)
-  const propertyValue = creditValue * 1.06; // Crédito corrigido por valorização de 6%
+  // Cenário 2: Aquisição de Imóvel (usa crédito disponível)
+  const propertyValue = availableCredit * 1.06; // Crédito disponível corrigido por valorização de 6%
   const rentalRate = 0.01; // 1% ao mês sobre o valor do imóvel
   const monthlyRental = propertyValue * rentalRate;
   const netMonthlyReturn = monthlyRental - postContemplationPayment;
   
-  // Cenário 3: Crédito Aplicado (FÓRMULA CORRIGIDA)
-  const appliedValue = creditValue * 1.06; // Valor corrigido aplicado
+  // Cenário 3: Crédito Aplicado (usa crédito disponível)
+  const appliedValue = availableCredit * 1.06; // Valor disponível corrigido aplicado
   const investmentReturn = 12; // 12% a.a.
   const monthsToApply = finalTerm; // Prazo restante após contemplação
   const yearsToApply = monthsToApply / 12;
@@ -110,8 +118,11 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     postContemplationPayment,
     finalTerm,
     bidValue,
+    embeddedBidValue,
+    ownResourcesBidValue,
+    availableCredit,
     totalPaid,
-    totalInvested: paidUntilContemplation, // Campo adicionado
+    totalInvested,
     reducedPaymentEnabled,
     reducedPaymentPercentage,
     scenarios: {
