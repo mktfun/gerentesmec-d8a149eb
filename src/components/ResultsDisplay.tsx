@@ -1,8 +1,7 @@
-
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download } from 'lucide-react';
+import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SimulationData } from '@/pages/Index';
 import { formatCurrency } from '@/utils/formatters';
@@ -100,6 +99,8 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
     URL.revokeObjectURL(url);
   };
 
+  const hasBid = data.bidValue > 0;
+
   return (
     <div className="space-y-6">
       {/* Summary Card */}
@@ -125,15 +126,37 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="p-4 bg-slate-50 rounded-lg">
             <p className="text-sm text-slate-600 mb-1">Valor do Crédito</p>
             <p className="text-2xl font-bold text-slate-900">{formatCurrency(data.creditValue)}</p>
           </div>
           <div className="p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-600 mb-1">Parcela Mensal</p>
+            <p className="text-sm text-slate-600 mb-1">Parcela Inicial</p>
             <p className="text-2xl font-bold text-apple-blue-600">{formatCurrency(data.monthlyPayment)}</p>
           </div>
+        </div>
+
+        {hasBid && (
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+              <p className="text-sm text-purple-700 mb-1">Valor do Lance</p>
+              <p className="text-xl font-bold text-purple-800">{formatCurrency(data.bidValue)}</p>
+            </div>
+            <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
+              <p className="text-sm text-orange-700 mb-1">Parcela Pós-Contemplação</p>
+              <p className="text-xl font-bold text-orange-800">{formatCurrency(data.postContemplationPayment)}</p>
+            </div>
+            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+              <p className="text-sm text-blue-700 mb-1">Prazo Final</p>
+              <p className="text-xl font-bold text-blue-800">{data.finalTerm} meses</p>
+            </div>
+          </div>
+        )}
+
+        <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+          <p className="text-sm text-green-700 mb-1">Total Investido</p>
+          <p className="text-2xl font-bold text-green-800">{formatCurrency(data.totalPaid)}</p>
         </div>
       </Card>
 
@@ -161,6 +184,12 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
                 Cenário 1
               </Badge>
               <h3 className="text-xl font-bold text-slate-900">{data.scenarios.quotaSale.title}</h3>
+              {hasBid && (
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  <Target className="w-3 h-3 mr-1" />
+                  Com Lance
+                </Badge>
+              )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -186,6 +215,12 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
                 Cenário 2
               </Badge>
               <h3 className="text-xl font-bold text-slate-900">{data.scenarios.propertyAcquisition.title}</h3>
+              {hasBid && (
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  <Target className="w-3 h-3 mr-1" />
+                  Com Lance
+                </Badge>
+              )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -217,6 +252,12 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
                 Cenário 3
               </Badge>
               <h3 className="text-xl font-bold text-slate-900">{data.scenarios.appliedCredit.title}</h3>
+              {hasBid && (
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  <Target className="w-3 h-3 mr-1" />
+                  Com Lance
+                </Badge>
+              )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">

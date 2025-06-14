@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { SimulationData } from '@/pages/Index';
 import { calculateSimulation } from '@/utils/consortiumCalculations';
 
@@ -52,7 +53,9 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     contemplationTime: '',
     adminRate: '18',
     reserveFundRate: '1',
-    insuranceRate: '1'
+    insuranceRate: '1',
+    bidPercentage: '',
+    bidDiscountType: 'reducePayment'
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -73,13 +76,13 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Agora usar parseBRLInputToNumber para garantir precisão no valor
     const creditValue = parseBRLInputToNumber(formData.creditValue);
     const installments = parseInt(formData.installments);
     const contemplationTime = parseInt(formData.contemplationTime);
     const adminRate = parseFloat(formData.adminRate);
     const reserveFundRate = parseFloat(formData.reserveFundRate);
     const insuranceRate = parseFloat(formData.insuranceRate);
+    const bidPercentage = parseFloat(formData.bidPercentage) || 0;
 
     if (!creditValue || !installments || !contemplationTime || 
         isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate)) {
@@ -92,7 +95,9 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
       contemplationTime,
       adminRate,
       reserveFundRate,
-      insuranceRate
+      insuranceRate,
+      bidPercentage,
+      bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment'
     });
 
     onSimulate(simulationData);
@@ -100,6 +105,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
 
   const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime &&
                      formData.adminRate && formData.reserveFundRate && formData.insuranceRate;
+
+  const hasBid = parseFloat(formData.bidPercentage) > 0;
 
   return (
     <Card className="glass-card p-8 apple-shadow-lg">
@@ -221,6 +228,55 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               />
             </div>
           </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="border-t border-slate-200 pt-4">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Lance (Opcional)</h3>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="bidPercentage" className="text-sm font-medium text-slate-700">
+              Valor do Lance (% do crédito)
+            </Label>
+            <Input
+              id="bidPercentage"
+              type="number"
+              placeholder="0"
+              value={formData.bidPercentage}
+              onChange={(e) => handleInputChange('bidPercentage', e.target.value)}
+              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+              min="0"
+              max="50"
+              step="0.1"
+            />
+          </div>
+
+          {hasBid && (
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-slate-700">
+                Abatimento do Lance
+              </Label>
+              <RadioGroup
+                value={formData.bidDiscountType}
+                onValueChange={(value) => handleInputChange('bidDiscountType', value)}
+                className="flex flex-col space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="reducePayment" id="reducePayment" />
+                  <Label htmlFor="reducePayment" className="text-sm cursor-pointer">
+                    Reduzir valor da parcela
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="reduceTerm" id="reduceTerm" />
+                  <Label htmlFor="reduceTerm" className="text-sm cursor-pointer">
+                    Reduzir prazo
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 pt-4">

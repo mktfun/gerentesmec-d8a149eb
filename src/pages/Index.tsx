@@ -10,6 +10,9 @@ export interface SimulationData {
   installments: number;
   contemplationTime: number;
   monthlyPayment: number;
+  postContemplationPayment: number;
+  finalTerm: number;
+  bidValue: number;
   totalPaid: number;
   scenarios: {
     quotaSale: {

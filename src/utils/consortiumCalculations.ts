@@ -8,10 +8,21 @@ interface CalculationInput {
   adminRate: number;
   reserveFundRate: number;
   insuranceRate: number;
+  bidPercentage?: number;
+  bidDiscountType?: 'reduceTerm' | 'reducePayment';
 }
 
 export const calculateSimulation = (input: CalculationInput): SimulationData => {
-  const { creditValue, installments, contemplationTime, adminRate, reserveFundRate, insuranceRate } = input;
+  const { 
+    creditValue, 
+    installments, 
+    contemplationTime, 
+    adminRate, 
+    reserveFundRate, 
+    insuranceRate,
+    bidPercentage = 0,
+    bidDiscountType = 'reducePayment'
+  } = input;
   
   // Cálculo da parcela usando as taxas específicas
   const adminValue = creditValue * (adminRate / 100);
@@ -21,16 +32,37 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   const totalCreditWithTaxes = creditValue + adminValue + reserveFundValue + insuranceValue;
   const monthlyPayment = totalCreditWithTaxes / installments;
   
+  // Cálculos de lance
+  const bidValue = creditValue * (bidPercentage / 100);
+  const remainingInstallments = installments - contemplationTime;
+  
+  let postContemplationPayment = monthlyPayment;
+  let finalTerm = remainingInstallments;
+  
+  if (bidValue > 0) {
+    if (bidDiscountType === 'reduceTerm') {
+      // Reduzir prazo: parcela mantém valor, prazo diminui
+      const installmentsToReduce = Math.floor(bidValue / monthlyPayment);
+      finalTerm = Math.max(1, remainingInstallments - installmentsToReduce);
+      postContemplationPayment = monthlyPayment;
+    } else {
+      // Reduzir parcela: prazo mantém, parcela diminui
+      const remainingDebt = monthlyPayment * remainingInstallments - bidValue;
+      postContemplationPayment = Math.max(0, remainingDebt / remainingInstallments);
+      finalTerm = remainingInstallments;
+    }
+  }
+  
   // Total a ser pago
-  const totalPaid = monthlyPayment * installments;
+  const totalPaid = (monthlyPayment * contemplationTime) + (postContemplationPayment * finalTerm) + bidValue;
   
   // Valor pago até a contemplação
   const paidUntilContemplation = monthlyPayment * contemplationTime;
   
   // Cenário 1: Venda da Cota
   const quotaSaleValue = creditValue * 0.85; // Valor de venda da cota (85% do crédito)
-  const quotaSaleProfit = quotaSaleValue - paidUntilContemplation;
-  const quotaSaleProfitPercentage = (quotaSaleProfit / paidUntilContemplation) * 100;
+  const quotaSaleProfit = quotaSaleValue - paidUntilContemplation - bidValue;
+  const quotaSaleProfitPercentage = (quotaSaleProfit / (paidUntilContemplation + bidValue)) * 100;
   
   // Cenário 2: Aquisição de Imóvel
   const propertyValue = creditValue * 1.2; // Valor do imóvel (20% acima do crédito)
@@ -49,6 +81,9 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     installments,
     contemplationTime,
     monthlyPayment,
+    postContemplationPayment,
+    finalTerm,
+    bidValue,
     totalPaid,
     scenarios: {
       quotaSale: {
