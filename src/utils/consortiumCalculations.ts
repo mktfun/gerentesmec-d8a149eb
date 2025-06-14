@@ -59,25 +59,28 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   // Valor pago até a contemplação
   const paidUntilContemplation = monthlyPayment * contemplationTime;
   
-  // Cenário 1: Venda da Cota (com ágio de 15% sobre o crédito)
+  // Cenário 1: Venda da Cota (FÓRMULA CORRIGIDA)
   const quotaSaleAgio = 0.15; // 15% de ágio
-  const quotaSaleValue = creditValue * (1 + quotaSaleAgio);
-  const quotaSaleProfit = quotaSaleValue - paidUntilContemplation - bidValue;
-  const quotaSaleProfitPercentage = (quotaSaleProfit / (paidUntilContemplation + bidValue)) * 100;
+  // Retorno Total = Parcelas pagas + Prêmio do ágio
+  const quotaSaleProfit = creditValue * (quotaSaleAgio / 100); // Apenas o ágio como lucro
+  const quotaSaleValue = paidUntilContemplation + quotaSaleProfit; // Parcelas + Prêmio
+  const quotaSaleProfitPercentage = (quotaSaleProfit / paidUntilContemplation) * 100;
   
-  // Cenário 2: Aquisição de Imóvel (lógica corrigida)
+  // Cenário 2: Aquisição de Imóvel (lógica mantida)
   const propertyValue = creditValue * 1.06; // Crédito corrigido por valorização de 6%
   const rentalRate = 0.01; // 1% ao mês sobre o valor do imóvel
   const monthlyRental = propertyValue * rentalRate;
   const netMonthlyReturn = monthlyRental - postContemplationPayment;
   
-  // Cenário 3: Crédito Aplicado (lógica corrigida - juros compostos sobre o montante total)
+  // Cenário 3: Crédito Aplicado (FÓRMULA CORRIGIDA)
   const appliedValue = creditValue * 1.06; // Valor corrigido aplicado
   const investmentReturn = 12; // 12% a.a.
   const monthsToApply = finalTerm; // Prazo restante após contemplação
   const yearsToApply = monthsToApply / 12;
+  // Fórmula de juros compostos: FV = PV * (1 + r)^n
   const finalInvestmentValue = appliedValue * Math.pow(1 + (investmentReturn / 100), yearsToApply);
-  const totalInvestmentProfit = finalInvestmentValue - appliedValue - (postContemplationPayment * finalTerm);
+  // Lucro Total = Valor Final - Valor Aplicado (FÓRMULA CORRIGIDA)
+  const totalInvestmentProfit = finalInvestmentValue - appliedValue;
   
   return {
     creditValue,
