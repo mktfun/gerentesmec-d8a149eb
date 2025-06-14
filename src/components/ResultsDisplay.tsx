@@ -1,0 +1,242 @@
+
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { SimulationData } from '@/pages/Index';
+import { formatCurrency } from '@/utils/formatters';
+
+interface ResultsDisplayProps {
+  data: SimulationData | null;
+  isLoading: boolean;
+}
+
+export const ResultsDisplay = ({ data, isLoading }: ResultsDisplayProps) => {
+  if (isLoading) {
+    return (
+      <Card className="glass-card p-8 apple-shadow-lg">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-apple-blue-200 border-t-apple-blue-500 rounded-full animate-spin mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-700 mb-2">Processando Simulação</h3>
+            <p className="text-slate-500">Calculando os melhores cenários...</p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card className="glass-card p-8 apple-shadow-lg">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-apple-blue-100 rounded-full flex items-center justify-center mb-4">
+              <TrendingUp className="w-8 h-8 text-apple-blue-500" />
+            </div>
+            <h3 className="text-lg font-medium text-slate-700 mb-2">Aguardando Simulação</h3>
+            <p className="text-slate-500">Preencha os dados ao lado para ver os resultados</p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  const exportSimulation = () => {
+    const simulationReport = {
+      timestamp: new Date().toISOString(),
+      creditValue: data.creditValue,
+      installments: data.installments,
+      contemplationTime: data.contemplationTime,
+      monthlyPayment: data.monthlyPayment,
+      totalPaid: data.totalPaid,
+      scenarios: data.scenarios
+    };
+
+    localStorage.setItem('lastSimulation', JSON.stringify(simulationReport));
+    
+    // Create downloadable report
+    const reportContent = `
+RELATÓRIO DE SIMULAÇÃO - CONSÓRCIO FLASH SIM
+============================================
+
+DADOS BÁSICOS:
+- Valor do Crédito: ${formatCurrency(data.creditValue)}
+- Parcelas: ${data.installments}
+- Tempo de Contemplação: ${data.contemplationTime} meses
+- Valor da Parcela: ${formatCurrency(data.monthlyPayment)}
+- Total Pago: ${formatCurrency(data.totalPaid)}
+
+CENÁRIOS:
+
+1. ${data.scenarios.quotaSale.title}
+   - Retorno Total: ${formatCurrency(data.scenarios.quotaSale.totalReturn)}
+   - Lucro: ${formatCurrency(data.scenarios.quotaSale.profit)}
+   - Rentabilidade: ${data.scenarios.quotaSale.profitPercentage.toFixed(2)}%
+
+2. ${data.scenarios.propertyAcquisition.title}
+   - Valor do Imóvel: ${formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}
+   - Financiamento: ${formatCurrency(data.scenarios.propertyAcquisition.financing)}
+   - Parcela Financiamento: ${formatCurrency(data.scenarios.propertyAcquisition.monthlyFinancing)}
+   - Custo Total: ${formatCurrency(data.scenarios.propertyAcquisition.totalCost)}
+
+3. ${data.scenarios.appliedCredit.title}
+   - Retorno do Investimento: ${data.scenarios.appliedCredit.investmentReturn.toFixed(2)}% a.a.
+   - Valor Final: ${formatCurrency(data.scenarios.appliedCredit.finalValue)}
+   - Lucro Total: ${formatCurrency(data.scenarios.appliedCredit.totalProfit)}
+
+Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
+`;
+
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `simulacao-consorcio-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Card */}
+      <Card className="glass-card p-6 apple-shadow-lg">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Resumo da Simulação</h3>
+              <p className="text-sm text-slate-500">Dados principais calculados</p>
+            </div>
+          </div>
+          <Button
+            onClick={exportSimulation}
+            variant="outline"
+            size="sm"
+            className="glass-button border-slate-200 hover:border-apple-blue-300 hover:bg-apple-blue-50"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exportar
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-slate-50 rounded-lg">
+            <p className="text-sm text-slate-600 mb-1">Valor do Crédito</p>
+            <p className="text-2xl font-bold text-slate-900">{formatCurrency(data.creditValue)}</p>
+          </div>
+          <div className="p-4 bg-slate-50 rounded-lg">
+            <p className="text-sm text-slate-600 mb-1">Parcela Mensal</p>
+            <p className="text-2xl font-bold text-apple-blue-600">{formatCurrency(data.monthlyPayment)}</p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Scenarios */}
+      <Card className="glass-card apple-shadow-lg">
+        <Tabs defaultValue="sale" className="w-full">
+          <TabsList className="grid grid-cols-3 w-full bg-slate-100 p-1 rounded-lg">
+            <TabsTrigger value="sale" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <DollarSign className="w-4 h-4" />
+              Venda da Cota
+            </TabsTrigger>
+            <TabsTrigger value="property" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <Home className="w-4 h-4" />
+              Imóvel
+            </TabsTrigger>
+            <TabsTrigger value="investment" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <PiggyBank className="w-4 h-4" />
+              Investimento
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="sale" className="p-6 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                Cenário 1
+              </Badge>
+              <h3 className="text-xl font-bold text-slate-900">{data.scenarios.quotaSale.title}</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                <p className="text-sm text-green-700 mb-1">Retorno Total</p>
+                <p className="text-2xl font-bold text-green-800">{formatCurrency(data.scenarios.quotaSale.totalReturn)}</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                <p className="text-sm text-blue-700 mb-1">Lucro Líquido</p>
+                <p className="text-2xl font-bold text-blue-800">{formatCurrency(data.scenarios.quotaSale.profit)}</p>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+              <p className="text-sm text-purple-700 mb-1">Rentabilidade</p>
+              <p className="text-3xl font-bold text-purple-800">{data.scenarios.quotaSale.profitPercentage.toFixed(2)}%</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="property" className="p-6 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                Cenário 2
+              </Badge>
+              <h3 className="text-xl font-bold text-slate-900">{data.scenarios.propertyAcquisition.title}</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                <p className="text-sm text-blue-700 mb-1">Valor do Imóvel</p>
+                <p className="text-xl font-bold text-blue-800">{formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
+                <p className="text-sm text-orange-700 mb-1">Financiamento</p>
+                <p className="text-xl font-bold text-orange-800">{formatCurrency(data.scenarios.propertyAcquisition.financing)}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                <p className="text-sm text-purple-700 mb-1">Parcela Financiamento</p>
+                <p className="text-xl font-bold text-purple-800">{formatCurrency(data.scenarios.propertyAcquisition.monthlyFinancing)}</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
+                <p className="text-sm text-red-700 mb-1">Custo Total</p>
+                <p className="text-xl font-bold text-red-800">{formatCurrency(data.scenarios.propertyAcquisition.totalCost)}</p>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="investment" className="p-6 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                Cenário 3
+              </Badge>
+              <h3 className="text-xl font-bold text-slate-900">{data.scenarios.appliedCredit.title}</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                <p className="text-sm text-green-700 mb-1">Taxa de Retorno</p>
+                <p className="text-2xl font-bold text-green-800">{data.scenarios.appliedCredit.investmentReturn.toFixed(2)}% a.a.</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                <p className="text-sm text-blue-700 mb-1">Valor Final</p>
+                <p className="text-xl font-bold text-blue-800">{formatCurrency(data.scenarios.appliedCredit.finalValue)}</p>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg">
+              <p className="text-sm text-orange-700 mb-1">Lucro Total</p>
+              <p className="text-3xl font-bold text-orange-800">{formatCurrency(data.scenarios.appliedCredit.totalProfit)}</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </Card>
+    </div>
+  );
+};
