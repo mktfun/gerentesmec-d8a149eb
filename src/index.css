@@ -29,8 +29,8 @@
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
-    --border: 226 232 240;
-    --input: 226 232 240;
+    --border: 209 213 219;
+    --input: 209 213 219;
     --ring: 14 165 233;
 
     --radius: 0.75rem;
@@ -56,7 +56,7 @@
     min-height: 100vh;
   }
   
-  /* Remover outline padrão dos inputs e aplicar estilo customizado */
+  /* Improved input focus styles with better contrast */
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
@@ -65,13 +65,13 @@
     border-color: rgb(14, 165, 233) !important;
   }
   
-  /* Estilo customizado para o Switch */
+  /* Custom Switch styles with proper contrast */
   [data-state="checked"] {
     background-color: rgb(14, 165, 233) !important;
   }
   
   [data-state="unchecked"] {
-    background-color: rgb(226, 232, 240) !important;
+    background-color: rgb(209, 213, 219) !important;
   }
 }
 
@@ -90,5 +90,30 @@
   
   .apple-shadow-lg {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Improved contrast for badges and status indicators */
+  .badge-blue {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+  
+  .badge-green {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+  
+  .badge-purple {
+    @apply bg-purple-100 text-purple-800 border-purple-200;
+  }
+  
+  .badge-orange {
+    @apply bg-orange-100 text-orange-800 border-orange-200;
+  }
+  
+  .badge-red {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+  
+  .badge-yellow {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
   }
 }
