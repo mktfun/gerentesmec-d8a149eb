@@ -15,6 +15,36 @@ interface SimulatorFormProps {
   hasResults: boolean;
 }
 
+// Função para formatar valor para o padrão R$ 0.000,00 (pt-BR)
+function formatBRLCurrency(value: string): string {
+  // Remove todos os caracteres não numéricos
+  const numeric = value.replace(/\D/g, '');
+  if (!numeric) return '';
+
+  // Divide centavos
+  let intValue = parseInt(numeric, 10);
+  let cents = (intValue % 100).toString().padStart(2, '0'); // Últimos 2 dígitos
+  let rest = Math.floor(intValue / 100).toString();
+
+  // Adiciona separador de milhar
+  let formattedInt = rest.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `R$ ${formattedInt},${cents}`;
+}
+
+// Função para converter "R$ 300.000,00" -> 300000 (float)
+function parseBRLInputToNumber(value: string): number {
+  // Remove R$ e espaços, troca "." por "", troca "," por "."
+  // Ex: "R$ 300.000,25" => "300000.25"
+  const clean = value
+    .replace(/[^0-9,]/g, '')           // Keep only numbers and comma
+    .replace(/\./g, '')                // Remove dots (thousand separators)
+    .replace(/,/g, '.');               // Convert comma to dot for decimal
+
+  // ParseFloat entende "." como decimal separador
+  const num = parseFloat(clean);
+  return isNaN(num) ? 0 : num;
+}
+
 export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: SimulatorFormProps) => {
   const [formData, setFormData] = useState({
     creditValue: '',
@@ -29,10 +59,19 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     }));
   };
 
+  const handleCreditValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatBRLCurrency(e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      creditValue: formatted
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const creditValue = parseFloat(formData.creditValue.replace(/\D/g, ''));
+    // Agora usar parseBRLInputToNumber para garantir precisão no valor
+    const creditValue = parseBRLInputToNumber(formData.creditValue);
     const installments = parseInt(formData.installments);
     const contemplationTime = parseInt(formData.contemplationTime);
 
@@ -47,15 +86,6 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     });
 
     onSimulate(simulationData);
-  };
-
-  const formatCurrency = (value: string) => {
-    const numericValue = value.replace(/\D/g, '');
-    const formatted = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(parseInt(numericValue) / 100);
-    return formatted;
   };
 
   const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime;
@@ -80,13 +110,12 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
           <Input
             id="creditValue"
             type="text"
+            inputMode="numeric"
             placeholder="R$ 0,00"
             value={formData.creditValue}
-            onChange={(e) => {
-              const formatted = formatCurrency(e.target.value);
-              handleInputChange('creditValue', formatted);
-            }}
+            onChange={handleCreditValueChange}
             className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+            autoComplete="off"
           />
         </div>
 
