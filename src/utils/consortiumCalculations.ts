@@ -10,6 +10,8 @@ interface CalculationInput {
   insuranceRate: number;
   bidPercentage?: number;
   bidDiscountType?: 'reduceTerm' | 'reducePayment';
+  reducedPaymentEnabled?: boolean;
+  reducedPaymentPercentage?: number;
 }
 
 export const calculateSimulation = (input: CalculationInput): SimulationData => {
@@ -21,7 +23,9 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     reserveFundRate, 
     insuranceRate,
     bidPercentage = 0,
-    bidDiscountType = 'reducePayment'
+    bidDiscountType = 'reducePayment',
+    reducedPaymentEnabled = false,
+    reducedPaymentPercentage = 50
   } = input;
   
   // Cálculo da parcela usando as taxas específicas
@@ -30,7 +34,17 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   const insuranceValue = creditValue * (insuranceRate / 100);
   
   const totalCreditWithTaxes = creditValue + adminValue + reserveFundValue + insuranceValue;
-  const monthlyPayment = totalCreditWithTaxes / installments;
+  let monthlyPayment = totalCreditWithTaxes / installments;
+  
+  // Aplicar parcela reduzida se habilitada
+  let actualMonthlyPayment = monthlyPayment;
+  let compensationAmount = 0;
+  
+  if (reducedPaymentEnabled) {
+    actualMonthlyPayment = monthlyPayment * (reducedPaymentPercentage / 100);
+    const unpaidAmount = monthlyPayment - actualMonthlyPayment;
+    compensationAmount = unpaidAmount * contemplationTime;
+  }
   
   // Cálculos de lance
   const bidValue = creditValue * (bidPercentage / 100);
@@ -53,17 +67,23 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     }
   }
   
-  // Total a ser pago
-  const totalPaid = (monthlyPayment * contemplationTime) + (postContemplationPayment * finalTerm) + bidValue;
+  // Compensar parcela reduzida no pós-contemplação
+  if (reducedPaymentEnabled) {
+    postContemplationPayment += compensationAmount / finalTerm;
+  }
   
-  // Valor pago até a contemplação
-  const paidUntilContemplation = monthlyPayment * contemplationTime;
+  // Total a ser pago
+  const totalPaid = (actualMonthlyPayment * contemplationTime) + (postContemplationPayment * finalTerm) + bidValue;
+  
+  // Valor pago até a contemplação (CORRIGIDO)
+  const paidUntilContemplation = actualMonthlyPayment * contemplationTime;
   
   // Cenário 1: Venda da Cota (FÓRMULA CORRIGIDA)
-  const quotaSaleAgio = 0.15; // 15% de ágio
-  // Retorno Total = Parcelas pagas + Prêmio do ágio
-  const quotaSaleProfit = creditValue * (quotaSaleAgio / 100); // Apenas o ágio como lucro
-  const quotaSaleValue = paidUntilContemplation + quotaSaleProfit; // Parcelas + Prêmio
+  const quotaSaleAgio = 15; // 15% de ágio
+  // Lucro Líquido = Apenas o ágio como lucro (CORRIGIDO)
+  const quotaSaleProfit = creditValue * (quotaSaleAgio / 100);
+  // Retorno Total = Total Investido + Lucro Líquido (CORRIGIDO)
+  const quotaSaleValue = paidUntilContemplation + quotaSaleProfit;
   const quotaSaleProfitPercentage = (quotaSaleProfit / paidUntilContemplation) * 100;
   
   // Cenário 2: Aquisição de Imóvel (lógica mantida)
@@ -86,11 +106,14 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     creditValue,
     installments,
     contemplationTime,
-    monthlyPayment,
+    monthlyPayment: actualMonthlyPayment,
     postContemplationPayment,
     finalTerm,
     bidValue,
     totalPaid,
+    totalInvested: paidUntilContemplation, // Campo adicionado
+    reducedPaymentEnabled,
+    reducedPaymentPercentage,
     scenarios: {
       quotaSale: {
         title: "Venda da Cota na Contemplação",

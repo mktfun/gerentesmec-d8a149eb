@@ -14,6 +14,9 @@ export interface SimulationData {
   finalTerm: number;
   bidValue: number;
   totalPaid: number;
+  totalInvested: number;
+  reducedPaymentEnabled?: boolean;
+  reducedPaymentPercentage?: number;
   scenarios: {
     quotaSale: {
       title: string;

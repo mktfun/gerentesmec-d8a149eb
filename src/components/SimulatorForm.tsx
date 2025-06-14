@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calculator, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SimulationData } from '@/pages/Index';
 import { calculateSimulation } from '@/utils/consortiumCalculations';
 
@@ -55,10 +56,12 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     reserveFundRate: '1',
     insuranceRate: '1',
     bidPercentage: '',
-    bidDiscountType: 'reducePayment'
+    bidDiscountType: 'reducePayment',
+    reducedPaymentEnabled: false,
+    reducedPaymentPercentage: '50'
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -83,6 +86,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     const reserveFundRate = parseFloat(formData.reserveFundRate);
     const insuranceRate = parseFloat(formData.insuranceRate);
     const bidPercentage = parseFloat(formData.bidPercentage) || 0;
+    const reducedPaymentPercentage = parseFloat(formData.reducedPaymentPercentage);
 
     if (!creditValue || !installments || !contemplationTime || 
         isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate)) {
@@ -97,7 +101,9 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
       reserveFundRate,
       insuranceRate,
       bidPercentage,
-      bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment'
+      bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment',
+      reducedPaymentEnabled: formData.reducedPaymentEnabled,
+      reducedPaymentPercentage
     });
 
     onSimulate(simulationData);
@@ -227,6 +233,42 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 step="0.01"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Nova seção: Parcela Reduzida */}
+        <div className="space-y-4">
+          <div className="border-t border-slate-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Parcela Reduzida</h3>
+                <p className="text-sm text-slate-500">Pagar parcela reduzida até a contemplação</p>
+              </div>
+              <Switch
+                checked={formData.reducedPaymentEnabled}
+                onCheckedChange={(checked) => handleInputChange('reducedPaymentEnabled', checked)}
+              />
+            </div>
+
+            {formData.reducedPaymentEnabled && (
+              <div className="space-y-2">
+                <Label htmlFor="reducedPaymentPercentage" className="text-sm font-medium text-slate-700">
+                  Percentual da Parcela Reduzida
+                </Label>
+                <Select
+                  value={formData.reducedPaymentPercentage}
+                  onValueChange={(value) => handleInputChange('reducedPaymentPercentage', value)}
+                >
+                  <SelectTrigger className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20">
+                    <SelectValue placeholder="Selecione o percentual" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="50">50% da parcela</SelectItem>
+                    <SelectItem value="75">75% da parcela</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </div>
 
