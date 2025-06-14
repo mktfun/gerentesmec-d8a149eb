@@ -1,7 +1,8 @@
+
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download, Target } from 'lucide-react';
+import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download, Target, Percent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SimulationData } from '@/pages/Index';
 import { formatCurrency } from '@/utils/formatters';
@@ -73,15 +74,17 @@ CENÁRIOS:
    - Retorno Total: ${formatCurrency(data.scenarios.quotaSale.totalReturn)}
    - Lucro: ${formatCurrency(data.scenarios.quotaSale.profit)}
    - Rentabilidade: ${data.scenarios.quotaSale.profitPercentage.toFixed(2)}%
+   - Ágio: ${(data.scenarios.quotaSale.agio * 100).toFixed(0)}%
 
 2. ${data.scenarios.propertyAcquisition.title}
    - Valor do Imóvel: ${formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}
-   - Financiamento: ${formatCurrency(data.scenarios.propertyAcquisition.financing)}
-   - Parcela Financiamento: ${formatCurrency(data.scenarios.propertyAcquisition.monthlyFinancing)}
-   - Custo Total: ${formatCurrency(data.scenarios.propertyAcquisition.totalCost)}
+   - Renda Mensal: ${formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}
+   - Parcela Pós-Contemplação: ${formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}
+   - Retorno Líquido: ${formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}
 
 3. ${data.scenarios.appliedCredit.title}
-   - Retorno do Investimento: ${data.scenarios.appliedCredit.investmentReturn.toFixed(2)}% a.a.
+   - Valor Aplicado: ${formatCurrency(data.scenarios.appliedCredit.appliedValue)}
+   - Taxa de Retorno: ${data.scenarios.appliedCredit.investmentReturn.toFixed(2)}% a.a.
    - Valor Final: ${formatCurrency(data.scenarios.appliedCredit.finalValue)}
    - Lucro Total: ${formatCurrency(data.scenarios.appliedCredit.totalProfit)}
 
@@ -203,9 +206,15 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
               </div>
             </div>
             
-            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-              <p className="text-sm text-purple-700 mb-1">Rentabilidade</p>
-              <p className="text-3xl font-bold text-purple-800">{data.scenarios.quotaSale.profitPercentage.toFixed(2)}%</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+                <p className="text-sm text-purple-700 mb-1">Rentabilidade</p>
+                <p className="text-2xl font-bold text-purple-800">{data.scenarios.quotaSale.profitPercentage.toFixed(2)}%</p>
+              </div>
+              <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg">
+                <p className="text-sm text-orange-700 mb-1">Ágio de Venda</p>
+                <p className="text-2xl font-bold text-orange-800">{(data.scenarios.quotaSale.agio * 100).toFixed(0)}%</p>
+              </div>
             </div>
           </TabsContent>
 
@@ -227,21 +236,23 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
               <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
                 <p className="text-sm text-blue-700 mb-1">Valor do Imóvel</p>
                 <p className="text-xl font-bold text-blue-800">{formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}</p>
+                <p className="text-xs text-blue-600 mt-1">Crédito Corrigido</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
-                <p className="text-sm text-orange-700 mb-1">Financiamento</p>
-                <p className="text-xl font-bold text-orange-800">{formatCurrency(data.scenarios.propertyAcquisition.financing)}</p>
+              <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                <p className="text-sm text-green-700 mb-1">Valor da Locação</p>
+                <p className="text-xl font-bold text-green-800">{formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}</p>
+                <p className="text-xs text-green-600 mt-1">1% ao mês</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                <p className="text-sm text-purple-700 mb-1">Parcela Financiamento</p>
-                <p className="text-xl font-bold text-purple-800">{formatCurrency(data.scenarios.propertyAcquisition.monthlyFinancing)}</p>
+              <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
+                <p className="text-sm text-orange-700 mb-1">Parcela Pós-Contemplação</p>
+                <p className="text-xl font-bold text-orange-800">{formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
-                <p className="text-sm text-red-700 mb-1">Custo Total</p>
-                <p className="text-xl font-bold text-red-800">{formatCurrency(data.scenarios.propertyAcquisition.totalCost)}</p>
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                <p className="text-sm text-purple-700 mb-1">Retorno Mensal Líquido</p>
+                <p className="text-xl font-bold text-purple-800">{formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}</p>
               </div>
             </div>
           </TabsContent>
@@ -261,19 +272,27 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                <p className="text-sm text-blue-700 mb-1">Valor Aplicado</p>
+                <p className="text-xl font-bold text-blue-800">{formatCurrency(data.scenarios.appliedCredit.appliedValue)}</p>
+                <p className="text-xs text-blue-600 mt-1">Crédito Corrigido</p>
+              </div>
               <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
                 <p className="text-sm text-green-700 mb-1">Taxa de Retorno</p>
-                <p className="text-2xl font-bold text-green-800">{data.scenarios.appliedCredit.investmentReturn.toFixed(2)}% a.a.</p>
-              </div>
-              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                <p className="text-sm text-blue-700 mb-1">Valor Final</p>
-                <p className="text-xl font-bold text-blue-800">{formatCurrency(data.scenarios.appliedCredit.finalValue)}</p>
+                <p className="text-xl font-bold text-green-800">{data.scenarios.appliedCredit.investmentReturn.toFixed(2)}% a.a.</p>
+                <p className="text-xs text-green-600 mt-1">Por {data.scenarios.appliedCredit.monthsToApply} meses</p>
               </div>
             </div>
             
-            <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg">
-              <p className="text-sm text-orange-700 mb-1">Lucro Total</p>
-              <p className="text-3xl font-bold text-orange-800">{formatCurrency(data.scenarios.appliedCredit.totalProfit)}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg">
+                <p className="text-sm text-orange-700 mb-1">Valor Final</p>
+                <p className="text-xl font-bold text-orange-800">{formatCurrency(data.scenarios.appliedCredit.finalValue)}</p>
+              </div>
+              <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+                <p className="text-sm text-purple-700 mb-1">Lucro Total</p>
+                <p className="text-2xl font-bold text-purple-800">{formatCurrency(data.scenarios.appliedCredit.totalProfit)}</p>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

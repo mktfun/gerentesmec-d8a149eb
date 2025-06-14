@@ -59,22 +59,25 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   // Valor pago até a contemplação
   const paidUntilContemplation = monthlyPayment * contemplationTime;
   
-  // Cenário 1: Venda da Cota
-  const quotaSaleValue = creditValue * 0.85; // Valor de venda da cota (85% do crédito)
+  // Cenário 1: Venda da Cota (com ágio de 15% sobre o crédito)
+  const quotaSaleAgio = 0.15; // 15% de ágio
+  const quotaSaleValue = creditValue * (1 + quotaSaleAgio);
   const quotaSaleProfit = quotaSaleValue - paidUntilContemplation - bidValue;
   const quotaSaleProfitPercentage = (quotaSaleProfit / (paidUntilContemplation + bidValue)) * 100;
   
-  // Cenário 2: Aquisição de Imóvel
-  const propertyValue = creditValue * 1.2; // Valor do imóvel (20% acima do crédito)
-  const downPayment = creditValue; // Entrada com o crédito do consórcio
-  const financing = propertyValue - downPayment;
-  const monthlyFinancing = financing * 0.008; // Taxa aproximada de financiamento
-  const totalFinancingCost = totalPaid + (monthlyFinancing * 240); // 20 anos de financiamento
+  // Cenário 2: Aquisição de Imóvel (lógica corrigida)
+  const propertyValue = creditValue * 1.06; // Crédito corrigido por valorização de 6%
+  const rentalRate = 0.01; // 1% ao mês sobre o valor do imóvel
+  const monthlyRental = propertyValue * rentalRate;
+  const netMonthlyReturn = monthlyRental - postContemplationPayment;
   
-  // Cenário 3: Crédito Aplicado
-  const investmentReturn = 12; // 12% a.a. (CDI + margin)
-  const finalValue = creditValue * Math.pow(1 + (investmentReturn / 100), 5); // 5 years
-  const totalInvestmentProfit = finalValue - totalPaid;
+  // Cenário 3: Crédito Aplicado (lógica corrigida - juros compostos sobre o montante total)
+  const appliedValue = creditValue * 1.06; // Valor corrigido aplicado
+  const investmentReturn = 12; // 12% a.a.
+  const monthsToApply = finalTerm; // Prazo restante após contemplação
+  const yearsToApply = monthsToApply / 12;
+  const finalInvestmentValue = appliedValue * Math.pow(1 + (investmentReturn / 100), yearsToApply);
+  const totalInvestmentProfit = finalInvestmentValue - appliedValue - (postContemplationPayment * finalTerm);
   
   return {
     creditValue,
@@ -90,20 +93,23 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
         title: "Venda da Cota na Contemplação",
         totalReturn: quotaSaleValue,
         profit: quotaSaleProfit,
-        profitPercentage: quotaSaleProfitPercentage
+        profitPercentage: quotaSaleProfitPercentage,
+        agio: quotaSaleAgio
       },
       propertyAcquisition: {
         title: "Aquisição de Imóvel",
         propertyValue,
-        financing,
-        monthlyFinancing,
-        totalCost: totalFinancingCost
+        monthlyRental,
+        postContemplationPayment,
+        netMonthlyReturn
       },
       appliedCredit: {
         title: "Crédito Aplicado em Investimentos",
+        appliedValue,
         investmentReturn,
-        finalValue,
-        totalProfit: totalInvestmentProfit
+        finalValue: finalInvestmentValue,
+        totalProfit: totalInvestmentProfit,
+        monthsToApply
       }
     }
   };

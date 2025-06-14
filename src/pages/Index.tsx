@@ -20,19 +20,22 @@ export interface SimulationData {
       totalReturn: number;
       profit: number;
       profitPercentage: number;
+      agio: number;
     };
     propertyAcquisition: {
       title: string;
       propertyValue: number;
-      financing: number;
-      monthlyFinancing: number;
-      totalCost: number;
+      monthlyRental: number;
+      postContemplationPayment: number;
+      netMonthlyReturn: number;
     };
     appliedCredit: {
       title: string;
+      appliedValue: number;
       investmentReturn: number;
       finalValue: number;
       totalProfit: number;
+      monthsToApply: number;
     };
   };
 }
