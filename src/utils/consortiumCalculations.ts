@@ -5,16 +5,21 @@ interface CalculationInput {
   creditValue: number;
   installments: number;
   contemplationTime: number;
+  adminRate: number;
+  reserveFundRate: number;
+  insuranceRate: number;
 }
 
 export const calculateSimulation = (input: CalculationInput): SimulationData => {
-  const { creditValue, installments, contemplationTime } = input;
+  const { creditValue, installments, contemplationTime, adminRate, reserveFundRate, insuranceRate } = input;
   
-  // Cálculo da taxa de administração (tipicamente 15-20%)
-  const adminRate = 0.18;
+  // Cálculo da parcela usando as taxas específicas
+  const adminValue = creditValue * (adminRate / 100);
+  const reserveFundValue = creditValue * (reserveFundRate / 100);
+  const insuranceValue = creditValue * (insuranceRate / 100);
   
-  // Cálculo do valor da parcela
-  const monthlyPayment = (creditValue * (1 + adminRate)) / installments;
+  const totalCreditWithTaxes = creditValue + adminValue + reserveFundValue + insuranceValue;
+  const monthlyPayment = totalCreditWithTaxes / installments;
   
   // Total a ser pago
   const totalPaid = monthlyPayment * installments;

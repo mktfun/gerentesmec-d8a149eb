@@ -49,7 +49,10 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
   const [formData, setFormData] = useState({
     creditValue: '',
     installments: '',
-    contemplationTime: ''
+    contemplationTime: '',
+    adminRate: '18',
+    reserveFundRate: '1',
+    insuranceRate: '1'
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -74,21 +77,29 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     const creditValue = parseBRLInputToNumber(formData.creditValue);
     const installments = parseInt(formData.installments);
     const contemplationTime = parseInt(formData.contemplationTime);
+    const adminRate = parseFloat(formData.adminRate);
+    const reserveFundRate = parseFloat(formData.reserveFundRate);
+    const insuranceRate = parseFloat(formData.insuranceRate);
 
-    if (!creditValue || !installments || !contemplationTime) {
+    if (!creditValue || !installments || !contemplationTime || 
+        isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate)) {
       return;
     }
 
     const simulationData = calculateSimulation({
       creditValue,
       installments,
-      contemplationTime
+      contemplationTime,
+      adminRate,
+      reserveFundRate,
+      insuranceRate
     });
 
     onSimulate(simulationData);
   };
 
-  const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime;
+  const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime &&
+                     formData.adminRate && formData.reserveFundRate && formData.insuranceRate;
 
   return (
     <Card className="glass-card p-8 apple-shadow-lg">
@@ -150,6 +161,65 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               min="6"
               max="120"
             />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="border-t border-slate-200 pt-4">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Taxas do Consórcio</h3>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="adminRate" className="text-sm font-medium text-slate-700">
+                Taxa de Administração (%)
+              </Label>
+              <Input
+                id="adminRate"
+                type="number"
+                placeholder="18"
+                value={formData.adminRate}
+                onChange={(e) => handleInputChange('adminRate', e.target.value)}
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                min="0"
+                max="30"
+                step="0.01"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reserveFundRate" className="text-sm font-medium text-slate-700">
+                Fundo de Reserva (%)
+              </Label>
+              <Input
+                id="reserveFundRate"
+                type="number"
+                placeholder="1"
+                value={formData.reserveFundRate}
+                onChange={(e) => handleInputChange('reserveFundRate', e.target.value)}
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                min="0"
+                max="10"
+                step="0.01"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="insuranceRate" className="text-sm font-medium text-slate-700">
+                Seguro de Vida (%)
+              </Label>
+              <Input
+                id="insuranceRate"
+                type="number"
+                placeholder="1"
+                value={formData.insuranceRate}
+                onChange={(e) => handleInputChange('insuranceRate', e.target.value)}
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                min="0"
+                max="10"
+                step="0.01"
+              />
+            </div>
           </div>
         </div>
 
