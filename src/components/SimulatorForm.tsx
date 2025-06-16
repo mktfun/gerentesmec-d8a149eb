@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Calculator, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { SimulationData } from '@/pages/Index';
 import { calculateSimulation } from '@/utils/consortiumCalculations';
+
 interface SimulatorFormProps {
   onSimulate: (data: SimulationData) => void;
   isLoading: boolean;
@@ -43,6 +45,7 @@ function parseBRLInputToNumber(value: string): number {
   const num = parseFloat(clean);
   return isNaN(num) ? 0 : num;
 }
+
 export const SimulatorForm = ({
   onSimulate,
   isLoading,
@@ -57,6 +60,7 @@ export const SimulatorForm = ({
     adminRate: '18',
     reserveFundRate: '1',
     insuranceRate: '1',
+    anticipatedTaxRate: '0.5',
     embeddedBidPercentage: '',
     ownResourcesBidPercentage: '',
     bidDiscountType: 'reducePayment',
@@ -64,12 +68,14 @@ export const SimulatorForm = ({
     reducedPaymentPercentage: '50',
     financingRate: '2.5'
   });
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
+
   const handleCreditValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatBRLCurrency(e.target.value);
     setFormData(prev => ({
@@ -77,6 +83,7 @@ export const SimulatorForm = ({
       creditValue: formatted
     }));
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const creditValue = parseBRLInputToNumber(formData.creditValue);
@@ -85,16 +92,20 @@ export const SimulatorForm = ({
     const adminRate = parseFloat(formData.adminRate);
     const reserveFundRate = parseFloat(formData.reserveFundRate);
     const insuranceRate = parseFloat(formData.insuranceRate);
+    const anticipatedTaxRate = parseFloat(formData.anticipatedTaxRate);
     const embeddedBidPercentage = parseFloat(formData.embeddedBidPercentage) || 0;
     const ownResourcesBidPercentage = parseFloat(formData.ownResourcesBidPercentage) || 0;
     const reducedPaymentPercentage = parseFloat(formData.reducedPaymentPercentage);
     const financingRate = parseFloat(formData.financingRate);
-    if (!creditValue || !installments || !contemplationTime || isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate)) {
+
+    if (!creditValue || !installments || !contemplationTime || isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate) || isNaN(anticipatedTaxRate)) {
       return;
     }
+
     if (formData.creditType === 'vehicle' && isNaN(financingRate)) {
       return;
     }
+
     const simulationData = calculateSimulation({
       creditType: formData.creditType as 'property' | 'vehicle',
       creditValue,
@@ -103,6 +114,7 @@ export const SimulatorForm = ({
       adminRate,
       reserveFundRate,
       insuranceRate,
+      anticipatedTaxRate,
       embeddedBidPercentage,
       ownResourcesBidPercentage,
       bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment',
@@ -110,11 +122,16 @@ export const SimulatorForm = ({
       reducedPaymentPercentage,
       financingRate: formData.creditType === 'vehicle' ? financingRate : undefined
     });
+
     onSimulate(simulationData);
   };
-  const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime && formData.adminRate && formData.reserveFundRate && formData.insuranceRate && (formData.creditType === 'property' || formData.creditType === 'vehicle' && formData.financingRate);
+
+  const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime && formData.adminRate && formData.reserveFundRate && formData.insuranceRate && formData.anticipatedTaxRate && (formData.creditType === 'property' || formData.creditType === 'vehicle' && formData.financingRate);
+
   const hasBid = (parseFloat(formData.embeddedBidPercentage) || 0) + (parseFloat(formData.ownResourcesBidPercentage) || 0) > 0;
-  return <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
+
+  return (
+    <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
           <Calculator className="w-5 h-5 text-white" />
@@ -173,26 +190,37 @@ export const SimulatorForm = ({
         </div>
 
         {/* Taxa de Financiamento (apenas para veículo) */}
-        {formData.creditType === 'vehicle' && <div className="space-y-2">
+        {formData.creditType === 'vehicle' && (
+          <div className="space-y-2">
             <Label htmlFor="financingRate" className="text-sm font-medium text-slate-700">
               Taxa de Juros do Financiamento (% a.m.)
             </Label>
             <Input id="financingRate" type="number" placeholder="2.5" value={formData.financingRate} onChange={e => handleInputChange('financingRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0.1" max="10" step="0.1" />
-          </div>}
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="border-t border-slate-200 pt-4">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">Taxas do Consórcio</h3>
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="adminRate" className="text-sm font-medium text-slate-700">
                 Taxa de Administração (%)
               </Label>
-              <Input id="adminRate" type="number" placeholder="18" value={formData.adminRate} onChange={e => handleInputChange('adminRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="30" step="0.01" />
+              <Input id="adminRate" type="number" placeholder="18" value={formData.adminRate} onChange={e => handleInputChange('adminRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="50" step="0.01" />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="anticipatedTaxRate" className="text-sm font-medium text-slate-700">
+                Taxa Antecipada (%)
+              </Label>
+              <Input id="anticipatedTaxRate" type="number" placeholder="0.5" value={formData.anticipatedTaxRate} onChange={e => handleInputChange('anticipatedTaxRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="10" step="0.01" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="reserveFundRate" className="text-sm font-medium text-slate-700">
                 Fundo de Reserva (%)
@@ -220,7 +248,8 @@ export const SimulatorForm = ({
               <Switch checked={formData.reducedPaymentEnabled} onCheckedChange={checked => handleInputChange('reducedPaymentEnabled', checked)} className="bg-slate-500 hover:bg-slate-400 text-gray-600" />
             </div>
 
-            {formData.reducedPaymentEnabled && <div className="space-y-2">
+            {formData.reducedPaymentEnabled && (
+              <div className="space-y-2">
                 <Label htmlFor="reducedPaymentPercentage" className="text-sm font-medium text-slate-700">
                   Percentual da Parcela Reduzida
                 </Label>
@@ -230,7 +259,8 @@ export const SimulatorForm = ({
                     <span className="text-slate-500 text-lg">%</span>
                   </div>
                 </div>
-              </div>}
+              </div>
+            )}
           </div>
         </div>
 
@@ -255,7 +285,8 @@ export const SimulatorForm = ({
             </div>
           </div>
 
-          {hasBid && <div className="space-y-3">
+          {hasBid && (
+            <div className="space-y-3">
               <Label className="text-sm font-medium text-slate-700">
                 Abatimento do Lance
               </Label>
@@ -273,23 +304,30 @@ export const SimulatorForm = ({
                   </Label>
                 </div>
               </RadioGroup>
-            </div>}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 pt-4">
           <Button type="submit" disabled={!isFormValid || isLoading} className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border-0">
-            {isLoading ? <div className="flex items-center gap-2">
+            {isLoading ? (
+              <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 Calculando...
-              </div> : <div className="flex items-center gap-2">
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4" />
                 Simular Agora
-              </div>}
+              </div>
+            )}
           </Button>
 
-          {hasResults && <Button type="button" onClick={onReset} variant="outline" className="h-12 px-6 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all duration-200 bg-slate-400 hover:bg-slate-300">
+          {hasResults && (
+            <Button type="button" onClick={onReset} variant="outline" className="h-12 px-6 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all duration-200 bg-slate-400 hover:bg-slate-300">
               <RotateCcw className="w-4 h-4" />
-            </Button>}
+            </Button>
+          )}
         </div>
       </form>
 
@@ -298,5 +336,6 @@ export const SimulatorForm = ({
           <strong>Dica:</strong> Para melhores resultados, use dados reais do consórcio que você está apresentando ao cliente.
         </p>
       </div>
-    </Card>;
+    </Card>
+  );
 };

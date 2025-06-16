@@ -56,7 +56,7 @@
     min-height: 100vh;
   }
   
-  /* DESIGN SYSTEM UNIFICADO - Sem cores aleatórias */
+  /* DESIGN SYSTEM UNIFICADO - Sistema de cores consistente */
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
@@ -65,7 +65,7 @@
     border-color: rgb(59, 130, 246) !important;
   }
   
-  /* Switch consistente */
+  /* Switch consistente - sempre azul */
   [data-state="checked"] {
     background-color: rgb(59, 130, 246) !important;
   }
@@ -74,10 +74,27 @@
     background-color: rgb(156, 163, 175) !important;
   }
   
-  /* Botões consistentes */
+  /* Botões consistentes - sempre azul */
   button:focus-visible {
     outline: none !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  }
+  
+  /* Radio buttons consistentes */
+  [data-state="checked"] > span {
+    background-color: rgb(59, 130, 246) !important;
+  }
+  
+  /* Tabs consistentes */
+  [data-state="active"] {
+    background-color: rgb(59, 130, 246) !important;
+    color: white !important;
+  }
+  
+  /* Links e elementos interativos */
+  a:hover,
+  button:hover:not(:disabled) {
+    color: rgb(59, 130, 246) !important;
   }
 
   /* NAVBAR FLUTUANTE - Estados de animação */
@@ -119,41 +136,115 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.06);
   }
 
-  /* Sistema de badges limpo e consistente */
+  /* Sistema de badges limpo e consistente - sempre com azul como cor principal */
   .badge-blue {
     @apply bg-blue-50 text-blue-800 border-blue-200;
   }
   
   .badge-green {
-    @apply bg-emerald-50 text-emerald-800 border-emerald-200;
+    @apply bg-blue-50 text-blue-800 border-blue-200;
   }
   
   .badge-purple {
-    @apply bg-purple-50 text-purple-800 border-purple-200;
+    @apply bg-blue-50 text-blue-800 border-blue-200;
   }
   
   .badge-orange {
-    @apply bg-orange-50 text-orange-800 border-orange-200;
+    @apply bg-blue-50 text-blue-800 border-blue-200;
   }
   
   .badge-red {
-    @apply bg-red-50 text-red-800 border-red-200;
+    @apply bg-blue-50 text-blue-800 border-blue-200;
   }
   
   .badge-yellow {
-    @apply bg-yellow-50 text-yellow-800 border-yellow-200;
+    @apply bg-blue-50 text-blue-800 border-blue-200;
   }
 
-  /* Cores de texto consistentes */
+  /* Cores de texto consistentes com melhor contraste */
   .text-primary-dark {
-    @apply text-gray-900;
+    @apply text-slate-900;
   }
   
   .text-secondary {
-    @apply text-gray-700;
+    @apply text-slate-700;
   }
   
   .text-muted {
-    @apply text-gray-500;
+    @apply text-slate-600;
+  }
+  
+  /* Melhorar contraste do card Simulador */
+  .simulator-card {
+    @apply bg-white/98 backdrop-blur-sm border border-slate-300 shadow-xl;
+  }
+  
+  .simulator-card h2 {
+    @apply text-slate-900 font-bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .simulator-card p {
+    @apply text-slate-700;
+  }
+  
+  /* Eliminar todas as cores de foco/hover aleatórias */
+  *:focus-visible,
+  *:hover {
+    border-color: rgb(59, 130, 246) !important;
+  }
+  
+  /* Garantir que elementos com fundo colorido mantenham legibilidade */
+  .bg-gradient-to-br {
+    color: rgb(17, 24, 39) !important;
+  }
+  
+  /* Padronizar estados de seleção */
+  ::selection {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    color: rgb(17, 24, 39) !important;
+  }
+}
+
+/* Animações suaves e consistentes */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out;
+}
+
+/* Melhorar acessibilidade e contraste */
+@media (prefers-contrast: high) {
+  :root {
+    --foreground: 0 0 0;
+    --background: 255 255 255;
+  }
+  
+  .simulator-card h2,
+  .simulator-card p {
+    color: black !important;
+  }
+}
+
+/* Responsividade melhorada */
+@media (max-width: 768px) {
+  .simulator-card {
+    @apply p-6;
+  }
+  
+  .simulator-card h2 {
+    @apply text-xl;
   }
 }

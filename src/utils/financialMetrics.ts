@@ -1,6 +1,6 @@
 
 // Função para calcular a Taxa Interna de Retorno (TIR/IRR) para o CET
-export const calculateIRR = (cashFlows: number[], guess: number = 0.1, maxIterations: number = 100): number => {
+export const calculateIRR = (cashFlows: number[], guess: number = 0.01, maxIterations: number = 1000): number => {
   let rate = guess;
   
   for (let i = 0; i < maxIterations; i++) {
@@ -8,55 +8,74 @@ export const calculateIRR = (cashFlows: number[], guess: number = 0.1, maxIterat
     let dnpv = 0;
     
     for (let j = 0; j < cashFlows.length; j++) {
-      npv += cashFlows[j] / Math.pow(1 + rate, j);
-      dnpv += (-j * cashFlows[j]) / Math.pow(1 + rate, j + 1);
+      const denominator = Math.pow(1 + rate, j);
+      npv += cashFlows[j] / denominator;
+      if (j > 0) {
+        dnpv += (-j * cashFlows[j]) / Math.pow(1 + rate, j + 1);
+      }
     }
     
-    if (Math.abs(dnpv) < 0.000001) break;
+    if (Math.abs(dnpv) < 0.000001 || Math.abs(npv) < 0.000001) {
+      return Math.max(0, rate);
+    }
     
     const newRate = rate - npv / dnpv;
     
     if (Math.abs(newRate - rate) < 0.000001) {
-      return newRate;
+      return Math.max(0, newRate);
     }
     
-    rate = newRate;
+    // Evitar taxas negativas ou muito altas
+    rate = Math.max(0.0001, Math.min(newRate, 0.5));
   }
   
-  return rate;
+  return Math.max(0, rate);
 };
 
 export const calculateCET = (creditValue: number, monthlyPayments: number[], anticipatedTaxValue: number = 0): { cetMonthly: number; cetAnnual: number } => {
-  // Fluxo de caixa corrigido: entrada positiva (crédito recebido) e saídas negativas (parcelas pagas)
-  const cashFlows: number[] = [creditValue]; // Entrada inicial
+  if (!creditValue || creditValue <= 0 || !monthlyPayments || monthlyPayments.length === 0) {
+    return { cetMonthly: 0, cetAnnual: 0 };
+  }
+
+  // Fluxo de caixa: entrada positiva (crédito) no período 0, saídas negativas (parcelas)
+  const cashFlows: number[] = [creditValue];
   
-  // Adicionar as parcelas como saídas negativas
+  // Adicionar todas as parcelas como saídas negativas
   monthlyPayments.forEach(payment => {
-    cashFlows.push(-payment);
+    if (payment > 0) {
+      cashFlows.push(-payment);
+    }
   });
   
+  // Validar se temos fluxo de caixa suficiente
+  if (cashFlows.length < 2) {
+    return { cetMonthly: 0, cetAnnual: 0 };
+  }
+  
   try {
-    const cetMonthly = calculateIRR(cashFlows);
-    // Correção: usar juros compostos para anualização correta
+    const cetMonthly = calculateIRR(cashFlows, 0.01, 1000);
+    
+    // Conversão correta para taxa anual (juros compostos)
     const cetAnnual = Math.pow(1 + cetMonthly, 12) - 1;
     
     return {
-      cetMonthly: Math.max(0, cetMonthly * 100), // Converter para percentual
-      cetAnnual: Math.max(0, cetAnnual * 100)
+      cetMonthly: Math.min(50, Math.max(0, cetMonthly * 100)), // Limitar a 50% ao mês
+      cetAnnual: Math.min(600, Math.max(0, cetAnnual * 100))   // Limitar a 600% ao ano
     };
   } catch (error) {
-    // Fallback melhorado se o IRR não convergir
+    console.error('Erro no cálculo do CET:', error);
+    
+    // Fallback: cálculo aproximado mais robusto
     const totalPaid = monthlyPayments.reduce((sum, payment) => sum + payment, 0);
     const periods = monthlyPayments.length;
     
-    if (periods > 0 && creditValue > 0) {
-      // Cálculo aproximado mais preciso
+    if (periods > 0 && creditValue > 0 && totalPaid > creditValue) {
       const effectiveRate = Math.pow(totalPaid / creditValue, 1/periods) - 1;
       const annualRate = Math.pow(1 + effectiveRate, 12) - 1;
       
       return {
-        cetMonthly: Math.max(0, effectiveRate * 100),
-        cetAnnual: Math.max(0, annualRate * 100)
+        cetMonthly: Math.min(50, Math.max(0, effectiveRate * 100)),
+        cetAnnual: Math.min(600, Math.max(0, annualRate * 100))
       };
     }
     
@@ -69,7 +88,16 @@ export const calculateDemonstrativeRate = (adminRate: number, reserveFundRate: n
   const annualRate = monthlyRate * 12;
   
   return {
-    monthlyRate,
-    annualRate
+    monthlyRate: Math.max(0, monthlyRate),
+    annualRate: Math.max(0, annualRate)
   };
+};
+
+// Função para formatação consistente de percentuais
+export const formatPercentage = (value: number, decimals: number = 2): string => {
+  if (isNaN(value) || !isFinite(value)) return '0,00%';
+  return value.toLocaleString('pt-BR', { 
+    minimumFractionDigits: decimals, 
+    maximumFractionDigits: decimals 
+  }) + '%';
 };
