@@ -10,13 +10,13 @@ interface CalculationInput {
   adminRate: number;
   reserveFundRate: number;
   insuranceRate: number;
-  anticipatedTaxRate: number; // Novo campo obrigatório
   embeddedBidPercentage?: number;
   ownResourcesBidPercentage?: number;
   bidDiscountType?: 'reduceTerm' | 'reducePayment';
   reducedPaymentEnabled?: boolean;
   reducedPaymentPercentage?: number;
   financingRate?: number;
+  anticipatedTaxRate?: number;
 }
 
 // Função para calcular financiamento pela Tabela Price
@@ -34,16 +34,16 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     adminRate, 
     reserveFundRate, 
     insuranceRate,
-    anticipatedTaxRate, // Agora obrigatório
     embeddedBidPercentage = 0,
     ownResourcesBidPercentage = 0,
     bidDiscountType = 'reducePayment',
     reducedPaymentEnabled = false,
     reducedPaymentPercentage = 50,
-    financingRate = 0
+    financingRate = 0,
+    anticipatedTaxRate = 0.5
   } = input;
   
-  // MODELO DE CÁLCULO EMBRACON CORRIGIDO (BASEADO NO PDF):
+  // MODELO DE CÁLCULO EMBRACON CORRIGIDO:
   // 1. Fundo Comum Mensal = Valor do Crédito / Prazo
   const commonFundMonthly = creditValue / installments;
   
@@ -125,18 +125,12 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   
   // Preparar fluxo de pagamentos para CET (CORRIGIDO PARA IRR)
   const monthlyPayments: number[] = [];
-  
-  // Adicionar as parcelas com taxa antecipada
   for (let i = 0; i < installmentsWithAnticipatedTax; i++) {
     monthlyPayments.push(monthlyPaymentWithAnticipatedTax);
   }
-  
-  // Adicionar as parcelas normais até contemplação
   for (let i = installmentsWithAnticipatedTax; i < contemplationTime; i++) {
     monthlyPayments.push(actualMonthlyPayment);
   }
-  
-  // Adicionar as parcelas pós-contemplação
   for (let i = 0; i < finalTerm; i++) {
     monthlyPayments.push(postContemplationPayment);
   }
@@ -179,7 +173,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
       appliedCredit: {
         title: "Crédito Aplicado em Investimentos",
         appliedValue: availableCredit * (1 + correctionRate),
-        investmentReturn: 12, // Fixado em 12% a.a.
+        investmentReturn: 12,
         finalValue: availableCredit * (1 + correctionRate) * Math.pow(1.12, finalTerm / 12),
         totalProfit: (availableCredit * (1 + correctionRate) * Math.pow(1.12, finalTerm / 12)) - (availableCredit * (1 + correctionRate)),
         monthsToApply: finalTerm
@@ -211,7 +205,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
       appliedCredit: {
         title: "Crédito Aplicado em Investimentos",
         appliedValue: correctedCredit,
-        investmentReturn: 12, // Fixado em 12% a.a.
+        investmentReturn: 12,
         finalValue: correctedCredit * Math.pow(1.12, finalTerm / 12),
         totalProfit: (correctedCredit * Math.pow(1.12, finalTerm / 12)) - correctedCredit,
         monthsToApply: finalTerm

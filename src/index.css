@@ -52,11 +52,11 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 text-foreground;
+    @apply bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 text-foreground font-sf;
     min-height: 100vh;
   }
   
-  /* DESIGN SYSTEM UNIFICADO - AZUL CONSISTENTE */
+  /* DESIGN SYSTEM UNIFICADO - Sem cores aleatórias */
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
@@ -78,24 +78,6 @@
   button:focus-visible {
     outline: none !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
-  }
-  
-  /* Radio buttons consistentes */
-  [data-state="checked"] {
-    border-color: rgb(59, 130, 246) !important;
-    background-color: rgb(59, 130, 246) !important;
-  }
-  
-  /* ELIMINAÇÃO DEFINITIVA DE CORES ALEATÓRIAS */
-  /* Remover qualquer amarelo, marrom, verde aleatório */
-  *:focus-visible {
-    outline: none !important;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
-  }
-  
-  /* Sobrescrever qualquer cor de hover/focus não desejada */
-  button:hover:not(.bg-blue-600):not(.bg-green-500):not(.bg-purple-500):not(.bg-red-500) {
-    background-color: rgba(59, 130, 246, 0.1) !important;
   }
 
   /* NAVBAR FLUTUANTE - Estados de animação */
@@ -173,30 +155,5 @@
   
   .text-muted {
     @apply text-gray-500;
-  }
-  
-  /* Animações suaves para transições */
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  
-  .animate-slide-up {
-    animation: slideUp 0.6s ease-out;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes slideUp {
-    from { 
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to { 
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 }
