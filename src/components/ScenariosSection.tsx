@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DollarSign, Home, Calculator, PiggyBank, Target, Percent } from 'lucide-react';
+import { DollarSign, Home, Calculator, PiggyBank, Target, Percent, TrendingUp } from 'lucide-react';
 import { SimulationData } from '@/pages/Index';
 import { formatCurrency } from '@/utils/formatters';
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -44,7 +44,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
   };
 
   const calculateDynamicInvestment = () => {
-    // FIXO: sempre calcular em base anual (a.a.)
     const annualRate = investmentReturn / 100;
     const appliedValue = data.availableCredit * (1 + (data.creditType === 'property' ? 0.06 : 0.05));
     const finalValue = appliedValue * Math.pow(1 + annualRate, data.finalTerm / 12);
@@ -76,13 +75,11 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
     { name: 'Lucro (Ágio)', value: dynamicQuotaSale.profit, fill: '#10B981' }
   ];
 
-  // NOVO: Gráfico de Pizza para Cenário 3 (Composição do Valor Final)
   const investmentPieData = [
     { name: 'Valor Aplicado', value: dynamicInvestment.appliedValue, fill: '#8B5CF6' },
     { name: 'Lucro Total', value: dynamicInvestment.totalProfit, fill: '#F59E0B' }
   ];
 
-  // NOVO: Dados para Gráfico de Cascata (Waterfall Chart) - Cenário 2
   const waterfallData = data.scenarios.propertyAcquisition ? [
     { 
       name: 'Renda Mensal', 
@@ -101,7 +98,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
     }
   ] : [];
 
-  // Gráfico de linha para Cenário 3
   const generateLineChartData = () => {
     const points = [];
     const annualRate = investmentReturn / 100;
@@ -140,12 +136,12 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
               {isVehicle ? 'Comparativo' : 'Imóvel'}
             </TabsTrigger>
             <TabsTrigger value="investment" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all">
-              <PiggyBank className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4" />
               Investimento
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sale" className="space-y-8">
+          <TabsContent value="sale" className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-2 mb-6">
               <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1 border-0">
                 Cenário 1
@@ -166,7 +162,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
-              {/* Controles e Métricas */}
               <div className="space-y-6">
                 <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
                   <Label className="text-base font-semibold text-slate-700 mb-3 block">Configurar Ágio de Venda</Label>
@@ -208,7 +203,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                 </div>
               </div>
 
-              {/* Gráfico de Pizza Refinado */}
               <div className="bg-white rounded-xl p-6 border shadow-sm">
                 <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Composição do Retorno</h4>
                 <ResponsiveContainer width="100%" height={300}>
@@ -252,7 +246,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             </div>
           </TabsContent>
 
-          <TabsContent value="scenario2" className="space-y-8">
+          <TabsContent value="scenario2" className="space-y-8 animate-fade-in">
             {isVehicle && data.scenarios.financingComparison ? (
               <>
                 <div className="flex items-center gap-2 mb-6">
@@ -354,7 +348,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                       </div>
                     </div>
 
-                    {/* NOVO: Gráfico de Cascata (Waterfall Chart) */}
                     <div className="bg-white rounded-xl p-6 border shadow-sm">
                       <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Fluxo Mensal de Caixa</h4>
                       <ResponsiveContainer width="100%" height={300}>
@@ -367,7 +360,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                             labelStyle={{ color: '#334155' }}
                             contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
                           />
-                          <Bar dataKey="valor" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="valor" radius={[4, 4, 0, 0]} fill="#8B5CF6" />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -386,7 +379,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             )}
           </TabsContent>
 
-          <TabsContent value="investment" className="space-y-8">
+          <TabsContent value="investment" className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-2 mb-6">
               <Badge className="bg-purple-100 text-purple-800 text-sm px-3 py-1 border-0">
                 Cenário 3
@@ -407,7 +400,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
-              {/* Controles e Métricas */}
               <div className="space-y-6">
                 <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
                   <Label className="text-base font-semibold text-slate-700 mb-3 block">Taxa de Retorno Anual</Label>
@@ -450,7 +442,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                   </div>
                 </div>
 
-                {/* NOVO: Gráfico de Pizza para Composição do Investimento */}
                 <div className="bg-white rounded-xl p-6 border shadow-sm">
                   <h4 className="text-lg font-bold text-slate-900 mb-4 text-center">Composição do Valor Final</h4>
                   <ResponsiveContainer width="100%" height={200}>
@@ -484,7 +475,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                 </div>
               </div>
 
-              {/* Gráfico de Linha Aprimorado */}
               <div className="bg-white rounded-xl p-6 border shadow-sm">
                 <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Crescimento do Investimento</h4>
                 <ResponsiveContainer width="100%" height={400}>
