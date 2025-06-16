@@ -43,7 +43,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     financingRate = 0
   } = input;
   
-  // MODELO DE CÁLCULO EMBRACON CORRIGIDO PARA ALINHAR COM PDF:
+  // MODELO EMBRACON CORRIGIDO PARA ALINHAR EXATAMENTE COM PDF:
   // 1. Fundo Comum Mensal = Valor do Crédito / Prazo
   const commonFundMonthly = creditValue / installments;
   
@@ -56,7 +56,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   // 4. Seguro de Vida Mensal = (Valor do Crédito * Seguro %) / Prazo
   const insuranceMonthly = (creditValue * (insuranceRate / 100)) / installments;
   
-  // 5. Taxa Antecipada: Valor total a ser distribuído nas primeiras 12 parcelas
+  // 5. Taxa Antecipada: Valor total distribuído nas primeiras 12 parcelas
   const anticipatedTaxTotal = creditValue * (anticipatedTaxRate / 100);
   const anticipatedTaxPerInstallment = anticipatedTaxTotal / Math.min(12, installments);
   
