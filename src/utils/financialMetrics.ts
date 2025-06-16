@@ -33,23 +33,28 @@ export const calculateCET = (creditValue: number, monthlyPayments: number[], ant
     cashFlows.push(-payment);
   });
   
-  // Se houver taxa antecipada, ajustar as primeiras 12 parcelas
-  if (anticipatedTaxValue > 0 && monthlyPayments.length >= 12) {
-    const anticipatedTaxPerInstallment = anticipatedTaxValue / 12;
-    for (let i = 1; i <= Math.min(12, monthlyPayments.length); i++) {
-      cashFlows[i] -= anticipatedTaxPerInstallment;
-    }
-  }
-  
   try {
     const cetMonthly = calculateIRR(cashFlows);
-    const cetAnnual = cetMonthly * 12;
+    const cetAnnual = Math.pow(1 + cetMonthly, 12) - 1; // Correção: usar juros compostos para anualização
     
     return {
       cetMonthly: Math.max(0, cetMonthly * 100), // Converter para percentual
       cetAnnual: Math.max(0, cetAnnual * 100)
     };
   } catch (error) {
+    // Fallback se o IRR não convergir
+    const totalPaid = monthlyPayments.reduce((sum, payment) => sum + payment, 0);
+    const totalCost = totalPaid - creditValue;
+    const periods = monthlyPayments.length;
+    
+    if (periods > 0 && creditValue > 0) {
+      const approximateRate = (totalCost / creditValue) / periods;
+      return {
+        cetMonthly: Math.max(0, approximateRate * 100),
+        cetAnnual: Math.max(0, approximateRate * 12 * 100)
+      };
+    }
+    
     return { cetMonthly: 0, cetAnnual: 0 };
   }
 };

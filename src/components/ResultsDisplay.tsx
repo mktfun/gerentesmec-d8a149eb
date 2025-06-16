@@ -1,14 +1,8 @@
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download, Target, Percent, Car, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Calculator, Car, Home, Download } from 'lucide-react';
 import { SimulationData } from '@/pages/Index';
 import { formatCurrency } from '@/utils/formatters';
-import { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface ResultsDisplayProps {
   data: SimulationData | null;
@@ -16,18 +10,6 @@ interface ResultsDisplayProps {
 }
 
 export const ResultsDisplay = ({ data, isLoading }: ResultsDisplayProps) => {
-  const [agioPercentage, setAgioPercentage] = useState(15);
-  const [investmentReturn, setInvestmentReturn] = useState(12);
-  const [returnPeriod, setReturnPeriod] = useState<'monthly' | 'yearly'>('yearly');
-
-  // Reset interactive values when new simulation data arrives
-  useEffect(() => {
-    if (data) {
-      setAgioPercentage(data.scenarios.quotaSale.agio);
-      setInvestmentReturn(data.scenarios.appliedCredit.investmentReturn);
-    }
-  }, [data]);
-
   if (isLoading) {
     return (
       <Card className="glass-card p-8 apple-shadow-lg">
@@ -48,7 +30,7 @@ export const ResultsDisplay = ({ data, isLoading }: ResultsDisplayProps) => {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="w-16 h-16 bg-apple-blue-100 rounded-full flex items-center justify-center mb-4">
-              <TrendingUp className="w-8 h-8 text-apple-blue-500" />
+              <Calculator className="w-8 h-8 text-apple-blue-500" />
             </div>
             <h3 className="text-lg font-medium text-slate-700 mb-2">Aguardando Simulação</h3>
             <p className="text-slate-500">Preencha os dados ao lado para ver os resultados</p>
@@ -57,41 +39,6 @@ export const ResultsDisplay = ({ data, isLoading }: ResultsDisplayProps) => {
       </Card>
     );
   }
-
-  // Calculate dynamic values based on interactive inputs
-  const calculateDynamicQuotaSale = () => {
-    const profit = data.totalInvested * (agioPercentage / 100);
-    const totalReturn = data.totalInvested + profit;
-    const profitPercentage = (profit / data.totalInvested) * 100;
-    
-    return {
-      profit,
-      totalReturn,
-      profitPercentage,
-      agio: agioPercentage
-    };
-  };
-
-  const calculateDynamicInvestment = () => {
-    const monthlyRate = returnPeriod === 'yearly' ? 
-      Math.pow(1 + investmentReturn / 100, 1/12) - 1 : 
-      investmentReturn / 100;
-    
-    const appliedValue = data.availableCredit * (1 + (data.creditType === 'property' ? 0.06 : 0.05));
-    const finalValue = appliedValue * Math.pow(1 + monthlyRate, data.finalTerm);
-    const totalProfit = finalValue - appliedValue;
-    
-    return {
-      appliedValue,
-      investmentReturn,
-      finalValue,
-      totalProfit,
-      monthsToApply: data.finalTerm
-    };
-  };
-
-  const dynamicQuotaSale = calculateDynamicQuotaSale();
-  const dynamicInvestment = calculateDynamicInvestment();
 
   const exportSimulation = () => {
     const simulationReport = {
@@ -115,32 +62,14 @@ DADOS BÁSICOS:
 - Valor do Crédito: ${formatCurrency(data.creditValue)}
 - Parcelas: ${data.installments}
 - Tempo de Contemplação: ${data.contemplationTime} meses
-- Valor da Parcela: ${formatCurrency(data.monthlyPayment)}
+- Parcela Base: ${formatCurrency(data.monthlyPayment)}
 - Total Pago: ${formatCurrency(data.totalPaid)}
 
-CENÁRIOS:
-
-1. ${data.scenarios.quotaSale.title}
-   - Retorno Total: ${formatCurrency(data.scenarios.quotaSale.totalReturn)}
-   - Lucro: ${formatCurrency(data.scenarios.quotaSale.profit)}
-   - Rentabilidade: ${data.scenarios.quotaSale.profitPercentage.toFixed(2)}%
-   - Ágio: ${(data.scenarios.quotaSale.agio * 100).toFixed(0)}%
-
-2. ${data.scenarios.propertyAcquisition?.title || data.scenarios.financingComparison?.title}
-   ${data.scenarios.propertyAcquisition ? `
-   - Valor do Imóvel: ${formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}
-   - Renda Mensal: ${formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}
-   - Parcela Pós-Contemplação: ${formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}
-   - Retorno Líquido: ${formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}` : `
-   - Custo Total do Consórcio: ${formatCurrency(data.scenarios.financingComparison!.consortiumTotalCost)}
-   - Custo Total do Financiamento: ${formatCurrency(data.scenarios.financingComparison!.financingTotalCost)}
-   - Economia: ${formatCurrency(data.scenarios.financingComparison!.savings)}`}
-
-3. ${data.scenarios.appliedCredit.title}
-   - Valor Aplicado: ${formatCurrency(data.scenarios.appliedCredit.appliedValue)}
-   - Taxa de Retorno: ${data.scenarios.appliedCredit.investmentReturn.toFixed(2)}% a.a.
-   - Valor Final: ${formatCurrency(data.scenarios.appliedCredit.finalValue)}
-   - Lucro Total: ${formatCurrency(data.scenarios.appliedCredit.totalProfit)}
+MÉTRICAS FINANCEIRAS:
+${data.demonstrativeRate ? `- Taxa Demonstrativa Mensal: ${data.demonstrativeRate.monthlyRate.toFixed(4)}%` : ''}
+${data.demonstrativeRate ? `- Taxa Demonstrativa Anual: ${data.demonstrativeRate.annualRate.toFixed(4)}%` : ''}
+${data.cet ? `- CET Mensal: ${data.cet.cetMonthly.toFixed(4)}%` : ''}
+${data.cet ? `- CET Anual: ${data.cet.cetAnnual.toFixed(4)}%` : ''}
 
 Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
 `;
@@ -161,534 +90,144 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
   const hasEmbeddedBid = data.embeddedBidValue > 0;
   const isVehicle = data.creditType === 'vehicle';
 
-  // Chart data
-  const pieChartData = [
-    { name: 'Valor Investido', value: data.totalInvested, fill: '#3B82F6' },
-    { name: 'Lucro (Ágio)', value: dynamicQuotaSale.profit, fill: '#10B981' }
-  ];
-
-  const barChartData = data.scenarios.propertyAcquisition ? [
-    { name: 'Renda Mensal', entrada: data.scenarios.propertyAcquisition.monthlyRental, saida: 0 },
-    { name: 'Parcela', entrada: 0, saida: data.scenarios.propertyAcquisition.postContemplationPayment }
-  ] : [];
-
-  const generateLineChartData = () => {
-    const points = [];
-    const monthlyRate = returnPeriod === 'yearly' ? 
-      Math.pow(1 + investmentReturn / 100, 1/12) - 1 : 
-      investmentReturn / 100;
-    
-    for (let i = 0; i <= dynamicInvestment.monthsToApply; i += Math.max(1, Math.floor(dynamicInvestment.monthsToApply / 12))) {
-      const value = dynamicInvestment.appliedValue * Math.pow(1 + monthlyRate, i);
-      points.push({
-        mes: i,
-        valor: value
-      });
-    }
-    return points;
+  const formatPercentage = (value: number): string => {
+    return `${value.toFixed(2)}%`;
   };
 
-  const lineChartData = generateLineChartData();
-
   return (
-    <div className="space-y-6">
-      {/* Summary Card */}
-      <Card className="glass-card p-6 apple-shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-              {isVehicle ? <Car className="w-5 h-5 text-white" /> : <Home className="w-5 h-5 text-white" />}
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Resumo da Simulação</h3>
-              <p className="text-sm text-slate-500">
-                Consórcio de {isVehicle ? 'Veículo' : 'Imóvel'} • Correção: {data.correctionIndex}
-              </p>
-            </div>
+    <Card className="glass-card p-6 apple-shadow-lg">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+            {isVehicle ? <Car className="w-5 h-5 text-white" /> : <Home className="w-5 h-5 text-white" />}
           </div>
-          <Button
-            onClick={exportSimulation}
-            variant="outline"
-            size="sm"
-            className="glass-button border-slate-200 hover:border-apple-blue-300 hover:bg-apple-blue-50"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-800 font-medium mb-1">Valor do Crédito</p>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(data.creditValue)}</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-800 font-medium mb-1">
-              Parcela {hasReducedPayment ? 'Reduzida' : 'Inicial'}
+          <div>
+            <h3 className="text-xl font-bold text-slate-900">Resumo da Simulação</h3>
+            <p className="text-sm text-slate-500">
+              Consórcio de {isVehicle ? 'Veículo' : 'Imóvel'} • Correção: {data.correctionIndex}
             </p>
-            <p className="text-2xl font-bold text-apple-blue-600">{formatCurrency(data.monthlyPayment)}</p>
-            {hasReducedPayment && (
-              <p className="text-xs text-slate-600 mt-1">{data.reducedPaymentPercentage}% da parcela</p>
-            )}
-            {data.monthlyPaymentWithAnticipatedTax && data.monthlyPaymentWithAnticipatedTax > data.monthlyPayment && (
-              <p className="text-xs text-orange-600 mt-1">
-                Com taxa antecipada: {formatCurrency(data.monthlyPaymentWithAnticipatedTax)} (12 primeiras)
-              </p>
-            )}
           </div>
         </div>
+        <Button
+          onClick={exportSimulation}
+          variant="outline"
+          size="sm"
+          className="glass-button border-slate-200 hover:border-apple-blue-300 hover:bg-apple-blue-50"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Exportar
+        </Button>
+      </div>
 
-        {/* Métricas Financeiras */}
-        {(data.demonstrativeRate || data.cet) && (
-          <div className="mb-4">
-            <h4 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-apple-blue-500" />
-              Métricas Financeiras
-            </h4>
-            
+      {/* Dados Básicos */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="p-4 bg-slate-50 rounded-lg">
+          <p className="text-sm text-slate-800 font-medium mb-1">Valor do Crédito</p>
+          <p className="text-2xl font-bold text-slate-900">{formatCurrency(data.creditValue)}</p>
+        </div>
+        <div className="p-4 bg-slate-50 rounded-lg">
+          <p className="text-sm text-slate-800 font-medium mb-1">
+            Parcela {hasReducedPayment ? 'Reduzida' : 'Base'}
+          </p>
+          <p className="text-2xl font-bold text-apple-blue-600">{formatCurrency(data.monthlyPayment)}</p>
+          {hasReducedPayment && (
+            <p className="text-xs text-slate-600 mt-1">{formatPercentage(data.reducedPaymentPercentage || 0)} da parcela</p>
+          )}
+          {data.monthlyPaymentWithAnticipatedTax && data.monthlyPaymentWithAnticipatedTax > data.monthlyPayment && (
+            <p className="text-xs text-orange-600 mt-1">
+              Com taxa antecipada: {formatCurrency(data.monthlyPaymentWithAnticipatedTax)} (12 primeiras)
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Métricas Financeiras */}
+      {(data.demonstrativeRate || data.cet) && (
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <Calculator className="w-5 h-5 text-apple-blue-500" />
+            Métricas Financeiras
+          </h4>
+          
+          {data.demonstrativeRate && (
             <div className="grid grid-cols-2 gap-4 mb-4">
-              {data.demonstrativeRate && (
-                <>
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-900 font-medium mb-1">Taxa Mensal</p>
-                    <p className="text-xl font-bold text-blue-900">{data.demonstrativeRate.monthlyRate.toFixed(4)}%</p>
-                    <p className="text-xs text-blue-700 mt-1">Demonstrativo de Taxa</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-900 font-medium mb-1">Taxa Anual</p>
-                    <p className="text-xl font-bold text-blue-900">{data.demonstrativeRate.annualRate.toFixed(4)}%</p>
-                    <p className="text-xs text-blue-700 mt-1">Demonstrativo de Taxa</p>
-                  </div>
-                </>
-              )}
-            </div>
-            
-            {data.cet && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                  <p className="text-sm text-purple-900 font-medium mb-1">CET Mensal</p>
-                  <p className="text-xl font-bold text-purple-900">{data.cet.cetMonthly.toFixed(4)}%</p>
-                  <p className="text-xs text-purple-700 mt-1">Custo Efetivo Total</p>
-                </div>
-                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                  <p className="text-sm text-purple-900 font-medium mb-1">CET Anual</p>
-                  <p className="text-xl font-bold text-purple-900">{data.cet.cetAnnual.toFixed(4)}%</p>
-                  <p className="text-xs text-purple-700 mt-1">Custo Efetivo Total</p>
-                </div>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                <p className="text-sm text-blue-900 font-medium mb-1">Taxa Mensal</p>
+                <p className="text-xl font-bold text-blue-900">{formatPercentage(data.demonstrativeRate.monthlyRate)}</p>
+                <p className="text-xs text-blue-700 mt-1">Demonstrativo de Taxa</p>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Taxa Antecipada */}
-        {data.anticipatedTaxValue && data.anticipatedTaxValue > 0 && (
-          <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg mb-4">
-            <p className="text-sm text-orange-900 font-medium mb-1">Taxa Antecipada</p>
-            <p className="text-2xl font-bold text-orange-900">{formatCurrency(data.anticipatedTaxValue)}</p>
-            <p className="text-xs text-orange-700 mt-1">Diluída nas primeiras 12 parcelas</p>
-          </div>
-        )}
-
-        {hasBid && (
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-              <p className="text-sm text-purple-900 font-medium mb-1">Valor do Lance Total</p>
-              <p className="text-xl font-bold text-purple-900">{formatCurrency(data.bidValue)}</p>
-              {hasEmbeddedBid && (
-                <p className="text-xs text-purple-700 mt-1">
-                  Embutido: {formatCurrency(data.embeddedBidValue)}
-                </p>
-              )}
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                <p className="text-sm text-blue-900 font-medium mb-1">Taxa Anual</p>
+                <p className="text-xl font-bold text-blue-900">{formatPercentage(data.demonstrativeRate.annualRate)}</p>
+                <p className="text-xs text-blue-700 mt-1">Demonstrativo de Taxa</p>
+              </div>
             </div>
-            <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
-              <p className="text-sm text-orange-900 font-medium mb-1">Parcela Pós-Contemplação</p>
-              <p className="text-xl font-bold text-orange-900">{formatCurrency(data.postContemplationPayment)}</p>
+          )}
+          
+          {data.cet && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                <p className="text-sm text-purple-900 font-medium mb-1">CET Mensal</p>
+                <p className="text-xl font-bold text-purple-900">{formatPercentage(data.cet.cetMonthly)}</p>
+                <p className="text-xs text-purple-700 mt-1">Custo Efetivo Total</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                <p className="text-sm text-purple-900 font-medium mb-1">CET Anual</p>
+                <p className="text-xl font-bold text-purple-900">{formatPercentage(data.cet.cetAnnual)}</p>
+                <p className="text-xs text-purple-700 mt-1">Custo Efetivo Total</p>
+              </div>
             </div>
-            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-              <p className="text-sm text-blue-900 font-medium mb-1">Prazo Final</p>
-              <p className="text-xl font-bold text-blue-900">{data.finalTerm} meses</p>
-            </div>
-          </div>
-        )}
-
-        {hasEmbeddedBid && (
-          <div className="p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg mb-4">
-            <p className="text-sm text-indigo-900 font-medium mb-1">Crédito Disponível</p>
-            <p className="text-2xl font-bold text-indigo-900">{formatCurrency(data.availableCredit)}</p>
-            <p className="text-xs text-indigo-700 mt-1">Após desconto do lance embutido</p>
-          </div>
-        )}
-
-        <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
-          <p className="text-sm text-green-900 font-medium mb-1">Total Investido</p>
-          <p className="text-2xl font-bold text-green-900">{formatCurrency(data.totalInvested)}</p>
-          <p className="text-xs text-green-700 mt-1">Valor pago até a contemplação (incluindo taxa antecipada)</p>
+          )}
         </div>
-      </Card>
+      )}
 
-      {/* Scenarios */}
-      <Card className="glass-card apple-shadow-lg">
-        <Tabs defaultValue="sale" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full bg-slate-100 p-1 rounded-lg">
-            <TabsTrigger value="sale" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-              <DollarSign className="w-4 h-4" />
-              Venda da Cota
-            </TabsTrigger>
-            <TabsTrigger value="scenario2" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-              {isVehicle ? <Calculator className="w-4 h-4" /> : <Home className="w-4 h-4" />}
-              {isVehicle ? 'Comparativo' : 'Imóvel'}
-            </TabsTrigger>
-            <TabsTrigger value="investment" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-              <PiggyBank className="w-4 h-4" />
-              Investimento
-            </TabsTrigger>
-          </TabsList>
+      {/* Taxa Antecipada */}
+      {data.anticipatedTaxValue && data.anticipatedTaxValue > 0 && (
+        <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg mb-6">
+          <p className="text-sm text-orange-900 font-medium mb-1">Taxa Antecipada</p>
+          <p className="text-2xl font-bold text-orange-900">{formatCurrency(data.anticipatedTaxValue)}</p>
+          <p className="text-xs text-orange-700 mt-1">Diluída nas primeiras 12 parcelas</p>
+        </div>
+      )}
 
-          <TabsContent value="sale" className="p-6 space-y-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                Cenário 1
-              </Badge>
-              <h3 className="text-xl font-bold text-slate-900">{data.scenarios.quotaSale.title}</h3>
-              {hasBid && (
-                <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
-                  <Target className="w-3 h-3 mr-1" />
-                  Com Lance
-                </Badge>
-              )}
-              {hasReducedPayment && (
-                <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                  <Percent className="w-3 h-3 mr-1" />
-                  Parcela Reduzida
-                </Badge>
-              )}
-            </div>
-
-            {/* Interactive Agio Input */}
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <Label className="text-sm font-medium text-slate-700 mb-2 block">Ágio de Venda (%)</Label>
-              <Input
-                type="number"
-                value={agioPercentage}
-                onChange={(e) => setAgioPercentage(Number(e.target.value))}
-                className="w-32"
-                min="0"
-                max="100"
-                step="1"
-              />
-              <p className="text-xs text-slate-500 mt-1">Ajuste o percentual de ágio para ver o impacto nos resultados</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-                    <p className="text-sm text-green-900 font-medium mb-1">Retorno Total</p>
-                    <p className="text-2xl font-bold text-green-900">{formatCurrency(dynamicQuotaSale.totalReturn)}</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-900 font-medium mb-1">Lucro Líquido</p>
-                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(dynamicQuotaSale.profit)}</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-                    <p className="text-sm text-purple-900 font-medium mb-1">Rentabilidade</p>
-                    <p className="text-2xl font-bold text-purple-900">{dynamicQuotaSale.profitPercentage.toFixed(2)}%</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg">
-                    <p className="text-sm text-orange-900 font-medium mb-1">Ágio Aplicado</p>
-                    <p className="text-2xl font-bold text-orange-900">{agioPercentage}%</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pie Chart */}
-              <div className="bg-white rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-slate-900 mb-4 text-center">Composição do Retorno</h4>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={pieChartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex justify-center gap-4 mt-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                    <span className="text-xs text-slate-600">Investido</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded"></div>
-                    <span className="text-xs text-slate-600">Lucro</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-900 font-medium mb-2">💡 Como funciona este cenário:</p>
-              <p className="text-sm text-blue-800">
-                Neste cenário, você vende sua cota do consórcio no momento da contemplação. 
-                O ágio representa o percentual adicional que você recebe sobre o valor investido, 
-                sendo uma prática comum no mercado de consórcios contemplados.
+      {/* Informações de Lance */}
+      {hasBid && (
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+            <p className="text-sm text-purple-900 font-medium mb-1">Lance Total</p>
+            <p className="text-xl font-bold text-purple-900">{formatCurrency(data.bidValue)}</p>
+            {hasEmbeddedBid && (
+              <p className="text-xs text-purple-700 mt-1">
+                Embutido: {formatCurrency(data.embeddedBidValue)}
               </p>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="scenario2" className="p-6 space-y-6">
-            {isVehicle && data.scenarios.financingComparison ? (
-              <>
-                <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                    Cenário 2
-                  </Badge>
-                  <h3 className="text-xl font-bold text-slate-900">{data.scenarios.financingComparison.title}</h3>
-                  {hasBid && (
-                    <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
-                      <Target className="w-3 h-3 mr-1" />
-                      Com Lance
-                    </Badge>
-                  )}
-                  {hasReducedPayment && (
-                    <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                      <Percent className="w-3 h-3 mr-1" />
-                      Parcela Reduzida
-                    </Badge>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-900 font-medium mb-1">Custo Total do Consórcio</p>
-                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(data.scenarios.financingComparison.consortiumTotalCost)}</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
-                    <p className="text-sm text-red-900 font-medium mb-1">Custo Total do Financiamento</p>
-                    <p className="text-2xl font-bold text-red-900">{formatCurrency(data.scenarios.financingComparison.financingTotalCost)}</p>
-                    <p className="text-xs text-red-700 mt-1">Taxa: {data.financingRate}% a.m.</p>
-                  </div>
-                </div>
-                
-                <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
-                  <div className="text-center">
-                    <p className="text-sm text-green-900 font-medium mb-2">💰 Economia com Consórcio</p>
-                    <p className="text-3xl font-bold text-green-900 mb-1">{formatCurrency(data.scenarios.financingComparison.savings)}</p>
-                    <p className="text-lg font-semibold text-green-700">
-                      {data.scenarios.financingComparison.savingsPercentage.toFixed(1)}% de economia
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-900 font-medium mb-2">💡 Como funciona este cenário:</p>
-                  <p className="text-sm text-blue-800">
-                    Comparação direta entre o custo total de adquirir o veículo através do consórcio 
-                    versus um financiamento tradicional. O consórcio geralmente oferece economia significativa 
-                    por não haver juros, apenas taxas administrativas.
-                  </p>
-                </div>
-              </>
-            ) : (
-              data.scenarios.propertyAcquisition && (
-                <>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                      Cenário 2
-                    </Badge>
-                    <h3 className="text-xl font-bold text-slate-900">{data.scenarios.propertyAcquisition.title}</h3>
-                    {hasBid && (
-                      <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
-                        <Target className="w-3 h-3 mr-1" />
-                        Com Lance
-                      </Badge>
-                    )}
-                    {hasReducedPayment && (
-                      <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                        <Percent className="w-3 h-3 mr-1" />
-                        Parcela Reduzida
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                          <p className="text-sm text-blue-900 font-medium mb-1">Valor do Imóvel</p>
-                          <p className="text-xl font-bold text-blue-900">{formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}</p>
-                          <p className="text-xs text-blue-700 mt-1">{hasEmbeddedBid ? 'Crédito Disponível Corrigido' : 'Crédito Corrigido'}</p>
-                        </div>
-                        <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-                          <p className="text-sm text-green-900 font-medium mb-1">Valor da Locação</p>
-                          <p className="text-xl font-bold text-green-900">{formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}</p>
-                          <p className="text-xs text-green-700 mt-1">1% ao mês</p>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
-                          <p className="text-sm text-orange-900 font-medium mb-1">Parcela Pós-Contemplação</p>
-                          <p className="text-xl font-bold text-orange-900">{formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}</p>
-                        </div>
-                        <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                          <p className="text-sm text-purple-900 font-medium mb-1">Retorno Mensal Líquido</p>
-                          <p className="text-xl font-bold text-purple-900">{formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bar Chart */}
-                    <div className="bg-white rounded-lg p-4">
-                      <h4 className="text-lg font-semibold text-slate-900 mb-4 text-center">Fluxo Mensal</h4>
-                      <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={barChartData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis tickFormatter={(value) => formatCurrency(value).replace('R$ ', 'R$')} />
-                          <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                          <Bar dataKey="entrada" fill="#10B981" name="Entrada" />
-                          <Bar dataKey="saida" fill="#EF4444" name="Saída" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-900 font-medium mb-2">💡 Como funciona este cenário:</p>
-                    <p className="text-sm text-blue-800">
-                      Você usa o crédito contemplado para adquirir um imóvel e o coloca para locação. 
-                      A renda do aluguel (1% do valor do imóvel) ajuda a pagar a parcela restante do consórcio, 
-                      gerando um fluxo de caixa positivo mensal.
-                    </p>
-                  </div>
-                </>
-              )
             )}
-          </TabsContent>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
+            <p className="text-sm text-orange-900 font-medium mb-1">Parcela Pós-Contemplação</p>
+            <p className="text-xl font-bold text-orange-900">{formatCurrency(data.postContemplationPayment)}</p>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+            <p className="text-sm text-blue-900 font-medium mb-1">Prazo Final</p>
+            <p className="text-xl font-bold text-blue-900">{data.finalTerm} meses</p>
+          </div>
+        </div>
+      )}
 
-          <TabsContent value="investment" className="p-6 space-y-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                Cenário 3
-              </Badge>
-              <h3 className="text-xl font-bold text-slate-900">{data.scenarios.appliedCredit.title}</h3>
-              {hasBid && (
-                <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
-                  <Target className="w-3 h-3 mr-1" />
-                  Com Lance
-                </Badge>
-              )}
-              {hasReducedPayment && (
-                <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                  <Percent className="w-3 h-3 mr-1" />
-                  Parcela Reduzida
-                </Badge>
-              )}
-            </div>
+      {/* Crédito Disponível */}
+      {hasEmbeddedBid && (
+        <div className="p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg mb-6">
+          <p className="text-sm text-indigo-900 font-medium mb-1">Crédito Disponível</p>
+          <p className="text-2xl font-bold text-indigo-900">{formatCurrency(data.availableCredit)}</p>
+          <p className="text-xs text-indigo-700 mt-1">Após desconto do lance embutido</p>
+        </div>
+      )}
 
-            {/* Interactive Investment Return Input */}
-            <div className="p-4 bg-slate-50 rounded-lg">
-              <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <Label className="text-sm font-medium text-slate-700 mb-2 block">Taxa de Retorno (%)</Label>
-                  <Input
-                    type="number"
-                    value={investmentReturn}
-                    onChange={(e) => setInvestmentReturn(Number(e.target.value))}
-                    className="w-32"
-                    min="0"
-                    max="50"
-                    step="0.1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-slate-700 mb-2 block">Período</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      variant={returnPeriod === 'monthly' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setReturnPeriod('monthly')}
-                    >
-                      a.m.
-                    </Button>
-                    <Button
-                      variant={returnPeriod === 'yearly' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setReturnPeriod('yearly')}
-                    >
-                      a.a.
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">Ajuste a taxa de retorno e o período para ver o impacto no investimento</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-900 font-medium mb-1">Valor Aplicado</p>
-                    <p className="text-xl font-bold text-blue-900">{formatCurrency(dynamicInvestment.appliedValue)}</p>
-                    <p className="text-xs text-blue-700 mt-1">{hasEmbeddedBid ? 'Crédito Disponível Corrigido' : 'Crédito Corrigido'}</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-                    <p className="text-sm text-green-900 font-medium mb-1">Taxa de Retorno</p>
-                    <p className="text-xl font-bold text-green-900">{investmentReturn}% {returnPeriod === 'yearly' ? 'a.a.' : 'a.m.'}</p>
-                    <p className="text-xs text-green-700 mt-1">Por {dynamicInvestment.monthsToApply} meses</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg">
-                    <p className="text-sm text-orange-900 font-medium mb-1">Valor Final</p>
-                    <p className="text-xl font-bold text-orange-900">{formatCurrency(dynamicInvestment.finalValue)}</p>
-                  </div>
-                  <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-                    <p className="text-sm text-purple-900 font-medium mb-1">Lucro Total</p>
-                    <p className="text-2xl font-bold text-purple-900">{formatCurrency(dynamicInvestment.totalProfit)}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Line Chart */}
-              <div className="bg-white rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-slate-900 mb-4 text-center">Crescimento do Investimento</h4>
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={lineChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
-                    <YAxis tickFormatter={(value) => formatCurrency(value).replace('R$ ', 'R$')} />
-                    <Tooltip formatter={(value) => formatCurrency(Number(value))} labelFormatter={(label) => `Mês ${label}`} />
-                    <Line type="monotone" dataKey="valor" stroke="#8B5CF6" strokeWidth={3} dot={{ fill: '#8B5CF6' }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-900 font-medium mb-2">💡 Como funciona este cenário:</p>
-              <p className="text-sm text-blue-800">
-                Você aplica o valor do crédito contemplado em investimentos seguros como CDB, Tesouro Direto ou fundos. 
-                O crescimento é baseado em juros compostos, demonstrando o potencial de rentabilidade ao longo do prazo restante do consórcio.
-              </p>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </Card>
-    </div>
+      {/* Total Investido */}
+      <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+        <p className="text-sm text-green-900 font-medium mb-1">Total Investido até Contemplação</p>
+        <p className="text-2xl font-bold text-green-900">{formatCurrency(data.totalInvested)}</p>
+        <p className="text-xs text-green-700 mt-1">Incluindo taxa antecipada e parcelas reduzidas</p>
+      </div>
+    </Card>
   );
 };

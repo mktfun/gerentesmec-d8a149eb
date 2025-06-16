@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Calculator, TrendingUp, DollarSign, Home, CreditCard } from 'lucide-react';
 import { SimulatorForm } from '@/components/SimulatorForm';
 import { ResultsDisplay } from '@/components/ResultsDisplay';
+import { ScenariosSection } from '@/components/ScenariosSection';
 import { Header } from '@/components/Header';
 
 export interface SimulationData {
@@ -122,8 +123,10 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="grid lg:grid-cols-2 gap-8">
+          {/* NOVO LAYOUT EM 3 SEÇÕES */}
+          
+          {/* Seção Superior: Simulador + Resumo */}
+          <div className="grid lg:grid-cols-2 gap-8 mb-8">
             {/* Simulator Form */}
             <div className="animate-slide-up">
               <SimulatorForm 
@@ -134,7 +137,7 @@ const Index = () => {
               />
             </div>
 
-            {/* Results Display */}
+            {/* Results Summary */}
             <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <ResultsDisplay 
                 data={simulationData}
@@ -142,6 +145,16 @@ const Index = () => {
               />
             </div>
           </div>
+
+          {/* Seção Inferior: Cenários (Largura Total) */}
+          {simulationData && (
+            <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+              <ScenariosSection 
+                data={simulationData}
+                isLoading={isSimulating}
+              />
+            </div>
+          )}
         </div>
       </main>
     </div>
