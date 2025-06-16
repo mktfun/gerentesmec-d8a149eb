@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Calculator, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SimulationData } from '@/pages/Index';
 import { calculateSimulation } from '@/utils/consortiumCalculations';
 
@@ -130,7 +130,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
   return (
     <Card className="glass-card p-8 apple-shadow-lg">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-apple-blue-500 to-apple-blue-600 rounded-lg flex items-center justify-center">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
           <Calculator className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -179,7 +179,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
             placeholder="R$ 0,00"
             value={formData.creditValue}
             onChange={handleCreditValueChange}
-            className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+            className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
             autoComplete="off"
           />
         </div>
@@ -195,7 +195,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               placeholder="60"
               value={formData.installments}
               onChange={(e) => handleInputChange('installments', e.target.value)}
-              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
               min="12"
               max="200"
             />
@@ -211,7 +211,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               placeholder="36"
               value={formData.contemplationTime}
               onChange={(e) => handleInputChange('contemplationTime', e.target.value)}
-              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
               min="6"
               max="120"
             />
@@ -230,7 +230,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               placeholder="2.5"
               value={formData.financingRate}
               onChange={(e) => handleInputChange('financingRate', e.target.value)}
-              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
               min="0.1"
               max="10"
               step="0.1"
@@ -254,7 +254,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="18"
                 value={formData.adminRate}
                 onChange={(e) => handleInputChange('adminRate', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="30"
                 step="0.01"
@@ -271,7 +271,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="1"
                 value={formData.reserveFundRate}
                 onChange={(e) => handleInputChange('reserveFundRate', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="10"
                 step="0.01"
@@ -288,7 +288,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="1"
                 value={formData.insuranceRate}
                 onChange={(e) => handleInputChange('insuranceRate', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="10"
                 step="0.01"
@@ -297,7 +297,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
           </div>
         </div>
 
-        {/* Nova seção: Parcela Reduzida */}
+        {/* Seção: Parcela Reduzida */}
         <div className="space-y-4">
           <div className="border-t border-slate-200 pt-4">
             <div className="flex items-center justify-between mb-3">
@@ -316,18 +316,21 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 <Label htmlFor="reducedPaymentPercentage" className="text-sm font-medium text-slate-700">
                   Percentual da Parcela Reduzida
                 </Label>
-                <Select
-                  value={formData.reducedPaymentPercentage}
-                  onValueChange={(value) => handleInputChange('reducedPaymentPercentage', value)}
-                >
-                  <SelectTrigger className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20">
-                    <SelectValue placeholder="Selecione o percentual" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="50">50% da parcela</SelectItem>
-                    <SelectItem value="75">75% da parcela</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <Input
+                    id="reducedPaymentPercentage"
+                    type="number"
+                    placeholder="50"
+                    value={formData.reducedPaymentPercentage}
+                    onChange={(e) => handleInputChange('reducedPaymentPercentage', e.target.value)}
+                    className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 pr-10"
+                    min="1"
+                    max="99"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-slate-500 text-lg">%</span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -405,7 +408,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
           <Button
             type="submit"
             disabled={!isFormValid || isLoading}
-            className="flex-1 h-12 bg-gradient-to-r from-apple-blue-500 to-apple-blue-600 hover:from-apple-blue-600 hover:to-apple-blue-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border-0"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -425,7 +428,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               type="button"
               onClick={onReset}
               variant="outline"
-              className="h-12 px-6 glass-button border-slate-200 hover:border-apple-blue-300 hover:bg-apple-blue-50 rounded-xl transition-all duration-200"
+              className="h-12 px-6 glass-button border-slate-200 hover:border-blue-300 hover:bg-blue-50 rounded-xl transition-all duration-200"
             >
               <RotateCcw className="w-4 h-4" />
             </Button>
@@ -433,8 +436,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
         </div>
       </form>
 
-      <div className="mt-6 p-4 bg-apple-blue-50 rounded-xl border border-apple-blue-100">
-        <p className="text-sm text-apple-blue-700">
+      <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+        <p className="text-sm text-blue-700">
           <strong>Dica:</strong> Para melhores resultados, use dados reais do consórcio que você está apresentando ao cliente.
         </p>
       </div>
