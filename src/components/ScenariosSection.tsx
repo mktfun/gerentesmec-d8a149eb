@@ -44,9 +44,9 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
 
   // Dados para o gráfico de cascata do Cenário 2 (Waterfall Chart)
   const waterfallData = data.scenarios.propertyAcquisition ? [
-    { name: 'Renda Mensal', value: data.scenarios.propertyAcquisition.monthlyRental, color: COLORS.green },
-    { name: 'Parcela', value: -data.scenarios.propertyAcquisition.postContemplationPayment, color: COLORS.red },
-    { name: 'Saldo Líquido', value: data.scenarios.propertyAcquisition.netMonthlyReturn, color: COLORS.blue }
+    { name: 'Renda Mensal', value: data.scenarios.propertyAcquisition.monthlyRental, fill: COLORS.green },
+    { name: 'Parcela', value: -data.scenarios.propertyAcquisition.postContemplationPayment, fill: COLORS.red },
+    { name: 'Saldo Líquido', value: data.scenarios.propertyAcquisition.netMonthlyReturn, fill: COLORS.blue }
   ] : [];
 
   // Dados para o gráfico de pizza do Cenário 1
@@ -60,19 +60,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
     { name: 'Valor Aplicado', value: data.scenarios.appliedCredit.appliedValue, color: COLORS.blue },
     { name: 'Lucro Total', value: data.scenarios.appliedCredit.totalProfit, color: COLORS.green }
   ];
-
-  // Dados para o gráfico de linha do Cenário 3 (Crescimento ao longo do tempo)
-  const investmentGrowthData = [];
-  const months = data.scenarios.appliedCredit.monthsToApply;
-  const monthlyRate = 0.12 / 12; // 12% a.a. = 1% a.m.
-  
-  for (let i = 0; i <= Math.min(months, 60); i += 6) { // Mostrar apenas até 60 meses, de 6 em 6
-    const value = data.scenarios.appliedCredit.appliedValue * Math.pow(1 + monthlyRate, i);
-    investmentGrowthData.push({
-      month: i,
-      value: value
-    });
-  }
 
   const formatPercentage = (value: number): string => {
     return `${value.toFixed(2)}%`;
@@ -118,14 +105,14 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
           
           <div className="h-48 mb-4">
             <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
+              <PieChart>
                 <RechartsPieChart data={quotaSalePieData}>
                   {quotaSalePieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </RechartsPieChart>
                 <Tooltip formatter={(value: number) => formatCurrency(value)} />
-              </RechartsPieChart>
+              </PieChart>
             </ResponsiveContainer>
           </div>
 
@@ -168,7 +155,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                     <XAxis dataKey="name" />
                     <YAxis tickFormatter={(value) => `R$ ${(value/1000).toFixed(0)}k`} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" fill={(entry: any) => entry.color} />
+                    <Bar dataKey="value" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -226,14 +213,14 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
           {/* Gráfico de Pizza - Composição do Valor Final */}
           <div className="h-48 mb-4">
             <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
+              <PieChart>
                 <RechartsPieChart data={appliedCreditPieData}>
                   {appliedCreditPieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </RechartsPieChart>
                 <Tooltip formatter={(value: number) => formatCurrency(value)} />
-              </RechartsPieChart>
+              </PieChart>
             </ResponsiveContainer>
           </div>
 
