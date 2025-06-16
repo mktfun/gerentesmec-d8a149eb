@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calculator, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -63,6 +62,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     reducedPaymentPercentage: '50',
     financingRate: '2.5'
   });
+
+  const [installments, setInstallments] = useState('');
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
@@ -186,19 +187,17 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="installments" className="text-sm font-medium text-slate-700">
-              Parcelas
-            </Label>
+            <Label htmlFor="installments">Parcelas</Label>
             <Input
               id="installments"
               type="number"
-              placeholder="60"
-              value={formData.installments}
-              onChange={(e) => handleInputChange('installments', e.target.value)}
-              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
-              min="12"
-              max="200"
+              value={installments}
+              onChange={(e) => setInstallments(Number(e.target.value))}
+              min={12}
+              max={260}
+              className="glass-input"
             />
+            <p className="text-xs text-slate-500">Entre 12 e 260 parcelas</p>
           </div>
 
           <div className="space-y-2">

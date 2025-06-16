@@ -10,6 +10,7 @@ export interface SimulationData {
   installments: number;
   contemplationTime: number;
   monthlyPayment: number;
+  monthlyPaymentWithAnticipatedTax?: number;
   postContemplationPayment: number;
   finalTerm: number;
   bidValue: number;
@@ -23,6 +24,15 @@ export interface SimulationData {
   creditType: 'property' | 'vehicle';
   correctionIndex: 'INCC' | 'IPCA';
   financingRate?: number;
+  anticipatedTaxValue?: number;
+  demonstrativeRate?: {
+    monthlyRate: number;
+    annualRate: number;
+  };
+  cet?: {
+    cetMonthly: number;
+    cetAnnual: number;
+  };
   scenarios: {
     quotaSale: {
       title: string;

@@ -230,8 +230,64 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
             {hasReducedPayment && (
               <p className="text-xs text-slate-600 mt-1">{data.reducedPaymentPercentage}% da parcela</p>
             )}
+            {data.monthlyPaymentWithAnticipatedTax && data.monthlyPaymentWithAnticipatedTax > data.monthlyPayment && (
+              <p className="text-xs text-orange-600 mt-1">
+                Com taxa antecipada: {formatCurrency(data.monthlyPaymentWithAnticipatedTax)} (12 primeiras)
+              </p>
+            )}
           </div>
         </div>
+
+        {/* Métricas Financeiras */}
+        {(data.demonstrativeRate || data.cet) && (
+          <div className="mb-4">
+            <h4 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+              <Calculator className="w-5 h-5 text-apple-blue-500" />
+              Métricas Financeiras
+            </h4>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              {data.demonstrativeRate && (
+                <>
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                    <p className="text-sm text-blue-900 font-medium mb-1">Taxa Mensal</p>
+                    <p className="text-xl font-bold text-blue-900">{data.demonstrativeRate.monthlyRate.toFixed(4)}%</p>
+                    <p className="text-xs text-blue-700 mt-1">Demonstrativo de Taxa</p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                    <p className="text-sm text-blue-900 font-medium mb-1">Taxa Anual</p>
+                    <p className="text-xl font-bold text-blue-900">{data.demonstrativeRate.annualRate.toFixed(4)}%</p>
+                    <p className="text-xs text-blue-700 mt-1">Demonstrativo de Taxa</p>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {data.cet && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                  <p className="text-sm text-purple-900 font-medium mb-1">CET Mensal</p>
+                  <p className="text-xl font-bold text-purple-900">{data.cet.cetMonthly.toFixed(4)}%</p>
+                  <p className="text-xs text-purple-700 mt-1">Custo Efetivo Total</p>
+                </div>
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                  <p className="text-sm text-purple-900 font-medium mb-1">CET Anual</p>
+                  <p className="text-xl font-bold text-purple-900">{data.cet.cetAnnual.toFixed(4)}%</p>
+                  <p className="text-xs text-purple-700 mt-1">Custo Efetivo Total</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Taxa Antecipada */}
+        {data.anticipatedTaxValue && data.anticipatedTaxValue > 0 && (
+          <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg mb-4">
+            <p className="text-sm text-orange-900 font-medium mb-1">Taxa Antecipada</p>
+            <p className="text-2xl font-bold text-orange-900">{formatCurrency(data.anticipatedTaxValue)}</p>
+            <p className="text-xs text-orange-700 mt-1">Diluída nas primeiras 12 parcelas</p>
+          </div>
+        )}
 
         {hasBid && (
           <div className="grid grid-cols-3 gap-4 mb-4">
@@ -266,7 +322,7 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
         <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
           <p className="text-sm text-green-900 font-medium mb-1">Total Investido</p>
           <p className="text-2xl font-bold text-green-900">{formatCurrency(data.totalInvested)}</p>
-          <p className="text-xs text-green-700 mt-1">Valor pago até a contemplação</p>
+          <p className="text-xs text-green-700 mt-1">Valor pago até a contemplação (incluindo taxa antecipada)</p>
         </div>
       </Card>
 

@@ -1,4 +1,6 @@
+
 import { SimulationData } from '@/pages/Index';
+import { calculateCET, calculateDemonstrativeRate } from './financialMetrics';
 
 interface CalculationInput {
   creditType: 'property' | 'vehicle';
@@ -14,6 +16,7 @@ interface CalculationInput {
   reducedPaymentEnabled?: boolean;
   reducedPaymentPercentage?: number;
   financingRate?: number;
+  anticipatedTaxRate?: number; // Nova taxa antecipada
 }
 
 // Função para calcular financiamento pela Tabela Price
@@ -36,7 +39,8 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     bidDiscountType = 'reducePayment',
     reducedPaymentEnabled = false,
     reducedPaymentPercentage = 50,
-    financingRate = 0
+    financingRate = 0,
+    anticipatedTaxRate = 0.5 // Taxa padrão de 0.5% para taxa antecipada
   } = input;
   
   // Cálculo da parcela usando as taxas específicas
@@ -44,62 +48,88 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   const reserveFundValue = creditValue * (reserveFundRate / 100);
   const insuranceValue = creditValue * (insuranceRate / 100);
   
-  const totalCreditWithTaxes = creditValue + adminValue + reserveFundValue + insuranceValue;
-  let monthlyPayment = totalCreditWithTaxes / installments;
+  // Implementação da Taxa Antecipada (apenas nas primeiras 12 parcelas)
+  const anticipatedTaxValue = creditValue * (anticipatedTaxRate / 100);
+  const anticipatedTaxPerInstallment = anticipatedTaxValue / Math.min(12, installments);
   
-  // Aplicar parcela reduzida se habilitada (CORRIGIDO)
-  let actualMonthlyPayment = monthlyPayment;
+  const totalCreditWithTaxes = creditValue + adminValue + reserveFundValue + insuranceValue;
+  let baseMonthlyPayment = totalCreditWithTaxes / installments;
+  
+  // Aplicar parcela reduzida se habilitada
+  let actualMonthlyPayment = baseMonthlyPayment;
   let compensationAmount = 0;
   
   if (reducedPaymentEnabled) {
-    actualMonthlyPayment = monthlyPayment * (reducedPaymentPercentage / 100);
-    const unpaidAmount = monthlyPayment - actualMonthlyPayment;
+    actualMonthlyPayment = baseMonthlyPayment * (reducedPaymentPercentage / 100);
+    const unpaidAmount = baseMonthlyPayment - actualMonthlyPayment;
     compensationAmount = unpaidAmount * contemplationTime;
   }
+  
+  // Adicionar taxa antecipada às primeiras 12 parcelas (ou até a contemplação se for menor)
+  const installmentsWithAnticipatedTax = Math.min(12, contemplationTime);
+  const monthlyPaymentWithAnticipatedTax = actualMonthlyPayment + anticipatedTaxPerInstallment;
   
   // Cálculos de lance
   const embeddedBidValue = creditValue * (embeddedBidPercentage / 100);
   const ownResourcesBidValue = creditValue * (ownResourcesBidPercentage / 100);
   const bidValue = embeddedBidValue + ownResourcesBidValue;
   
-  // CÁLCULO CRÍTICO: Crédito disponível após lance embutido
+  // Crédito disponível após lance embutido
   const availableCredit = creditValue - embeddedBidValue;
   
   const remainingInstallments = installments - contemplationTime;
   
-  let postContemplationPayment = monthlyPayment;
+  let postContemplationPayment = baseMonthlyPayment;
   let finalTerm = remainingInstallments;
   
   if (bidValue > 0) {
     if (bidDiscountType === 'reduceTerm') {
-      // Reduzir prazo: parcela mantém valor, prazo diminui
-      const installmentsToReduce = Math.floor(bidValue / monthlyPayment);
+      const installmentsToReduce = Math.floor(bidValue / baseMonthlyPayment);
       finalTerm = Math.max(1, remainingInstallments - installmentsToReduce);
-      postContemplationPayment = monthlyPayment;
+      postContemplationPayment = baseMonthlyPayment;
     } else {
-      // Reduzir parcela: prazo mantém, parcela diminui
-      const remainingDebt = monthlyPayment * remainingInstallments - bidValue;
+      const remainingDebt = baseMonthlyPayment * remainingInstallments - bidValue;
       postContemplationPayment = Math.max(0, remainingDebt / remainingInstallments);
       finalTerm = remainingInstallments;
     }
   }
   
-  // Compensar parcela reduzida no pós-contemplação
   if (reducedPaymentEnabled) {
     postContemplationPayment += compensationAmount / finalTerm;
   }
   
-  // Total a ser pago
-  const totalPaid = (actualMonthlyPayment * contemplationTime) + (postContemplationPayment * finalTerm) + ownResourcesBidValue;
+  // Calcular total pago considerando taxa antecipada
+  const totalPaidWithAnticipatedTax = (monthlyPaymentWithAnticipatedTax * installmentsWithAnticipatedTax) + 
+                                     (actualMonthlyPayment * (contemplationTime - installmentsWithAnticipatedTax)) +
+                                     (postContemplationPayment * finalTerm) + 
+                                     ownResourcesBidValue;
   
-  // Total investido até a contemplação (CORRIGIDO)
-  const totalInvested = actualMonthlyPayment * contemplationTime;
+  // Total investido até a contemplação (incluindo taxa antecipada)
+  const totalInvested = (monthlyPaymentWithAnticipatedTax * installmentsWithAnticipatedTax) + 
+                       (actualMonthlyPayment * (contemplationTime - installmentsWithAnticipatedTax));
+  
+  // Calcular métricas financeiras
+  const demonstrativeRate = calculateDemonstrativeRate(adminRate, reserveFundRate, installments);
+  
+  // Preparar fluxo de pagamentos para CET
+  const monthlyPayments: number[] = [];
+  for (let i = 0; i < installmentsWithAnticipatedTax; i++) {
+    monthlyPayments.push(monthlyPaymentWithAnticipatedTax);
+  }
+  for (let i = installmentsWithAnticipatedTax; i < contemplationTime; i++) {
+    monthlyPayments.push(actualMonthlyPayment);
+  }
+  for (let i = 0; i < finalTerm; i++) {
+    monthlyPayments.push(postContemplationPayment);
+  }
+  
+  const cet = calculateCET(creditValue, monthlyPayments, anticipatedTaxValue);
   
   // Definir índice de correção baseado no tipo de crédito
   const correctionIndex = creditType === 'property' ? 'INCC' : 'IPCA';
-  const correctionRate = creditType === 'property' ? 0.06 : 0.05; // 6% INCC, 5% IPCA
+  const correctionRate = creditType === 'property' ? 0.06 : 0.05;
   
-  // Cenário 1: Venda da Cota (mesmo para ambos os tipos)
+  // Cenário 1: Venda da Cota
   const quotaSaleAgio = 15;
   const quotaSaleProfit = creditValue * (quotaSaleAgio / 100);
   const quotaSaleValue = totalInvested + quotaSaleProfit;
@@ -108,7 +138,6 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   let scenarios: SimulationData['scenarios'];
   
   if (creditType === 'property') {
-    // Cenário 2: Aquisição de Imóvel
     const propertyValue = availableCredit * (1 + correctionRate);
     const rentalRate = 0.01;
     const monthlyRental = propertyValue * rentalRate;
@@ -139,11 +168,10 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
       }
     };
   } else {
-    // Cenário 2: Comparativo vs. Financiamento
     const correctedCredit = availableCredit * (1 + correctionRate);
     const monthlyFinancingRate = financingRate / 100;
     const financingTotalCost = calculateFinancingCost(correctedCredit, monthlyFinancingRate, finalTerm);
-    const consortiumTotalCost = totalPaid;
+    const consortiumTotalCost = totalPaidWithAnticipatedTax;
     const savings = financingTotalCost - consortiumTotalCost;
     const savingsPercentage = (savings / financingTotalCost) * 100;
     
@@ -181,16 +209,20 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     installments,
     contemplationTime,
     monthlyPayment: actualMonthlyPayment,
+    monthlyPaymentWithAnticipatedTax,
     postContemplationPayment,
     finalTerm,
     bidValue,
     embeddedBidValue,
     ownResourcesBidValue,
     availableCredit,
-    totalPaid,
+    totalPaid: totalPaidWithAnticipatedTax,
     totalInvested,
     reducedPaymentEnabled,
     reducedPaymentPercentage,
+    anticipatedTaxValue,
+    demonstrativeRate,
+    cet,
     scenarios
   };
 };
