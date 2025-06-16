@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -48,13 +47,17 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
     const appliedValue = data.availableCredit * (1 + (data.creditType === 'property' ? 0.06 : 0.05));
     const finalValue = appliedValue * Math.pow(1 + annualRate, data.finalTerm / 12);
     const totalProfit = finalValue - appliedValue;
+    const monthlyGain = totalProfit / data.finalTerm;
+    const annualGain = monthlyGain * 12;
     
     return {
       appliedValue,
       investmentReturn,
       finalValue,
       totalProfit,
-      monthsToApply: data.finalTerm
+      monthsToApply: data.finalTerm,
+      monthlyGain,
+      annualGain
     };
   };
 
@@ -342,9 +345,15 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                           <p className="text-2xl font-bold text-orange-900">{formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}</p>
                         </div>
                         <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-                          <p className="text-base text-purple-800 font-semibold mb-2">Retorno Mensal Líquido</p>
+                          <p className="text-base text-purple-800 font-semibold mb-2">Ganho Mensal (Aluguel)</p>
                           <p className="text-2xl font-bold text-purple-900">{formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}</p>
                         </div>
+                      </div>
+
+                      <div className="p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl border border-indigo-200">
+                        <p className="text-base text-indigo-800 font-semibold mb-2">Ganho Anual (Aluguel)</p>
+                        <p className="text-3xl font-bold text-indigo-900">{formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn * 12)}</p>
+                        <p className="text-sm text-indigo-700 mt-1">Ganho mensal × 12 meses</p>
                       </div>
                     </div>
 
@@ -439,6 +448,19 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                   <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
                     <p className="text-base text-purple-800 font-semibold mb-2">Lucro Total</p>
                     <p className="text-2xl font-bold text-purple-900">{formatCurrency(dynamicInvestment.totalProfit)}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200">
+                    <p className="text-base text-cyan-800 font-semibold mb-2">Ganho Médio Mensal</p>
+                    <p className="text-2xl font-bold text-cyan-900">{formatCurrency(dynamicInvestment.monthlyGain)}</p>
+                    <p className="text-sm text-cyan-700 mt-1">Lucro total ÷ {dynamicInvestment.monthsToApply} meses</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-r from-teal-50 to-teal-100 rounded-xl border border-teal-200">
+                    <p className="text-base text-teal-800 font-semibold mb-2">Ganho Médio Anual</p>
+                    <p className="text-2xl font-bold text-teal-900">{formatCurrency(dynamicInvestment.annualGain)}</p>
+                    <p className="text-sm text-teal-700 mt-1">Ganho mensal × 12 meses</p>
                   </div>
                 </div>
 
