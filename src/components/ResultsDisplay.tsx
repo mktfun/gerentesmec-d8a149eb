@@ -1,3 +1,4 @@
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calculator, Car, Home, Download } from 'lucide-react';
@@ -12,10 +13,10 @@ interface ResultsDisplayProps {
 export const ResultsDisplay = ({ data, isLoading }: ResultsDisplayProps) => {
   if (isLoading) {
     return (
-      <Card className="glass-card p-8 apple-shadow-lg">
+      <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-apple-blue-200 border-t-apple-blue-500 rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
             <h3 className="text-lg font-medium text-slate-700 mb-2">Processando Simulação</h3>
             <p className="text-slate-500">Calculando os melhores cenários...</p>
           </div>
@@ -26,11 +27,11 @@ export const ResultsDisplay = ({ data, isLoading }: ResultsDisplayProps) => {
 
   if (!data) {
     return (
-      <Card className="glass-card p-8 apple-shadow-lg">
+      <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="w-16 h-16 bg-apple-blue-100 rounded-full flex items-center justify-center mb-4">
-              <Calculator className="w-8 h-8 text-apple-blue-500" />
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <Calculator className="w-8 h-8 text-blue-500" />
             </div>
             <h3 className="text-lg font-medium text-slate-700 mb-2">Aguardando Simulação</h3>
             <p className="text-slate-500">Preencha os dados ao lado para ver os resultados</p>
@@ -95,7 +96,7 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
   };
 
   return (
-    <Card className="glass-card p-6 apple-shadow-lg">
+    <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
@@ -111,8 +112,7 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
         <Button
           onClick={exportSimulation}
           variant="outline"
-          size="sm"
-          className="glass-button border-slate-200 hover:border-apple-blue-300 hover:bg-apple-blue-50"
+          className="border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50"
         >
           <Download className="w-4 h-4 mr-2" />
           Exportar
@@ -129,7 +129,7 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
           <p className="text-sm text-slate-800 font-medium mb-1">
             Parcela {hasReducedPayment ? 'Reduzida' : 'Base'}
           </p>
-          <p className="text-2xl font-bold text-apple-blue-600">{formatCurrency(data.monthlyPayment)}</p>
+          <p className="text-2xl font-bold text-blue-600">{formatCurrency(data.monthlyPayment)}</p>
           {hasReducedPayment && (
             <p className="text-xs text-slate-600 mt-1">{formatPercentage(data.reducedPaymentPercentage || 0)} da parcela</p>
           )}
@@ -145,7 +145,7 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
       {(data.demonstrativeRate || data.cet) && (
         <div className="mb-6">
           <h4 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-apple-blue-500" />
+            <Calculator className="w-5 h-5 text-blue-500" />
             Métricas Financeiras
           </h4>
           

@@ -127,14 +127,14 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
   const hasBid = (parseFloat(formData.embeddedBidPercentage) || 0) + (parseFloat(formData.ownResourcesBidPercentage) || 0) > 0;
 
   return (
-    <Card className="glass-card p-8 apple-shadow-lg">
+    <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
           <Calculator className="w-5 h-5 text-white" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Simulador</h2>
-          <p className="text-slate-500">Insira os dados para começar</p>
+          <p className="text-slate-600">Insira os dados para começar</p>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
             placeholder="R$ 0,00"
             value={formData.creditValue}
             onChange={handleCreditValueChange}
-            className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+            className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
             autoComplete="off"
           />
         </div>
@@ -193,7 +193,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               onChange={(e) => handleInputChange('installments', e.target.value)}
               min={12}
               max={260}
-              className="glass-input"
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
             />
             <p className="text-xs text-slate-500">Entre 12 e 260 parcelas</p>
           </div>
@@ -208,7 +208,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               placeholder="36"
               value={formData.contemplationTime}
               onChange={(e) => handleInputChange('contemplationTime', e.target.value)}
-              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
               min="6"
               max="120"
             />
@@ -227,7 +227,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               placeholder="2.5"
               value={formData.financingRate}
               onChange={(e) => handleInputChange('financingRate', e.target.value)}
-              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
               min="0.1"
               max="10"
               step="0.1"
@@ -251,7 +251,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="18"
                 value={formData.adminRate}
                 onChange={(e) => handleInputChange('adminRate', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="30"
                 step="0.01"
@@ -268,7 +268,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="1"
                 value={formData.reserveFundRate}
                 onChange={(e) => handleInputChange('reserveFundRate', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="10"
                 step="0.01"
@@ -285,7 +285,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="1"
                 value={formData.insuranceRate}
                 onChange={(e) => handleInputChange('insuranceRate', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="10"
                 step="0.01"
@@ -320,7 +320,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                     placeholder="50"
                     value={formData.reducedPaymentPercentage}
                     onChange={(e) => handleInputChange('reducedPaymentPercentage', e.target.value)}
-                    className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 pr-10"
+                    className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 pr-10"
                     min="1"
                     max="99"
                   />
@@ -349,7 +349,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="0"
                 value={formData.embeddedBidPercentage}
                 onChange={(e) => handleInputChange('embeddedBidPercentage', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="30"
                 step="0.1"
@@ -366,7 +366,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
                 placeholder="0"
                 value={formData.ownResourcesBidPercentage}
                 onChange={(e) => handleInputChange('ownResourcesBidPercentage', e.target.value)}
-                className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                 min="0"
                 max="50"
                 step="0.1"
@@ -425,7 +425,7 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
               type="button"
               onClick={onReset}
               variant="outline"
-              className="h-12 px-6 glass-button border-slate-200 hover:border-blue-300 hover:bg-blue-50 rounded-xl transition-all duration-200"
+              className="h-12 px-6 border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50 rounded-xl transition-all duration-200"
             >
               <RotateCcw className="w-4 h-4" />
             </Button>

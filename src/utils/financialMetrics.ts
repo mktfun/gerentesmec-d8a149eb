@@ -12,6 +12,8 @@ export const calculateIRR = (cashFlows: number[], guess: number = 0.1, maxIterat
       dnpv += (-j * cashFlows[j]) / Math.pow(1 + rate, j + 1);
     }
     
+    if (Math.abs(dnpv) < 0.000001) break;
+    
     const newRate = rate - npv / dnpv;
     
     if (Math.abs(newRate - rate) < 0.000001) {
@@ -25,7 +27,7 @@ export const calculateIRR = (cashFlows: number[], guess: number = 0.1, maxIterat
 };
 
 export const calculateCET = (creditValue: number, monthlyPayments: number[], anticipatedTaxValue: number = 0): { cetMonthly: number; cetAnnual: number } => {
-  // Fluxo de caixa: entrada positiva (crédito recebido) e saídas negativas (parcelas pagas)
+  // Fluxo de caixa corrigido: entrada positiva (crédito recebido) e saídas negativas (parcelas pagas)
   const cashFlows: number[] = [creditValue]; // Entrada inicial
   
   // Adicionar as parcelas como saídas negativas
@@ -35,23 +37,26 @@ export const calculateCET = (creditValue: number, monthlyPayments: number[], ant
   
   try {
     const cetMonthly = calculateIRR(cashFlows);
-    const cetAnnual = Math.pow(1 + cetMonthly, 12) - 1; // Correção: usar juros compostos para anualização
+    // Correção: usar juros compostos para anualização correta
+    const cetAnnual = Math.pow(1 + cetMonthly, 12) - 1;
     
     return {
       cetMonthly: Math.max(0, cetMonthly * 100), // Converter para percentual
       cetAnnual: Math.max(0, cetAnnual * 100)
     };
   } catch (error) {
-    // Fallback se o IRR não convergir
+    // Fallback melhorado se o IRR não convergir
     const totalPaid = monthlyPayments.reduce((sum, payment) => sum + payment, 0);
-    const totalCost = totalPaid - creditValue;
     const periods = monthlyPayments.length;
     
     if (periods > 0 && creditValue > 0) {
-      const approximateRate = (totalCost / creditValue) / periods;
+      // Cálculo aproximado mais preciso
+      const effectiveRate = Math.pow(totalPaid / creditValue, 1/periods) - 1;
+      const annualRate = Math.pow(1 + effectiveRate, 12) - 1;
+      
       return {
-        cetMonthly: Math.max(0, approximateRate * 100),
-        cetAnnual: Math.max(0, approximateRate * 12 * 100)
+        cetMonthly: Math.max(0, effectiveRate * 100),
+        cetAnnual: Math.max(0, annualRate * 100)
       };
     }
     

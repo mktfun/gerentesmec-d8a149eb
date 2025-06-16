@@ -5,8 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { DollarSign, Home, Calculator, PiggyBank, Target, Percent, Car } from 'lucide-react';
+import { DollarSign, Home, Calculator, PiggyBank, Target, Percent } from 'lucide-react';
 import { SimulationData } from '@/pages/Index';
 import { formatCurrency } from '@/utils/formatters';
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -19,7 +18,6 @@ interface ScenariosSectionProps {
 export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => {
   const [agioPercentage, setAgioPercentage] = useState(15);
   const [investmentReturn, setInvestmentReturn] = useState(12);
-  const [returnPeriod, setReturnPeriod] = useState<'monthly' | 'yearly'>('yearly');
 
   // Reset interactive values when new simulation data arrives
   useEffect(() => {
@@ -46,12 +44,10 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
   };
 
   const calculateDynamicInvestment = () => {
-    const monthlyRate = returnPeriod === 'yearly' ? 
-      Math.pow(1 + investmentReturn / 100, 1/12) - 1 : 
-      investmentReturn / 100;
-    
+    // FIXO: sempre calcular em base anual (a.a.)
+    const annualRate = investmentReturn / 100;
     const appliedValue = data.availableCredit * (1 + (data.creditType === 'property' ? 0.06 : 0.05));
-    const finalValue = appliedValue * Math.pow(1 + monthlyRate, data.finalTerm);
+    const finalValue = appliedValue * Math.pow(1 + annualRate, data.finalTerm / 12);
     const totalProfit = finalValue - appliedValue;
     
     return {
@@ -80,43 +76,41 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
     { name: 'Lucro (Ágio)', value: dynamicQuotaSale.profit, fill: '#10B981' }
   ];
 
+  // NOVO: Gráfico de Pizza para Cenário 3 (Composição do Valor Final)
   const investmentPieData = [
     { name: 'Valor Aplicado', value: dynamicInvestment.appliedValue, fill: '#8B5CF6' },
     { name: 'Lucro Total', value: dynamicInvestment.totalProfit, fill: '#F59E0B' }
   ];
 
-  const barChartData = data.scenarios.propertyAcquisition ? [
+  // NOVO: Dados para Gráfico de Cascata (Waterfall Chart) - Cenário 2
+  const waterfallData = data.scenarios.propertyAcquisition ? [
     { 
       name: 'Renda Mensal', 
-      entrada: data.scenarios.propertyAcquisition.monthlyRental, 
-      saida: 0,
-      net: data.scenarios.propertyAcquisition.monthlyRental
+      valor: data.scenarios.propertyAcquisition.monthlyRental,
+      fill: '#10B981'
     },
     { 
       name: 'Parcela', 
-      entrada: 0, 
-      saida: data.scenarios.propertyAcquisition.postContemplationPayment,
-      net: -data.scenarios.propertyAcquisition.postContemplationPayment
+      valor: -data.scenarios.propertyAcquisition.postContemplationPayment,
+      fill: '#EF4444'
     },
     {
       name: 'Saldo Líquido',
-      entrada: 0,
-      saida: 0,
-      net: data.scenarios.propertyAcquisition.netMonthlyReturn
+      valor: data.scenarios.propertyAcquisition.netMonthlyReturn,
+      fill: '#8B5CF6'
     }
   ] : [];
 
+  // Gráfico de linha para Cenário 3
   const generateLineChartData = () => {
     const points = [];
-    const monthlyRate = returnPeriod === 'yearly' ? 
-      Math.pow(1 + investmentReturn / 100, 1/12) - 1 : 
-      investmentReturn / 100;
+    const annualRate = investmentReturn / 100;
     
     const intervals = Math.min(24, Math.max(12, Math.floor(dynamicInvestment.monthsToApply / 12)));
     const step = Math.floor(dynamicInvestment.monthsToApply / intervals);
     
     for (let i = 0; i <= dynamicInvestment.monthsToApply; i += step) {
-      const value = dynamicInvestment.appliedValue * Math.pow(1 + monthlyRate, i);
+      const value = dynamicInvestment.appliedValue * Math.pow(1 + annualRate, i / 12);
       points.push({
         mes: i,
         valor: value
@@ -134,26 +128,26 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
         <p className="text-lg text-slate-600">Explore as diferentes possibilidades de rentabilidade</p>
       </div>
 
-      <Card className="glass-card apple-shadow-lg">
+      <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
         <Tabs defaultValue="sale" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full bg-slate-100 p-1 rounded-lg mb-6">
-            <TabsTrigger value="sale" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsList className="grid grid-cols-3 w-full bg-slate-100 p-1 rounded-xl mb-8">
+            <TabsTrigger value="sale" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all">
               <DollarSign className="w-4 h-4" />
               Venda da Cota
             </TabsTrigger>
-            <TabsTrigger value="scenario2" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <TabsTrigger value="scenario2" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all">
               {isVehicle ? <Calculator className="w-4 h-4" /> : <Home className="w-4 h-4" />}
               {isVehicle ? 'Comparativo' : 'Imóvel'}
             </TabsTrigger>
-            <TabsTrigger value="investment" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <TabsTrigger value="investment" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all">
               <PiggyBank className="w-4 h-4" />
               Investimento
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sale" className="p-8 space-y-8">
+          <TabsContent value="sale" className="space-y-8">
             <div className="flex items-center gap-2 mb-6">
-              <Badge variant="secondary" className="bg-green-100 text-green-800 text-sm px-3 py-1">
+              <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1 border-0">
                 Cenário 1
               </Badge>
               <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.quotaSale.title}</h3>
@@ -174,14 +168,14 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Controles e Métricas */}
               <div className="space-y-6">
-                <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border">
+                <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
                   <Label className="text-base font-semibold text-slate-700 mb-3 block">Configurar Ágio de Venda</Label>
                   <div className="flex items-center gap-4">
                     <Input
                       type="number"
                       value={agioPercentage}
                       onChange={(e) => setAgioPercentage(Number(e.target.value))}
-                      className="w-24 h-12 text-lg font-semibold text-center"
+                      className="w-24 h-12 text-lg font-semibold text-center border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                       min="0"
                       max="100"
                       step="1"
@@ -214,7 +208,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                 </div>
               </div>
 
-              {/* Gráfico de Pizza Aprimorado */}
+              {/* Gráfico de Pizza Refinado */}
               <div className="bg-white rounded-xl p-6 border shadow-sm">
                 <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Composição do Retorno</h4>
                 <ResponsiveContainer width="100%" height={300}>
@@ -258,11 +252,11 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             </div>
           </TabsContent>
 
-          <TabsContent value="scenario2" className="p-8 space-y-8">
+          <TabsContent value="scenario2" className="space-y-8">
             {isVehicle && data.scenarios.financingComparison ? (
               <>
                 <div className="flex items-center gap-2 mb-6">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-sm px-3 py-1">
+                  <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-1 border-0">
                     Cenário 2
                   </Badge>
                   <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.financingComparison.title}</h3>
@@ -315,7 +309,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
               data.scenarios.propertyAcquisition && (
                 <>
                   <div className="flex items-center gap-2 mb-6">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-sm px-3 py-1">
+                    <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-1 border-0">
                       Cenário 2
                     </Badge>
                     <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.propertyAcquisition.title}</h3>
@@ -360,22 +354,20 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                       </div>
                     </div>
 
-                    {/* Gráfico de Barras Aprimorado */}
+                    {/* NOVO: Gráfico de Cascata (Waterfall Chart) */}
                     <div className="bg-white rounded-xl p-6 border shadow-sm">
-                      <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Fluxo Mensal Detalhado</h4>
+                      <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Fluxo Mensal de Caixa</h4>
                       <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                        <BarChart data={waterfallData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                          <YAxis tickFormatter={(value) => formatCurrency(value).replace('R$ ', 'R$')} tick={{ fontSize: 11 }} />
+                          <YAxis tickFormatter={(value) => formatCurrency(Math.abs(value)).replace('R$ ', 'R$')} tick={{ fontSize: 11 }} />
                           <Tooltip 
-                            formatter={(value, name) => [formatCurrency(Number(value)), name === 'entrada' ? 'Entrada' : name === 'saida' ? 'Saída' : 'Saldo']} 
+                            formatter={(value, name) => [formatCurrency(Math.abs(Number(value))), name]} 
                             labelStyle={{ color: '#334155' }}
                             contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
                           />
-                          <Bar dataKey="entrada" fill="#10B981" name="Entrada" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="saida" fill="#EF4444" name="Saída" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="net" fill="#8B5CF6" name="Saldo" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="valor" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -394,9 +386,9 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             )}
           </TabsContent>
 
-          <TabsContent value="investment" className="p-8 space-y-8">
+          <TabsContent value="investment" className="space-y-8">
             <div className="flex items-center gap-2 mb-6">
-              <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-sm px-3 py-1">
+              <Badge className="bg-purple-100 text-purple-800 text-sm px-3 py-1 border-0">
                 Cenário 3
               </Badge>
               <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.appliedCredit.title}</h3>
@@ -417,43 +409,21 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Controles e Métricas */}
               <div className="space-y-6">
-                <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border">
-                  <Label className="text-base font-semibold text-slate-700 mb-3 block">Configurar Taxa de Retorno</Label>
-                  <div className="flex gap-4 items-end">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4">
-                        <Input
-                          type="number"
-                          value={investmentReturn}
-                          onChange={(e) => setInvestmentReturn(Number(e.target.value))}
-                          className="w-24 h-12 text-lg font-semibold text-center"
-                          min="0"
-                          max="50"
-                          step="0.1"
-                        />
-                        <span className="text-lg font-medium text-slate-600">%</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant={returnPeriod === 'monthly' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setReturnPeriod('monthly')}
-                        className="px-4"
-                      >
-                        a.m.
-                      </Button>
-                      <Button
-                        variant={returnPeriod === 'yearly' ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setReturnPeriod('yearly')}
-                        className="px-4"
-                      >
-                        a.a.
-                      </Button>
-                    </div>
+                <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
+                  <Label className="text-base font-semibold text-slate-700 mb-3 block">Taxa de Retorno Anual</Label>
+                  <div className="flex gap-4 items-center">
+                    <Input
+                      type="number"
+                      value={investmentReturn}
+                      onChange={(e) => setInvestmentReturn(Number(e.target.value))}
+                      className="w-24 h-12 text-lg font-semibold text-center border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      min="0"
+                      max="50"
+                      step="0.1"
+                    />
+                    <span className="text-lg font-medium text-slate-600">% a.a.</span>
                   </div>
-                  <p className="text-sm text-slate-500 mt-2">Ajuste a taxa de retorno e o período para ver o impacto no investimento</p>
+                  <p className="text-sm text-slate-500 mt-2">Ajuste a taxa de retorno anual para ver o impacto no investimento</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -464,7 +434,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                   </div>
                   <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
                     <p className="text-base text-green-800 font-semibold mb-2">Taxa de Retorno</p>
-                    <p className="text-2xl font-bold text-green-900">{formatPercentage(investmentReturn)} {returnPeriod === 'yearly' ? 'a.a.' : 'a.m.'}</p>
+                    <p className="text-2xl font-bold text-green-900">{formatPercentage(investmentReturn)} a.a.</p>
                     <p className="text-sm text-green-700 mt-1">Por {dynamicInvestment.monthsToApply} meses</p>
                   </div>
                 </div>
@@ -480,7 +450,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                   </div>
                 </div>
 
-                {/* Gráfico de Pizza para Composição do Investimento */}
+                {/* NOVO: Gráfico de Pizza para Composição do Investimento */}
                 <div className="bg-white rounded-xl p-6 border shadow-sm">
                   <h4 className="text-lg font-bold text-slate-900 mb-4 text-center">Composição do Valor Final</h4>
                   <ResponsiveContainer width="100%" height={200}>

@@ -43,7 +43,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     anticipatedTaxRate = 0.5
   } = input;
   
-  // NOVO MODELO DE CÁLCULO EMBRACON:
+  // MODELO DE CÁLCULO EMBRACON CORRIGIDO:
   // 1. Fundo Comum Mensal = Valor do Crédito / Prazo
   const commonFundMonthly = creditValue / installments;
   
@@ -123,7 +123,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   // Calcular métricas financeiras
   const demonstrativeRate = calculateDemonstrativeRate(adminRate, reserveFundRate, installments);
   
-  // Preparar fluxo de pagamentos para CET (CORRIGIDO)
+  // Preparar fluxo de pagamentos para CET (CORRIGIDO PARA IRR)
   const monthlyPayments: number[] = [];
   for (let i = 0; i < installmentsWithAnticipatedTax; i++) {
     monthlyPayments.push(monthlyPaymentWithAnticipatedTax);

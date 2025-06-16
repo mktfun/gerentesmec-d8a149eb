@@ -56,7 +56,7 @@
     min-height: 100vh;
   }
   
-  /* Clean input focus styles */
+  /* DESIGN SYSTEM UNIFICADO - Sem cores aleatórias */
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
@@ -65,13 +65,19 @@
     border-color: rgb(59, 130, 246) !important;
   }
   
-  /* Clean Switch styles */
+  /* Switch consistente */
   [data-state="checked"] {
     background-color: rgb(59, 130, 246) !important;
   }
   
   [data-state="unchecked"] {
     background-color: rgb(156, 163, 175) !important;
+  }
+  
+  /* Botões consistentes */
+  button:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
   }
 }
 
@@ -92,7 +98,7 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.06);
   }
 
-  /* Clean, consistent badge system */
+  /* Sistema de badges limpo e consistente */
   .badge-blue {
     @apply bg-blue-50 text-blue-800 border-blue-200;
   }
@@ -117,7 +123,7 @@
     @apply bg-yellow-50 text-yellow-800 border-yellow-200;
   }
 
-  /* Clean text colors */
+  /* Cores de texto consistentes */
   .text-primary-dark {
     @apply text-gray-900;
   }

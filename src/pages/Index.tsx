@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Calculator, TrendingUp, DollarSign, Home, CreditCard } from 'lucide-react';
+import { Calculator, TrendingUp, DollarSign, Home } from 'lucide-react';
 import { SimulatorForm } from '@/components/SimulatorForm';
 import { ResultsDisplay } from '@/components/ResultsDisplay';
 import { ScenariosSection } from '@/components/ScenariosSection';
@@ -93,12 +93,12 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-12 animate-fade-in">
-            <div className="inline-flex items-center gap-2 bg-apple-blue-50 text-apple-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
               <TrendingUp className="w-4 h-4" />
               Simulador Profissional de Consórcio
             </div>
             
-            <h1 className="text-5xl font-bold text-slate-900 mb-4 bg-gradient-to-r from-apple-blue-600 to-apple-blue-800 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold text-slate-900 mb-4 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
               Consórcio Flash Sim
             </h1>
             
@@ -109,23 +109,23 @@ const Index = () => {
 
             <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500">
               <div className="flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-apple-blue-500" />
+                <Calculator className="w-4 h-4 text-blue-500" />
                 Cálculos em Tempo Real
               </div>
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-apple-blue-500" />
+                <DollarSign className="w-4 h-4 text-blue-500" />
                 3 Cenários Completos
               </div>
               <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-apple-blue-500" />
+                <Home className="w-4 h-4 text-blue-500" />
                 Relatórios Profissionais
               </div>
             </div>
           </div>
 
-          {/* NOVO LAYOUT EM 3 SEÇÕES */}
+          {/* LAYOUT DE 3 SEÇÕES CONFORME MOCKUP */}
           
-          {/* Seção Superior: Simulador + Resumo */}
+          {/* Seção Superior: Simulador (Esquerda) + Resumo (Direita) */}
           <div className="grid lg:grid-cols-2 gap-8 mb-8">
             {/* Simulator Form */}
             <div className="animate-slide-up">
