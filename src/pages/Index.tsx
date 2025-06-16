@@ -20,6 +20,9 @@ export interface SimulationData {
   totalInvested: number;
   reducedPaymentEnabled?: boolean;
   reducedPaymentPercentage?: number;
+  creditType: 'property' | 'vehicle';
+  correctionIndex: 'INCC' | 'IPCA';
+  financingRate?: number;
   scenarios: {
     quotaSale: {
       title: string;
@@ -28,12 +31,19 @@ export interface SimulationData {
       profitPercentage: number;
       agio: number;
     };
-    propertyAcquisition: {
+    propertyAcquisition?: {
       title: string;
       propertyValue: number;
       monthlyRental: number;
       postContemplationPayment: number;
       netMonthlyReturn: number;
+    };
+    financingComparison?: {
+      title: string;
+      consortiumTotalCost: number;
+      financingTotalCost: number;
+      savings: number;
+      savingsPercentage: number;
     };
     appliedCredit: {
       title: string;

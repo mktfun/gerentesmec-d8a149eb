@@ -1,7 +1,7 @@
-
 import { SimulationData } from '@/pages/Index';
 
 interface CalculationInput {
+  creditType: 'property' | 'vehicle';
   creditValue: number;
   installments: number;
   contemplationTime: number;
@@ -13,10 +13,18 @@ interface CalculationInput {
   bidDiscountType?: 'reduceTerm' | 'reducePayment';
   reducedPaymentEnabled?: boolean;
   reducedPaymentPercentage?: number;
+  financingRate?: number;
 }
+
+// Função para calcular financiamento pela Tabela Price
+const calculateFinancingCost = (principal: number, monthlyRate: number, months: number): number => {
+  const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+  return monthlyPayment * months;
+};
 
 export const calculateSimulation = (input: CalculationInput): SimulationData => {
   const { 
+    creditType,
     creditValue, 
     installments, 
     contemplationTime, 
@@ -27,7 +35,8 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     ownResourcesBidPercentage = 0,
     bidDiscountType = 'reducePayment',
     reducedPaymentEnabled = false,
-    reducedPaymentPercentage = 50
+    reducedPaymentPercentage = 50,
+    financingRate = 0
   } = input;
   
   // Cálculo da parcela usando as taxas específicas
@@ -86,46 +95,26 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   // Total investido até a contemplação (CORRIGIDO)
   const totalInvested = actualMonthlyPayment * contemplationTime;
   
-  // Cenário 1: Venda da Cota (FÓRMULA CORRIGIDA)
-  const quotaSaleAgio = 15; // 15% de ágio
-  // Lucro Líquido = Apenas o ágio como lucro (CORRIGIDO)
+  // Definir índice de correção baseado no tipo de crédito
+  const correctionIndex = creditType === 'property' ? 'INCC' : 'IPCA';
+  const correctionRate = creditType === 'property' ? 0.06 : 0.05; // 6% INCC, 5% IPCA
+  
+  // Cenário 1: Venda da Cota (mesmo para ambos os tipos)
+  const quotaSaleAgio = 15;
   const quotaSaleProfit = creditValue * (quotaSaleAgio / 100);
-  // Retorno Total = Total Investido + Lucro Líquido (CORRIGIDO)
   const quotaSaleValue = totalInvested + quotaSaleProfit;
   const quotaSaleProfitPercentage = (quotaSaleProfit / totalInvested) * 100;
   
-  // Cenário 2: Aquisição de Imóvel (usa crédito disponível)
-  const propertyValue = availableCredit * 1.06; // Crédito disponível corrigido por valorização de 6%
-  const rentalRate = 0.01; // 1% ao mês sobre o valor do imóvel
-  const monthlyRental = propertyValue * rentalRate;
-  const netMonthlyReturn = monthlyRental - postContemplationPayment;
+  let scenarios: SimulationData['scenarios'];
   
-  // Cenário 3: Crédito Aplicado (usa crédito disponível)
-  const appliedValue = availableCredit * 1.06; // Valor disponível corrigido aplicado
-  const investmentReturn = 12; // 12% a.a.
-  const monthsToApply = finalTerm; // Prazo restante após contemplação
-  const yearsToApply = monthsToApply / 12;
-  // Fórmula de juros compostos: FV = PV * (1 + r)^n
-  const finalInvestmentValue = appliedValue * Math.pow(1 + (investmentReturn / 100), yearsToApply);
-  // Lucro Total = Valor Final - Valor Aplicado (FÓRMULA CORRIGIDA)
-  const totalInvestmentProfit = finalInvestmentValue - appliedValue;
-  
-  return {
-    creditValue,
-    installments,
-    contemplationTime,
-    monthlyPayment: actualMonthlyPayment,
-    postContemplationPayment,
-    finalTerm,
-    bidValue,
-    embeddedBidValue,
-    ownResourcesBidValue,
-    availableCredit,
-    totalPaid,
-    totalInvested,
-    reducedPaymentEnabled,
-    reducedPaymentPercentage,
-    scenarios: {
+  if (creditType === 'property') {
+    // Cenário 2: Aquisição de Imóvel
+    const propertyValue = availableCredit * (1 + correctionRate);
+    const rentalRate = 0.01;
+    const monthlyRental = propertyValue * rentalRate;
+    const netMonthlyReturn = monthlyRental - postContemplationPayment;
+    
+    scenarios = {
       quotaSale: {
         title: "Venda da Cota na Contemplação",
         totalReturn: quotaSaleValue,
@@ -142,12 +131,66 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
       },
       appliedCredit: {
         title: "Crédito Aplicado em Investimentos",
-        appliedValue,
-        investmentReturn,
-        finalValue: finalInvestmentValue,
-        totalProfit: totalInvestmentProfit,
-        monthsToApply
+        appliedValue: availableCredit * (1 + correctionRate),
+        investmentReturn: 12,
+        finalValue: availableCredit * (1 + correctionRate) * Math.pow(1.12, finalTerm / 12),
+        totalProfit: (availableCredit * (1 + correctionRate) * Math.pow(1.12, finalTerm / 12)) - (availableCredit * (1 + correctionRate)),
+        monthsToApply: finalTerm
       }
-    }
+    };
+  } else {
+    // Cenário 2: Comparativo vs. Financiamento
+    const correctedCredit = availableCredit * (1 + correctionRate);
+    const monthlyFinancingRate = financingRate / 100;
+    const financingTotalCost = calculateFinancingCost(correctedCredit, monthlyFinancingRate, finalTerm);
+    const consortiumTotalCost = totalPaid;
+    const savings = financingTotalCost - consortiumTotalCost;
+    const savingsPercentage = (savings / financingTotalCost) * 100;
+    
+    scenarios = {
+      quotaSale: {
+        title: "Venda da Cota na Contemplação",
+        totalReturn: quotaSaleValue,
+        profit: quotaSaleProfit,
+        profitPercentage: quotaSaleProfitPercentage,
+        agio: quotaSaleAgio
+      },
+      financingComparison: {
+        title: "Comparativo: Consórcio vs. Financiamento",
+        consortiumTotalCost,
+        financingTotalCost,
+        savings,
+        savingsPercentage
+      },
+      appliedCredit: {
+        title: "Crédito Aplicado em Investimentos",
+        appliedValue: correctedCredit,
+        investmentReturn: 12,
+        finalValue: correctedCredit * Math.pow(1.12, finalTerm / 12),
+        totalProfit: (correctedCredit * Math.pow(1.12, finalTerm / 12)) - correctedCredit,
+        monthsToApply: finalTerm
+      }
+    };
+  }
+  
+  return {
+    creditType,
+    correctionIndex,
+    financingRate,
+    creditValue,
+    installments,
+    contemplationTime,
+    monthlyPayment: actualMonthlyPayment,
+    postContemplationPayment,
+    finalTerm,
+    bidValue,
+    embeddedBidValue,
+    ownResourcesBidValue,
+    availableCredit,
+    totalPaid,
+    totalInvested,
+    reducedPaymentEnabled,
+    reducedPaymentPercentage,
+    scenarios
   };
 };

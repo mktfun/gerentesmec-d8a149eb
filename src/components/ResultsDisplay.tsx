@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download, Target, Percent } from 'lucide-react';
+import { TrendingUp, Home, DollarSign, PiggyBank, FileText, Download, Target, Percent, Car, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SimulationData } from '@/pages/Index';
 import { formatCurrency } from '@/utils/formatters';
@@ -104,6 +104,7 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
   const hasBid = data.bidValue > 0;
   const hasReducedPayment = data.reducedPaymentEnabled;
   const hasEmbeddedBid = data.embeddedBidValue > 0;
+  const isVehicle = data.creditType === 'vehicle';
 
   return (
     <div className="space-y-6">
@@ -112,11 +113,13 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
+              {isVehicle ? <Car className="w-5 h-5 text-white" /> : <Home className="w-5 h-5 text-white" />}
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900">Resumo da Simulação</h3>
-              <p className="text-sm text-slate-500">Dados principais calculados</p>
+              <p className="text-sm text-slate-500">
+                Consórcio de {isVehicle ? 'Veículo' : 'Imóvel'} • Correção: {data.correctionIndex}
+              </p>
             </div>
           </div>
           <Button
@@ -191,9 +194,9 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
               <DollarSign className="w-4 h-4" />
               Venda da Cota
             </TabsTrigger>
-            <TabsTrigger value="property" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-              <Home className="w-4 h-4" />
-              Imóvel
+            <TabsTrigger value="scenario2" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              {isVehicle ? <Calculator className="w-4 h-4" /> : <Home className="w-4 h-4" />}
+              {isVehicle ? 'Comparativo' : 'Imóvel'}
             </TabsTrigger>
             <TabsTrigger value="investment" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <PiggyBank className="w-4 h-4" />
@@ -244,49 +247,100 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
             </div>
           </TabsContent>
 
-          <TabsContent value="property" className="p-6 space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                Cenário 2
-              </Badge>
-              <h3 className="text-xl font-bold text-slate-900">{data.scenarios.propertyAcquisition.title}</h3>
-              {hasBid && (
-                <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
-                  <Target className="w-3 h-3 mr-1" />
-                  Com Lance
-                </Badge>
-              )}
-              {hasReducedPayment && (
-                <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                  <Percent className="w-3 h-3 mr-1" />
-                  Parcela Reduzida
-                </Badge>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                <p className="text-sm text-blue-900 font-medium mb-1">Valor do Imóvel</p>
-                <p className="text-xl font-bold text-blue-900">{formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}</p>
-                <p className="text-xs text-blue-700 mt-1">{hasEmbeddedBid ? 'Crédito Disponível Corrigido' : 'Crédito Corrigido'}</p>
-              </div>
-              <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-                <p className="text-sm text-green-900 font-medium mb-1">Valor da Locação</p>
-                <p className="text-xl font-bold text-green-900">{formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}</p>
-                <p className="text-xs text-green-700 mt-1">1% ao mês</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
-                <p className="text-sm text-orange-900 font-medium mb-1">Parcela Pós-Contemplação</p>
-                <p className="text-xl font-bold text-orange-900">{formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}</p>
-              </div>
-              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-                <p className="text-sm text-purple-900 font-medium mb-1">Retorno Mensal Líquido</p>
-                <p className="text-xl font-bold text-purple-900">{formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}</p>
-              </div>
-            </div>
+          <TabsContent value="scenario2" className="p-6 space-y-4">
+            {isVehicle && data.scenarios.financingComparison ? (
+              // Cenário de Comparativo para Veículo
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    Cenário 2
+                  </Badge>
+                  <h3 className="text-xl font-bold text-slate-900">{data.scenarios.financingComparison.title}</h3>
+                  {hasBid && (
+                    <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
+                      <Target className="w-3 h-3 mr-1" />
+                      Com Lance
+                    </Badge>
+                  )}
+                  {hasReducedPayment && (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                      <Percent className="w-3 h-3 mr-1" />
+                      Parcela Reduzida
+                    </Badge>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                    <p className="text-sm text-blue-900 font-medium mb-1">Custo Total do Consórcio</p>
+                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(data.scenarios.financingComparison.consortiumTotalCost)}</p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
+                    <p className="text-sm text-red-900 font-medium mb-1">Custo Total do Financiamento</p>
+                    <p className="text-2xl font-bold text-red-900">{formatCurrency(data.scenarios.financingComparison.financingTotalCost)}</p>
+                    <p className="text-xs text-red-700 mt-1">Taxa: {data.financingRate}% a.m.</p>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
+                  <div className="text-center">
+                    <p className="text-sm text-green-900 font-medium mb-2">💰 Economia com Consórcio</p>
+                    <p className="text-3xl font-bold text-green-900 mb-1">{formatCurrency(data.scenarios.financingComparison.savings)}</p>
+                    <p className="text-lg font-semibold text-green-700">
+                      {data.scenarios.financingComparison.savingsPercentage.toFixed(1)}% de economia
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              // Cenário de Imóvel (código existente)
+              data.scenarios.propertyAcquisition && (
+                <>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      Cenário 2
+                    </Badge>
+                    <h3 className="text-xl font-bold text-slate-900">{data.scenarios.propertyAcquisition.title}</h3>
+                    {hasBid && (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
+                        <Target className="w-3 h-3 mr-1" />
+                        Com Lance
+                      </Badge>
+                    )}
+                    {hasReducedPayment && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                        <Percent className="w-3 h-3 mr-1" />
+                        Parcela Reduzida
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                      <p className="text-sm text-blue-900 font-medium mb-1">Valor do Imóvel</p>
+                      <p className="text-xl font-bold text-blue-900">{formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}</p>
+                      <p className="text-xs text-blue-700 mt-1">{hasEmbeddedBid ? 'Crédito Disponível Corrigido' : 'Crédito Corrigido'}</p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                      <p className="text-sm text-green-900 font-medium mb-1">Valor da Locação</p>
+                      <p className="text-xl font-bold text-green-900">{formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}</p>
+                      <p className="text-xs text-green-700 mt-1">1% ao mês</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
+                      <p className="text-sm text-orange-900 font-medium mb-1">Parcela Pós-Contemplação</p>
+                      <p className="text-xl font-bold text-orange-900">{formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}</p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                      <p className="text-sm text-purple-900 font-medium mb-1">Retorno Mensal Líquido</p>
+                      <p className="text-xl font-bold text-purple-900">{formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}</p>
+                    </div>
+                  </div>
+                </>
+              )
+            )}
           </TabsContent>
 
           <TabsContent value="investment" className="p-6 space-y-4">

@@ -49,6 +49,7 @@ function parseBRLInputToNumber(value: string): number {
 
 export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: SimulatorFormProps) => {
   const [formData, setFormData] = useState({
+    creditType: 'property',
     creditValue: '',
     installments: '',
     contemplationTime: '',
@@ -59,7 +60,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     ownResourcesBidPercentage: '',
     bidDiscountType: 'reducePayment',
     reducedPaymentEnabled: false,
-    reducedPaymentPercentage: '50'
+    reducedPaymentPercentage: '50',
+    financingRate: '2.5'
   });
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -89,13 +91,19 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     const embeddedBidPercentage = parseFloat(formData.embeddedBidPercentage) || 0;
     const ownResourcesBidPercentage = parseFloat(formData.ownResourcesBidPercentage) || 0;
     const reducedPaymentPercentage = parseFloat(formData.reducedPaymentPercentage);
+    const financingRate = parseFloat(formData.financingRate);
 
     if (!creditValue || !installments || !contemplationTime || 
         isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate)) {
       return;
     }
 
+    if (formData.creditType === 'vehicle' && isNaN(financingRate)) {
+      return;
+    }
+
     const simulationData = calculateSimulation({
+      creditType: formData.creditType as 'property' | 'vehicle',
       creditValue,
       installments,
       contemplationTime,
@@ -106,14 +114,16 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
       ownResourcesBidPercentage,
       bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment',
       reducedPaymentEnabled: formData.reducedPaymentEnabled,
-      reducedPaymentPercentage
+      reducedPaymentPercentage,
+      financingRate: formData.creditType === 'vehicle' ? financingRate : undefined
     });
 
     onSimulate(simulationData);
   };
 
   const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime &&
-                     formData.adminRate && formData.reserveFundRate && formData.insuranceRate;
+                     formData.adminRate && formData.reserveFundRate && formData.insuranceRate &&
+                     (formData.creditType === 'property' || (formData.creditType === 'vehicle' && formData.financingRate));
 
   const hasBid = (parseFloat(formData.embeddedBidPercentage) || 0) + (parseFloat(formData.ownResourcesBidPercentage) || 0) > 0;
 
@@ -130,6 +140,34 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Seletor de Tipo de Crédito */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-slate-700">
+            Tipo de Crédito
+          </Label>
+          <RadioGroup
+            value={formData.creditType}
+            onValueChange={(value) => handleInputChange('creditType', value)}
+            className="flex flex-row gap-6"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="property" id="property" />
+              <Label htmlFor="property" className="text-sm cursor-pointer flex items-center gap-2">
+                🏠 Imóvel
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="vehicle" id="vehicle" />
+              <Label htmlFor="vehicle" className="text-sm cursor-pointer flex items-center gap-2">
+                🚗 Veículo
+              </Label>
+            </div>
+          </RadioGroup>
+          <p className="text-xs text-slate-500">
+            Índice de correção: {formData.creditType === 'property' ? 'INCC' : 'IPCA'}
+          </p>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="creditValue" className="text-sm font-medium text-slate-700">
             Valor do Crédito
@@ -179,6 +217,26 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
             />
           </div>
         </div>
+
+        {/* Taxa de Financiamento (apenas para veículo) */}
+        {formData.creditType === 'vehicle' && (
+          <div className="space-y-2">
+            <Label htmlFor="financingRate" className="text-sm font-medium text-slate-700">
+              Taxa de Juros do Financiamento (% a.m.)
+            </Label>
+            <Input
+              id="financingRate"
+              type="number"
+              placeholder="2.5"
+              value={formData.financingRate}
+              onChange={(e) => handleInputChange('financingRate', e.target.value)}
+              className="h-12 text-lg font-medium glass-button border-slate-200 focus:border-apple-blue-500 focus:ring-apple-blue-500/20"
+              min="0.1"
+              max="10"
+              step="0.1"
+            />
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="border-t border-slate-200 pt-4">
