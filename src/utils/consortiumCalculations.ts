@@ -10,13 +10,13 @@ interface CalculationInput {
   adminRate: number;
   reserveFundRate: number;
   insuranceRate: number;
-  anticipatedTaxRate: number;
   embeddedBidPercentage?: number;
   ownResourcesBidPercentage?: number;
   bidDiscountType?: 'reduceTerm' | 'reducePayment';
   reducedPaymentEnabled?: boolean;
   reducedPaymentPercentage?: number;
   financingRate?: number;
+  anticipatedTaxRate?: number;
 }
 
 // Função para calcular financiamento pela Tabela Price
@@ -34,16 +34,16 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     adminRate, 
     reserveFundRate, 
     insuranceRate,
-    anticipatedTaxRate,
     embeddedBidPercentage = 0,
     ownResourcesBidPercentage = 0,
     bidDiscountType = 'reducePayment',
     reducedPaymentEnabled = false,
     reducedPaymentPercentage = 50,
-    financingRate = 0
+    financingRate = 0,
+    anticipatedTaxRate = 0.5
   } = input;
   
-  // MODELO EMBRACON CORRIGIDO PARA ALINHAR EXATAMENTE COM PDF:
+  // MODELO DE CÁLCULO EMBRACON CORRIGIDO:
   // 1. Fundo Comum Mensal = Valor do Crédito / Prazo
   const commonFundMonthly = creditValue / installments;
   
@@ -56,12 +56,12 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   // 4. Seguro de Vida Mensal = (Valor do Crédito * Seguro %) / Prazo
   const insuranceMonthly = (creditValue * (insuranceRate / 100)) / installments;
   
-  // 5. Taxa Antecipada: Valor total distribuído nas primeiras 12 parcelas
-  const anticipatedTaxTotal = creditValue * (anticipatedTaxRate / 100);
-  const anticipatedTaxPerInstallment = anticipatedTaxTotal / Math.min(12, installments);
+  // 5. Taxa Antecipada (aplicada apenas nas primeiras 12 parcelas)
+  const anticipatedTaxValue = creditValue * (anticipatedTaxRate / 100);
+  const anticipatedTaxPerInstallment = anticipatedTaxValue / Math.min(12, installments);
   
-  // PARCELA BASE (sem taxa antecipada)
-  const baseMonthlyPayment = commonFundMonthly + adminTaxMonthly + reserveFundMonthly + insuranceMonthly;
+  // Parcela base = soma de todos os componentes EXCETO taxa antecipada
+  let baseMonthlyPayment = commonFundMonthly + adminTaxMonthly + reserveFundMonthly + insuranceMonthly;
   
   // Aplicar parcela reduzida APENAS sobre o Fundo Comum
   let actualCommonFund = commonFundMonthly;
@@ -73,11 +73,11 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     compensationAmount = unpaidAmount * contemplationTime;
   }
   
-  // PARCELA PRÉ-CONTEMPLAÇÃO
-  const preContemplationPayment = actualCommonFund + adminTaxMonthly + reserveFundMonthly + insuranceMonthly;
+  // Parcela real = Fundo Comum (possivelmente reduzido) + outras taxas
+  const actualMonthlyPayment = actualCommonFund + adminTaxMonthly + reserveFundMonthly + insuranceMonthly;
   
-  // PARCELA COM TAXA ANTECIPADA (primeiras 12 parcelas)
-  const monthlyPaymentWithAnticipatedTax = preContemplationPayment + anticipatedTaxPerInstallment;
+  // Parcela com taxa antecipada (primeiras 12 parcelas)
+  const monthlyPaymentWithAnticipatedTax = actualMonthlyPayment + anticipatedTaxPerInstallment;
   
   // Cálculos de lance
   const embeddedBidValue = creditValue * (embeddedBidPercentage / 100);
@@ -89,7 +89,6 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   
   const remainingInstallments = installments - contemplationTime;
   
-  // CÁLCULO PÓS-CONTEMPLAÇÃO
   let postContemplationPayment = baseMonthlyPayment;
   let finalTerm = remainingInstallments;
   
@@ -105,48 +104,38 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     }
   }
   
-  // Adicionar compensação da parcela reduzida
-  if (reducedPaymentEnabled && compensationAmount > 0) {
+  // Compensação da parcela reduzida
+  if (reducedPaymentEnabled) {
     postContemplationPayment += compensationAmount / finalTerm;
   }
   
-  // TOTAL PAGO - Cálculo corrigido
+  // Calcular total pago considerando taxa antecipada
   const installmentsWithAnticipatedTax = Math.min(12, contemplationTime);
-  const remainingPreContemplation = Math.max(0, contemplationTime - installmentsWithAnticipatedTax);
-  
-  const totalPaidWithAnticipatedTax = 
-    (monthlyPaymentWithAnticipatedTax * installmentsWithAnticipatedTax) + 
-    (preContemplationPayment * remainingPreContemplation) +
-    (postContemplationPayment * finalTerm) + 
-    ownResourcesBidValue;
+  const totalPaidWithAnticipatedTax = (monthlyPaymentWithAnticipatedTax * installmentsWithAnticipatedTax) + 
+                                     (actualMonthlyPayment * (contemplationTime - installmentsWithAnticipatedTax)) +
+                                     (postContemplationPayment * finalTerm) + 
+                                     ownResourcesBidValue;
   
   // Total investido até a contemplação
-  const totalInvested = 
-    (monthlyPaymentWithAnticipatedTax * installmentsWithAnticipatedTax) + 
-    (preContemplationPayment * remainingPreContemplation);
+  const totalInvested = (monthlyPaymentWithAnticipatedTax * installmentsWithAnticipatedTax) + 
+                       (actualMonthlyPayment * (contemplationTime - installmentsWithAnticipatedTax));
   
   // Calcular métricas financeiras
   const demonstrativeRate = calculateDemonstrativeRate(adminRate, reserveFundRate, installments);
   
-  // Preparar fluxo de pagamentos para CET
+  // Preparar fluxo de pagamentos para CET (CORRIGIDO PARA IRR)
   const monthlyPayments: number[] = [];
-  
-  // Adicionar parcelas com taxa antecipada
   for (let i = 0; i < installmentsWithAnticipatedTax; i++) {
     monthlyPayments.push(monthlyPaymentWithAnticipatedTax);
   }
-  
-  // Adicionar parcelas pré-contemplação restantes
-  for (let i = 0; i < remainingPreContemplation; i++) {
-    monthlyPayments.push(preContemplationPayment);
+  for (let i = installmentsWithAnticipatedTax; i < contemplationTime; i++) {
+    monthlyPayments.push(actualMonthlyPayment);
   }
-  
-  // Adicionar parcelas pós-contemplação
   for (let i = 0; i < finalTerm; i++) {
     monthlyPayments.push(postContemplationPayment);
   }
   
-  const cet = calculateCET(creditValue, monthlyPayments, anticipatedTaxTotal);
+  const cet = calculateCET(creditValue, monthlyPayments, anticipatedTaxValue);
   
   // Definir índice de correção baseado no tipo de crédito
   const correctionIndex = creditType === 'property' ? 'INCC' : 'IPCA';
@@ -231,7 +220,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     creditValue,
     installments,
     contemplationTime,
-    monthlyPayment: preContemplationPayment,
+    monthlyPayment: actualMonthlyPayment,
     monthlyPaymentWithAnticipatedTax,
     postContemplationPayment,
     finalTerm,
@@ -243,7 +232,7 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
     totalInvested,
     reducedPaymentEnabled,
     reducedPaymentPercentage,
-    anticipatedTaxValue: anticipatedTaxTotal,
+    anticipatedTaxValue,
     demonstrativeRate,
     cet,
     scenarios

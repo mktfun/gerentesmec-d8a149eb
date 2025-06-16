@@ -1,387 +1,522 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TrendingUp, DollarSign, Home } from 'lucide-react';
+import { DollarSign, Home, Calculator, PiggyBank, Target, Percent, TrendingUp } from 'lucide-react';
 import { SimulationData } from '@/pages/Index';
-import { formatPercentage } from '@/utils/financialMetrics';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Cell,
-  ReferenceLine
-} from 'recharts';
+import { formatCurrency } from '@/utils/formatters';
+import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface ScenariosSectionProps {
-  data: SimulationData;
+  data: SimulationData | null;
   isLoading: boolean;
 }
 
 export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => {
-  const [quotaSaleAgio, setQuotaSaleAgio] = useState(15);
+  const [agioPercentage, setAgioPercentage] = useState(15);
   const [investmentReturn, setInvestmentReturn] = useState(12);
 
-  if (isLoading) {
-    return (
-      <Card className="p-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded mb-6"></div>
-          <div className="space-y-4">
-            <div className="h-32 bg-gray-200 rounded"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </Card>
-    );
-  }
+  // Reset interactive values when new simulation data arrives
+  useEffect(() => {
+    if (data) {
+      setAgioPercentage(data.scenarios.quotaSale.agio);
+      setInvestmentReturn(data.scenarios.appliedCredit.investmentReturn);
+    }
+  }, [data]);
 
-  if (!data) {
-    return (
-      <Card className="p-8 text-center">
-        <p className="text-gray-500">Execute uma simulação para ver os cenários de análise</p>
-      </Card>
-    );
-  }
+  if (!data) return null;
 
-  // Recalcular cenário 1 com ágio dinâmico
-  const quotaSaleProfit = data.totalInvested * (quotaSaleAgio / 100);
-  const quotaSaleValue = data.totalInvested + quotaSaleProfit;
-  const quotaSaleProfitPercentage = (quotaSaleProfit / data.totalInvested) * 100;
+  // Calculate dynamic values based on interactive inputs
+  const calculateDynamicQuotaSale = () => {
+    const profit = data.totalInvested * (agioPercentage / 100);
+    const totalReturn = data.totalInvested + profit;
+    const profitPercentage = (profit / data.totalInvested) * 100;
+    
+    return {
+      profit,
+      totalReturn,
+      profitPercentage,
+      agio: agioPercentage
+    };
+  };
 
-  // Recalcular cenário 3 FIXADO EM TAXA ANUAL
-  const appliedValue = data.availableCredit * (data.creditType === 'property' ? 1.06 : 1.05);
-  const annualReturn = investmentReturn / 100;
-  const yearsToApply = data.finalTerm / 12;
-  const finalValue = appliedValue * Math.pow(1 + annualReturn, yearsToApply);
-  const totalProfit = finalValue - appliedValue;
+  const calculateDynamicInvestment = () => {
+    const annualRate = investmentReturn / 100;
+    const appliedValue = data.availableCredit * (1 + (data.creditType === 'property' ? 0.06 : 0.05));
+    const finalValue = appliedValue * Math.pow(1 + annualRate, data.finalTerm / 12);
+    const totalProfit = finalValue - appliedValue;
+    
+    return {
+      appliedValue,
+      investmentReturn,
+      finalValue,
+      totalProfit,
+      monthsToApply: data.finalTerm
+    };
+  };
 
-  // Dados para o Waterfall Chart APRIMORADO (Cenário 2)
+  const dynamicQuotaSale = calculateDynamicQuotaSale();
+  const dynamicInvestment = calculateDynamicInvestment();
+
+  const hasBid = data.bidValue > 0;
+  const hasReducedPayment = data.reducedPaymentEnabled;
+  const isVehicle = data.creditType === 'vehicle';
+
+  const formatPercentage = (value: number): string => {
+    return `${value.toFixed(2)}%`;
+  };
+
+  // Chart data configurations
+  const quotaSalePieData = [
+    { name: 'Valor Investido', value: data.totalInvested, fill: '#3B82F6' },
+    { name: 'Lucro (Ágio)', value: dynamicQuotaSale.profit, fill: '#10B981' }
+  ];
+
+  const investmentPieData = [
+    { name: 'Valor Aplicado', value: dynamicInvestment.appliedValue, fill: '#8B5CF6' },
+    { name: 'Lucro Total', value: dynamicInvestment.totalProfit, fill: '#F59E0B' }
+  ];
+
   const waterfallData = data.scenarios.propertyAcquisition ? [
-    {
-      name: 'Renda\nMensal',
-      value: data.scenarios.propertyAcquisition.monthlyRental,
-      type: 'positive',
-      cumulative: data.scenarios.propertyAcquisition.monthlyRental,
-      displayValue: data.scenarios.propertyAcquisition.monthlyRental
+    { 
+      name: 'Renda Mensal', 
+      valor: data.scenarios.propertyAcquisition.monthlyRental,
+      fill: '#10B981'
+    },
+    { 
+      name: 'Parcela', 
+      valor: -data.scenarios.propertyAcquisition.postContemplationPayment,
+      fill: '#EF4444'
     },
     {
-      name: 'Parcela\nConsórcio',
-      value: -data.scenarios.propertyAcquisition.postContemplationPayment,
-      type: 'negative',
-      cumulative: data.scenarios.propertyAcquisition.monthlyRental - data.scenarios.propertyAcquisition.postContemplationPayment,
-      displayValue: data.scenarios.propertyAcquisition.postContemplationPayment
-    },
-    {
-      name: 'Saldo\nLíquido',
-      value: data.scenarios.propertyAcquisition.netMonthlyReturn,
-      type: data.scenarios.propertyAcquisition.netMonthlyReturn >= 0 ? 'result-positive' : 'result-negative',
-      cumulative: data.scenarios.propertyAcquisition.netMonthlyReturn,
-      displayValue: Math.abs(data.scenarios.propertyAcquisition.netMonthlyReturn)
+      name: 'Saldo Líquido',
+      valor: data.scenarios.propertyAcquisition.netMonthlyReturn,
+      fill: '#8B5CF6'
     }
   ] : [];
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(Math.abs(value));
+  const generateLineChartData = () => {
+    const points = [];
+    const annualRate = investmentReturn / 100;
+    
+    const intervals = Math.min(24, Math.max(12, Math.floor(dynamicInvestment.monthsToApply / 12)));
+    const step = Math.floor(dynamicInvestment.monthsToApply / intervals);
+    
+    for (let i = 0; i <= dynamicInvestment.monthsToApply; i += step) {
+      const value = dynamicInvestment.appliedValue * Math.pow(1 + annualRate, i / 12);
+      points.push({
+        mes: i,
+        valor: value
+      });
+    }
+    return points;
   };
 
-  const CustomWaterfallTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white p-4 border border-slate-300 rounded-lg shadow-lg">
-          <p className="font-bold text-slate-900 mb-2">{label.replace('\n', ' ')}</p>
-          <p className={`text-lg font-semibold ${
-            data.type === 'positive' ? 'text-green-600' : 
-            data.type === 'negative' ? 'text-red-600' : 
-            data.type === 'result-positive' ? 'text-blue-600' : 'text-red-600'
-          }`}>
-            {data.type === 'negative' ? '-' : '+'}
-            {formatCurrency(data.displayValue)}
-          </p>
-          {data.type.includes('result') && (
-            <p className="text-xs text-slate-600 mt-1">
-              {data.type === 'result-positive' ? 'Lucro mensal' : 'Déficit mensal'}
-            </p>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
+  const lineChartData = generateLineChartData();
 
   return (
-    <Card className="bg-white backdrop-blur-sm border border-slate-300 shadow-xl p-8">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-          <TrendingUp className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Análise de Cenários</h2>
-          <p className="text-slate-700 font-medium">Compare as opções de investimento</p>
-        </div>
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">Análise de Cenários</h2>
+        <p className="text-lg text-slate-600">Explore as diferentes possibilidades de rentabilidade</p>
       </div>
 
-      <Tabs defaultValue="quotaSale" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 bg-slate-100">
-          <TabsTrigger value="quotaSale" className="flex items-center gap-2 text-slate-700 font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            <DollarSign className="w-4 h-4" />
-            Venda da Cota
-          </TabsTrigger>
-          <TabsTrigger value="property" className="flex items-center gap-2 text-slate-700 font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            <Home className="w-4 h-4" />
-            {data.creditType === 'property' ? 'Imóvel' : 'Comparativo'}
-          </TabsTrigger>
-          <TabsTrigger value="investment" className="flex items-center gap-2 text-slate-700 font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            <TrendingUp className="w-4 h-4" />
-            Investimento
-          </TabsTrigger>
-        </TabsList>
+      <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
+        <Tabs defaultValue="sale" className="w-full">
+          <TabsList className="grid grid-cols-3 w-full bg-slate-100 p-1 rounded-xl mb-8">
+            <TabsTrigger value="sale" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all">
+              <DollarSign className="w-4 h-4" />
+              Venda da Cota
+            </TabsTrigger>
+            <TabsTrigger value="scenario2" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all">
+              {isVehicle ? <Calculator className="w-4 h-4" /> : <Home className="w-4 h-4" />}
+              {isVehicle ? 'Comparativo' : 'Imóvel'}
+            </TabsTrigger>
+            <TabsTrigger value="investment" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all">
+              <TrendingUp className="w-4 h-4" />
+              Investimento
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="quotaSale">
-          <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-            <h3 className="text-xl font-bold text-green-900 mb-4">💰 Venda da Cota na Contemplação</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="quotaSaleAgio" className="text-sm font-semibold text-green-800">
-                    Ágio de Venda (%)
-                  </Label>
-                  <Input
-                    id="quotaSaleAgio"
-                    type="number"
-                    value={quotaSaleAgio}
-                    onChange={(e) => setQuotaSaleAgio(parseFloat(e.target.value) || 0)}
-                    min="0"
-                    max="50"
-                    step="0.1"
-                    className="border-green-300 focus:border-green-500 focus:ring-green-500/20"
-                  />
+          <TabsContent value="sale" className="space-y-8 animate-fade-in">
+            <div className="flex items-center gap-2 mb-6">
+              <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1 border-0">
+                Cenário 1
+              </Badge>
+              <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.quotaSale.title}</h3>
+              {hasBid && (
+                <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
+                  <Target className="w-3 h-3 mr-1" />
+                  Com Lance
+                </Badge>
+              )}
+              {hasReducedPayment && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                  <Percent className="w-3 h-3 mr-1" />
+                  Parcela Reduzida
+                </Badge>
+              )}
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
+                  <Label className="text-base font-semibold text-slate-700 mb-3 block">Configurar Ágio de Venda</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="number"
+                      value={agioPercentage}
+                      onChange={(e) => setAgioPercentage(Number(e.target.value))}
+                      className="w-24 h-12 text-lg font-semibold text-center border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      min="0"
+                      max="100"
+                      step="1"
+                    />
+                    <span className="text-lg font-medium text-slate-600">%</span>
+                  </div>
+                  <p className="text-sm text-slate-500 mt-2">Ajuste o percentual de ágio para ver o impacto nos resultados</p>
                 </div>
                 
-                <div className="bg-white/80 p-4 rounded-lg border border-green-200">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-green-700 font-medium">Total Investido:</span>
-                      <span className="font-bold text-green-900">{formatCurrency(data.totalInvested)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-green-700 font-medium">Lucro com Ágio:</span>
-                      <span className="font-bold text-green-900">{formatCurrency(quotaSaleProfit)}</span>
-                    </div>
-                    <div className="border-t border-green-200 pt-2">
-                      <div className="flex justify-between text-lg">
-                        <span className="font-bold text-green-800">Valor Total:</span>
-                        <span className="font-bold text-green-900">{formatCurrency(quotaSaleValue)}</span>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                    <p className="text-sm text-green-800 font-medium mb-2">Retorno Total</p>
+                    <p className="text-2xl font-bold text-green-900">{formatCurrency(dynamicQuotaSale.totalReturn)}</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                    <p className="text-sm text-blue-800 font-medium mb-2">Lucro Líquido</p>
+                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(dynamicQuotaSale.profit)}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                    <p className="text-sm text-purple-800 font-medium mb-2">Rentabilidade</p>
+                    <p className="text-2xl font-bold text-purple-900">{formatPercentage(dynamicQuotaSale.profitPercentage)}</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200">
+                    <p className="text-sm text-orange-800 font-medium mb-2">Ágio Aplicado</p>
+                    <p className="text-2xl font-bold text-orange-900">{formatPercentage(agioPercentage)}</p>
                   </div>
                 </div>
               </div>
-              
-              <div className="bg-white/80 p-4 rounded-lg border border-green-200">
-                <h4 className="font-bold text-green-900 mb-3">Resumo do Investimento</h4>
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-1">
-                      {formatPercentage(quotaSaleProfitPercentage)}
-                    </div>
-                    <div className="text-sm text-green-700 font-medium">Rentabilidade Total</div>
+
+              <div className="bg-white rounded-xl p-6 border shadow-sm">
+                <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Composição do Retorno</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={quotaSalePieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {quotaSalePieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex justify-center gap-6 mt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                    <span className="text-sm font-medium text-slate-700">Investido</span>
                   </div>
-                  <div className="text-center pt-2 border-t border-green-200">
-                    <div className="text-sm text-green-700">
-                      Tempo de investimento: <span className="font-semibold">{data.contemplationTime} meses</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                    <span className="text-sm font-medium text-slate-700">Lucro</span>
                   </div>
                 </div>
               </div>
             </div>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="property">
-          {data.scenarios.propertyAcquisition ? (
-            <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-              <h3 className="text-xl font-bold text-blue-900 mb-4">🏠 Aquisição de Imóvel</h3>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white/80 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-bold text-blue-900 mb-4">Dados do Imóvel</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-blue-700 font-medium">Valor do Imóvel:</span>
-                      <span className="font-bold">{formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-blue-700 font-medium">Renda Mensal (1%):</span>
-                      <span className="font-bold text-green-600">{formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-blue-700 font-medium">Parcela Consórcio:</span>
-                      <span className="font-bold text-red-600">{formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}</span>
-                    </div>
-                    <div className="border-t border-blue-200 pt-2">
-                      <div className="flex justify-between text-lg">
-                        <span className="font-bold text-blue-800">Saldo Líquido:</span>
-                        <span className={`font-bold ${data.scenarios.propertyAcquisition.netMonthlyReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}
-                        </span>
-                      </div>
-                    </div>
+            <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
+              <h4 className="text-lg font-semibold text-blue-900 mb-3">💡 Como funciona este cenário:</h4>
+              <p className="text-blue-800 leading-relaxed">
+                Neste cenário, você vende sua cota do consórcio no momento da contemplação. 
+                O ágio representa o percentual adicional que você recebe sobre o valor investido, 
+                sendo uma prática comum no mercado de consórcios contemplados.
+              </p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="scenario2" className="space-y-8 animate-fade-in">
+            {isVehicle && data.scenarios.financingComparison ? (
+              <>
+                <div className="flex items-center gap-2 mb-6">
+                  <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-1 border-0">
+                    Cenário 2
+                  </Badge>
+                  <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.financingComparison.title}</h3>
+                  {hasBid && (
+                    <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
+                      <Target className="w-3 h-3 mr-1" />
+                      Com Lance
+                    </Badge>
+                  )}
+                  {hasReducedPayment && (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                      <Percent className="w-3 h-3 mr-1" />
+                      Parcela Reduzida
+                    </Badge>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                    <p className="text-base text-blue-800 font-semibold mb-2">Custo Total do Consórcio</p>
+                    <p className="text-3xl font-bold text-blue-900">{formatCurrency(data.scenarios.financingComparison.consortiumTotalCost)}</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200">
+                    <p className="text-base text-red-800 font-semibold mb-2">Custo Total do Financiamento</p>
+                    <p className="text-3xl font-bold text-red-900">{formatCurrency(data.scenarios.financingComparison.financingTotalCost)}</p>
+                    <p className="text-sm text-red-700 mt-1">Taxa: {formatPercentage(data.financingRate || 0)} a.m.</p>
                   </div>
                 </div>
                 
-                <div className="bg-white/80 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-bold text-blue-900 mb-4">Fluxo de Caixa Mensal</h4>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={waterfallData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis 
-                        dataKey="name" 
-                        tick={{ fontSize: 11, fill: '#1e40af', fontWeight: 600 }}
-                        axisLine={{ stroke: '#3b82f6', strokeWidth: 2 }}
-                        interval={0}
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 11, fill: '#1e40af', fontWeight: 600 }}
-                        tickFormatter={(value) => `R$ ${(Math.abs(value)/1000).toFixed(0)}k`}
-                        axisLine={{ stroke: '#3b82f6', strokeWidth: 2 }}
-                      />
-                      <ReferenceLine y={0} stroke="#64748b" strokeDasharray="2 2" strokeWidth={2} />
-                      <Tooltip content={<CustomWaterfallTooltip />} />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                        {waterfallData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={
-                              entry.type === 'positive' ? '#10b981' : 
-                              entry.type === 'negative' ? '#ef4444' : 
-                              entry.type === 'result-positive' ? '#3b82f6' : '#dc2626'
-                            } 
+                <div className="p-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
+                  <div className="text-center">
+                    <p className="text-lg text-green-800 font-semibold mb-3">💰 Economia com Consórcio</p>
+                    <p className="text-4xl font-bold text-green-900 mb-2">{formatCurrency(data.scenarios.financingComparison.savings)}</p>
+                    <p className="text-xl font-bold text-green-700">
+                      {formatPercentage(data.scenarios.financingComparison.savingsPercentage)} de economia
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-3">💡 Como funciona este cenário:</h4>
+                  <p className="text-blue-800 leading-relaxed">
+                    Comparação direta entre o custo total de adquirir o veículo através do consórcio 
+                    versus um financiamento tradicional. O consórcio geralmente oferece economia significativa 
+                    por não haver juros, apenas taxas administrativas.
+                  </p>
+                </div>
+              </>
+            ) : (
+              data.scenarios.propertyAcquisition && (
+                <>
+                  <div className="flex items-center gap-2 mb-6">
+                    <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-1 border-0">
+                      Cenário 2
+                    </Badge>
+                    <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.propertyAcquisition.title}</h3>
+                    {hasBid && (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
+                        <Target className="w-3 h-3 mr-1" />
+                        Com Lance
+                      </Badge>
+                    )}
+                    {hasReducedPayment && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                        <Percent className="w-3 h-3 mr-1" />
+                        Parcela Reduzida
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="grid lg:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                          <p className="text-base text-blue-800 font-semibold mb-2">Valor do Imóvel</p>
+                          <p className="text-2xl font-bold text-blue-900">{formatCurrency(data.scenarios.propertyAcquisition.propertyValue)}</p>
+                          <p className="text-sm text-blue-700 mt-1">Crédito Corrigido</p>
+                        </div>
+                        <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+                          <p className="text-base text-green-800 font-semibold mb-2">Valor da Locação</p>
+                          <p className="text-2xl font-bold text-green-900">{formatCurrency(data.scenarios.propertyAcquisition.monthlyRental)}</p>
+                          <p className="text-sm text-green-700 mt-1">1% ao mês</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+                          <p className="text-base text-orange-800 font-semibold mb-2">Parcela Pós-Contemplação</p>
+                          <p className="text-2xl font-bold text-orange-900">{formatCurrency(data.scenarios.propertyAcquisition.postContemplationPayment)}</p>
+                        </div>
+                        <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                          <p className="text-base text-purple-800 font-semibold mb-2">Retorno Mensal Líquido</p>
+                          <p className="text-2xl font-bold text-purple-900">{formatCurrency(data.scenarios.propertyAcquisition.netMonthlyReturn)}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-6 border shadow-sm">
+                      <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Fluxo Mensal de Caixa</h4>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={waterfallData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                          <YAxis tickFormatter={(value) => formatCurrency(Math.abs(value)).replace('R$ ', 'R$')} tick={{ fontSize: 11 }} />
+                          <Tooltip 
+                            formatter={(value, name) => [formatCurrency(Math.abs(Number(value))), name]} 
+                            labelStyle={{ color: '#334155' }}
+                            contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
                           />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </Card>
-          ) : data.scenarios.financingComparison ? (
-            <Card className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-              <h3 className="text-xl font-bold text-orange-900 mb-4">🚗 Comparativo: Consórcio vs. Financiamento</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white/80 p-4 rounded-lg border border-orange-200">
-                  <h4 className="font-bold text-orange-900 mb-4">Custos Comparativos</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-orange-700 font-medium">Custo Total Consórcio:</span>
-                      <span className="font-bold">{formatCurrency(data.scenarios.financingComparison.consortiumTotalCost)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-orange-700 font-medium">Custo Total Financiamento:</span>
-                      <span className="font-bold">{formatCurrency(data.scenarios.financingComparison.financingTotalCost)}</span>
-                    </div>
-                    <div className="border-t border-orange-200 pt-2">
-                      <div className="flex justify-between text-lg">
-                        <span className="font-bold text-orange-800">Economia:</span>
-                        <span className="font-bold text-green-600">{formatCurrency(data.scenarios.financingComparison.savings)}</span>
-                      </div>
+                          <Bar dataKey="valor" radius={[4, 4, 0, 0]} fill="#8B5CF6" />
+                        </BarChart>
+                      </ResponsiveContainer>
                     </div>
                   </div>
-                </div>
-                
-                <div className="bg-white/80 p-4 rounded-lg border border-orange-200">
-                  <h4 className="font-bold text-orange-900 mb-3">Vantagem do Consórcio</h4>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-2">
-                      {formatPercentage(data.scenarios.financingComparison.savingsPercentage)}
-                    </div>
-                    <div className="text-sm text-orange-700 font-medium">Economia Total</div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ) : null}
-        </TabsContent>
 
-        <TabsContent value="investment">
-          <Card className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
-            <h3 className="text-xl font-bold text-purple-900 mb-4">📈 Crédito Aplicado em Investimentos</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="investmentReturn" className="text-sm font-semibold text-purple-800">
-                    Taxa de Retorno Anual (%)
-                  </Label>
-                  <Input
-                    id="investmentReturn"
-                    type="number"
-                    value={investmentReturn}
-                    onChange={(e) => setInvestmentReturn(parseFloat(e.target.value) || 0)}
-                    min="0"
-                    max="50"
-                    step="0.1"
-                    className="border-purple-300 focus:border-purple-500 focus:ring-purple-500/20"
-                  />
+                  <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
+                    <h4 className="text-lg font-semibold text-blue-900 mb-3">💡 Como funciona este cenário:</h4>
+                    <p className="text-blue-800 leading-relaxed">
+                      Você usa o crédito contemplado para adquirir um imóvel e o coloca para locação. 
+                      A renda do aluguel (1% do valor do imóvel) ajuda a pagar a parcela restante do consórcio, 
+                      gerando um fluxo de caixa positivo mensal.
+                    </p>
+                  </div>
+                </>
+              )
+            )}
+          </TabsContent>
+
+          <TabsContent value="investment" className="space-y-8 animate-fade-in">
+            <div className="flex items-center gap-2 mb-6">
+              <Badge className="bg-purple-100 text-purple-800 text-sm px-3 py-1 border-0">
+                Cenário 3
+              </Badge>
+              <h3 className="text-2xl font-bold text-slate-900">{data.scenarios.appliedCredit.title}</h3>
+              {hasBid && (
+                <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200">
+                  <Target className="w-3 h-3 mr-1" />
+                  Com Lance
+                </Badge>
+              )}
+              {hasReducedPayment && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                  <Percent className="w-3 h-3 mr-1" />
+                  Parcela Reduzida
+                </Badge>
+              )}
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
+                  <Label className="text-base font-semibold text-slate-700 mb-3 block">Taxa de Retorno Anual</Label>
+                  <div className="flex gap-4 items-center">
+                    <Input
+                      type="number"
+                      value={investmentReturn}
+                      onChange={(e) => setInvestmentReturn(Number(e.target.value))}
+                      className="w-24 h-12 text-lg font-semibold text-center border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      min="0"
+                      max="50"
+                      step="0.1"
+                    />
+                    <span className="text-lg font-medium text-slate-600">% a.a.</span>
+                  </div>
+                  <p className="text-sm text-slate-500 mt-2">Ajuste a taxa de retorno anual para ver o impacto no investimento</p>
                 </div>
                 
-                <div className="bg-white/80 p-4 rounded-lg border border-purple-200">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-purple-700 font-medium">Valor Aplicado:</span>
-                      <span className="font-bold text-purple-900">{formatCurrency(appliedValue)}</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                    <p className="text-base text-blue-800 font-semibold mb-2">Valor Aplicado</p>
+                    <p className="text-2xl font-bold text-blue-900">{formatCurrency(dynamicInvestment.appliedValue)}</p>
+                    <p className="text-sm text-blue-700 mt-1">Crédito Corrigido</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+                    <p className="text-base text-green-800 font-semibold mb-2">Taxa de Retorno</p>
+                    <p className="text-2xl font-bold text-green-900">{formatPercentage(investmentReturn)} a.a.</p>
+                    <p className="text-sm text-green-700 mt-1">Por {dynamicInvestment.monthsToApply} meses</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-orange-200">
+                    <p className="text-base text-orange-800 font-semibold mb-2">Valor Final</p>
+                    <p className="text-2xl font-bold text-orange-900">{formatCurrency(dynamicInvestment.finalValue)}</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                    <p className="text-base text-purple-800 font-semibold mb-2">Lucro Total</p>
+                    <p className="text-2xl font-bold text-purple-900">{formatCurrency(dynamicInvestment.totalProfit)}</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl p-6 border shadow-sm">
+                  <h4 className="text-lg font-bold text-slate-900 mb-4 text-center">Composição do Valor Final</h4>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={investmentPieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={40}
+                        outerRadius={80}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {investmentPieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex justify-center gap-4 mt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-purple-500 rounded"></div>
+                      <span className="text-xs font-medium text-slate-700">Aplicado</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-purple-700 font-medium">Período:</span>
-                      <span className="font-bold text-purple-900">{yearsToApply.toFixed(1)} anos</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-purple-700 font-medium">Valor Final:</span>
-                      <span className="font-bold text-purple-900">{formatCurrency(finalValue)}</span>
-                    </div>
-                    <div className="border-t border-purple-200 pt-2">
-                      <div className="flex justify-between text-lg">
-                        <span className="font-bold text-purple-800">Lucro Total:</span>
-                        <span className="font-bold text-green-600">{formatCurrency(totalProfit)}</span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                      <span className="text-xs font-medium text-slate-700">Lucro</span>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="bg-white/80 p-4 rounded-lg border border-purple-200">
-                <h4 className="font-bold text-purple-900 mb-3">Projeção de Rendimento</h4>
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-600 mb-1">
-                      {formatPercentage((totalProfit / appliedValue) * 100)}
-                    </div>
-                    <div className="text-sm text-purple-700 font-medium">Rentabilidade Total</div>
-                  </div>
-                  <div className="text-center pt-2 border-t border-purple-200">
-                    <div className="text-sm text-purple-700">
-                      Rendimento anual: <span className="font-semibold">{formatPercentage(investmentReturn)}</span>
-                    </div>
-                  </div>
-                </div>
+
+              <div className="bg-white rounded-xl p-6 border shadow-sm">
+                <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Crescimento do Investimento</h4>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      dataKey="mes" 
+                      tick={{ fontSize: 12 }} 
+                      label={{ value: 'Meses', position: 'insideBottom', offset: -10 }}
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => formatCurrency(value).replace('R$ ', 'R$')} 
+                      tick={{ fontSize: 11 }}
+                    />
+                    <Tooltip 
+                      formatter={(value) => [formatCurrency(Number(value)), 'Valor']} 
+                      labelFormatter={(label) => `Mês ${label}`}
+                      contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="valor" 
+                      stroke="#8B5CF6" 
+                      strokeWidth={4} 
+                      dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 6 }} 
+                      activeDot={{ r: 8, fill: '#7C3AED' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </Card>
+
+            <div className="p-6 bg-purple-50 rounded-xl border border-purple-200">
+              <h4 className="text-lg font-semibold text-purple-900 mb-3">💡 Como funciona este cenário:</h4>
+              <p className="text-purple-800 leading-relaxed">
+                Você aplica o valor do crédito contemplado em investimentos seguros como CDB, Tesouro Direto ou fundos. 
+                O crescimento é baseado em juros compostos, demonstrando o potencial de rentabilidade ao longo do prazo restante do consórcio.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </Card>
+    </div>
   );
 };

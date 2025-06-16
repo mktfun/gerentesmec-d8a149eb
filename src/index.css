@@ -52,35 +52,20 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 text-foreground;
+    @apply bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 text-foreground font-sf;
     min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
   }
   
-  /* DESIGN SYSTEM UNIFICADO - ESTABILIZAÇÃO FINAL */
-  
-  /* Estados de foco consistentes - SEMPRE AZUL */
+  /* DESIGN SYSTEM UNIFICADO - Sem cores aleatórias */
   input:focus-visible,
   select:focus-visible,
-  textarea:focus-visible,
-  button:focus-visible,
-  [role="button"]:focus-visible,
-  [data-radix-collection-item]:focus-visible {
+  textarea:focus-visible {
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
     border-color: rgb(59, 130, 246) !important;
   }
   
-  /* Estados de hover consistentes - SEMPRE AZUL */
-  input:hover:not(:disabled),
-  select:hover:not(:disabled),
-  textarea:hover:not(:disabled),
-  button:hover:not(:disabled):not([data-state="active"]),
-  [role="button"]:hover:not(:disabled) {
-    border-color: rgb(59, 130, 246) !important;
-  }
-  
-  /* Switch - Estados consistentes */
+  /* Switch consistente */
   [data-state="checked"] {
     background-color: rgb(59, 130, 246) !important;
   }
@@ -89,35 +74,14 @@
     background-color: rgb(156, 163, 175) !important;
   }
   
-  /* Radio buttons - Estados consistentes */
-  [data-state="checked"] > span {
-    background-color: rgb(59, 130, 246) !important;
-  }
-  
-  /* Tabs - Estados consistentes */
-  [data-state="active"] {
-    background-color: rgb(59, 130, 246) !important;
-    color: white !important;
-  }
-  
-  /* ELIMINAR TODAS AS CORES ALEATÓRIAS */
-  /* Remover qualquer amarelo, marrom, verde aleatório nos estados de foco */
-  *:focus-visible {
+  /* Botões consistentes */
+  button:focus-visible {
     outline: none !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
   }
-  
-  /* Remover cores de borda aleatórias */
-  * {
-    border-color: rgb(203, 213, 225) !important;
-  }
-  
-  *:focus-visible,
-  *:hover:not(:disabled) {
-    border-color: rgb(59, 130, 246) !important;
-  }
 
   /* NAVBAR FLUTUANTE - Estados de animação */
+  /* ESTADO INICIAL (Topo da página) */
   header[data-state="false"] > div {
     max-width: 100%;
     margin-top: 0;
@@ -127,10 +91,11 @@
     border-right-width: 0;
   }
 
+  /* ESTADO FLUTUANTE / ILHA (Após rolar a página) */
   header[data-state="true"] > div {
-    max-width: 56rem;
-    margin-top: 0.5rem;
-    border-radius: 1rem;
+    max-width: 56rem; /* max-w-4xl */
+    margin-top: 0.5rem; /* mt-2 */
+    border-radius: 1rem; /* rounded-2xl */
     border-width: 1px;
     margin-left: auto;
     margin-right: auto;
@@ -139,11 +104,11 @@
 
 @layer utilities {
   .glass-card {
-    @apply backdrop-blur-xl bg-white/95 border border-slate-300 shadow-lg;
+    @apply backdrop-blur-xl bg-white/90 border border-gray-200/50 shadow-lg;
   }
   
   .glass-button {
-    @apply backdrop-blur-sm bg-white/30 border border-slate-300 hover:bg-white/50 transition-all duration-200;
+    @apply backdrop-blur-sm bg-white/30 border border-gray-200 hover:bg-white/50 transition-all duration-200;
   }
   
   .apple-shadow {
@@ -158,114 +123,37 @@
   .badge-blue {
     @apply bg-blue-50 text-blue-800 border-blue-200;
   }
+  
+  .badge-green {
+    @apply bg-emerald-50 text-emerald-800 border-emerald-200;
+  }
+  
+  .badge-purple {
+    @apply bg-purple-50 text-purple-800 border-purple-200;
+  }
+  
+  .badge-orange {
+    @apply bg-orange-50 text-orange-800 border-orange-200;
+  }
+  
+  .badge-red {
+    @apply bg-red-50 text-red-800 border-red-200;
+  }
+  
+  .badge-yellow {
+    @apply bg-yellow-50 text-yellow-800 border-yellow-200;
+  }
 
-  /* Cores de texto de alto contraste */
+  /* Cores de texto consistentes */
   .text-primary-dark {
-    @apply text-slate-900;
+    @apply text-gray-900;
   }
   
   .text-secondary {
-    @apply text-slate-700;
+    @apply text-gray-700;
   }
   
   .text-muted {
-    @apply text-slate-600;
-  }
-  
-  /* CARD SIMULADOR - CONTRASTE MELHORADO */
-  .simulator-card {
-    @apply bg-white backdrop-blur-sm border border-slate-300 shadow-xl;
-  }
-  
-  .simulator-card h2 {
-    @apply text-slate-900 font-bold;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  .simulator-card p {
-    @apply text-slate-700 font-medium;
-  }
-  
-  .simulator-card label {
-    @apply text-slate-800 font-semibold;
-  }
-  
-  /* Padronizar estados de seleção */
-  ::selection {
-    background-color: rgba(59, 130, 246, 0.2) !important;
-    color: rgb(17, 24, 39) !important;
-  }
-  
-  /* ESTABILIZAÇÃO GERAL DE CORES */
-  /* Qualquer elemento que tenha cor de foco/hover diferente de azul será corrigido */
-  
-  /* Inputs específicos */
-  input[type="text"],
-  input[type="number"],
-  select,
-  textarea {
-    @apply border-slate-300 text-slate-900;
-  }
-  
-  input[type="text"]:focus,
-  input[type="number"]:focus,
-  select:focus,
-  textarea:focus {
-    @apply border-blue-500 ring-blue-500/20;
-  }
-  
-  /* Labels com melhor contraste */
-  label {
-    @apply text-slate-800 font-semibold;
-  }
-  
-  /* Texto de ajuda com melhor legibilidade */
-  .text-xs {
-    @apply text-slate-600 font-medium;
-  }
-}
-
-/* Animações suaves e consistentes */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.8s ease-out;
-}
-
-/* Melhorar acessibilidade e contraste */
-@media (prefers-contrast: high) {
-  :root {
-    --foreground: 0 0 0;
-    --background: 255 255 255;
-  }
-  
-  .simulator-card h2,
-  .simulator-card p,
-  .simulator-card label {
-    color: black !important;
-    font-weight: bold !important;
-  }
-}
-
-/* Responsividade melhorada */
-@media (max-width: 768px) {
-  .simulator-card {
-    @apply p-6;
-  }
-  
-  .simulator-card h2 {
-    @apply text-xl;
+    @apply text-gray-500;
   }
 }
