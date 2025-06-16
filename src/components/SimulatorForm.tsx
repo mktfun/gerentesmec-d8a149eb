@@ -63,8 +63,6 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
     financingRate: '2.5'
   });
 
-  const [installments, setInstallments] = useState('');
-
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
@@ -191,8 +189,8 @@ export const SimulatorForm = ({ onSimulate, isLoading, onReset, hasResults }: Si
             <Input
               id="installments"
               type="number"
-              value={installments}
-              onChange={(e) => setInstallments(Number(e.target.value))}
+              value={formData.installments}
+              onChange={(e) => handleInputChange('installments', e.target.value)}
               min={12}
               max={260}
               className="glass-input"
