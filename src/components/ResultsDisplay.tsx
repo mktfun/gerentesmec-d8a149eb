@@ -1,16 +1,21 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calculator, Car, Home, Download } from 'lucide-react';
+import { Calculator, Car, Home, Check } from 'lucide-react';
 import { SimulationData } from '@/pages/Index';
 import { formatCurrency } from '@/utils/formatters';
+import { useState } from 'react';
+
 interface ResultsDisplayProps {
   data: SimulationData | null;
   isLoading: boolean;
 }
+
 export const ResultsDisplay = ({
   data,
   isLoading
 }: ResultsDisplayProps) => {
+  const [exportSuccess, setExportSuccess] = useState(false);
+
   if (isLoading) {
     return <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
         <div className="flex items-center justify-center h-96">
@@ -22,6 +27,7 @@ export const ResultsDisplay = ({
         </div>
       </Card>;
   }
+
   if (!data) {
     return <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
         <div className="flex items-center justify-center h-96">
@@ -35,57 +41,72 @@ export const ResultsDisplay = ({
         </div>
       </Card>;
   }
+
   const exportSimulation = () => {
-    const simulationReport = {
+    // Criar objeto JSON completo com todos os dados da simulação
+    const simulationData = {
       timestamp: new Date().toISOString(),
-      creditValue: data.creditValue,
-      installments: data.installments,
-      contemplationTime: data.contemplationTime,
-      monthlyPayment: data.monthlyPayment,
-      totalPaid: data.totalPaid,
-      scenarios: data.scenarios
+      metadata: {
+        exportVersion: "1.0",
+        appName: "Consórcio Flash Sim",
+        generatedAt: new Date().toLocaleString('pt-BR')
+      },
+      inputs: {
+        creditValue: data.creditValue,
+        installments: data.installments,
+        contemplationTime: data.contemplationTime,
+        creditType: data.creditType,
+        correctionIndex: data.correctionIndex,
+        bidValue: data.bidValue,
+        embeddedBidValue: data.embeddedBidValue,
+        ownResourcesBidValue: data.ownResourcesBidValue,
+        reducedPaymentEnabled: data.reducedPaymentEnabled,
+        reducedPaymentPercentage: data.reducedPaymentPercentage,
+        financingRate: data.financingRate
+      },
+      calculations: {
+        monthlyPayment: data.monthlyPayment,
+        monthlyPaymentWithAnticipatedTax: data.monthlyPaymentWithAnticipatedTax,
+        postContemplationPayment: data.postContemplationPayment,
+        finalTerm: data.finalTerm,
+        availableCredit: data.availableCredit,
+        totalPaid: data.totalPaid,
+        totalInvested: data.totalInvested,
+        anticipatedTaxValue: data.anticipatedTaxValue
+      },
+      financialMetrics: {
+        demonstrativeRate: data.demonstrativeRate,
+        cet: data.cet
+      },
+      scenarios: {
+        quotaSale: data.scenarios.quotaSale,
+        propertyAcquisition: data.scenarios.propertyAcquisition,
+        financingComparison: data.scenarios.financingComparison,
+        appliedCredit: data.scenarios.appliedCredit
+      }
     };
-    localStorage.setItem('lastSimulation', JSON.stringify(simulationReport));
 
-    // Create downloadable report
-    const reportContent = `
-RELATÓRIO DE SIMULAÇÃO - CONSÓRCIO FLASH SIM
-============================================
+    // Logar no console
+    console.log('=== DADOS COMPLETOS DA SIMULAÇÃO ===');
+    console.log(simulationData);
+    console.log('=== FIM DOS DADOS ===');
 
-DADOS BÁSICOS:
-- Valor do Crédito: ${formatCurrency(data.creditValue)}
-- Parcelas: ${data.installments}
-- Tempo de Contemplação: ${data.contemplationTime} meses
-- Parcela Base: ${formatCurrency(data.monthlyPayment)}
-- Total Pago: ${formatCurrency(data.totalPaid)}
-
-MÉTRICAS FINANCEIRAS:
-${data.demonstrativeRate ? `- Taxa Demonstrativa Mensal: ${data.demonstrativeRate.monthlyRate.toFixed(4)}%` : ''}
-${data.demonstrativeRate ? `- Taxa Demonstrativa Anual: ${data.demonstrativeRate.annualRate.toFixed(4)}%` : ''}
-${data.cet ? `- CET Mensal: ${data.cet.cetMonthly.toFixed(4)}%` : ''}
-${data.cet ? `- CET Anual: ${data.cet.cetAnnual.toFixed(4)}%` : ''}
-
-Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
-`;
-    const blob = new Blob([reportContent], {
-      type: 'text/plain'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `simulacao-consorcio-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Feedback visual para o usuário
+    setExportSuccess(true);
+    setTimeout(() => {
+      setExportSuccess(false);
+    }, 2000);
   };
+
   const hasBid = data.bidValue > 0;
   const hasReducedPayment = data.reducedPaymentEnabled;
   const hasEmbeddedBid = data.embeddedBidValue > 0;
   const isVehicle = data.creditType === 'vehicle';
+  
   const formatPercentage = (value: number): string => {
     return `${value.toFixed(2)}%`;
   };
+
   return <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -99,9 +120,26 @@ Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
             </p>
           </div>
         </div>
-        <Button onClick={exportSimulation} variant="outline" className="border-2 border-slate-200 hover:border-blue-300 text-gray-50 bg-blue-700 hover:bg-blue-600">
-          <Download className="w-4 h-4 mr-2" />
-          Exportar
+        <Button 
+          onClick={exportSimulation} 
+          variant="outline" 
+          className={`border-2 transition-all duration-200 ${
+            exportSuccess 
+              ? 'border-green-300 bg-green-100 text-green-700' 
+              : 'border-slate-200 hover:border-blue-300 text-gray-50 bg-blue-700 hover:bg-blue-600'
+          }`}
+        >
+          {exportSuccess ? (
+            <>
+              <Check className="w-4 h-4 mr-2" />
+              Dados Prontos!
+            </>
+          ) : (
+            <>
+              <Calculator className="w-4 h-4 mr-2" />
+              Exportar
+            </>
+          )}
         </Button>
       </div>
 
