@@ -37,6 +37,7 @@ export interface SimulationData {
   scenarios: {
     quotaSale: {
       title: string;
+      agioGrossValue?: number; // Novo campo
       totalReturn: number;
       profit: number;
       profitPercentage: number;
@@ -48,6 +49,8 @@ export interface SimulationData {
       monthlyRental: number;
       postContemplationPayment: number;
       netMonthlyReturn: number;
+      monthlyGain?: number; // Novo campo
+      annualGain?: number;   // Novo campo
     };
     financingComparison?: {
       title: string;
@@ -63,6 +66,8 @@ export interface SimulationData {
       finalValue: number;
       totalProfit: number;
       monthsToApply: number;
+      monthlyGain?: number; // Novo campo
+      annualGain?: number;  // Novo campo
     };
   };
 }
