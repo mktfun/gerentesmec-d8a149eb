@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -365,7 +366,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                           <YAxis tickFormatter={(value) => formatCurrency(Math.abs(value)).replace('R$ ', 'R$')} tick={{ fontSize: 11 }} />
                           <Tooltip 
-                            formatter={(value) => [formatCurrency(Math.abs(Number(value))), name]} 
+                            formatter={(value, name) => [formatCurrency(Math.abs(Number(value))), name]} 
                             labelStyle={{ color: '#334155' }}
                             contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
                           />
