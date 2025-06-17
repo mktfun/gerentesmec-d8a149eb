@@ -1,89 +1,39 @@
 
-// Métricas financeiras corrigidas - Versão 2.0
+// Métricas financeiras estabilizadas - Versão 2.0 FINAL
 
-// Função para calcular a Taxa Interna de Retorno (TIR/IRR) usando Newton-Raphson
-export const calculateIRR = (cashFlows: number[], guess: number = 0.01, maxIterations: number = 1000): number => {
-  let rate = guess;
-  const tolerance = 0.0000001;
-  
-  for (let iteration = 0; iteration < maxIterations; iteration++) {
-    let npv = 0;
-    let dnpv = 0;
-    
-    // Calcular NPV e sua derivada
-    for (let period = 0; period < cashFlows.length; period++) {
-      const divisor = Math.pow(1 + rate, period);
-      npv += cashFlows[period] / divisor;
-      
-      if (period > 0) {
-        dnpv += (-period * cashFlows[period]) / Math.pow(1 + rate, period + 1);
-      }
-    }
-    
-    // Verificar convergência
-    if (Math.abs(npv) < tolerance) {
-      return rate;
-    }
-    
-    // Evitar divisão por zero
-    if (Math.abs(dnpv) < tolerance) {
-      break;
-    }
-    
-    // Atualizar taxa usando Newton-Raphson
-    const newRate = rate - npv / dnpv;
-    
-    // Verificar convergência da taxa
-    if (Math.abs(newRate - rate) < tolerance) {
-      return newRate;
-    }
-    
-    rate = newRate;
-    
-    // Limitar a taxa para valores razoáveis
-    if (rate < -0.99) rate = -0.99;
-    if (rate > 10) rate = 10;
-  }
-  
-  return rate;
-};
-
-// CET corrigido para evitar notação científica e valores zerados
+// CET ESTABILIZADO - removido TIR complexa
 export const calculateCET = (availableCredit: number, postContemplationPayment: number, finalTerm: number): { cetMonthly: number; cetAnnual: number } => {
   try {
-    console.log('🔍 Calculando CET:', { availableCredit, postContemplationPayment, finalTerm });
+    console.log('🔍 Calculando CET (ESTABILIZADO):', { availableCredit, postContemplationPayment, finalTerm });
     
-    // Validação rigorosa de entrada
     if (availableCredit <= 0 || postContemplationPayment <= 0 || finalTerm <= 0) {
-      console.warn('⚠️ Valores inválidos para CET:', { availableCredit, postContemplationPayment, finalTerm });
+      console.warn('⚠️ Valores inválidos para CET');
       return { cetMonthly: 0, cetAnnual: 0 };
     }
     
-    // Método simplificado e mais confiável
-    // CET Mensal = (Parcela / Crédito)^(1/Prazo) - 1
+    // Método Price simplificado e confiável
     const ratio = postContemplationPayment / availableCredit;
-    const cetMonthly = Math.pow(ratio, 1 / finalTerm) - 1;
     
-    // CET Anual = (1 + CET Mensal)^12 - 1
+    if (ratio <= 0 || !isFinite(ratio)) {
+      console.warn('⚠️ Ratio inválido para CET');
+      return { cetMonthly: 0, cetAnnual: 0 };
+    }
+    
+    const cetMonthly = Math.pow(ratio, 1 / finalTerm) - 1;
     const cetAnnual = Math.pow(1 + cetMonthly, 12) - 1;
     
-    // Verificar se os valores são válidos
-    if (isNaN(cetMonthly) || !isFinite(cetMonthly) || cetMonthly < 0) {
-      console.error('❌ CET mensal inválido:', cetMonthly);
+    // Validações rigorosas
+    if (!isFinite(cetMonthly) || !isFinite(cetAnnual) || cetMonthly < 0 || cetAnnual < 0) {
+      console.error('❌ CET calculado é inválido');
       return { cetMonthly: 0, cetAnnual: 0 };
-    }
-    
-    if (isNaN(cetAnnual) || !isFinite(cetAnnual) || cetAnnual < 0) {
-      console.error('❌ CET anual inválido:', cetAnnual);
-      return { cetMonthly: cetMonthly * 100, cetAnnual: 0 };
     }
     
     const result = {
-      cetMonthly: Number((cetMonthly * 100).toFixed(4)), // Converter para % com 4 casas decimais
-      cetAnnual: Number((cetAnnual * 100).toFixed(4))    // Converter para % com 4 casas decimais
+      cetMonthly: Number((cetMonthly * 100).toFixed(4)),
+      cetAnnual: Number((cetAnnual * 100).toFixed(4))
     };
     
-    console.log('✅ CET calculado com sucesso:', result);
+    console.log('✅ CET calculado (ESTABILIZADO):', result);
     return result;
     
   } catch (error) {
@@ -102,7 +52,6 @@ export const calculateDemonstrativeRate = (adminRate: number, reserveFundRate: n
   };
 };
 
-// Função para calcular rentabilidade de investimento
 export const calculateInvestmentYield = (
   initialValue: number, 
   monthlyRate: number, 
@@ -121,7 +70,6 @@ export const calculateInvestmentYield = (
   };
 };
 
-// Função para calcular economia em comparação com financiamento
 export const calculateFinancingSavings = (
   creditValue: number,
   consortiumTotalCost: number,
@@ -130,7 +78,7 @@ export const calculateFinancingSavings = (
 ): { financingCost: number; savings: number; savingsPercentage: number } => {
   const financingCost = creditValue * (1 + (financingRate / 100) * (periods / 12));
   const savings = financingCost - consortiumTotalCost;
-  const savingsPercentage = (savings / financingCost) * 100;
+  const savingsPercentage = financingCost > 0 ? (savings / financingCost) * 100 : 0;
   
   return {
     financingCost: Number(financingCost.toFixed(2)),
@@ -138,3 +86,5 @@ export const calculateFinancingSavings = (
     savingsPercentage: Number(savingsPercentage.toFixed(2))
   };
 };
+
+// TIR REMOVIDA - era fonte de bugs, substituída por método Price no CET

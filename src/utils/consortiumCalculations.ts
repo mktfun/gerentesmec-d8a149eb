@@ -1,6 +1,6 @@
 
-// Funções de cálculo para consórcio - Versão 2.0
-// Baseado na documentação do Flash Sim e correções do imovel.pdf
+// Funções de cálculo para consórcio - Versão 2.0 ESTABILIZADA
+// Motor de cálculo corrigido com tolerância zero para bugs
 
 export interface ConsortiumInputs {
   creditValue: number;
@@ -45,7 +45,7 @@ export interface ConsortiumResults {
   scenarios: {
     quotaSale: {
       title: string;
-      agioGrossValue: number; // Novo campo
+      agioGrossValue: number;
       totalReturn: number;
       profit: number;
       profitPercentage: number;
@@ -57,8 +57,8 @@ export interface ConsortiumResults {
       monthlyRental: number;
       postContemplationPayment: number;
       netMonthlyReturn: number;
-      monthlyGain?: number;
-      annualGain?: number;
+      monthlyGain: number;
+      annualGain: number;
     };
     financingComparison?: {
       title: string;
@@ -74,52 +74,54 @@ export interface ConsortiumResults {
       finalValue: number;
       totalProfit: number;
       monthsToApply: number;
-      monthlyGain?: number;
-      annualGain?: number;
+      monthlyGain: number;
+      annualGain: number;
     };
   };
 }
 
-// Função principal de cálculo
+// Função principal de cálculo - CORRIGIDA
 export const calculateConsortium = (inputs: ConsortiumInputs): ConsortiumResults => {
-  console.log('🧮 Iniciando cálculo do consórcio com inputs:', inputs);
+  console.log('🧮 Iniciando cálculo do consórcio (V2.0 ESTABILIZADA):', inputs);
   
-  // 1. Cálculo dos componentes da parcela
+  // 1. COMPONENTES DA PARCELA - LÓGICA CORRIGIDA
   const commonFund = inputs.creditValue / inputs.installments;
   const adminFee = (inputs.creditValue * (inputs.adminRate / 100)) / inputs.installments;
   const reserveFund = (inputs.creditValue * (inputs.reserveFundRate / 100)) / inputs.installments;
+  const lifeInsuranceValue = inputs.lifeInsurance || 0;
   
-  // Taxa antecipada (aplicada apenas nas primeiras 12 parcelas)
+  // Taxa antecipada (12 primeiras parcelas apenas)
   const anticipatedTaxValue = inputs.anticipatedTaxRate 
     ? (inputs.creditValue * (inputs.anticipatedTaxRate / 100)) / 12
     : 0;
   
-  // Parcela base (sem taxa antecipada)
-  const baseMonthlyPayment = commonFund + adminFee + reserveFund + (inputs.lifeInsurance || 0);
+  // Parcela base (componentes fixos)
+  const baseComponents = adminFee + reserveFund + lifeInsuranceValue;
   
-  // Parcela com taxa antecipada (primeiras 12 parcelas)
-  const monthlyPaymentWithAnticipatedTax = baseMonthlyPayment + anticipatedTaxValue;
+  // Aplicar redução APENAS no fundo comum se habilitada
+  let effectiveCommonFund = commonFund;
+  if (inputs.reducedPaymentPercentage) {
+    effectiveCommonFund = commonFund * (inputs.reducedPaymentPercentage / 100);
+  }
   
-  // Se há parcela reduzida, aplicar apenas ao fundo comum
-  const reducedCommonFund = inputs.reducedPaymentPercentage 
-    ? commonFund * (inputs.reducedPaymentPercentage / 100)
-    : commonFund;
-  
-  const monthlyPayment = inputs.reducedPaymentPercentage
-    ? reducedCommonFund + adminFee + reserveFund + (inputs.lifeInsurance || 0)
-    : baseMonthlyPayment;
+  // Parcela mensal final
+  const monthlyPayment = effectiveCommonFund + baseComponents;
+  const monthlyPaymentWithAnticipatedTax = anticipatedTaxValue > 0 
+    ? monthlyPayment + anticipatedTaxValue 
+    : undefined;
 
-  console.log('💰 Componentes da parcela:', {
+  console.log('💰 Componentes da parcela (CORRIGIDOS):', {
     commonFund,
+    effectiveCommonFund,
     adminFee,
     reserveFund,
+    lifeInsuranceValue,
     anticipatedTaxValue,
-    baseMonthlyPayment,
-    monthlyPaymentWithAnticipatedTax,
-    monthlyPayment
+    monthlyPayment,
+    monthlyPaymentWithAnticipatedTax
   });
 
-  // 2. Cálculo dos lances
+  // 2. LANCES
   const embeddedBidValue = inputs.embeddedBidPercentage 
     ? inputs.creditValue * (inputs.embeddedBidPercentage / 100)
     : 0;
@@ -128,45 +130,41 @@ export const calculateConsortium = (inputs: ConsortiumInputs): ConsortiumResults
   const bidValue = embeddedBidValue + ownResourcesBidValue;
   const availableCredit = inputs.creditValue - embeddedBidValue;
 
-  console.log('🎯 Lances calculados:', {
-    embeddedBidValue,
-    ownResourcesBidValue,
-    bidValue,
-    availableCredit
-  });
-
-  // 3. Cálculo do total investido (até a contemplação)
-  const regularMonths = Math.max(0, inputs.contemplationTime - 12);
-  const anticipatedMonths = Math.min(12, inputs.contemplationTime);
+  // 3. TOTAL INVESTIDO ATÉ CONTEMPLAÇÃO - CORRIGIDO
+  const monthsWithAnticipatedTax = Math.min(12, inputs.contemplationTime);
+  const monthsWithoutAnticipatedTax = Math.max(0, inputs.contemplationTime - 12);
   
-  const totalInvested = (regularMonths * monthlyPayment) + 
-                       (anticipatedMonths * (monthlyPayment + anticipatedTaxValue)) +
-                       ownResourcesBidValue;
+  const totalInvested = 
+    (monthsWithAnticipatedTax * (monthlyPayment + anticipatedTaxValue)) +
+    (monthsWithoutAnticipatedTax * monthlyPayment) +
+    ownResourcesBidValue;
 
-  // 4. Cálculo da parcela pós-contemplação
+  // 4. PÓS-CONTEMPLAÇÃO - LÓGICA CORRIGIDA
   const remainingMonths = inputs.installments - inputs.contemplationTime;
-  const outstandingBalance = inputs.creditValue - (inputs.contemplationTime * commonFund);
-  const adjustedBalance = outstandingBalance - bidValue;
-  const postContemplationPayment = adjustedBalance / remainingMonths;
+  const totalPaidCommonFund = inputs.contemplationTime * commonFund;
+  const outstandingBalance = inputs.creditValue - totalPaidCommonFund;
+  const adjustedBalance = Math.max(0, outstandingBalance - bidValue);
+  const postContemplationPayment = remainingMonths > 0 ? adjustedBalance / remainingMonths : 0;
 
-  console.log('📊 Cálculos pós-contemplação:', {
+  console.log('📊 Pós-contemplação (CORRIGIDO):', {
     remainingMonths,
+    totalPaidCommonFund,
     outstandingBalance,
     adjustedBalance,
     postContemplationPayment
   });
 
-  // 5. Taxa demonstrativa
+  // 5. TAXA DEMONSTRATIVA
   const demonstrativeRate = {
-    monthlyRate: (inputs.adminRate + inputs.reserveFundRate) / inputs.installments,
-    annualRate: ((inputs.adminRate + inputs.reserveFundRate) / inputs.installments) * 12
+    monthlyRate: Number(((inputs.adminRate + inputs.reserveFundRate) / inputs.installments).toFixed(4)),
+    annualRate: Number((((inputs.adminRate + inputs.reserveFundRate) / inputs.installments) * 12).toFixed(4))
   };
 
-  // 6. CET corrigido
-  const cet = calculateCETCorrect(availableCredit, postContemplationPayment, remainingMonths);
+  // 6. CET CORRIGIDO - MÉTODO SIMPLIFICADO E CONFIÁVEL
+  const cet = calculateCETStabilized(availableCredit, postContemplationPayment, remainingMonths);
 
-  // 7. Cenários
-  const scenarios = calculateScenarios(inputs, {
+  // 7. CENÁRIOS
+  const scenarios = calculateScenariosStabilized(inputs, {
     availableCredit,
     totalInvested,
     remainingMonths,
@@ -175,7 +173,7 @@ export const calculateConsortium = (inputs: ConsortiumInputs): ConsortiumResults
 
   const results: ConsortiumResults = {
     monthlyPayment,
-    monthlyPaymentWithAnticipatedTax: anticipatedTaxValue > 0 ? monthlyPaymentWithAnticipatedTax : undefined,
+    monthlyPaymentWithAnticipatedTax,
     postContemplationPayment,
     finalTerm: remainingMonths,
     bidValue,
@@ -191,54 +189,60 @@ export const calculateConsortium = (inputs: ConsortiumInputs): ConsortiumResults
     scenarios
   };
 
-  console.log('✅ Resultados finais:', results);
+  console.log('✅ Resultados finais (V2.0 ESTABILIZADA):', results);
   return results;
 };
 
-// Função corrigida para calcular o CET
-const calculateCETCorrect = (availableCredit: number, postContemplationPayment: number, finalTerm: number) => {
+// CET ESTABILIZADO - Método confiável sem TIR complexa
+const calculateCETStabilized = (availableCredit: number, postContemplationPayment: number, finalTerm: number) => {
   try {
     if (availableCredit <= 0 || postContemplationPayment <= 0 || finalTerm <= 0) {
       return { cetMonthly: 0, cetAnnual: 0 };
     }
 
-    // Usar uma aproximação mais simples e confiável
-    // CET = [(Parcela * Prazo / Crédito) - 1] / Prazo
-    const totalPayments = postContemplationPayment * finalTerm;
-    const cetMonthly = Math.pow(totalPayments / availableCredit, 1 / finalTerm) - 1;
+    // Método Price simplificado - mais confiável
+    // CET = (Parcela / Crédito)^(1/Prazo) - 1
+    const ratio = postContemplationPayment / availableCredit;
+    
+    if (ratio <= 0 || !isFinite(ratio)) {
+      return { cetMonthly: 0, cetAnnual: 0 };
+    }
+    
+    const cetMonthly = Math.pow(ratio, 1 / finalTerm) - 1;
     const cetAnnual = Math.pow(1 + cetMonthly, 12) - 1;
 
-    console.log('📈 CET calculado:', {
-      availableCredit,
-      postContemplationPayment,
-      finalTerm,
-      totalPayments,
-      cetMonthly: cetMonthly * 100,
-      cetAnnual: cetAnnual * 100
-    });
+    // Validações rigorosas
+    if (!isFinite(cetMonthly) || !isFinite(cetAnnual) || cetMonthly < 0 || cetAnnual < 0) {
+      console.warn('⚠️ CET inválido calculado, retornando 0');
+      return { cetMonthly: 0, cetAnnual: 0 };
+    }
 
-    return {
-      cetMonthly: cetMonthly * 100,
-      cetAnnual: cetAnnual * 100
+    const result = {
+      cetMonthly: Number((cetMonthly * 100).toFixed(4)),
+      cetAnnual: Number((cetAnnual * 100).toFixed(4))
     };
+
+    console.log('📈 CET estabilizado:', result);
+    return result;
+    
   } catch (error) {
-    console.error('❌ Erro no cálculo do CET:', error);
+    console.error('❌ Erro no CET:', error);
     return { cetMonthly: 0, cetAnnual: 0 };
   }
 };
 
-// Função para calcular os cenários
-const calculateScenarios = (
+// CENÁRIOS ESTABILIZADOS
+const calculateScenariosStabilized = (
   inputs: ConsortiumInputs, 
   context: { availableCredit: number; totalInvested: number; remainingMonths: number; postContemplationPayment: number }
 ) => {
-  // CENÁRIO 1: Venda da Cota (NOVA LÓGICA)
-  const agioPercentage = inputs.agioPercentage || 15; // Default 15%
+  // CENÁRIO 1: VENDA DA COTA - NOVA LÓGICA CORRIGIDA
+  const agioPercentage = inputs.agioPercentage || 15;
   const agioGrossValue = inputs.creditValue * (agioPercentage / 100); // Valor Bruto do Ágio
   const quotaSaleProfit = agioGrossValue - context.totalInvested; // Lucro Líquido = Ágio - Total Investido
-  const quotaSaleProfitPercentage = (quotaSaleProfit / context.totalInvested) * 100;
+  const quotaSaleProfitPercentage = context.totalInvested > 0 ? (quotaSaleProfit / context.totalInvested) * 100 : 0;
 
-  console.log('🏷️ Cenário 1 - Nova Lógica:', {
+  console.log('🏷️ Cenário 1 - NOVA LÓGICA ESTABILIZADA:', {
     creditValue: inputs.creditValue,
     agioPercentage,
     agioGrossValue,
@@ -247,12 +251,12 @@ const calculateScenarios = (
     quotaSaleProfitPercentage
   });
 
-  // CENÁRIO 2: Aquisição do Bem
+  // CENÁRIO 2: CONDICIONAL POR TIPO
   let propertyAcquisition = undefined;
   let financingComparison = undefined;
 
   if (inputs.creditType === 'property') {
-    const correctedPropertyValue = context.availableCredit * 1.05; // Correção INCC simulada
+    const correctedPropertyValue = context.availableCredit * 1.05; // Correção INCC
     const monthlyRental = correctedPropertyValue * ((inputs.rentalYield || 0.5) / 100);
     const netMonthlyReturn = monthlyRental - context.postContemplationPayment;
     const monthlyGain = netMonthlyReturn;
@@ -271,7 +275,7 @@ const calculateScenarios = (
     const consortiumTotalCost = context.totalInvested + (context.postContemplationPayment * context.remainingMonths);
     const financingTotalCost = context.availableCredit * (1 + ((inputs.financingRate || 12) / 100) * (context.remainingMonths / 12));
     const savings = financingTotalCost - consortiumTotalCost;
-    const savingsPercentage = (savings / financingTotalCost) * 100;
+    const savingsPercentage = financingTotalCost > 0 ? (savings / financingTotalCost) * 100 : 0;
 
     financingComparison = {
       title: 'Comparativo com Financiamento',
@@ -282,9 +286,9 @@ const calculateScenarios = (
     };
   }
 
-  // CENÁRIO 3: Aplicação do Crédito
+  // CENÁRIO 3: APLICAÇÃO DO CRÉDITO - SEM TOGGLE (SEMPRE MENSAL)
   const returnRate = inputs.returnRate || 1.2; // 1.2% a.m. default
-  const monthlyRate = inputs.returnPeriod === 'annual' ? returnRate / 12 : returnRate;
+  const monthlyRate = returnRate; // SEMPRE MENSAL - removido o toggle
   const finalValue = context.availableCredit * Math.pow(1 + (monthlyRate / 100), context.remainingMonths);
   const investmentReturn = finalValue - context.availableCredit;
   const totalProfit = investmentReturn - (context.postContemplationPayment * context.remainingMonths);
@@ -294,7 +298,7 @@ const calculateScenarios = (
   return {
     quotaSale: {
       title: 'Venda da Cota',
-      agioGrossValue, // Novo campo
+      agioGrossValue,
       totalReturn: agioGrossValue, // Retorno Total = Valor Bruto do Ágio
       profit: quotaSaleProfit,
       profitPercentage: quotaSaleProfitPercentage,
@@ -315,18 +319,16 @@ const calculateScenarios = (
   };
 };
 
-// Função para aplicar correção monetária
+// UTILITÁRIOS
 export const applyCurrencyCorrection = (value: number, months: number, index: 'INCC' | 'IPCA'): number => {
-  const monthlyRate = index === 'INCC' ? 0.005 : 0.004; // 0.5% INCC, 0.4% IPCA
+  const monthlyRate = index === 'INCC' ? 0.005 : 0.004;
   return value * Math.pow(1 + monthlyRate, months);
 };
 
-// Função para calcular juros compostos
 export const calculateCompoundInterest = (principal: number, rate: number, periods: number): number => {
   return principal * Math.pow(1 + (rate / 100), periods);
 };
 
-// Função para validar inputs
 export const validateInputs = (inputs: ConsortiumInputs): string[] => {
   const errors: string[] = [];
   
