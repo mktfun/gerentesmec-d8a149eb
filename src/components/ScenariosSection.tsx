@@ -365,7 +365,7 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                           <YAxis tickFormatter={(value) => formatCurrency(Math.abs(value)).replace('R$ ', 'R$')} tick={{ fontSize: 11 }} />
                           <Tooltip 
-                            formatter={(value, name) => [formatCurrency(Math.abs(Number(value))), name]} 
+                            formatter={(value) => [formatCurrency(Math.abs(Number(value))), name]} 
                             labelStyle={{ color: '#334155' }}
                             contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
                           />
@@ -464,6 +464,53 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                   </div>
                 </div>
 
+                {/* Novos cards comparativos */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl border border-indigo-200">
+                    <p className="text-base text-indigo-800 font-semibold mb-2">Ganho Mensal vs. Parcela</p>
+                    <p className="text-2xl font-bold text-indigo-900">{formatCurrency(dynamicInvestment.monthlyGain - data.postContemplationPayment)}</p>
+                    <p className="text-sm text-indigo-700 mt-1">Diferença líquida mensal</p>
+                  </div>
+                  <div className="p-6 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+                    <p className="text-base text-emerald-800 font-semibold mb-2">Ganho Anual vs. Custo Anual</p>
+                    <p className="text-2xl font-bold text-emerald-900">{formatCurrency(dynamicInvestment.annualGain - (data.postContemplationPayment * 12))}</p>
+                    <p className="text-sm text-emerald-700 mt-1">Diferença líquida anual</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-6 border shadow-sm">
+                  <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Crescimento do Investimento</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="mes" 
+                        tick={{ fontSize: 12 }} 
+                        label={{ value: 'Meses', position: 'insideBottom', offset: -10 }}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => formatCurrency(value).replace('R$ ', 'R$')} 
+                        tick={{ fontSize: 11 }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [formatCurrency(Number(value)), 'Valor']} 
+                        labelFormatter={(label) => `Mês ${label}`}
+                        contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="valor" 
+                        stroke="#8B5CF6" 
+                        strokeWidth={4} 
+                        dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 6 }} 
+                        activeDot={{ r: 8, fill: '#7C3AED' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
                 <div className="bg-white rounded-xl p-6 border shadow-sm">
                   <h4 className="text-lg font-bold text-slate-900 mb-4 text-center">Composição do Valor Final</h4>
                   <ResponsiveContainer width="100%" height={200}>
@@ -495,37 +542,6 @@ export const ScenariosSection = ({ data, isLoading }: ScenariosSectionProps) => 
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 border shadow-sm">
-                <h4 className="text-xl font-bold text-slate-900 mb-6 text-center">Crescimento do Investimento</h4>
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={lineChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="mes" 
-                      tick={{ fontSize: 12 }} 
-                      label={{ value: 'Meses', position: 'insideBottom', offset: -10 }}
-                    />
-                    <YAxis 
-                      tickFormatter={(value) => formatCurrency(value).replace('R$ ', 'R$')} 
-                      tick={{ fontSize: 11 }}
-                    />
-                    <Tooltip 
-                      formatter={(value) => [formatCurrency(Number(value)), 'Valor']} 
-                      labelFormatter={(label) => `Mês ${label}`}
-                      contentStyle={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="valor" 
-                      stroke="#8B5CF6" 
-                      strokeWidth={4} 
-                      dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 6 }} 
-                      activeDot={{ r: 8, fill: '#7C3AED' }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
               </div>
             </div>
 

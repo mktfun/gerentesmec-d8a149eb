@@ -37,12 +37,14 @@ export const calculateCET = (creditValue: number, monthlyPayments: number[], ant
   
   try {
     const cetMonthly = calculateIRR(cashFlows);
-    // Correção: usar juros compostos para anualização correta
-    const cetAnnual = Math.pow(1 + cetMonthly, 12) - 1;
+    // Garantir que o resultado seja um número válido e positivo
+    const validCetMonthly = isNaN(cetMonthly) || !isFinite(cetMonthly) ? 0 : Math.abs(cetMonthly);
+    // Conversão correta para taxa anual composta
+    const cetAnnual = Math.pow(1 + validCetMonthly, 12) - 1;
     
     return {
-      cetMonthly: Math.max(0, cetMonthly * 100), // Converter para percentual
-      cetAnnual: Math.max(0, cetAnnual * 100)
+      cetMonthly: validCetMonthly * 100, // Converter para percentual
+      cetAnnual: cetAnnual * 100
     };
   } catch (error) {
     // Fallback melhorado se o IRR não convergir

@@ -66,12 +66,14 @@ export const SimulatorForm = ({
     reducedPaymentPercentage: '50',
     financingRate: '2.5'
   });
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
+
   const handleCreditValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatBRLCurrency(e.target.value);
     setFormData(prev => ({
@@ -79,6 +81,7 @@ export const SimulatorForm = ({
       creditValue: formatted
     }));
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const creditValue = parseBRLInputToNumber(formData.creditValue);
@@ -92,12 +95,15 @@ export const SimulatorForm = ({
     const ownResourcesBidPercentage = parseFloat(formData.ownResourcesBidPercentage) || 0;
     const reducedPaymentPercentage = parseFloat(formData.reducedPaymentPercentage);
     const financingRate = parseFloat(formData.financingRate);
+
     if (!creditValue || !installments || !contemplationTime || isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate) || isNaN(anticipatedTaxRate)) {
       return;
     }
+
     if (formData.creditType === 'vehicle' && isNaN(financingRate)) {
       return;
     }
+
     const simulationData = calculateSimulation({
       creditType: formData.creditType as 'property' | 'vehicle',
       creditValue,
@@ -114,14 +120,18 @@ export const SimulatorForm = ({
       reducedPaymentPercentage,
       financingRate: formData.creditType === 'vehicle' ? financingRate : undefined
     });
+
     onSimulate(simulationData);
   };
+
   const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime && 
     formData.adminRate && formData.reserveFundRate && formData.insuranceRate && formData.anticipatedTaxRate &&
     (formData.creditType === 'property' || (formData.creditType === 'vehicle' && formData.financingRate));
 
   const hasBid = (parseFloat(formData.embeddedBidPercentage) || 0) + (parseFloat(formData.ownResourcesBidPercentage) || 0) > 0;
-  return <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
+
+  return (
+    <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
           <Calculator className="w-5 h-5 text-white" />
@@ -384,5 +394,6 @@ export const SimulatorForm = ({
           <strong>Dica:</strong> Para melhores resultados, use dados reais do consórcio que você está apresentando ao cliente.
         </p>
       </div>
-    </Card>;
+    </Card>
+  );
 };
