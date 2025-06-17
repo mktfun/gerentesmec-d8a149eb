@@ -38,10 +38,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          company_contact: string | null
-          company_logo_url: string | null
-          company_name: string | null
-          company_website: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -49,10 +45,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          company_contact?: string | null
-          company_logo_url?: string | null
-          company_name?: string | null
-          company_website?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -60,10 +52,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          company_contact?: string | null
-          company_logo_url?: string | null
-          company_name?: string | null
-          company_website?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null

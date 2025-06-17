@@ -1,17 +1,13 @@
-
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calculator, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { Calculator, RotateCcw, Download } from 'lucide-react';
-import { calculateConsortium } from '@/utils/consortiumCalculations';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import type { SimulationData } from '@/pages/Index';
+import { SimulationData } from '@/pages/Index';
+import { calculateSimulation } from '@/utils/consortiumCalculations';
 
 interface SimulatorFormProps {
   onSimulate: (data: SimulationData) => void;
@@ -20,502 +16,384 @@ interface SimulatorFormProps {
   hasResults: boolean;
 }
 
+// Função para formatar valor para o padrão R$ 0.000,00 (pt-BR)
+function formatBRLCurrency(value: string): string {
+  // Remove todos os caracteres não numéricos
+  const numeric = value.replace(/\D/g, '');
+  if (!numeric) return '';
+
+  // Divide centavos
+  let intValue = parseInt(numeric, 10);
+  let cents = (intValue % 100).toString().padStart(2, '0'); // Últimos 2 dígitos
+  let rest = Math.floor(intValue / 100).toString();
+
+  // Adiciona separador de milhar
+  let formattedInt = rest.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `R$ ${formattedInt},${cents}`;
+}
+
+// Função para converter "R$ 300.000,00" -> 300000 (float)
+function parseBRLInputToNumber(value: string): number {
+  // Remove R$ e espaços, troca "." por "", troca "," por "."
+  // Ex: "R$ 300.000,25" => "300000.25"
+  const clean = value.replace(/[^0-9,]/g, '') // Keep only numbers and comma
+  .replace(/\./g, '') // Remove dots (thousand separators)
+  .replace(/,/g, '.'); // Convert comma to dot for decimal
+
+  // ParseFloat entende "." como decimal separador
+  const num = parseFloat(clean);
+  return isNaN(num) ? 0 : num;
+}
 export const SimulatorForm = ({
   onSimulate,
   isLoading,
   onReset,
   hasResults
 }: SimulatorFormProps) => {
-  // Estados do formulário
-  const [creditValue, setCreditValue] = useState<string>('200000');
-  const [installments, setInstallments] = useState<string>('240');
-  const [contemplationTime, setContemplationTime] = useState<string>('60');
-  const [adminRate, setAdminRate] = useState<string>('10');
-  const [reserveFundRate, setReserveFundRate] = useState<string>('2');
-  const [anticipatedTaxRate, setAnticipatedTaxRate] = useState<string>('');
-  const [lifeInsurance, setLifeInsurance] = useState<string>('15');
-  const [creditType, setCreditType] = useState<'property' | 'vehicle'>('property');
-  const [embeddedBidPercentage, setEmbeddedBidPercentage] = useState<string>('');
-  const [ownResourcesBid, setOwnResourcesBid] = useState<string>('');
-  const [agioPercentage, setAgioPercentage] = useState<string>('15');
-  const [returnRate, setReturnRate] = useState<string>('1.2');
-  // REMOVIDO: returnPeriod (sempre mensal agora)
-  const [financingRate, setFinancingRate] = useState<string>('12');
-  const [rentalYield, setRentalYield] = useState<string>('0.5');
-  const [reducedPaymentEnabled, setReducedPaymentEnabled] = useState(false);
-  const [reducedPaymentPercentage, setReducedPaymentPercentage] = useState<string>('50');
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [formData, setFormData] = useState({
+    creditType: 'property',
+    creditValue: '',
+    installments: '',
+    contemplationTime: '',
+    adminRate: '18',
+    reserveFundRate: '1',
+    insuranceRate: '1',
+    anticipatedTaxRate: '0.5',
+    embeddedBidPercentage: '',
+    ownResourcesBidPercentage: '',
+    bidDiscountType: 'reducePayment',
+    reducedPaymentEnabled: false,
+    reducedPaymentPercentage: '50',
+    financingRate: '2.5'
+  });
 
-  const handleSimulate = async () => {
-    try {
-      console.log('🚀 Iniciando simulação (V2.0 ESTABILIZADA)...');
-      const inputs = {
-        creditValue: parseFloat(creditValue) || 0,
-        installments: parseInt(installments) || 0,
-        contemplationTime: parseInt(contemplationTime) || 0,
-        adminRate: parseFloat(adminRate) || 0,
-        reserveFundRate: parseFloat(reserveFundRate) || 0,
-        anticipatedTaxRate: anticipatedTaxRate ? parseFloat(anticipatedTaxRate) : undefined,
-        lifeInsurance: parseFloat(lifeInsurance) || 0,
-        creditType,
-        embeddedBidPercentage: embeddedBidPercentage ? parseFloat(embeddedBidPercentage) : undefined,
-        ownResourcesBid: ownResourcesBid ? parseFloat(ownResourcesBid) : undefined,
-        agioPercentage: parseFloat(agioPercentage) || 15,
-        returnRate: parseFloat(returnRate) || 1.2,
-        returnPeriod: 'monthly' as const, // SEMPRE MENSAL - removido toggle
-        financingRate: parseFloat(financingRate) || 12,
-        rentalYield: parseFloat(rentalYield) || 0.5,
-        reducedPaymentPercentage: reducedPaymentEnabled ? parseFloat(reducedPaymentPercentage) : undefined
-      };
-
-      console.log('📝 Inputs da simulação (ESTABILIZADA):', inputs);
-      const results = calculateConsortium(inputs);
-
-      // Converter para o formato esperado pelo componente pai
-      const simulationData: SimulationData = {
-        creditValue: results.availableCredit,
-        installments: inputs.installments,
-        contemplationTime: inputs.contemplationTime,
-        monthlyPayment: results.monthlyPayment,
-        monthlyPaymentWithAnticipatedTax: results.monthlyPaymentWithAnticipatedTax,
-        postContemplationPayment: results.postContemplationPayment,
-        finalTerm: results.finalTerm,
-        bidValue: results.bidValue,
-        embeddedBidValue: results.embeddedBidValue,
-        ownResourcesBidValue: results.ownResourcesBidValue,
-        availableCredit: results.availableCredit,
-        totalPaid: results.totalPaid,
-        totalInvested: results.totalInvested,
-        reducedPaymentEnabled,
-        reducedPaymentPercentage: reducedPaymentEnabled ? parseFloat(reducedPaymentPercentage) : undefined,
-        creditType,
-        correctionIndex: results.correctionIndex,
-        financingRate: parseFloat(financingRate),
-        anticipatedTaxValue: results.anticipatedTaxValue,
-        demonstrativeRate: results.demonstrativeRate,
-        cet: results.cet,
-        scenarios: results.scenarios
-      };
-
-      console.log('✅ Dados da simulação convertidos (V2.0):', simulationData);
-      onSimulate(simulationData);
-    } catch (error) {
-      console.error('❌ Erro na simulação:', error);
-      toast.error('Erro ao calcular simulação. Verifique os dados inseridos.');
-    }
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const handleReset = () => {
-    setCreditValue('200000');
-    setInstallments('240');
-    setContemplationTime('60');
-    setAdminRate('10');
-    setReserveFundRate('2');
-    setAnticipatedTaxRate('');
-    setLifeInsurance('15');
-    setCreditType('property');
-    setEmbeddedBidPercentage('');
-    setOwnResourcesBid('');
-    setAgioPercentage('15');
-    setReturnRate('1.2');
-    // REMOVIDO: returnPeriod reset
-    setFinancingRate('12');
-    setRentalYield('0.5');
-    setReducedPaymentEnabled(false);
-    setReducedPaymentPercentage('50');
-    onReset();
-    toast.success('Formulário resetado com sucesso!');
+  const handleCreditValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatBRLCurrency(e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      creditValue: formatted
+    }));
   };
 
-  const handleExportPDF = async () => {
-    if (!hasResults) {
-      toast.error('Execute uma simulação antes de exportar o PDF');
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const creditValue = parseBRLInputToNumber(formData.creditValue);
+    const installments = parseInt(formData.installments);
+    const contemplationTime = parseInt(formData.contemplationTime);
+    const adminRate = parseFloat(formData.adminRate);
+    const reserveFundRate = parseFloat(formData.reserveFundRate);
+    const insuranceRate = parseFloat(formData.insuranceRate);
+    const anticipatedTaxRate = parseFloat(formData.anticipatedTaxRate);
+    const embeddedBidPercentage = parseFloat(formData.embeddedBidPercentage) || 0;
+    const ownResourcesBidPercentage = parseFloat(formData.ownResourcesBidPercentage) || 0;
+    const reducedPaymentPercentage = parseFloat(formData.reducedPaymentPercentage);
+    const financingRate = parseFloat(formData.financingRate);
+
+    if (!creditValue || !installments || !contemplationTime || isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate) || isNaN(anticipatedTaxRate)) {
       return;
     }
 
-    setIsGeneratingPDF(true);
-    try {
-      console.log('📄 Iniciando geração de PDF (V2.0)...');
-
-      // Dados da simulação para PDF
-      const simulationData = {
-        creditValue: parseFloat(creditValue),
-        installments: parseInt(installments),
-        contemplationTime: parseInt(contemplationTime),
-        monthlyPayment: 1000, // Será calculado dinamicamente no futuro
-        postContemplationPayment: 800,
-        finalTerm: 180,
-        bidValue: 0,
-        availableCredit: parseFloat(creditValue),
-        totalInvested: 60000,
-        creditType,
-        scenarios: {
-          quotaSale: {
-            agioGrossValue: parseFloat(creditValue) * (parseFloat(agioPercentage) / 100),
-            profit: 30000,
-            profitPercentage: 15
-          },
-          appliedCredit: {
-            appliedValue: parseFloat(creditValue),
-            finalValue: 300000,
-            totalProfit: 50000
-          }
-        },
-        cet: { cetMonthly: 0.24, cetAnnual: 2.88 },
-        demonstrativeRate: { monthlyRate: 0.05, annualRate: 0.6 }
-      };
-
-      const { data, error } = await supabase.functions.invoke('generate-pdf', {
-        body: { simulationData, userId: null }
-      });
-
-      if (error) {
-        console.error('❌ Erro na Edge Function:', error);
-        throw error;
-      }
-
-      console.log('✅ Resposta da Edge Function:', data);
-
-      if (data.success && data.pdfUrl) {
-        window.open(data.pdfUrl, '_blank');
-        toast.success('PDF gerado com sucesso!');
-      } else {
-        throw new Error(data.error || 'Erro desconhecido na geração do PDF');
-      }
-    } catch (error) {
-      console.error('❌ Erro ao gerar PDF:', error);
-      toast.error('Erro ao gerar PDF. Tente novamente.');
-    } finally {
-      setIsGeneratingPDF(false);
+    if (formData.creditType === 'vehicle' && isNaN(financingRate)) {
+      return;
     }
+
+    const simulationData = calculateSimulation({
+      creditType: formData.creditType as 'property' | 'vehicle',
+      creditValue,
+      installments,
+      contemplationTime,
+      adminRate,
+      reserveFundRate,
+      insuranceRate,
+      anticipatedTaxRate,
+      embeddedBidPercentage,
+      ownResourcesBidPercentage,
+      bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment',
+      reducedPaymentEnabled: formData.reducedPaymentEnabled,
+      reducedPaymentPercentage,
+      financingRate: formData.creditType === 'vehicle' ? financingRate : undefined
+    });
+
+    onSimulate(simulationData);
   };
 
+  const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime && 
+    formData.adminRate && formData.reserveFundRate && formData.insuranceRate && formData.anticipatedTaxRate &&
+    (formData.creditType === 'property' || (formData.creditType === 'vehicle' && formData.financingRate));
+
+  const hasBid = (parseFloat(formData.embeddedBidPercentage) || 0) + (parseFloat(formData.ownResourcesBidPercentage) || 0) > 0;
+
   return (
-    <Card className="w-full simulator-card apple-shadow">
-      <CardHeader className="pb-4 card-header">
-        <CardTitle className="text-2xl font-bold card-title flex items-center gap-2">
-          <Calculator className="w-6 h-6" style={{ color: 'rgb(59 130 246)' }} />
-          Simulador de Consórcio
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-6 p-6 card-content">
-        {/* Dados Básicos */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold border-b pb-2" style={{ borderColor: 'rgb(59 130 246 / 0.2)' }}>
-            Dados Básicos
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="creditValue" className="text-sm font-medium">
-                Valor do Crédito (R$)
+    <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+          <Calculator className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Simulador</h2>
+          <p className="text-slate-600">Insira os dados para começar</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Seletor de Tipo de Crédito */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-slate-700">
+            Tipo de Crédito
+          </Label>
+          <RadioGroup value={formData.creditType} onValueChange={value => handleInputChange('creditType', value)} className="flex flex-row gap-6">
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="property" id="property" />
+              <Label htmlFor="property" className="text-sm cursor-pointer flex items-center gap-2">
+                🏠 Imóvel
               </Label>
-              <Input 
-                id="creditValue" 
-                type="number" 
-                value={creditValue} 
-                onChange={e => setCreditValue(e.target.value)} 
-                placeholder="200.000" 
-                className="input-stabilized transition-stabilized" 
-              />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="installments" className="text-sm font-medium">
-                Prazo (meses)
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="vehicle" id="vehicle" />
+              <Label htmlFor="vehicle" className="text-sm cursor-pointer flex items-center gap-2">
+                🚗 Veículo
               </Label>
-              <Input 
-                id="installments" 
-                type="number" 
-                value={installments} 
-                onChange={e => setInstallments(e.target.value)} 
-                placeholder="240" 
-                max="260" 
-                className="input-stabilized transition-stabilized" 
-              />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="contemplationTime" className="text-sm font-medium">
-                Contemplação (mês)
-              </Label>
-              <Input 
-                id="contemplationTime" 
-                type="number" 
-                value={contemplationTime} 
-                onChange={e => setContemplationTime(e.target.value)} 
-                placeholder="60" 
-                className="input-stabilized transition-stabilized" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="creditType" className="text-sm font-medium">
-                Tipo de Crédito
-              </Label>
-              <Select value={creditType} onValueChange={(value: 'property' | 'vehicle') => setCreditType(value)}>
-                <SelectTrigger className="select-stabilized transition-stabilized">
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="property">Imóvel</SelectItem>
-                  <SelectItem value="vehicle">Veículo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          </RadioGroup>
+          <p className="text-xs text-slate-500">
+            Índice de correção: {formData.creditType === 'property' ? 'INCC' : 'IPCA'}
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="creditValue" className="text-sm font-medium text-slate-700">
+            Valor do Crédito
+          </Label>
+          <Input id="creditValue" type="text" inputMode="numeric" placeholder="R$ 0,00" value={formData.creditValue} onChange={handleCreditValueChange} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" autoComplete="off" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="installments">Parcelas</Label>
+            <Input 
+              id="installments" 
+              type="number" 
+              value={formData.installments} 
+              onChange={e => handleInputChange('installments', e.target.value)} 
+              min={12} 
+              max={260} 
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+            />
+            <p className="text-xs text-slate-500">Entre 12 e 260 parcelas</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contemplationTime" className="text-sm font-medium text-slate-700">
+              Contemplação (meses)
+            </Label>
+            <Input 
+              id="contemplationTime" 
+              type="number" 
+              placeholder="36" 
+              value={formData.contemplationTime} 
+              onChange={e => handleInputChange('contemplationTime', e.target.value)} 
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+              min="6" 
+              max="120" 
+            />
           </div>
         </div>
 
-        <Separator />
+        {/* Taxa de Financiamento (apenas para veículo) */}
+        {formData.creditType === 'vehicle' && (
+          <div className="space-y-2">
+            <Label htmlFor="financingRate" className="text-sm font-medium text-slate-700">
+              Taxa de Juros do Financiamento (% a.m.)
+            </Label>
+            <Input 
+              id="financingRate" 
+              type="number" 
+              placeholder="2.5" 
+              value={formData.financingRate} 
+              onChange={e => handleInputChange('financingRate', e.target.value)} 
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+              min="0.1" 
+              max="10" 
+              step="0.1" 
+            />
+          </div>
+        )}
 
-        {/* Taxas */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold border-b pb-2" style={{ borderColor: 'rgb(59 130 246 / 0.2)' }}>
-            Taxas e Encargos
-          </h3>
+          <div className="border-t border-slate-200 pt-4">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Taxas do Consórcio</h3>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="adminRate" className="text-sm font-medium">
-                Taxa Admin. (%)
+              <Label htmlFor="adminRate" className="text-sm font-medium text-slate-700">
+                Taxa de Administração (%)
               </Label>
               <Input 
                 id="adminRate" 
                 type="number" 
-                value={adminRate} 
-                onChange={e => setAdminRate(e.target.value)} 
-                placeholder="10" 
-                step="0.1" 
-                className="input-stabilized transition-stabilized" 
+                placeholder="18" 
+                value={formData.adminRate} 
+                onChange={e => handleInputChange('adminRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="30" 
+                step="0.01" 
               />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="reserveFundRate" className="text-sm font-medium">
-                Fundo Reserva (%)
+              <Label htmlFor="reserveFundRate" className="text-sm font-medium text-slate-700">
+                Fundo de Reserva (%)
               </Label>
               <Input 
                 id="reserveFundRate" 
                 type="number" 
-                value={reserveFundRate} 
-                onChange={e => setReserveFundRate(e.target.value)} 
-                placeholder="2" 
-                step="0.1" 
-                className="input-stabilized transition-stabilized" 
+                placeholder="1" 
+                value={formData.reserveFundRate} 
+                onChange={e => handleInputChange('reserveFundRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="10" 
+                step="0.01" 
               />
             </div>
-            
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="anticipatedTaxRate" className="text-sm font-medium">
+              <Label htmlFor="insuranceRate" className="text-sm font-medium text-slate-700">
+                Seguro de Vida (%)
+              </Label>
+              <Input 
+                id="insuranceRate" 
+                type="number" 
+                placeholder="1" 
+                value={formData.insuranceRate} 
+                onChange={e => handleInputChange('insuranceRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="10" 
+                step="0.01" 
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="anticipatedTaxRate" className="text-sm font-medium text-slate-700">
                 Taxa Antecipada (%)
               </Label>
               <Input 
                 id="anticipatedTaxRate" 
                 type="number" 
-                value={anticipatedTaxRate} 
-                onChange={e => setAnticipatedTaxRate(e.target.value)} 
                 placeholder="0.5" 
-                step="0.1" 
-                className="input-stabilized transition-stabilized" 
+                value={formData.anticipatedTaxRate} 
+                onChange={e => handleInputChange('anticipatedTaxRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="5" 
+                step="0.01" 
               />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="lifeInsurance" className="text-sm font-medium">
-                Seguro de Vida (R$)
-              </Label>
-              <Input 
-                id="lifeInsurance" 
-                type="number" 
-                value={lifeInsurance} 
-                onChange={e => setLifeInsurance(e.target.value)} 
-                placeholder="15" 
-                className="input-stabilized transition-stabilized" 
-              />
+              <p className="text-xs text-slate-500">Diluída nas primeiras 12 parcelas</p>
             </div>
           </div>
         </div>
 
-        {/* Parcela Reduzida */}
+        {/* Seção: Parcela Reduzida */}
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id="reducedPayment" 
-              checked={reducedPaymentEnabled} 
-              onCheckedChange={setReducedPaymentEnabled} 
-            />
-            <Label htmlFor="reducedPayment" className="text-sm font-medium">
-              Habilitar Parcela Reduzida
-            </Label>
-          </div>
-          
-          {reducedPaymentEnabled && (
-            <div className="space-y-2">
-              <Label htmlFor="reducedPaymentPercentage" className="text-sm font-medium">
-                Percentual de Redução (%)
-              </Label>
-              <Input 
-                id="reducedPaymentPercentage" 
-                type="number" 
-                value={reducedPaymentPercentage} 
-                onChange={e => setReducedPaymentPercentage(e.target.value)} 
-                placeholder="50" 
-                min="1" 
-                max="100" 
-                className="input-stabilized transition-stabilized" 
-              />
-            </div>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Lances */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold border-b pb-2" style={{ borderColor: 'rgb(59 130 246 / 0.2)' }}>
-            Lances
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="embeddedBidPercentage" className="text-sm font-medium">
-                Lance Embutido (%)
-              </Label>
-              <Input 
-                id="embeddedBidPercentage" 
-                type="number" 
-                value={embeddedBidPercentage} 
-                onChange={e => setEmbeddedBidPercentage(e.target.value)} 
-                placeholder="0" 
-                step="0.1" 
-                className="input-stabilized transition-stabilized" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="ownResourcesBid" className="text-sm font-medium">
-                Lance Recursos Próprios (R$)
-              </Label>
-              <Input 
-                id="ownResourcesBid" 
-                type="number" 
-                value={ownResourcesBid} 
-                onChange={e => setOwnResourcesBid(e.target.value)} 
-                placeholder="0" 
-                className="input-stabilized transition-stabilized" 
-              />
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Cenários */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold border-b pb-2" style={{ borderColor: 'rgb(59 130 246 / 0.2)' }}>
-            Cenários de Análise
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="agioPercentage" className="text-sm font-medium">
-                Ágio para Venda (%)
-              </Label>
-              <Input 
-                id="agioPercentage" 
-                type="number" 
-                value={agioPercentage} 
-                onChange={e => setAgioPercentage(e.target.value)} 
-                placeholder="15" 
-                step="0.1" 
-                className="input-stabilized transition-stabilized" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="returnRate" className="text-sm font-medium">
-                Taxa de Retorno (% a.m.)
-              </Label>
-              <Input 
-                id="returnRate" 
-                type="number" 
-                value={returnRate} 
-                onChange={e => setReturnRate(e.target.value)} 
-                placeholder="1.2" 
-                step="0.1" 
-                className="input-stabilized transition-stabilized" 
-              />
-            </div>
-            
-            {creditType === 'vehicle' && (
-              <div className="space-y-2">
-                <Label htmlFor="financingRate" className="text-sm font-medium">
-                  Taxa Financiamento (% a.a.)
-                </Label>
-                <Input 
-                  id="financingRate" 
-                  type="number" 
-                  value={financingRate} 
-                  onChange={e => setFinancingRate(e.target.value)} 
-                  placeholder="12" 
-                  step="0.1" 
-                  className="input-stabilized transition-stabilized" 
-                />
+          <div className="border-t border-slate-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Parcela Reduzida</h3>
+                <p className="text-sm text-slate-500">Pagar parcela reduzida até a contemplação</p>
               </div>
-            )}
-            
-            {creditType === 'property' && (
-              <div className="space-y-2">
-                <Label htmlFor="rentalYield" className="text-sm font-medium">
-                  Rendimento Aluguel (% a.m.)
+              <Switch checked={formData.reducedPaymentEnabled} onCheckedChange={checked => handleInputChange('reducedPaymentEnabled', checked)} className="bg-slate-500 hover:bg-slate-400 text-gray-600" />
+            </div>
+
+            {formData.reducedPaymentEnabled && <div className="space-y-2">
+                <Label htmlFor="reducedPaymentPercentage" className="text-sm font-medium text-slate-700">
+                  Percentual da Parcela Reduzida
                 </Label>
-                <Input 
-                  id="rentalYield" 
-                  type="number" 
-                  value={rentalYield} 
-                  onChange={e => setRentalYield(e.target.value)} 
-                  placeholder="0.5" 
-                  step="0.1" 
-                  className="input-stabilized transition-stabilized" 
-                />
-              </div>
-            )}
+                <div className="relative">
+                  <Input id="reducedPaymentPercentage" type="number" placeholder="50" value={formData.reducedPaymentPercentage} onChange={e => handleInputChange('reducedPaymentPercentage', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 pr-10" min="1" max="99" />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-slate-500 text-lg">%</span>
+                  </div>
+                </div>
+              </div>}
           </div>
         </div>
 
-        {/* Botões */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-4">
-          <Button 
-            onClick={handleSimulate} 
-            disabled={isLoading} 
-            className="flex-1 btn-primary transition-stabilized font-semibold py-3 px-6"
-          >
-            <Calculator className="w-4 h-4 mr-2" />
-            {isLoading ? 'Calculando...' : 'Simular'}
-          </Button>
+        <div className="space-y-4">
+          <div className="border-t border-slate-200 pt-4">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Lance (Opcional)</h3>
+          </div>
           
-          <Button 
-            variant="outline" 
-            onClick={handleReset} 
-            disabled={isLoading} 
-            className="flex-1 btn-secondary transition-stabilized font-semibold py-3 px-6"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Limpar
-          </Button>
-          
-          <Button 
-            variant="secondary" 
-            onClick={handleExportPDF} 
-            disabled={!hasResults || isGeneratingPDF} 
-            className="flex-1 btn-success transition-stabilized font-semibold py-3 px-6"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            {isGeneratingPDF ? 'Gerando...' : 'Exportar PDF'}
-          </Button>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="embeddedBidPercentage" className="text-sm font-medium text-slate-700">
+                Lance Embutido (% do crédito)
+              </Label>
+              <Input id="embeddedBidPercentage" type="number" placeholder="0" value={formData.embeddedBidPercentage} onChange={e => handleInputChange('embeddedBidPercentage', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="30" step="0.1" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="ownResourcesBidPercentage" className="text-sm font-medium text-slate-700">
+                Lance com Recursos Próprios (%)
+              </Label>
+              <Input id="ownResourcesBidPercentage" type="number" placeholder="0" value={formData.ownResourcesBidPercentage} onChange={e => handleInputChange('ownResourcesBidPercentage', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="50" step="0.1" />
+            </div>
+          </div>
+
+          {hasBid && <div className="space-y-3">
+              <Label className="text-sm font-medium text-slate-700">
+                Abatimento do Lance
+              </Label>
+              <RadioGroup value={formData.bidDiscountType} onValueChange={value => handleInputChange('bidDiscountType', value)} className="flex flex-col space-y-2">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="reducePayment" id="reducePayment" />
+                  <Label htmlFor="reducePayment" className="text-sm cursor-pointer">
+                    Reduzir valor da parcela
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="reduceTerm" id="reduceTerm" />
+                  <Label htmlFor="reduceTerm" className="text-sm cursor-pointer">
+                    Reduzir prazo
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>}
         </div>
-      </CardContent>
+
+        <div className="flex gap-3 pt-4">
+          <Button type="submit" disabled={!isFormValid || isLoading} className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border-0">
+            {isLoading ? <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                Calculando...
+              </div> : <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Simular Agora
+              </div>}
+          </Button>
+
+          {hasResults && <Button type="button" onClick={onReset} variant="outline" className="h-12 px-6 border-2 border-slate-200 hover:border-blue-300 rounded-xl transition-all duration-200 bg-slate-400 hover:bg-slate-300">
+              <RotateCcw className="w-4 h-4" />
+            </Button>}
+        </div>
+      </form>
+
+      <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+        <p className="text-sm text-blue-700">
+          <strong>Dica:</strong> Para melhores resultados, use dados reais do consórcio que você está apresentando ao cliente.
+        </p>
+      </div>
     </Card>
   );
 };
