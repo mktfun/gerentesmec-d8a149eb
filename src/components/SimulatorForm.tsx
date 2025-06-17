@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { SimulationData } from '@/pages/Index';
 import { calculateSimulation } from '@/utils/consortiumCalculations';
+
 interface SimulatorFormProps {
   onSimulate: (data: SimulationData) => void;
   isLoading: boolean;
@@ -57,6 +58,7 @@ export const SimulatorForm = ({
     adminRate: '18',
     reserveFundRate: '1',
     insuranceRate: '1',
+    anticipatedTaxRate: '0.5',
     embeddedBidPercentage: '',
     ownResourcesBidPercentage: '',
     bidDiscountType: 'reducePayment',
@@ -85,11 +87,12 @@ export const SimulatorForm = ({
     const adminRate = parseFloat(formData.adminRate);
     const reserveFundRate = parseFloat(formData.reserveFundRate);
     const insuranceRate = parseFloat(formData.insuranceRate);
+    const anticipatedTaxRate = parseFloat(formData.anticipatedTaxRate);
     const embeddedBidPercentage = parseFloat(formData.embeddedBidPercentage) || 0;
     const ownResourcesBidPercentage = parseFloat(formData.ownResourcesBidPercentage) || 0;
     const reducedPaymentPercentage = parseFloat(formData.reducedPaymentPercentage);
     const financingRate = parseFloat(formData.financingRate);
-    if (!creditValue || !installments || !contemplationTime || isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate)) {
+    if (!creditValue || !installments || !contemplationTime || isNaN(adminRate) || isNaN(reserveFundRate) || isNaN(insuranceRate) || isNaN(anticipatedTaxRate)) {
       return;
     }
     if (formData.creditType === 'vehicle' && isNaN(financingRate)) {
@@ -103,6 +106,7 @@ export const SimulatorForm = ({
       adminRate,
       reserveFundRate,
       insuranceRate,
+      anticipatedTaxRate,
       embeddedBidPercentage,
       ownResourcesBidPercentage,
       bidDiscountType: formData.bidDiscountType as 'reduceTerm' | 'reducePayment',
@@ -112,7 +116,10 @@ export const SimulatorForm = ({
     });
     onSimulate(simulationData);
   };
-  const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime && formData.adminRate && formData.reserveFundRate && formData.insuranceRate && (formData.creditType === 'property' || formData.creditType === 'vehicle' && formData.financingRate);
+  const isFormValid = formData.creditValue && formData.installments && formData.contemplationTime && 
+    formData.adminRate && formData.reserveFundRate && formData.insuranceRate && formData.anticipatedTaxRate &&
+    (formData.creditType === 'property' || (formData.creditType === 'vehicle' && formData.financingRate));
+
   const hasBid = (parseFloat(formData.embeddedBidPercentage) || 0) + (parseFloat(formData.ownResourcesBidPercentage) || 0) > 0;
   return <Card className="bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl p-8">
       <div className="flex items-center gap-3 mb-6">
@@ -160,7 +167,15 @@ export const SimulatorForm = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="installments">Parcelas</Label>
-            <Input id="installments" type="number" value={formData.installments} onChange={e => handleInputChange('installments', e.target.value)} min={12} max={260} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" />
+            <Input 
+              id="installments" 
+              type="number" 
+              value={formData.installments} 
+              onChange={e => handleInputChange('installments', e.target.value)} 
+              min={12} 
+              max={260} 
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+            />
             <p className="text-xs text-slate-500">Entre 12 e 260 parcelas</p>
           </div>
 
@@ -168,43 +183,114 @@ export const SimulatorForm = ({
             <Label htmlFor="contemplationTime" className="text-sm font-medium text-slate-700">
               Contemplação (meses)
             </Label>
-            <Input id="contemplationTime" type="number" placeholder="36" value={formData.contemplationTime} onChange={e => handleInputChange('contemplationTime', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="6" max="120" />
+            <Input 
+              id="contemplationTime" 
+              type="number" 
+              placeholder="36" 
+              value={formData.contemplationTime} 
+              onChange={e => handleInputChange('contemplationTime', e.target.value)} 
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+              min="6" 
+              max="120" 
+            />
           </div>
         </div>
 
         {/* Taxa de Financiamento (apenas para veículo) */}
-        {formData.creditType === 'vehicle' && <div className="space-y-2">
+        {formData.creditType === 'vehicle' && (
+          <div className="space-y-2">
             <Label htmlFor="financingRate" className="text-sm font-medium text-slate-700">
               Taxa de Juros do Financiamento (% a.m.)
             </Label>
-            <Input id="financingRate" type="number" placeholder="2.5" value={formData.financingRate} onChange={e => handleInputChange('financingRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0.1" max="10" step="0.1" />
-          </div>}
+            <Input 
+              id="financingRate" 
+              type="number" 
+              placeholder="2.5" 
+              value={formData.financingRate} 
+              onChange={e => handleInputChange('financingRate', e.target.value)} 
+              className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+              min="0.1" 
+              max="10" 
+              step="0.1" 
+            />
+          </div>
+        )}
 
         <div className="space-y-4">
           <div className="border-t border-slate-200 pt-4">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">Taxas do Consórcio</h3>
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="adminRate" className="text-sm font-medium text-slate-700">
                 Taxa de Administração (%)
               </Label>
-              <Input id="adminRate" type="number" placeholder="18" value={formData.adminRate} onChange={e => handleInputChange('adminRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="30" step="0.01" />
+              <Input 
+                id="adminRate" 
+                type="number" 
+                placeholder="18" 
+                value={formData.adminRate} 
+                onChange={e => handleInputChange('adminRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="30" 
+                step="0.01" 
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="reserveFundRate" className="text-sm font-medium text-slate-700">
                 Fundo de Reserva (%)
               </Label>
-              <Input id="reserveFundRate" type="number" placeholder="1" value={formData.reserveFundRate} onChange={e => handleInputChange('reserveFundRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="10" step="0.01" />
+              <Input 
+                id="reserveFundRate" 
+                type="number" 
+                placeholder="1" 
+                value={formData.reserveFundRate} 
+                onChange={e => handleInputChange('reserveFundRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="10" 
+                step="0.01" 
+              />
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="insuranceRate" className="text-sm font-medium text-slate-700">
                 Seguro de Vida (%)
               </Label>
-              <Input id="insuranceRate" type="number" placeholder="1" value={formData.insuranceRate} onChange={e => handleInputChange('insuranceRate', e.target.value)} className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" min="0" max="10" step="0.01" />
+              <Input 
+                id="insuranceRate" 
+                type="number" 
+                placeholder="1" 
+                value={formData.insuranceRate} 
+                onChange={e => handleInputChange('insuranceRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="10" 
+                step="0.01" 
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="anticipatedTaxRate" className="text-sm font-medium text-slate-700">
+                Taxa Antecipada (%)
+              </Label>
+              <Input 
+                id="anticipatedTaxRate" 
+                type="number" 
+                placeholder="0.5" 
+                value={formData.anticipatedTaxRate} 
+                onChange={e => handleInputChange('anticipatedTaxRate', e.target.value)} 
+                className="h-12 text-lg font-medium border-2 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20" 
+                min="0" 
+                max="5" 
+                step="0.01" 
+              />
+              <p className="text-xs text-slate-500">Diluída nas primeiras 12 parcelas</p>
             </div>
           </div>
         </div>
