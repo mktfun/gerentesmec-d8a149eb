@@ -249,7 +249,7 @@ export const SimulatorForm = ({
           </div>
         </div>
 
-        <Separator />
+        <Separator className="bg-gray-700" />
 
         {/* Taxas */}
         <div className="space-y-4">
