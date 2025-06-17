@@ -1,67 +1,85 @@
 
-// Função para calcular a Taxa Interna de Retorno (TIR/IRR) para o CET
-export const calculateIRR = (cashFlows: number[], guess: number = 0.1, maxIterations: number = 100): number => {
+// Função para calcular a Taxa Interna de Retorno (TIR/IRR) usando Newton-Raphson
+export const calculateIRR = (cashFlows: number[], guess: number = 0.01, maxIterations: number = 1000): number => {
   let rate = guess;
+  const tolerance = 0.0000001;
   
-  for (let i = 0; i < maxIterations; i++) {
+  for (let iteration = 0; iteration < maxIterations; iteration++) {
     let npv = 0;
     let dnpv = 0;
     
-    for (let j = 0; j < cashFlows.length; j++) {
-      npv += cashFlows[j] / Math.pow(1 + rate, j);
-      dnpv += (-j * cashFlows[j]) / Math.pow(1 + rate, j + 1);
+    // Calcular NPV e sua derivada
+    for (let period = 0; period < cashFlows.length; period++) {
+      const divisor = Math.pow(1 + rate, period);
+      npv += cashFlows[period] / divisor;
+      
+      if (period > 0) {
+        dnpv += (-period * cashFlows[period]) / Math.pow(1 + rate, period + 1);
+      }
     }
     
-    if (Math.abs(dnpv) < 0.000001) break;
+    // Verificar convergência
+    if (Math.abs(npv) < tolerance) {
+      return rate;
+    }
     
+    // Evitar divisão por zero
+    if (Math.abs(dnpv) < tolerance) {
+      break;
+    }
+    
+    // Atualizar taxa usando Newton-Raphson
     const newRate = rate - npv / dnpv;
     
-    if (Math.abs(newRate - rate) < 0.000001) {
+    // Verificar convergência da taxa
+    if (Math.abs(newRate - rate) < tolerance) {
       return newRate;
     }
     
     rate = newRate;
+    
+    // Limitar a taxa para valores razoáveis
+    if (rate < -0.99) rate = -0.99;
+    if (rate > 10) rate = 10;
   }
   
   return rate;
 };
 
-export const calculateCET = (creditValue: number, monthlyPayments: number[], anticipatedTaxValue: number = 0): { cetMonthly: number; cetAnnual: number } => {
-  // Fluxo de caixa corrigido: entrada positiva (crédito recebido) e saídas negativas (parcelas pagas)
-  const cashFlows: number[] = [creditValue]; // Entrada inicial
-  
-  // Adicionar as parcelas como saídas negativas
-  monthlyPayments.forEach(payment => {
-    cashFlows.push(-payment);
-  });
-  
+export const calculateCET = (availableCredit: number, postContemplationPayment: number, finalTerm: number): { cetMonthly: number; cetAnnual: number } => {
   try {
+    // Validação de entrada
+    if (availableCredit <= 0 || postContemplationPayment <= 0 || finalTerm <= 0) {
+      return { cetMonthly: 0, cetAnnual: 0 };
+    }
+    
+    // Fluxo de caixa correto para CET:
+    // Período 0: Entrada do crédito líquido (POSITIVO)
+    // Períodos 1 a finalTerm: Parcelas pós-contemplação (NEGATIVAS)
+    const cashFlows: number[] = [availableCredit]; // Entrada positiva
+    
+    // Adicionar as parcelas como saídas negativas
+    for (let month = 1; month <= finalTerm; month++) {
+      cashFlows.push(-postContemplationPayment);
+    }
+    
+    // Calcular a TIR
     const cetMonthly = calculateIRR(cashFlows);
-    // Garantir que o resultado seja um número válido e positivo
-    const validCetMonthly = isNaN(cetMonthly) || !isFinite(cetMonthly) ? 0 : Math.abs(cetMonthly);
-    // Conversão correta para taxa anual composta
-    const cetAnnual = Math.pow(1 + validCetMonthly, 12) - 1;
+    
+    // Garantir que o resultado seja válido
+    if (isNaN(cetMonthly) || !isFinite(cetMonthly) || cetMonthly < 0) {
+      return { cetMonthly: 0, cetAnnual: 0 };
+    }
+    
+    // CET Anual = CET Mensal * 12 (taxa simples para demonstração)
+    const cetAnnual = cetMonthly * 12;
     
     return {
-      cetMonthly: validCetMonthly * 100, // Converter para percentual
+      cetMonthly: cetMonthly * 100, // Converter para percentual
       cetAnnual: cetAnnual * 100
     };
   } catch (error) {
-    // Fallback melhorado se o IRR não convergir
-    const totalPaid = monthlyPayments.reduce((sum, payment) => sum + payment, 0);
-    const periods = monthlyPayments.length;
-    
-    if (periods > 0 && creditValue > 0) {
-      // Cálculo aproximado mais preciso
-      const effectiveRate = Math.pow(totalPaid / creditValue, 1/periods) - 1;
-      const annualRate = Math.pow(1 + effectiveRate, 12) - 1;
-      
-      return {
-        cetMonthly: Math.max(0, effectiveRate * 100),
-        cetAnnual: Math.max(0, annualRate * 100)
-      };
-    }
-    
+    console.error('Erro no cálculo do CET:', error);
     return { cetMonthly: 0, cetAnnual: 0 };
   }
 };

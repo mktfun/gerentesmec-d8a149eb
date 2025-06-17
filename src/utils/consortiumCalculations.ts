@@ -1,4 +1,3 @@
-
 import { SimulationData } from '@/pages/Index';
 import { calculateCET, calculateDemonstrativeRate } from './financialMetrics';
 
@@ -123,19 +122,8 @@ export const calculateSimulation = (input: CalculationInput): SimulationData => 
   // Calcular métricas financeiras
   const demonstrativeRate = calculateDemonstrativeRate(adminRate, reserveFundRate, installments);
   
-  // Preparar fluxo de pagamentos para CET (CORRIGIDO PARA IRR)
-  const monthlyPayments: number[] = [];
-  for (let i = 0; i < installmentsWithAnticipatedTax; i++) {
-    monthlyPayments.push(monthlyPaymentWithAnticipatedTax);
-  }
-  for (let i = installmentsWithAnticipatedTax; i < contemplationTime; i++) {
-    monthlyPayments.push(actualMonthlyPayment);
-  }
-  for (let i = 0; i < finalTerm; i++) {
-    monthlyPayments.push(postContemplationPayment);
-  }
-  
-  const cet = calculateCET(creditValue, monthlyPayments, anticipatedTaxValue);
+  // CÁLCULO CORRETO DO CET baseado no fluxo pós-contemplação
+  const cet = calculateCET(availableCredit, postContemplationPayment, finalTerm);
   
   // Definir índice de correção baseado no tipo de crédito
   const correctionIndex = creditType === 'property' ? 'INCC' : 'IPCA';
