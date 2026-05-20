@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, TrendingUp, TrendingDown, Filter, Download, DollarSign, Target } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
 import { mockLeads } from '@/data/mockData';
 
 const fadeUp = (delay = 0) => ({
@@ -9,44 +9,39 @@ const fadeUp = (delay = 0) => ({
   transition: { type: 'spring', stiffness: 280, damping: 26, delay },
 });
 
-const formatMoney = (val: number) => {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-};
-
 const Relatorios = () => {
   const [dateFilter, setDateFilter] = useState<'today' | '7days' | 'month'>('month');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fake "update" effect when changing filters
   const handleFilterChange = (filter: 'today' | '7days' | 'month') => {
     setIsUpdating(true);
     setDateFilter(filter);
     setTimeout(() => setIsUpdating(false), 600);
   };
 
-  // Mock numbers based on filter
   const multiplier = dateFilter === 'today' ? 0.1 : dateFilter === '7days' ? 0.3 : 1;
   
   const metrics = {
-    revenue: 45000 * multiplier,
-    revenueChange: dateFilter === 'month' ? 15 : dateFilter === '7days' ? 4 : -2,
-    closedLeads: Math.floor(42 * multiplier),
-    closedChange: dateFilter === 'month' ? 8 : dateFilter === '7days' ? -3 : 0,
-    ticketMedio: 1071,
-    ticketChange: 5,
+    score: Math.round(78.5 * (1 + multiplier * 0.05)),
+    scoreChange: 4,
+    tmr: Math.round(14 * (1 - multiplier * 0.1)), // Tempo medio resposta (menor é melhor)
+    tmrChange: -2,
+    slasRisk: Math.floor(12 * multiplier),
+    slasChange: dateFilter === 'month' ? -5 : 2,
   };
 
-  const wonLeads = mockLeads.filter(l => l.funnel_stage === 'closed_won');
+  const auditedLeads = mockLeads.filter(l => l.score !== null);
 
   return (
-    <div className="p-8">
+    <div className="p-8 pb-20">
+      
       {/* ── Header & Filters ── */}
       <motion.div {...fadeUp(0)} className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
         <div>
-          <p className="label-caps text-emerald-400/70 mb-1">Analytics</p>
-          <h1 className="text-2xl font-black text-foreground">Relatórios Financeiros</h1>
+          <p className="label-caps text-indigo-400/70 mb-1">Analytics Premium</p>
+          <h1 className="text-2xl font-black text-foreground">Saúde do Atendimento</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Resultados comerciais, ticket médio e comparativo com o período anterior.
+            Métricas de qualidade, tempo de resposta e gargalos de SLA da rede.
           </p>
         </div>
 
@@ -60,92 +55,121 @@ const Relatorios = () => {
             <Calendar className="w-4 h-4" />
             Customizado
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-colors shadow-[0_0_20px_rgba(16,185,129,0.25)]">
+          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
             <Download className="w-4 h-4" />
-            Exportar CSV
+            Exportar XLS
           </button>
         </div>
       </motion.div>
 
-      {/* ── KPI Cards ── */}
+      {/* ── KPI Cards Premium ── */}
       <div className={`grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'}`}>
         
-        {/* Faturamento */}
-        <motion.div {...fadeUp(0.1)} className="p-6 rounded-3xl bg-[#111118] border border-white/[0.08] relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-6 opacity-10"><DollarSign className="w-24 h-24" /></div>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Faturamento Gerado</p>
-          <h2 className="text-4xl font-black text-foreground mb-4">{formatMoney(metrics.revenue)}</h2>
-          <div className="flex items-center gap-2">
-            <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.revenueChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-              {metrics.revenueChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-              {Math.abs(metrics.revenueChange)}%
-            </span>
-            <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
+        {/* Score Geral */}
+        <motion.div {...fadeUp(0.1)} className="p-6 rounded-3xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden shadow-[0_0_40px_rgba(99,102,241,0.05)]">
+          <div className="absolute top-0 right-0 p-6 opacity-10"><ShieldCheck className="w-24 h-24" /></div>
+          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15)_0%,transparent_70%)] pointer-events-none" />
+          
+          <div className="relative z-10">
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">Score Global de Qualidade</p>
+            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">{metrics.score}<span className="text-2xl text-white/40">%</span></h2>
+            <div className="flex items-center gap-2">
+              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                {metrics.scoreChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {Math.abs(metrics.scoreChange)}%
+              </span>
+              <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+            </div>
           </div>
         </motion.div>
 
-        {/* Fechamentos */}
-        <motion.div {...fadeUp(0.15)} className="p-6 rounded-3xl bg-[#111118] border border-white/[0.08] relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-6 opacity-10"><Target className="w-24 h-24" /></div>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Negócios Fechados</p>
-          <h2 className="text-4xl font-black text-foreground mb-4">{metrics.closedLeads}</h2>
-          <div className="flex items-center gap-2">
-            <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.closedChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-              {metrics.closedChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-              {Math.abs(metrics.closedChange)}%
-            </span>
-            <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
+        {/* TMR */}
+        <motion.div {...fadeUp(0.15)} className="p-6 rounded-3xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden shadow-[0_0_40px_rgba(52,211,153,0.05)]">
+          <div className="absolute top-0 right-0 p-6 opacity-10"><Clock className="w-24 h-24" /></div>
+          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.15)_0%,transparent_70%)] pointer-events-none" />
+          
+          <div className="relative z-10">
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-3">Tempo Médio de Resposta (TMR)</p>
+            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">{metrics.tmr}<span className="text-2xl text-white/40">m</span></h2>
+            <div className="flex items-center gap-2">
+              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.tmrChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                {metrics.tmrChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {Math.abs(metrics.tmrChange)}m (Melhoria)
+              </span>
+              <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+            </div>
           </div>
         </motion.div>
 
-        {/* Ticket Médio */}
-        <motion.div {...fadeUp(0.2)} className="p-6 rounded-3xl bg-[#111118] border border-white/[0.08] relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-6 opacity-10"><Filter className="w-24 h-24" /></div>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Ticket Médio</p>
-          <h2 className="text-4xl font-black text-foreground mb-4">{formatMoney(metrics.ticketMedio)}</h2>
-          <div className="flex items-center gap-2">
-            <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.ticketChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-              {metrics.ticketChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-              {Math.abs(metrics.ticketChange)}%
-            </span>
-            <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
+        {/* SLAs */}
+        <motion.div {...fadeUp(0.2)} className="p-6 rounded-3xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden shadow-[0_0_40px_rgba(244,63,94,0.05)]">
+          <div className="absolute top-0 right-0 p-6 opacity-10"><AlertTriangle className="w-24 h-24" /></div>
+          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.15)_0%,transparent_70%)] pointer-events-none" />
+          
+          <div className="relative z-10">
+            <p className="text-xs font-bold uppercase tracking-widest text-rose-400 mb-3">Orçamentos em Risco (SLA)</p>
+            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">{metrics.slasRisk}</h2>
+            <div className="flex items-center gap-2">
+              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.slasChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                {metrics.slasChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {Math.abs(metrics.slasChange)} leads
+              </span>
+              <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+            </div>
           </div>
         </motion.div>
 
       </div>
 
-      {/* ── Extrato Tabela ── */}
-      <motion.div {...fadeUp(0.3)} className={`bg-card border border-border rounded-2xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'}`}>
-        <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/20">
-          <h3 className="text-sm font-bold text-foreground">Extrato de Conversões</h3>
-          <span className="text-xs font-medium text-muted-foreground">Mostrando os fechamentos mais recentes</span>
+      {/* ── Log de Auditoria ── */}
+      <motion.div {...fadeUp(0.3)} className={`bg-[#0a0a0f] border border-white/[0.08] rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(255,255,255,0.02)]`}>
+        <div className="px-8 py-6 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
+          <div>
+            <h3 className="text-base font-black text-white">Log de Auditorias Recentes</h3>
+            <p className="text-xs font-medium text-white/50 mt-1">Transparência total nos apontamentos de qualidade.</p>
+          </div>
+          <Target className="w-5 h-5 text-white/20" />
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-muted/30 border-b border-border text-xs uppercase text-muted-foreground tracking-wider font-bold">
+            <thead className="bg-white/[0.01] border-b border-white/[0.08] text-xs uppercase text-white/40 tracking-wider font-bold">
               <tr>
-                <th className="px-6 py-4">Cliente</th>
-                <th className="px-6 py-4">Veículo</th>
-                <th className="px-6 py-4">Data</th>
-                <th className="px-6 py-4 text-right">Valor Negociado</th>
+                <th className="px-8 py-4">Cliente / Veículo</th>
+                <th className="px-8 py-4">Unidade</th>
+                <th className="px-8 py-4">Status Funil</th>
+                <th className="px-8 py-4 text-right">Score Auditado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {wonLeads.length > 0 ? (
-                wonLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-foreground">{lead.customer_name}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{lead.customer_vehicle}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{new Date(lead.last_message_at).toLocaleDateString('pt-BR')}</td>
-                    <td className="px-6 py-4 text-right font-bold text-emerald-500">
-                      {lead.ticket_value ? formatMoney(lead.ticket_value) : '—'}
+            <tbody className="divide-y divide-white/[0.04]">
+              {auditedLeads.length > 0 ? (
+                auditedLeads.map((lead) => (
+                  <tr key={lead.id} className="hover:bg-white/[0.03] transition-colors">
+                    <td className="px-8 py-4">
+                      <p className="font-bold text-white/90">{lead.customer_name}</p>
+                      <p className="text-xs text-white/40">{lead.customer_vehicle}</p>
+                    </td>
+                    <td className="px-8 py-4 text-white/60 font-semibold">{lead.unit_id.replace('unit_', 'Unidade ')}</td>
+                    <td className="px-8 py-4">
+                      <span className="text-xs font-bold uppercase tracking-wider text-white/40 border border-white/10 px-2 py-1 rounded-md bg-white/[0.02]">
+                        {lead.funnel_stage.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-8 py-4 text-right">
+                      {lead.score && (
+                        <div className={`inline-flex items-center gap-1 font-black px-2.5 py-1 rounded-lg border
+                          ${lead.score >= 75 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
+                            : lead.score >= 50 ? 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' 
+                            : 'text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
+                          {Math.round(lead.score)}%
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">Nenhuma conversão encontrada neste período.</td>
+                  <td colSpan={4} className="px-8 py-8 text-center text-white/30">Nenhuma auditoria registrada neste período.</td>
                 </tr>
               )}
             </tbody>

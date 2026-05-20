@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   LineChart, Line, CartesianGrid, Legend
 } from 'recharts';
 import { 
-  DollarSign, TrendingUp, TrendingDown, Activity, CheckCircle2, 
-  Clock, AlertTriangle, MonitorPlay, XCircle
+  TrendingUp, MonitorPlay, AlertTriangle, Target, DollarSign, Clock, CheckCircle2
 } from 'lucide-react';
 import { 
   mockLeads, mockChartDataMultiline, mockRadarData, mockUnitBarData 
 } from '@/data/mockData';
 import { useAppData } from '@/context/AppDataContext';
+import TvDashboard from '@/components/Dashboard/TvDashboard';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -23,133 +23,127 @@ const fadeUp = (delay = 0) => ({
 const Index = () => {
   const { isTvMode, setIsTvMode } = useAppData();
   
-  // Simulated Realtime TV Mode effect
-  const [ticker, setTicker] = useState(0);
-  useEffect(() => {
-    if (!isTvMode) return;
-    const interval = setInterval(() => {
-      setTicker(v => v + 1);
-    }, 15000); // changes slight data or flashes a notification every 15s
-    return () => clearInterval(interval);
-  }, [isTvMode]);
+  if (isTvMode) {
+    return <TvDashboard />;
+  }
 
   const toggleTvMode = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => console.log(err));
+      document.documentElement.requestFullscreen().catch(() => {});
       setIsTvMode(true);
-    } else {
-      document.exitFullscreen();
-      setIsTvMode(false);
     }
   };
 
-  useEffect(() => {
-    const handleFsChange = () => {
-      if (!document.fullscreenElement) {
-        setIsTvMode(false);
-      }
-    };
-    document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
-  }, [setIsTvMode]);
-
-  // Derived metrics
+  // Derived metrics for Actionable Insight
   const dangerLeads = mockLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
-  const financialRisk = dangerLeads.length * 300; // Mock 300 ticket avg for at-risk
+  const financialRisk = dangerLeads.length * 300;
 
   return (
-    <div className={`p-8 ${isTvMode ? 'h-full flex flex-col justify-center' : ''}`}>
+    <div className="p-8 pb-20">
       
-      {/* ── Page Header & TV Mode Toggle ── */}
-      <motion.div {...fadeUp(0)} className={`mb-8 flex items-end justify-between ${isTvMode ? 'hidden' : ''}`}>
+      {/* ── Page Header ── */}
+      <motion.div {...fadeUp(0)} className="mb-6 flex items-end justify-between">
         <div>
           <p className="label-caps text-primary/70 mb-1">Visão CEO</p>
           <h1 className="text-2xl font-black text-foreground">Comando Central</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Status geral das mecânicas, SLAs críticos e métricas de conversão.
-          </p>
         </div>
         <button onClick={toggleTvMode}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-muted text-foreground border border-border
-            hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all">
+            hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all shadow-sm">
           <MonitorPlay className="w-4 h-4" />
           TV Mode
         </button>
       </motion.div>
 
-      {/* ── Seção 1: Impacto Financeiro e Alertas ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        
-        <motion.div {...fadeUp(0.1)} className="rounded-2xl p-5 bg-[#111118] border border-rose-500/20 shadow-[0_0_40px_rgba(244,63,94,0.08)] relative overflow-hidden">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl" />
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-rose-400">Risco Imediato</span>
-            <AlertTriangle className="w-4 h-4 text-rose-500" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-3xl font-black text-foreground mb-1">
-              R$ {financialRisk.toLocaleString('pt-BR')}
-            </p>
-            <p className="text-xs font-semibold text-muted-foreground">
-              Estimação baseada em <span className="text-rose-400">{dangerLeads.length} leads pendentes</span> no SLA.
-            </p>
-          </div>
-        </motion.div>
+      {/* ── HERO CARD: SCORE GLOBAL ── */}
+      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-[#0a0a0f] border border-white/[0.08] p-8 lg:p-10 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_0_80px_rgba(99,102,241,0.06)]">
+        {/* Glow */}
+        <div className="absolute -top-1/2 -left-1/4 w-[150%] h-[200%] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
 
-        <motion.div {...fadeUp(0.15)} className="rounded-2xl p-5 bg-card border border-border">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Conversão (Geral)</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+        <div className="relative z-10 flex-1">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-white/40 mb-4">Score Global da Rede</p>
+          <div className="flex items-end gap-4 mb-2">
+            <h2 className="text-7xl lg:text-8xl font-black text-white tracking-tighter leading-none">
+              78.5<span className="text-4xl text-white/40">%</span>
+            </h2>
           </div>
-          <p className="text-3xl font-black text-foreground mb-1">
-            {Math.floor(Math.random() * 5 + 68)}% <span className={`text-sm ${ticker % 2 === 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>▲</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-sm">
+            <TrendingUp className="w-4 h-4" />
+            +2.5% esta semana
+          </div>
+          <p className="text-sm text-white/40 mt-6 font-medium">
+            Média ponderada baseada em SLAs (60%) e Auditorias Manuais (40%).
           </p>
-          <p className="text-xs font-medium text-muted-foreground">
-            Alta de 4% em relação à última semana.
-          </p>
-        </motion.div>
+        </div>
 
-        <motion.div {...fadeUp(0.2)} className="rounded-2xl p-5 bg-card border border-border">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tempo Médio Rsp.</span>
-            <Clock className="w-4 h-4 text-amber-500" />
-          </div>
-          <p className="text-3xl font-black text-foreground mb-1">14m</p>
-          <p className="text-xs font-medium text-muted-foreground">
-            A unidade Dom Pedro puxa a média para cima.
-          </p>
-        </motion.div>
+        <div className="relative z-10 grid grid-cols-3 gap-4 lg:w-1/2">
+          {[{ name: 'Dom Pedro', val: 62.5, c: 'text-rose-400' }, { name: 'Jabaquara', val: 87.5, c: 'text-emerald-400' }, { name: 'Kennedy', val: 75.0, c: 'text-indigo-400' }].map(u => (
+            <div key={u.name} className="bg-white/[0.03] border border-white/[0.05] p-5 rounded-2xl flex flex-col items-center justify-center backdrop-blur-xl">
+              <span className={`text-3xl font-black ${u.c} mb-1`}>{u.val}%</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-white/50">{u.name}</span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
 
-        <motion.div {...fadeUp(0.25)} className="rounded-2xl p-5 bg-card border border-border">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ticket Médio</span>
-            <DollarSign className="w-4 h-4 text-primary" />
+      {/* ── ACTIONABLE INSIGHTS ── */}
+      <motion.div {...fadeUp(0.1)} className="mb-8 rounded-2xl bg-card border border-border p-6 shadow-sm flex flex-col md:flex-row gap-6 items-center">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5 text-rose-500" />
+            <h3 className="text-base font-black text-foreground uppercase tracking-wider">Gargalo Atual</h3>
           </div>
-          <p className="text-3xl font-black text-foreground mb-1">R$ 1.250</p>
-          <p className="text-xs font-medium text-muted-foreground">
-            Impulsionado por Jabaquara nesta semana.
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            A unidade <strong className="text-foreground">Dom Pedro</strong> possui <strong>{dangerLeads.length} orçamentos</strong> aguardando envio além do tempo limite (SLA Rompido). O impacto estimado de faturamento travado é de <strong className="text-rose-500">R$ {financialRisk.toLocaleString('pt-BR')}</strong>.
           </p>
+        </div>
+        <div className="w-px h-16 bg-border hidden md:block" />
+        <div className="flex-1 bg-muted/50 p-4 rounded-xl border border-border/50">
+          <div className="flex items-center gap-2 mb-2">
+            <Target className="w-5 h-5 text-indigo-500" />
+            <h3 className="text-sm font-bold text-foreground">Ação Recomendada</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Cobrar o gerente imediato sobre a <strong>Etapa 2 (Envio de Orçamento com Vídeo)</strong> e revisar fila de mensagens do Chatwoot na inbox `Dom Pedro`.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* ── MÉTIRICAS SECUNDÁRIAS (4 Cards) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <motion.div {...fadeUp(0.15)} className="rounded-xl p-4 bg-card border border-border">
+          <div className="flex items-center gap-2 mb-3 text-muted-foreground"><DollarSign className="w-4 h-4"/> <span className="text-xs font-bold uppercase tracking-wider">Risco Financeiro</span></div>
+          <p className="text-2xl font-black text-foreground">R$ {financialRisk}</p>
+        </motion.div>
+        <motion.div {...fadeUp(0.2)} className="rounded-xl p-4 bg-card border border-border">
+          <div className="flex items-center gap-2 mb-3 text-muted-foreground"><CheckCircle2 className="w-4 h-4"/> <span className="text-xs font-bold uppercase tracking-wider">Conversão</span></div>
+          <p className="text-2xl font-black text-foreground">68% <span className="text-xs text-emerald-500 ml-1">▲</span></p>
+        </motion.div>
+        <motion.div {...fadeUp(0.25)} className="rounded-xl p-4 bg-card border border-border">
+          <div className="flex items-center gap-2 mb-3 text-muted-foreground"><Clock className="w-4 h-4"/> <span className="text-xs font-bold uppercase tracking-wider">Tempo Médio</span></div>
+          <p className="text-2xl font-black text-foreground">14m</p>
+        </motion.div>
+        <motion.div {...fadeUp(0.3)} className="rounded-xl p-4 bg-card border border-border">
+          <div className="flex items-center gap-2 mb-3 text-muted-foreground"><DollarSign className="w-4 h-4"/> <span className="text-xs font-bold uppercase tracking-wider">Ticket Médio</span></div>
+          <p className="text-2xl font-black text-foreground">R$ 1.250</p>
         </motion.div>
       </div>
 
-      {/* ── Seção 2: Gráficos de Perfomance ── */}
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-5 ${isTvMode ? 'flex-1' : ''}`}>
+      {/* ── GRÁFICOS ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
-        {/* Gráfico de Barras: Ranking de Qualidade */}
-        <motion.div {...fadeUp(0.3)} className="rounded-2xl p-5 bg-card border border-border lg:col-span-1 flex flex-col">
+        <motion.div {...fadeUp(0.35)} className="rounded-2xl p-5 bg-card border border-border lg:col-span-1 flex flex-col">
           <div className="mb-6">
             <h3 className="text-sm font-bold text-foreground">Ranking de Atendimento</h3>
-            <p className="text-xs text-muted-foreground mt-1">Score médio por unidade (baseado em SLA e auditoria)</p>
+            <p className="text-xs text-muted-foreground mt-1">Score médio por unidade</p>
           </div>
           <div className="flex-1 min-h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mockUnitBarData} layout="vertical" margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
                 <XAxis type="number" domain={[0, 100]} hide />
                 <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 600 }} />
-                <Tooltip 
-                  cursor={{ fill: 'transparent' }}
-                  contentStyle={{ backgroundColor: '#111118', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                />
+                <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: '#111118', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
                 <Bar dataKey="score" radius={[0, 4, 4, 0]} barSize={24}>
                   {mockUnitBarData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.score >= 80 ? '#34d399' : entry.score >= 65 ? '#818cf8' : '#fb7185'} />
@@ -160,13 +154,13 @@ const Index = () => {
           </div>
         </motion.div>
 
-        {/* Gráfico Radar: Onde as mecânicas falham? */}
-        <motion.div {...fadeUp(0.35)} className="rounded-2xl p-5 bg-[#111118] border border-white/[0.06] lg:col-span-1 flex flex-col">
-          <div className="mb-2">
-            <h3 className="text-sm font-bold text-foreground">Compliance do Funil</h3>
-            <p className="text-xs text-muted-foreground mt-1">Onde as mecânicas estão errando (CEO View)</p>
+        <motion.div {...fadeUp(0.4)} className="rounded-2xl p-5 bg-[#0a0a0f] border border-white/[0.06] lg:col-span-1 flex flex-col relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.05)_0%,transparent_100%)] pointer-events-none" />
+          <div className="mb-2 relative z-10">
+            <h3 className="text-sm font-bold text-white">Compliance do Funil</h3>
+            <p className="text-xs text-white/50 mt-1">Gargalos por etapa (CEO View)</p>
           </div>
-          <div className="flex-1 min-h-[250px] -mt-4">
+          <div className="flex-1 min-h-[250px] -mt-4 relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="65%" data={mockRadarData}>
                 <PolarGrid stroke="rgba(255,255,255,0.1)" />
@@ -182,11 +176,10 @@ const Index = () => {
           </div>
         </motion.div>
 
-        {/* Gráfico de Linhas: Evolução 7 dias */}
-        <motion.div {...fadeUp(0.4)} className="rounded-2xl p-5 bg-card border border-border lg:col-span-1 flex flex-col">
+        <motion.div {...fadeUp(0.45)} className="rounded-2xl p-5 bg-card border border-border lg:col-span-1 flex flex-col">
           <div className="mb-6">
             <h3 className="text-sm font-bold text-foreground">Evolução Diária (Score)</h3>
-            <p className="text-xs text-muted-foreground mt-1">Comparativo de qualidade nos últimos 7 dias</p>
+            <p className="text-xs text-muted-foreground mt-1">Comparativo de qualidade (7 dias)</p>
           </div>
           <div className="flex-1 min-h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -204,20 +197,6 @@ const Index = () => {
         </motion.div>
 
       </div>
-
-      {/* Floating Exit TV Mode Button */}
-      <AnimatePresence>
-        {isTvMode && (
-          <motion.button
-            initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }}
-            onClick={toggleTvMode}
-            className="fixed bottom-8 right-8 flex items-center gap-2 px-5 py-3 rounded-full bg-rose-500 text-white font-bold shadow-2xl hover:bg-rose-600 transition-colors z-50"
-          >
-            <XCircle className="w-5 h-5" />
-            Sair do Modo TV
-          </motion.button>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

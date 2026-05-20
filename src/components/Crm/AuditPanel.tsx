@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon } from 'lucide-react';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign } from 'lucide-react';
 import { Lead } from '@/data/mockData';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -40,11 +40,15 @@ const auditStepsConfig = [
   },
 ];
 
+import { useAppData } from '@/context/AppDataContext';
+
 interface Props { lead: Lead; onClose: () => void; }
 
 const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
+  const { updateLead } = useAppData();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState('');
+  const [ticketValueStr, setTicketValueStr] = useState('');
 
   useEffect(() => {
     if (lead.score !== null) {
@@ -53,7 +57,17 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       setChecked({});
     }
     setNotes('');
-  }, [lead.id]);
+    setTicketValueStr(lead.ticket_value ? lead.ticket_value.toString() : '');
+  }, [lead.id, lead.ticket_value]);
+
+  const handleTicketBlur = () => {
+    const val = parseFloat(ticketValueStr);
+    if (!isNaN(val)) {
+      updateLead(lead.id, { ticket_value: val });
+    } else {
+      updateLead(lead.id, { ticket_value: undefined });
+    }
+  };
 
   // Fractional score
   let score = 0;
@@ -114,6 +128,26 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
             Marque cada sub-item para calcular a nota proporcional.
           </p>
+        </div>
+      </div>
+
+      {/* Inline Ticket Input */}
+      <div className="px-6 py-4 border-b border-white/[0.06] bg-white/[0.01] shrink-0">
+        <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+          Orçamento Estimado (R$)
+        </label>
+        <div className="flex items-center gap-2">
+          <DollarSign className="w-4 h-4 text-emerald-500" />
+          <input
+            type="number"
+            value={ticketValueStr}
+            onChange={(e) => setTicketValueStr(e.target.value)}
+            onBlur={handleTicketBlur}
+            placeholder="Ex: 1500"
+            className="flex-1 bg-transparent border-b border-white/[0.1] focus:border-emerald-500
+              text-lg font-black text-emerald-400 placeholder:text-muted-foreground/30 
+              focus:outline-none transition-colors py-1"
+          />
         </div>
       </div>
 
