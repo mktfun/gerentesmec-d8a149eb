@@ -2,19 +2,32 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings,
+  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import { useAppData } from '@/context/AppDataContext';
 
 const navItems = [
   { to: '/',         label: 'Dashboard',      icon: LayoutDashboard, end: true },
   { to: '/crm',      label: 'CRM / Auditoria', icon: MessageSquare },
+  { to: '/relatorios',label: 'Relatórios',     icon: BarChart3 },
   { to: '/gerentes', label: 'Gerentes',        icon: Users },
   { to: '/config',   label: 'Configurações',   icon: Settings },
 ];
 
 const DashboardLayout: React.FC = () => {
   const { isDark, toggle } = useTheme();
+  const { isTvMode } = useAppData();
+
+  if (isTvMode) {
+    return (
+      <div className="min-h-screen bg-background text-foreground overflow-hidden">
+        <main className="h-screen w-full flex flex-col">
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-background text-foreground">
@@ -52,32 +65,16 @@ const DashboardLayout: React.FC = () => {
                  }`
               }
             >
-              {({ isActive }) => (
-                <>
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : ''}`} />
-                  {label}
-                </>
-              )}
+              <Icon className="w-4 h-4 shrink-0" />
+              {label}
             </NavLink>
           ))}
         </nav>
 
         {/* Theme Toggle */}
         <div className="p-3 border-t border-sidebar-border">
-          <button
-            onClick={toggle}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
-              text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent
-              transition-all duration-200 focus-visible:outline-primary"
-          >
-            <motion.div
-              key={isDark ? 'moon' : 'sun'}
-              initial={{ rotate: -30, opacity: 0, scale: 0.8 }}
-              animate={{ rotate: 0, opacity: 1, scale: 1 }}
-              transition={{ duration: 0.25 }}
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </motion.div>
+          <button onClick={toggle} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent">
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {isDark ? 'Modo Claro' : 'Modo Escuro'}
           </button>
         </div>
@@ -103,7 +100,7 @@ const DashboardLayout: React.FC = () => {
             </div>
             <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center
               font-black text-sm text-white ring-2 ring-primary/30">
-              D
+              DS
             </div>
           </div>
         </header>

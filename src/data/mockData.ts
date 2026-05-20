@@ -30,6 +30,7 @@ export type Lead = {
   last_message_at: string;
   score: number | null;
   sla_status: SlaStatus;
+  ticket_value: number | null; // NOVO CAMPO: Valor orçado
 };
 
 // ─── Managers (1 per unit) ────────────────────────────────────
@@ -54,18 +55,21 @@ export const mockLeads: Lead[] = [
     customer_phone: '+55 11 9999-8888', manager_id: 'm1', unit_id: 'u1',
     funnel_stage: 'new', wait_time_minutes: 25, sla_status: 'danger',
     last_message_at: new Date(Date.now() - 25 * 60000).toISOString(), score: null,
+    ticket_value: null,
   },
   {
     id: 'l2', customer_name: 'Juliana', customer_vehicle: 'Corolla',
     customer_phone: '+55 11 9444-3333', manager_id: 'm1', unit_id: 'u1',
     funnel_stage: 'quote', wait_time_minutes: 12, sla_status: 'warning',
     last_message_at: new Date(Date.now() - 12 * 60000).toISOString(), score: null,
+    ticket_value: 1250,
   },
   {
     id: 'l3', customer_name: 'Carlos', customer_vehicle: 'Gol G7',
     customer_phone: '+55 11 9333-2222', manager_id: 'm1', unit_id: 'u1',
     funnel_stage: 'closed_lost', wait_time_minutes: 0, sla_status: 'ok',
     last_message_at: new Date(Date.now() - 300 * 60000).toISOString(), score: 50,
+    ticket_value: 400,
   },
   // Jabaquara — Jorge Bereta
   {
@@ -73,18 +77,21 @@ export const mockLeads: Lead[] = [
     customer_phone: '+55 11 9777-6666', manager_id: 'm2', unit_id: 'u2',
     funnel_stage: 'closed_won', wait_time_minutes: 0, sla_status: 'ok',
     last_message_at: new Date(Date.now() - 120 * 60000).toISOString(), score: 91.6,
+    ticket_value: 2800,
   },
   {
     id: 'l5', customer_name: 'Roberto', customer_vehicle: 'Hilux',
     customer_phone: '+55 11 9555-4444', manager_id: 'm2', unit_id: 'u2',
     funnel_stage: 'negotiation', wait_time_minutes: 8, sla_status: 'ok',
     last_message_at: new Date(Date.now() - 8 * 60000).toISOString(), score: null,
+    ticket_value: 5200,
   },
   {
     id: 'l6', customer_name: 'Marina', customer_vehicle: 'HRV',
     customer_phone: '+55 11 9666-5555', manager_id: 'm2', unit_id: 'u2',
     funnel_stage: 'new', wait_time_minutes: 4, sla_status: 'ok',
     last_message_at: new Date(Date.now() - 4 * 60000).toISOString(), score: null,
+    ticket_value: null,
   },
   // Kennedy — Amanda Costa
   {
@@ -92,18 +99,21 @@ export const mockLeads: Lead[] = [
     customer_phone: '+55 11 9111-0000', manager_id: 'm3', unit_id: 'u3',
     funnel_stage: 'quote', wait_time_minutes: 6, sla_status: 'ok',
     last_message_at: new Date(Date.now() - 6 * 60000).toISOString(), score: null,
+    ticket_value: 900,
   },
   {
     id: 'l8', customer_name: 'Fernanda', customer_vehicle: 'Argo',
     customer_phone: '+55 11 9222-1111', manager_id: 'm3', unit_id: 'u3',
     funnel_stage: 'negotiation', wait_time_minutes: 22, sla_status: 'danger',
     last_message_at: new Date(Date.now() - 22 * 60000).toISOString(), score: null,
+    ticket_value: 1100,
   },
   {
     id: 'l9', customer_name: 'Lucas', customer_vehicle: 'Creta',
     customer_phone: '+55 11 9333-2200', manager_id: 'm3', unit_id: 'u3',
     funnel_stage: 'closed_won', wait_time_minutes: 0, sla_status: 'ok',
     last_message_at: new Date(Date.now() - 180 * 60000).toISOString(), score: 75.0,
+    ticket_value: 3400,
   },
 ];
 

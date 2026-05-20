@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Users } from 'lucide-react';
-import { mockUnits, mockManagers, Manager } from '@/data/mockData';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, TrendingDown, Users, Plus, Edit2, Trash2 } from 'lucide-react';
+import { mockUnits, Manager } from '@/data/mockData';
+import { useAppData } from '@/context/AppDataContext';
 import ManagerModal from '@/components/Gerentes/ManagerModal';
+import ManagerModalForm from '@/components/Gerentes/ManagerModalForm';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -11,23 +13,53 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Gerentes = () => {
+  const { managers, deleteManager } = useAppData();
+  
   const [selectedManager, setSelectedManager] = useState<Manager | null>(null);
+  const [formManager, setFormManager] = useState<Manager | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const handleEdit = (m: Manager, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFormManager(m);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = (m: Manager, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Excluir o gerente ${m.name}?`)) {
+      deleteManager(m.id);
+    }
+  };
+
+  const handleNew = () => {
+    setFormManager(null);
+    setIsFormOpen(true);
+  };
 
   return (
     <div className="p-8">
       {/* Page header */}
-      <motion.div {...fadeUp(0)} className="mb-8">
-        <p className="label-caps text-indigo-400/70 mb-1">Gestão</p>
-        <h1 className="text-2xl font-black text-foreground">Gerentes & Unidades</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {mockUnits.length} unidades · {mockManagers.length} gerentes ativos
-        </p>
+      <motion.div {...fadeUp(0)} className="mb-8 flex items-end justify-between">
+        <div>
+          <p className="label-caps text-indigo-400/70 mb-1">Gestão</p>
+          <h1 className="text-2xl font-black text-foreground">Gerentes & Unidades</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {mockUnits.length} unidades · {managers.length} gerentes ativos
+          </p>
+        </div>
+        <button onClick={handleNew}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-indigo-500 text-white
+            hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
+          <Plus className="w-4 h-4" />
+          Novo Funcionário
+        </button>
       </motion.div>
 
       {/* Units grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {mockUnits.map((unit, idx) => {
-          const managers = mockManagers.filter(m => m.unit_id === unit.id);
+          const unitManagers = managers.filter(m => m.unit_id === unit.id);
           const unitScore = unit.score;
           const scoreColor = unitScore >= 80 ? 'text-emerald-400' : unitScore >= 65 ? 'text-indigo-300' : 'text-rose-400';
           const barColor   = unitScore >= 80 ? 'bg-emerald-400' : unitScore >= 65 ? 'bg-indigo-400' : 'bg-rose-400';
@@ -41,8 +73,6 @@ const Gerentes = () => {
             <motion.div
               key={unit.id}
               {...fadeUp(0.08 * idx)}
-              whileHover={{ y: -4, scale: 1.01 }}
-              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
               className={`rounded-2xl p-6 bg-[#111118] border border-white/[0.08] ${glowColor} cursor-default`}
             >
               {/* Unit header */}
@@ -51,7 +81,7 @@ const Gerentes = () => {
                   <p className="font-black text-base text-foreground">{unit.name}</p>
                   <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground font-medium">
                     <Users className="w-3 h-3" />
-                    {managers.length} gerente{managers.length > 1 ? 's' : ''}
+                    {unitManagers.length} gerente{unitManagers.length > 1 ? 's' : ''}
                   </div>
                 </div>
                 <div className="text-right">
@@ -73,20 +103,24 @@ const Gerentes = () => {
               {/* Manager list */}
               <div className="space-y-2">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                  Gerentes
+                  Gerentes ({unitManagers.length})
                 </p>
-                {managers.map((manager, mIdx) => {
+                {unitManagers.length === 0 ? (
+                  <div className="p-4 rounded-xl border border-dashed border-white/10 text-center">
+                    <span className="text-xs text-muted-foreground">Sem gerentes</span>
+                  </div>
+                ) : unitManagers.map((manager, mIdx) => {
                   const trend = manager.score >= 70;
                   return (
-                    <motion.button
+                    <motion.div
                       key={manager.id}
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 + idx * 0.08 + mIdx * 0.06, type: 'spring', stiffness: 300, damping: 28 }}
+                      transition={{ delay: 0.2 + idx * 0.08 + mIdx * 0.06, type: 'spring' }}
                       onClick={() => setSelectedManager(manager)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
                         bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05]
-                        hover:border-indigo-500/30 transition-all text-left group"
+                        hover:border-indigo-500/30 transition-all text-left group cursor-pointer"
                     >
                       {/* Avatar */}
                       <div className="w-7 h-7 rounded-full bg-indigo-500/20 flex items-center justify-center
@@ -100,8 +134,18 @@ const Gerentes = () => {
                         {manager.name}
                       </span>
 
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={(e) => handleEdit(manager, e)} className="p-1.5 rounded-md hover:bg-white/10 text-muted-foreground hover:text-white">
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={(e) => handleDelete(manager, e)} className="p-1.5 rounded-md hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
                       {/* Score + Trend */}
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 ml-1">
                         {trend
                           ? <TrendingUp className="w-3 h-3 text-emerald-400" />
                           : <TrendingDown className="w-3 h-3 text-rose-400" />
@@ -110,7 +154,7 @@ const Gerentes = () => {
                           manager.score >= 80 ? 'text-emerald-400' : manager.score >= 60 ? 'text-indigo-300' : 'text-rose-400'
                         }`}>{manager.score}%</span>
                       </div>
-                    </motion.button>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -119,8 +163,11 @@ const Gerentes = () => {
         })}
       </div>
 
-      {/* Manager drill-down modal */}
+      {/* View Modal */}
       <ManagerModal manager={selectedManager} onClose={() => setSelectedManager(null)} />
+      
+      {/* Form Modal */}
+      <ManagerModalForm manager={formManager} isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
     </div>
   );
 };

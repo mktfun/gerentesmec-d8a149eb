@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Lead, FunnelStage, mockUnits } from '@/data/mockData';
+import { Lead, FunnelStage } from '@/data/mockData';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import KanbanCard from './KanbanCard';
 
 const COLUMNS: { id: FunnelStage; label: string; color: string; dot: string }[] = [
@@ -14,14 +14,14 @@ interface Props {
   leads: Lead[];
   unitFilter: string;
   onSelectLead: (lead: Lead) => void;
+  onDragEnd: (result: DropResult) => void;
 }
 
-const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead }) => {
+const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEnd }) => {
   const filtered = unitFilter === 'all'
     ? leads
     : leads.filter(l => l.unit_id === unitFilter);
 
-  // Merge closed_lost into closed_won column for display
   const getColumnLeads = (stageId: FunnelStage) => {
     if (stageId === 'closed_won') {
       return filtered.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
@@ -30,53 +30,64 @@ const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead }) => {
   };
 
   return (
-    <div className="flex gap-4 h-full overflow-x-auto pb-4">
-      {COLUMNS.map(col => {
-        const colLeads = getColumnLeads(col.id);
-        return (
-          <div key={col.id} className="w-64 shrink-0 flex flex-col gap-3">
-            {/* Column header */}
-            <div className="flex items-center gap-2 px-1">
-              <div className={`w-2 h-2 rounded-full ${col.dot}`} />
-              <span className={`text-xs font-bold uppercase tracking-wider ${col.color}`}>
-                {col.label}
-              </span>
-              <span className="text-xs font-bold text-muted-foreground bg-muted
-                px-1.5 py-0.5 rounded-full ml-auto">{colLeads.length}</span>
-            </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="flex gap-4 h-full overflow-x-auto pb-4">
+        {COLUMNS.map(col => {
+          const colLeads = getColumnLeads(col.id);
+          return (
+            <div key={col.id} className="w-72 shrink-0 flex flex-col gap-3 bg-muted/20 p-2 rounded-2xl border border-border">
+              {/* Column header */}
+              <div className="flex items-center gap-2 px-2 py-1">
+                <div className={`w-2 h-2 rounded-full ${col.dot}`} />
+                <span className={`text-xs font-bold uppercase tracking-wider ${col.color}`}>
+                  {col.label}
+                </span>
+                <span className="text-xs font-bold text-muted-foreground bg-background border border-border
+                  px-2 py-0.5 rounded-full ml-auto shadow-sm">{colLeads.length}</span>
+              </div>
 
-            {/* Cards */}
-            <div className="flex flex-col gap-2.5">
-              <AnimatePresence mode="popLayout">
-                {colLeads.length === 0 ? (
-                  <motion.div
-                    key="empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="h-20 rounded-xl border border-dashed border-border
-                      flex items-center justify-center"
+              {/* Droppable Area */}
+              <Droppable droppableId={col.id}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`flex-1 overflow-y-auto px-1 pb-4 space-y-2.5 transition-colors rounded-xl
+                      ${snapshot.isDraggingOver ? 'bg-primary/5 border border-primary/20 border-dashed' : ''}
+                    `}
+                    style={{ minHeight: '150px' }}
                   >
-                    <span className="text-xs text-muted-foreground/50">Vazio</span>
-                  </motion.div>
-                ) : (
-                  colLeads.map((lead, i) => (
-                    <motion.div
-                      key={lead.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 28 }}
-                    >
-                      <KanbanCard lead={lead} onClick={() => onSelectLead(lead)} />
-                    </motion.div>
-                  ))
+                    {colLeads.map((lead, i) => (
+                      <Draggable key={lead.id} draggableId={lead.id} index={i}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={{
+                              ...provided.draggableProps.style,
+                              opacity: snapshot.isDragging ? 0.8 : 1,
+                            }}
+                          >
+                            <KanbanCard lead={lead} onClick={() => onSelectLead(lead)} />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                    {colLeads.length === 0 && !snapshot.isDraggingOver && (
+                      <div className="h-20 rounded-xl border border-dashed border-border flex items-center justify-center m-1">
+                        <span className="text-xs text-muted-foreground/50">Solte cards aqui</span>
+                      </div>
+                    )}
+                  </div>
                 )}
-              </AnimatePresence>
+              </Droppable>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </DragDropContext>
   );
 };
 
