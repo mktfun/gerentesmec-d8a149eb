@@ -75,29 +75,10 @@ const Index = () => {
   const todayStr = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date());
 
   return (
-    <div className="p-8 pb-20 min-h-screen bg-[#13111A]">
+    <div className="p-8 pb-20 min-h-screen">
       
-      {/* ── Page Header ── */}
-      <motion.div {...fadeUp(0)} className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-white">Olá, Administrador 👋</h1>
-          <p className="text-sm text-slate-400 mt-1 capitalize">
-            {new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-emerald-400">Ao vivo</span>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition-transform" onClick={toggleTvMode}>
-            D
-          </div>
-        </div>
-      </motion.div>
-
       {/* ── HERO CARD: SCORE GLOBAL ── */}
-      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-[#1E1B29] p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl">
+      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
         <div className="flex-1">
           <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-300/70 mb-4">Score Global da Rede</p>
           <div className="flex items-end gap-6 mb-2">
@@ -118,7 +99,7 @@ const Index = () => {
           {unitScores.map((u, i) => {
             const colorClass = u.score >= 80 ? 'text-emerald-400' : u.score >= 65 ? 'text-indigo-400' : 'text-rose-400';
             return (
-              <div key={u.id} className="bg-[#15121E] px-6 py-4 rounded-2xl flex flex-col items-center justify-center min-w-[120px]">
+              <div key={u.id} className="bg-black/20 backdrop-blur-md px-6 py-4 rounded-2xl flex flex-col items-center justify-center min-w-[120px] border border-white/5 shadow-inner">
                 <span className={`text-2xl font-black ${colorClass} mb-1`}>{u.score}%</span>
                 <span className="text-[11px] font-semibold text-slate-400">{u.name}</span>
               </div>
@@ -129,7 +110,7 @@ const Index = () => {
 
       {/* ── METRICS ROW ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <motion.div {...fadeUp(0.1)} className="rounded-2xl p-6 bg-[#1E1B29] shadow-xl relative overflow-hidden">
+        <motion.div {...fadeUp(0.1)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
             <Clock className="w-5 h-5 text-indigo-400" />
           </div>
@@ -138,7 +119,7 @@ const Index = () => {
           <p className="text-xs text-indigo-400">{pendingAudits} auditorias pendentes</p>
         </motion.div>
 
-        <motion.div {...fadeUp(0.15)} className="rounded-2xl p-6 bg-[#1E1B29] shadow-xl relative overflow-hidden">
+        <motion.div {...fadeUp(0.15)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
           </div>
@@ -147,7 +128,7 @@ const Index = () => {
           <p className="text-xs text-emerald-400">{resolutionRate}% de resolução</p>
         </motion.div>
 
-        <motion.div {...fadeUp(0.2)} className="rounded-2xl p-6 bg-[#1E1B29] shadow-xl relative overflow-hidden">
+        <motion.div {...fadeUp(0.2)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-6">
             <AlertTriangle className="w-5 h-5 text-rose-400" />
           </div>
@@ -161,7 +142,7 @@ const Index = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Area Chart */}
-        <motion.div {...fadeUp(0.25)} className="rounded-2xl p-6 bg-[#1E1B29] lg:col-span-2 shadow-xl flex flex-col">
+        <motion.div {...fadeUp(0.25)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 lg:col-span-2 shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
           <div className="flex items-start justify-between mb-8">
             <div>
               <h3 className="text-lg font-bold text-white">Evolução do Score Global</h3>
@@ -193,7 +174,7 @@ const Index = () => {
         </motion.div>
 
         {/* Ranking */}
-        <motion.div {...fadeUp(0.3)} className="rounded-2xl p-6 bg-[#1E1B29] lg:col-span-1 shadow-xl flex flex-col">
+        <motion.div {...fadeUp(0.3)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 lg:col-span-1 shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
           <div className="mb-6">
             <h3 className="text-lg font-bold text-white">Ranking de Gerentes</h3>
           </div>

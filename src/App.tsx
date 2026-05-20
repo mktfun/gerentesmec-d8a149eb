@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AppDataProvider } from "./context/AppDataContext";
+import { AuthProvider } from "./features/auth/hooks/useAuth";
+import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
+import { Login } from "./features/auth/components/Login";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import Index from "./pages/Index";
 import Crm from "./pages/Crm";
@@ -17,26 +20,34 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <ThemeProvider>
-    <AppDataProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route element={<DashboardLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/crm" element={<Crm />} />
-                <Route path="/gerentes" element={<Gerentes />} />
-                <Route path="/config" element={<Config />} />
-                <Route path="/relatorios" element={<Relatorios />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </AppDataProvider>
+    <AuthProvider>
+      <AppDataProvider>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Rota Pública */}
+                <Route path="/login" element={<Login />} />
+                
+                {/* Rotas Privadas */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/crm" element={<Crm />} />
+                    <Route path="/gerentes" element={<Gerentes />} />
+                    <Route path="/config" element={<Config />} />
+                    <Route path="/relatorios" element={<Relatorios />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </AppDataProvider>
+    </AuthProvider>
   </ThemeProvider>
 );
 

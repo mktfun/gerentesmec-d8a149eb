@@ -30,7 +30,7 @@ const DashboardLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
+    <div className="min-h-screen flex bg-[#0A0A0A] text-foreground">
 
       {/* ── Sidebar ─────────────────────────────────────────── */}
       <aside className="w-[220px] shrink-0 fixed inset-y-0 left-0 z-20 flex flex-col
@@ -85,9 +85,9 @@ const DashboardLayout: React.FC = () => {
 
         {/* Topbar */}
         <header className="h-16 sticky top-0 z-10 flex items-center justify-between px-8
-          bg-background/90 backdrop-blur-xl border-b border-border">
+          bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-white/5">
           <div>
-            <h2 className="text-base font-bold text-foreground">Olá, Daniel 👋</h2>
+            <h2 className="text-xl font-black text-white">Olá, Administrador 👋</h2>
             <p className="text-xs text-muted-foreground">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
