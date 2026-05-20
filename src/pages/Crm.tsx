@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus } from 'lucide-react';
-import { mockUnits, Lead, FunnelStage } from '@/data/mockData';
+import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
 import { DropResult } from '@hello-pangea/dnd';
 import AuditPanel from '@/components/Crm/AuditPanel';
@@ -11,7 +11,7 @@ import LeadModalForm from '@/components/Crm/LeadModalForm';
 type ViewMode = 'list' | 'kanban';
 
 const Crm = () => {
-  const { leads, moveLeadStage, managers } = useAppData();
+  const { leads, moveLeadStage, managers, units } = useAppData();
   
   const [view, setView] = useState<ViewMode>('kanban');
   const [unitFilter, setUnitFilter] = useState('all');
@@ -46,7 +46,7 @@ const Crm = () => {
 
   const LeadListCard = ({ lead, i }: { lead: Lead; i: number }) => {
     const manager = managers.find(m => m.id === lead.manager_id);
-    const unit    = mockUnits.find(u => u.id === lead.unit_id);
+    const unit    = units.find(u => u.id === lead.unit_id);
     const isDanger  = lead.sla_status === 'danger';
     const isSelected = selectedLead?.id === lead.id;
 
@@ -95,7 +95,7 @@ const Crm = () => {
         <div className="flex items-center gap-2">
           {/* Unit filter tabs */}
           <div className="flex items-center gap-1">
-            {[{ id: 'all', label: 'Todos' }, ...mockUnits.map(u => ({ id: u.id, label: u.name }))].map(({ id, label }) => (
+            {[{ id: 'all', label: 'Todos' }, ...units.map(u => ({ id: u.id, label: u.name }))].map(({ id, label }) => (
               <button key={id} onClick={() => setUnitFilter(id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
                   ${unitFilter === id ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}>
