@@ -5,44 +5,98 @@
 
 @layer base {
   :root {
-    --background: 249 250 251;
-    --foreground: 17 24 39;
+    /* Light Mode Tokens */
+    --bg-base:        250 250 252;
+    --bg-surface:     255 255 255;
+    --bg-elevated:    244 244 248;
+    --border-subtle:  226 232 240;
+    --border-default: 203 213 225;
 
+    --text-primary:   15 23 42;
+    --text-secondary: 71 85 105;
+    --text-muted:     148 163 184;
+
+    --accent:         99 102 241;
+    --accent-green:   52 211 153;
+    --accent-red:     251 113 133;
+    --accent-amber:   251 191 36;
+
+    --background: 250 250 252;
+    --foreground: 15 23 42;
     --card: 255 255 255;
-    --card-foreground: 17 24 39;
-
+    --card-foreground: 15 23 42;
     --popover: 255 255 255;
-    --popover-foreground: 17 24 39;
-
-    --primary: 59 130 246;
+    --popover-foreground: 15 23 42;
+    --primary: 99 102 241;
     --primary-foreground: 255 255 255;
-
-    --secondary: 249 250 251;
-    --secondary-foreground: 55 65 81;
-
-    --muted: 249 250 251;
-    --muted-foreground: 107 114 128;
-
-    --accent: 243 244 246;
-    --accent-foreground: 17 24 39;
-
+    --secondary: 244 244 248;
+    --secondary-foreground: 71 85 105;
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+    --accent: 244 244 248;
+    --accent-foreground: 15 23 42;
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
-
-    --border: 229 231 235;
-    --input: 229 231 235;
-    --ring: 59 130 246;
-
-    --radius: 0.75rem;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 99 102 241;
+    --radius: 0.875rem;
 
     --sidebar-background: 255 255 255;
-    --sidebar-foreground: 17 24 39;
-    --sidebar-primary: 59 130 246;
+    --sidebar-foreground: 15 23 42;
+    --sidebar-primary: 99 102 241;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 243 244 246;
-    --sidebar-accent-foreground: 17 24 39;
-    --sidebar-border: 229 231 235;
-    --sidebar-ring: 59 130 246;
+    --sidebar-accent: 244 244 248;
+    --sidebar-accent-foreground: 15 23 42;
+    --sidebar-border: 226 232 240;
+    --sidebar-ring: 99 102 241;
+  }
+
+  .dark {
+    /* Dark Mode Tokens — Revolut inspired */
+    --bg-base:        10 10 15;
+    --bg-surface:     17 17 24;
+    --bg-elevated:    26 26 36;
+    --border-subtle:  255 255 255 / 0.06;
+    --border-default: 255 255 255 / 0.10;
+
+    --text-primary:   255 255 255;
+    --text-secondary: 148 163 184;
+    --text-muted:     100 116 139;
+
+    --accent:         99 102 241;
+    --accent-green:   52 211 153;
+    --accent-red:     251 113 133;
+    --accent-amber:   251 191 36;
+
+    --background: 10 10 15;
+    --foreground: 248 250 252;
+    --card: 17 17 24;
+    --card-foreground: 248 250 252;
+    --popover: 17 17 24;
+    --popover-foreground: 248 250 252;
+    --primary: 99 102 241;
+    --primary-foreground: 255 255 255;
+    --secondary: 26 26 36;
+    --secondary-foreground: 148 163 184;
+    --muted: 26 26 36;
+    --muted-foreground: 100 116 139;
+    --accent: 26 26 36;
+    --accent-foreground: 248 250 252;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 255 255 255 / 0.08;
+    --input: 255 255 255 / 0.08;
+    --ring: 99 102 241;
+
+    --sidebar-background: 13 13 20;
+    --sidebar-foreground: 248 250 252;
+    --sidebar-primary: 99 102 241;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 26 26 36;
+    --sidebar-accent-foreground: 248 250 252;
+    --sidebar-border: 255 255 255 / 0.06;
+    --sidebar-ring: 99 102 241;
   }
 }
 
@@ -51,109 +105,104 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 text-foreground font-sf;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-background text-foreground antialiased;
     min-height: 100vh;
   }
-  
-  /* DESIGN SYSTEM UNIFICADO - Sem cores aleatórias */
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
-    outline: none !important;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
-    border-color: rgb(59, 130, 246) !important;
-  }
-  
-  /* Switch consistente */
-  [data-state="checked"] {
-    background-color: rgb(59, 130, 246) !important;
-  }
-  
-  [data-state="unchecked"] {
-    background-color: rgb(156, 163, 175) !important;
-  }
-  
-  /* Botões consistentes */
-  button:focus-visible {
-    outline: none !important;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+
+  /* Focus visible — WCAG 2.2 */
+  :focus-visible {
+    outline: 2px solid rgb(99 102 241);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
-  /* NAVBAR FLUTUANTE - Estados de animação */
-  /* ESTADO INICIAL (Topo da página) */
-  header[data-state="false"] > div {
-    max-width: 100%;
-    margin-top: 0;
-    border-radius: 0;
-    border-top-width: 0;
-    border-left-width: 0;
-    border-right-width: 0;
-  }
-
-  /* ESTADO FLUTUANTE / ILHA (Após rolar a página) */
-  header[data-state="true"] > div {
-    max-width: 56rem; /* max-w-4xl */
-    margin-top: 0.5rem; /* mt-2 */
-    border-radius: 1rem; /* rounded-2xl */
-    border-width: 1px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  /* Scrollbar custom */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-white/10 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-white/20; }
 }
 
 @layer utilities {
-  .glass-card {
-    @apply backdrop-blur-xl bg-white/90 border border-gray-200/50 shadow-lg;
-  }
-  
-  .glass-button {
-    @apply backdrop-blur-sm bg-white/30 border border-gray-200 hover:bg-white/50 transition-all duration-200;
-  }
-  
-  .apple-shadow {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
-  }
-  
-  .apple-shadow-lg {
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.06);
+
+  /* ─── Glass Card Pattern ─────────────────────────────────── */
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.12),
+      0 4px 12px rgba(0,0,0,0.16),
+      0 16px 40px rgba(0,0,0,0.20),
+      inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
-  /* Sistema de badges limpo e consistente */
-  .badge-blue {
-    @apply bg-blue-50 text-blue-800 border-blue-200;
-  }
-  
-  .badge-green {
-    @apply bg-emerald-50 text-emerald-800 border-emerald-200;
-  }
-  
-  .badge-purple {
-    @apply bg-purple-50 text-purple-800 border-purple-200;
-  }
-  
-  .badge-orange {
-    @apply bg-orange-50 text-orange-800 border-orange-200;
-  }
-  
-  .badge-red {
-    @apply bg-red-50 text-red-800 border-red-200;
-  }
-  
-  .badge-yellow {
-    @apply bg-yellow-50 text-yellow-800 border-yellow-200;
+  .dark .glass {
+    @apply bg-white/[0.04] border-white/[0.08];
   }
 
-  /* Cores de texto consistentes */
-  .text-primary-dark {
-    @apply text-gray-900;
+  .glass-light {
+    @apply bg-white backdrop-blur-xl border border-slate-200/80;
+    box-shadow:
+      0 1px 3px rgba(0,0,0,0.04),
+      0 4px 12px rgba(0,0,0,0.06),
+      0 16px 40px rgba(0,0,0,0.06);
   }
-  
-  .text-secondary {
-    @apply text-gray-700;
+
+  /* ─── Glow Effects ───────────────────────────────────────── */
+  .glow-indigo {
+    box-shadow: 0 0 40px rgba(99,102,241,0.25), 0 0 80px rgba(99,102,241,0.10);
   }
-  
-  .text-muted {
-    @apply text-gray-500;
+  .glow-green {
+    box-shadow: 0 0 30px rgba(52,211,153,0.20), 0 0 60px rgba(52,211,153,0.08);
+  }
+  .glow-red {
+    box-shadow: 0 0 30px rgba(251,113,133,0.20), 0 0 60px rgba(251,113,133,0.08);
+  }
+
+  /* ─── Orb Background Blobs ───────────────────────────────── */
+  .orb {
+    @apply absolute rounded-full pointer-events-none;
+    filter: blur(80px);
+  }
+
+  /* ─── Typography utilities ───────────────────────────────── */
+  .label-caps {
+    @apply text-xs font-semibold uppercase tracking-widest opacity-50;
+  }
+
+  .hero-number {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    @apply text-7xl font-black tracking-tight leading-none;
+  }
+
+  /* ─── Gradient text ──────────────────────────────────────── */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #a5b4fc 0%, #818cf8 50%, #6366f1 100%);
+  }
+
+  /* ─── Animated pulse for danger ─────────────────────────── */
+  .pulse-danger {
+    animation: pulseDanger 2s ease-in-out infinite;
+  }
+  @keyframes pulseDanger {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ─── Status border left accent ─────────────────────────── */
+  .status-danger  { border-left: 3px solid rgb(251 113 133); }
+  .status-warning { border-left: 3px solid rgb(251 191 36); }
+  .status-success { border-left: 3px solid rgb(52 211 153); }
+
+  /* ─── Nav active indicator ───────────────────────────────── */
+  .nav-active {
+    @apply bg-indigo-500/15 text-indigo-400;
+    border-left: 2px solid rgb(99 102 241);
   }
 }

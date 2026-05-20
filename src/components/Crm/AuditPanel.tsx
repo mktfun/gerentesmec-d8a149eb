@@ -1,226 +1,205 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Paperclip } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon } from 'lucide-react';
 import { Lead } from '@/data/mockData';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 
-interface AuditPanelProps {
-  lead: Lead;
-  onClose: () => void;
-}
-
 const auditStepsConfig = [
   {
-    id: 'step1',
-    title: '1. Cordialidade e Registro',
+    id: 'step1', title: '1. Cordialidade e Registro', weight: 25,
     items: [
-      { id: '1a', text: 'Atendimento foi cordial?' },
-      { id: '1b', text: 'Registrou acordo no WhatsApp?' },
+      { id: '1a', text: 'Atendimento foi cordial e respeitoso?' },
+      { id: '1b', text: 'Registrou no WhatsApp o que foi acordado presencialmente/por telefone?' },
     ],
-    weight: 25
   },
   {
-    id: 'step2',
-    title: '2. Orçamento e Consequências',
+    id: 'step2', title: '2. Orçamento + Vídeo + Efeitos', weight: 25,
     items: [
-      { id: '2a', text: 'Enviou link do Orçamento?' },
-      { id: '2b', text: 'Enviou vídeo do defeito?' },
-      { id: '2c', text: 'Explicou os efeitos em texto?' },
+      { id: '2a', text: 'Enviou o link do orçamento?' },
+      { id: '2b', text: 'Enviou vídeo mostrando o defeito?' },
+      { id: '2c', text: 'Explicou os efeitos e consequências de não fazer o reparo?' },
     ],
-    weight: 25
   },
   {
-    id: 'step3',
-    title: '3. Checklist Mecânico (Up-sell)',
+    id: 'step3', title: '3. Checklist Mecânico (Up-sell)', weight: 25,
     items: [
-      { id: '3a', text: 'Fez o checklist complementar?' },
-      { id: '3b', text: 'Enviou vídeo do up-sell?' },
-      { id: '3c', text: 'Explicou o texto?' },
+      { id: '3a', text: 'Enviou o checklist complementar do mecânico?' },
+      { id: '3b', text: 'Enviou vídeo do que mais precisa ser feito?' },
+      { id: '3c', text: 'Explicou o texto justificando os serviços extras?' },
     ],
-    weight: 25
   },
   {
-    id: 'step4',
-    title: '4. Encerramento e Review',
+    id: 'step4', title: '4. Encerramento + Review', weight: 25,
     items: [
-      { id: '4a', text: 'Agradeceu pelo serviço?' },
-      { id: '4b', text: 'Pediu avaliação no Google?' },
+      { id: '4a', text: 'Enviou mensagem de agradecimento padrão?' },
+      { id: '4b', text: 'Pediu avaliação no Google de forma explícita?' },
     ],
-    weight: 25
-  }
+  },
 ];
 
-const AuditPanel: React.FC<AuditPanelProps> = ({ lead, onClose }) => {
-  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+interface Props { lead: Lead; onClose: () => void; }
+
+const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState('');
 
-  // Auto-fill mock if closed
   useEffect(() => {
     if (lead.score !== null) {
-      // simulate checking items
-      setCheckedItems({
-        '1a': true, '1b': true,
-        '2a': true, '2b': true, '2c': true,
-        '3a': true, '3b': true, '3c': false,
-        '4a': true, '4b': true,
-      });
+      setChecked({ '1a': true, '1b': true, '2a': true, '2b': true, '2c': true, '3a': true, '3b': true, '4a': true, '4b': true });
     } else {
-      setCheckedItems({});
+      setChecked({});
     }
-  }, [lead.id, lead.score]);
+    setNotes('');
+  }, [lead.id]);
 
-  const toggleItem = (id: string) => {
-    setCheckedItems(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
-  // Calculate Fractional Score
+  // Fractional score
   let score = 0;
   auditStepsConfig.forEach(step => {
-    let checkedCount = 0;
-    step.items.forEach(item => {
-      if (checkedItems[item.id]) checkedCount++;
-    });
-    const stepScore = (checkedCount / step.items.length) * step.weight;
-    score += stepScore;
+    const done = step.items.filter(i => checked[i.id]).length;
+    score += (done / step.items.length) * step.weight;
   });
+  const rounded = Math.round(score);
+
+  const scoreColor = rounded >= 75 ? '#34d399' : rounded >= 50 ? '#818cf8' : '#f87171';
+  const circumference = 2 * Math.PI * 38;
 
   return (
-    <div className="h-full flex flex-col bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden relative">
+    <div className="h-full flex flex-col bg-[#0f0f18] border-l border-white/[0.06]">
+
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
         <div>
-          <h3 className="text-lg font-bold text-slate-800">Dossiê: {lead.customer_name}</h3>
-          <p className="text-xs text-slate-500">{lead.customer_phone}</p>
+          <h3 className="text-sm font-black text-foreground">Dossiê: {lead.customer_name}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">{lead.customer_phone}</p>
         </div>
-        <button 
-          onClick={onClose}
-          className="p-2 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <X className="w-5 h-5" />
+        <button onClick={onClose}
+          className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10]
+            flex items-center justify-center transition-colors focus-visible:outline-indigo-500">
+          <X className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>
 
-      {/* Score Header */}
-      <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-6">
-        <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="40" stroke="#f1f5f9" strokeWidth="8" fill="none" />
-            <motion.circle 
-              cx="50" cy="50" r="40" 
-              stroke="currentColor" 
-              strokeWidth="8" 
-              fill="none" 
+      {/* Score ring */}
+      <div className="px-6 py-5 border-b border-white/[0.06] flex items-center gap-5 shrink-0">
+        <div className="relative w-[88px] h-[88px] shrink-0">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" stroke="rgba(255,255,255,0.06)" strokeWidth="7" fill="none" />
+            <motion.circle
+              cx="50" cy="50" r="38"
+              stroke={scoreColor}
+              strokeWidth="7"
+              fill="none"
               strokeLinecap="round"
-              className={`${score >= 80 ? 'text-emerald-500' : score >= 50 ? 'text-blue-500' : 'text-rose-500'}`}
-              initial={{ strokeDasharray: '0 251' }}
-              animate={{ strokeDasharray: `${(score / 100) * 251} 251` }}
-              transition={{ duration: 0.8 }}
+              initial={{ strokeDasharray: `0 ${circumference}` }}
+              animate={{ strokeDasharray: `${(rounded / 100) * circumference} ${circumference}` }}
+              transition={{ duration: 0.9, ease: 'easeOut' }}
+              style={{ filter: `drop-shadow(0 0 8px ${scoreColor}60)` }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl font-black text-slate-800">
-              {Math.round(score)}<span className="text-xs text-slate-500 font-medium">%</span>
-            </span>
+            <motion.span
+              key={rounded}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-xl font-black text-white leading-none"
+            >{rounded}</motion.span>
+            <span className="text-[9px] text-white/30 font-bold uppercase tracking-wider">Score</span>
           </div>
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-slate-700">Qualidade de Atendimento</p>
-          <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-            A nota é fracionada baseada nos itens exigidos. Marque o checklist de acordo com a transcrição.
+        <div>
+          <p className="text-xs font-bold text-foreground">Qualidade do Atendimento</p>
+          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+            Marque cada sub-item para calcular a nota proporcional.
           </p>
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
-        
-        {/* Accordion Checklist */}
-        <div>
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Auditoria (Checklist)</h4>
-          <Accordion type="multiple" defaultValue={['step1', 'step2']} className="space-y-3">
-            {auditStepsConfig.map((step) => {
-              const checkedCount = step.items.filter(i => checkedItems[i.id]).length;
-              const isFull = checkedCount === step.items.length;
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
 
-              return (
-                <AccordionItem value={step.id} key={step.id} className="border border-slate-100 rounded-xl px-4 bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <AccordionTrigger className="hover:no-underline py-4">
-                    <div className="flex items-center gap-3 text-sm">
-                      {isFull ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                      ) : (
-                        <Circle className="w-5 h-5 text-slate-300" />
-                      )}
-                      <span className="font-semibold text-slate-700">{step.title}</span>
-                      <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                        {checkedCount}/{step.items.length}
-                      </span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-1 pb-4">
-                    <div className="space-y-3 pl-8">
-                      {step.items.map((item) => (
-                        <div key={item.id} className="flex items-center space-x-3 group">
-                          <Checkbox 
-                            id={item.id} 
-                            checked={checkedItems[item.id] || false}
-                            onCheckedChange={() => toggleItem(item.id)}
-                            className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
-                          />
-                          <label 
-                            htmlFor={item.id}
-                            className={`text-sm cursor-pointer transition-colors ${
-                              checkedItems[item.id] ? 'text-slate-900 font-medium' : 'text-slate-600 group-hover:text-slate-800'
-                            }`}
-                          >
-                            {item.text}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              )
-            })}
-          </Accordion>
-        </div>
+        {/* Checklist */}
+        <Accordion type="multiple" defaultValue={['step1', 'step2']} className="space-y-2">
+          {auditStepsConfig.map(step => {
+            const doneCount = step.items.filter(i => checked[i.id]).length;
+            const isFull = doneCount === step.items.length;
 
-        {/* Evidence Upload Area */}
+            return (
+              <AccordionItem key={step.id} value={step.id}
+                className="border border-white/[0.08] rounded-xl bg-white/[0.02] hover:bg-white/[0.04]
+                  transition-colors px-4">
+                <AccordionTrigger className="hover:no-underline py-3.5">
+                  <div className="flex items-center gap-3 text-left">
+                    {isFull
+                      ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      : <Circle className="w-4 h-4 text-white/20 shrink-0" />
+                    }
+                    <span className="text-xs font-bold text-foreground/80">{step.title}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground
+                      bg-white/[0.06] px-1.5 py-0.5 rounded-full ml-1">
+                      {doneCount}/{step.items.length}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-1 pb-4 pl-7">
+                  <div className="space-y-2.5">
+                    {step.items.map(item => (
+                      <div key={item.id} className="flex items-start gap-3 group cursor-pointer"
+                        onClick={() => setChecked(p => ({ ...p, [item.id]: !p[item.id] }))}>
+                        <Checkbox
+                          id={item.id}
+                          checked={checked[item.id] || false}
+                          onCheckedChange={() => setChecked(p => ({ ...p, [item.id]: !p[item.id] }))}
+                          className="mt-0.5 border-white/20 data-[state=checked]:bg-indigo-500
+                            data-[state=checked]:border-indigo-500"
+                        />
+                        <label htmlFor={item.id}
+                          className={`text-xs leading-relaxed cursor-pointer transition-colors ${
+                            checked[item.id] ? 'text-foreground font-medium' : 'text-muted-foreground'
+                          }`}>
+                          {item.text}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+
+        {/* Evidence */}
         <div>
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Dossiê e Evidências</h4>
-          <div className="space-y-4">
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Digite anotações ou justificativas para a nota..."
-              className="w-full h-24 p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
-            />
-            
-            <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100/50 transition-colors cursor-pointer group">
-              <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <UploadCloud className="w-5 h-5 text-blue-500" />
-              </div>
-              <p className="text-sm font-semibold text-slate-700">Anexar Provas</p>
-              <p className="text-xs text-slate-500 mt-1">Arraste imagens ou cole links (Ctrl+V)</p>
-            </div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+            Dossiê & Evidências
+          </p>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Anotações, justificativas, links..."
+            className="w-full h-20 p-3 text-xs text-foreground placeholder:text-muted-foreground/50
+              bg-white/[0.04] border border-white/[0.08] rounded-xl resize-none focus:outline-none
+              focus:border-indigo-500/50 transition-colors"
+          />
+          <div className="mt-3 border-2 border-dashed border-white/[0.08] rounded-xl p-5
+            flex flex-col items-center justify-center gap-2 bg-white/[0.02]
+            hover:border-indigo-500/30 hover:bg-indigo-500/[0.03] transition-all cursor-pointer group">
+            <UploadCloud className="w-5 h-5 text-white/20 group-hover:text-indigo-400 transition-colors" />
+            <p className="text-xs font-semibold text-muted-foreground/60 group-hover:text-muted-foreground">
+              Arrastar imagem · colar link (Ctrl+V)
+            </p>
           </div>
         </div>
-
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-100 bg-white">
-        <button className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all hover:shadow-md flex justify-center items-center gap-2">
-          Salvar Avaliação
+      <div className="p-4 border-t border-white/[0.06] shrink-0">
+        <button className="w-full py-3 rounded-xl text-sm font-bold text-white
+          bg-indigo-600 hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]
+          hover:shadow-[0_0_30px_rgba(99,102,241,0.45)] focus-visible:outline-indigo-300">
+          Salvar Auditoria
         </button>
       </div>
     </div>
