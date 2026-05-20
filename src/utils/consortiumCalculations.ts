@@ -1,4 +1,28 @@
-import { SimulationData } from '@/pages/Index';
+interface SimulationData {
+  creditType: string;
+  correctionIndex: string;
+  financingRate: number;
+  creditValue: number;
+  installments: number;
+  contemplationTime: number;
+  monthlyPayment: number;
+  monthlyPaymentWithAnticipatedTax: number;
+  postContemplationPayment: number;
+  finalTerm: number;
+  bidValue: number;
+  embeddedBidValue: number;
+  ownResourcesBidValue: number;
+  availableCredit: number;
+  totalPaid: number;
+  totalInvested: number;
+  reducedPaymentEnabled: boolean;
+  reducedPaymentPercentage: number;
+  anticipatedTaxValue: number;
+  demonstrativeRate: any;
+  cet: any;
+  scenarios: any;
+}
+
 import { calculateCET, calculateDemonstrativeRate } from './financialMetrics';
 
 interface CalculationInput {

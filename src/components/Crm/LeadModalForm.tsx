@@ -10,7 +10,7 @@ interface Props {
 }
 
 const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
-  const { addLead, updateLead, units } = useAppData();
+  const { addLead, updateLead, units, managers } = useAppData();
 
   const [name, setName] = useState('');
   const [vehicle, setVehicle] = useState('');
@@ -43,6 +43,8 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
     if (!unit) return;
 
     const tVal = ticket ? parseFloat(ticket) : null;
+    const manager = managers.find(m => m.unit_id === unitId);
+    const managerId = manager ? manager.id : null;
 
     if (lead) {
       updateLead(lead.id, {
@@ -50,24 +52,23 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
         customer_vehicle: vehicle,
         customer_phone: phone,
         unit_id: unitId,
-        manager_id: null, // should be preserved if not changed but form doesn't support changing manager yet
+        manager_id: managerId,
         ticket_value: tVal,
         funnel_stage: stage,
       });
     } else {
       addLead({
-        id: `l${Date.now()}`,
         customer_name: name,
         customer_vehicle: vehicle,
         customer_phone: phone,
         unit_id: unitId,
-        manager_id: unit.id, // we don't have manager_id in unit for supabase right now, we can leave it null or find manager
+        manager_id: managerId,
         ticket_value: tVal,
         funnel_stage: stage,
         wait_time_minutes: 0,
-        last_message_at: new Date().toISOString(),
         score: null,
         sla_status: 'ok',
+        closing_summary: null
       });
     }
     onClose();

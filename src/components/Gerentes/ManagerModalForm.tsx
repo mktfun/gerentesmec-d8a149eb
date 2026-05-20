@@ -19,7 +19,7 @@ const ManagerModalForm: React.FC<Props> = ({ manager, isOpen, onClose }) => {
   useEffect(() => {
     if (manager) {
       setName(manager.name);
-      setPhone(manager.phone || '');
+      setPhone(manager.avatar || '');
       setUnitId(manager.unit_id);
     } else {
       setName('');
@@ -31,14 +31,12 @@ const ManagerModalForm: React.FC<Props> = ({ manager, isOpen, onClose }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (manager) {
-      // update phone is not in our Manager schema natively but if we had it:
-      updateManager(manager.id, { name, unit_id: unitId });
+      updateManager(manager.id, { name, unit_id: unitId, avatar: phone || null });
     } else {
       addManager({
-        id: `m${Date.now()}`,
         name,
         unit_id: unitId || null,
-        avatar: null
+        avatar: phone || null
       });
     }
     onClose();

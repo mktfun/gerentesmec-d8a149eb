@@ -40,7 +40,7 @@ const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span className="text-xs text-muted-foreground font-medium">
-                Canal: <span className="font-bold text-foreground">"{unit.chatwoot_inbox_name}"</span>
+                Canal: <span className="font-bold text-foreground">"{unit.name}"</span>
               </span>
             </div>
             <span className="text-muted-foreground/30">·</span>
@@ -72,7 +72,7 @@ const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore
             <p className="text-xs text-muted-foreground leading-relaxed">
               Quando uma conversa chega pelo Chatwoot, o sistema lê o campo{' '}
               <code className="bg-muted px-1 py-0.5 rounded text-primary font-mono text-[11px]">inbox.name</code>.
-              Se o valor for <span className="font-bold text-foreground">"{unit.chatwoot_inbox_name}"</span>,
+              Se o valor for <span className="font-bold text-foreground">"{unit.name}"</span>,
               a conversa é atribuída a esta unidade e ao gerente{' '}
               <span className="font-bold text-foreground">{manager?.name}</span>.
             </p>
@@ -86,7 +86,7 @@ const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore
               </label>
               <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-xl border border-border">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <span className="text-sm font-semibold text-foreground">{unit.chatwoot_inbox_name}</span>
+                <span className="text-sm font-semibold text-foreground">{unit.name}</span>
               </div>
             </div>
             <div>

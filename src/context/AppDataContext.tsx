@@ -70,29 +70,27 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const fetchInitialData = async () => {
-    const [leadsRes, managersRes, unitsRes, aiRes] = await Promise.all([
-      supabase.from('leads').select('*'),
-      supabase.from('managers').select('*'),
-      supabase.from('units').select('*'),
-      supabase.from('ai_settings').select('*').single()
-    ]);
+    const leadsRes = await (supabase as any).from('leads').select('*');
+    const managersRes = await (supabase as any).from('managers').select('*');
+    const unitsRes = await (supabase as any).from('units').select('*');
+    const aiRes = await (supabase as any).from('ai_settings').select('*').maybeSingle();
 
-    if (leadsRes.data) setLeads(leadsRes.data);
-    if (managersRes.data) setManagers(managersRes.data);
-    if (unitsRes.data) setUnits(unitsRes.data);
-    if (aiRes.data) setAiSettings(aiRes.data);
+    if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
+    if (managersRes.data) setManagers(managersRes.data as Manager[]);
+    if (unitsRes.data) setUnits(unitsRes.data as Unit[]);
+    if (aiRes.data) setAiSettings(aiRes.data as AiSettings);
   };
 
   const addManager = async (manager: Omit<Manager, 'id' | 'created_at'>) => {
-    await supabase.from('managers').insert([manager]);
+    await (supabase as any).from('managers').insert([manager]);
   };
 
   const updateManager = async (id: string, updates: Partial<Manager>) => {
-    await supabase.from('managers').update(updates).eq('id', id);
+    await (supabase as any).from('managers').update(updates).eq('id', id);
   };
 
   const deleteManager = async (id: string) => {
-    await supabase.from('managers').delete().eq('id', id);
+    await (supabase as any).from('managers').delete().eq('id', id);
   };
 
   const addLead = async (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => {
@@ -101,20 +99,20 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       id: crypto.randomUUID(),
       last_message_at: new Date().toISOString()
     };
-    await supabase.from('leads').insert([newLead]);
+    await (supabase as any).from('leads').insert([newLead]);
   };
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
-    await supabase.from('leads').update(updates).eq('id', id);
+    await (supabase as any).from('leads').update(updates).eq('id', id);
   };
 
   const moveLeadStage = async (id: string, stage: FunnelStage) => {
-    await supabase.from('leads').update({ funnel_stage: stage }).eq('id', id);
+    await (supabase as any).from('leads').update({ funnel_stage: stage }).eq('id', id);
   };
 
   const updateAiSettings = async (updates: Partial<AiSettings>) => {
     if (!aiSettings?.id) return;
-    await supabase.from('ai_settings').update(updates).eq('id', aiSettings.id);
+    await (supabase as any).from('ai_settings').update(updates).eq('id', aiSettings.id);
   };
 
   return (
