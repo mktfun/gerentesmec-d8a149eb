@@ -129,6 +129,182 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          id: string
+          key: string
+          value: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          value: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      units: {
+        Row: {
+          id: string
+          name: string
+          google_place_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          google_place_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          google_place_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      managers: {
+        Row: {
+          id: string
+          unit_id: string | null
+          full_name: string
+          phone: string | null
+          chatwoot_inbox_id: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          unit_id?: string | null
+          full_name: string
+          phone?: string | null
+          chatwoot_inbox_id?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          unit_id?: string | null
+          full_name?: string
+          phone?: string | null
+          chatwoot_inbox_id?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managers_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      whatsapp_cycles: {
+        Row: {
+          id: string
+          manager_id: string | null
+          customer_phone: string | null
+          started_at: string
+          max_response_time_breached: boolean | null
+          chatwoot_conversation_id: number | null
+        }
+        Insert: {
+          id?: string
+          manager_id?: string | null
+          customer_phone?: string | null
+          started_at?: string
+          max_response_time_breached?: boolean | null
+          chatwoot_conversation_id?: number | null
+        }
+        Update: {
+          id?: string
+          manager_id?: string | null
+          customer_phone?: string | null
+          started_at?: string
+          max_response_time_breached?: boolean | null
+          chatwoot_conversation_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_cycles_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "managers"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      cycle_steps: {
+        Row: {
+          id: string
+          cycle_id: string | null
+          step_number: number
+          is_compliant: boolean | null
+          reason_failed: string | null
+          evaluated_at: string
+        }
+        Insert: {
+          id?: string
+          cycle_id?: string | null
+          step_number: number
+          is_compliant?: boolean | null
+          reason_failed?: string | null
+          evaluated_at?: string
+        }
+        Update: {
+          id?: string
+          cycle_id?: string | null
+          step_number?: number
+          is_compliant?: boolean | null
+          reason_failed?: string | null
+          evaluated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cycle_steps_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_cycles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      google_reviews_log: {
+        Row: {
+          id: string
+          unit_id: string | null
+          review_count_diff: number | null
+          logged_date: string | null
+        }
+        Insert: {
+          id?: string
+          unit_id?: string | null
+          review_count_diff?: number | null
+          logged_date?: string | null
+        }
+        Update: {
+          id?: string
+          unit_id?: string | null
+          review_count_diff?: number | null
+          logged_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_reviews_log_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
