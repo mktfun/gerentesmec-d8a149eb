@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, TrendingDown, BarChart2 } from 'lucide-react';
-import { Manager, mockUnits } from '@/data/mockData';
+import { useAppData, Manager } from '@/context/AppDataContext';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -17,7 +17,14 @@ interface Props {
 }
 
 const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
-  const unit = mockUnits.find(u => u.id === manager?.unit_id);
+  const { units, leads } = useAppData();
+  const unit = units.find(u => u.id === manager?.unit_id);
+  
+  // Calculate average score
+  const managerLeads = leads.filter(l => l.manager_id === manager?.id && l.score !== null);
+  const avgScore = managerLeads.length > 0 
+    ? Math.round(managerLeads.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeads.length)
+    : 0;
 
   return (
     <AnimatePresence>
@@ -62,8 +69,8 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
               <p className="label-caps text-indigo-400/70 mb-2">Score Atual</p>
               <div className="flex items-end gap-3">
                 <span className={`text-5xl font-black ${
-                  manager.score >= 80 ? 'text-emerald-400' : manager.score >= 60 ? 'text-indigo-300' : 'text-rose-400'
-                }`}>{manager.score}%</span>
+                  avgScore >= 80 ? 'text-emerald-400' : avgScore >= 60 ? 'text-indigo-300' : 'text-rose-400'
+                }`}>{avgScore}%</span>
                 <span className="flex items-center gap-1 text-xs font-bold text-emerald-400
                   bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full mb-1.5">
                   <TrendingUp className="w-3 h-3" />

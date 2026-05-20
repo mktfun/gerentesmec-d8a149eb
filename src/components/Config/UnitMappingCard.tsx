@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Edit2, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
-import { Unit, Manager, mockUnits, mockManagers } from '@/data/mockData';
+import { Unit, Manager } from '@/context/AppDataContext';
 
 interface Props {
   unit: Unit;
   manager: Manager | undefined;
   slaMinutes: number;
+  unitScore: number;
   onSlaChange: (minutes: number) => void;
 }
 
-const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, onSlaChange }) => {
+const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore, onSlaChange }) => {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [slaInput, setSlaInput] = useState(String(slaMinutes));
 
-  const scoreColor = unit.score >= 80
+  const scoreColor = unitScore >= 80
     ? 'text-emerald-600 dark:text-emerald-400'
-    : unit.score >= 65
+    : unitScore >= 65
     ? 'text-indigo-600 dark:text-indigo-400'
     : 'text-rose-600 dark:text-rose-400';
 
@@ -26,7 +27,7 @@ const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, onSlaChan
       {/* Card Header */}
       <div className="px-5 py-4 flex items-center gap-4">
         {/* Unit score chip */}
-        <div className={`text-2xl font-black shrink-0 ${scoreColor}`}>{unit.score}%</div>
+        <div className={`text-2xl font-black shrink-0 ${scoreColor}`}>{unitScore}%</div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign } from 'lucide-react';
-import { Lead } from '@/data/mockData';
+import { Lead } from '@/context/AppDataContext';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";

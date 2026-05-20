@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, Users, Plus, Edit2, Trash2 } from 'lucide-react';
-import { mockUnits, Manager } from '@/data/mockData';
-import { useAppData } from '@/context/AppDataContext';
+import { useAppData, Manager, Unit } from '@/context/AppDataContext';
 import ManagerModal from '@/components/Gerentes/ManagerModal';
 import ManagerModalForm from '@/components/Gerentes/ManagerModalForm';
 
@@ -13,7 +12,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Gerentes = () => {
-  const { managers, deleteManager } = useAppData();
+  const { managers, deleteManager, units, leads } = useAppData();
   
   const [selectedManager, setSelectedManager] = useState<Manager | null>(null);
   const [formManager, setFormManager] = useState<Manager | null>(null);
@@ -45,7 +44,7 @@ const Gerentes = () => {
           <p className="label-caps text-indigo-400/70 mb-1">Gestão</p>
           <h1 className="text-2xl font-black text-foreground">Gerentes & Unidades</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {mockUnits.length} unidades · {managers.length} gerentes ativos
+            {units.length} unidades · {managers.length} gerentes ativos
           </p>
         </div>
         <button onClick={handleNew}
@@ -58,9 +57,15 @@ const Gerentes = () => {
 
       {/* Units grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {mockUnits.map((unit, idx) => {
+        {units.map((unit, idx) => {
           const unitManagers = managers.filter(m => m.unit_id === unit.id);
-          const unitScore = unit.score;
+          
+          // Calculate average score for the unit
+          const unitLeads = leads.filter(l => l.unit_id === unit.id && l.score !== null);
+          const unitScore = unitLeads.length > 0
+            ? Math.round(unitLeads.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeads.length)
+            : 0;
+            
           const scoreColor = unitScore >= 80 ? 'text-emerald-400' : unitScore >= 65 ? 'text-indigo-300' : 'text-rose-400';
           const barColor   = unitScore >= 80 ? 'bg-emerald-400' : unitScore >= 65 ? 'bg-indigo-400' : 'bg-rose-400';
           const glowColor  = unitScore >= 80
@@ -110,7 +115,11 @@ const Gerentes = () => {
                     <span className="text-xs text-muted-foreground">Sem gerentes</span>
                   </div>
                 ) : unitManagers.map((manager, mIdx) => {
-                  const trend = manager.score >= 70;
+                  const managerLeads = leads.filter(l => l.manager_id === manager.id && l.score !== null);
+                  const mScore = managerLeads.length > 0 
+                    ? Math.round(managerLeads.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeads.length)
+                    : 0;
+                  const trend = mScore >= 70;
                   return (
                     <motion.div
                       key={manager.id}
@@ -151,8 +160,8 @@ const Gerentes = () => {
                           : <TrendingDown className="w-3 h-3 text-rose-400" />
                         }
                         <span className={`text-xs font-black ${
-                          manager.score >= 80 ? 'text-emerald-400' : manager.score >= 60 ? 'text-indigo-300' : 'text-rose-400'
-                        }`}>{manager.score}%</span>
+                          mScore >= 80 ? 'text-emerald-400' : mScore >= 60 ? 'text-indigo-300' : 'text-rose-400'
+                        }`}>{mScore}%</span>
                       </div>
                     </motion.div>
                   );

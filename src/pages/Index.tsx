@@ -9,7 +9,7 @@ import {
   TrendingUp, MonitorPlay, AlertTriangle, Target, DollarSign, Clock, CheckCircle2
 } from 'lucide-react';
 import { 
-  mockLeads, mockChartDataMultiline, mockRadarData, mockUnitBarData 
+  mockChartDataMultiline, mockRadarData, mockUnitBarData 
 } from '@/data/mockData';
 import { useAppData } from '@/context/AppDataContext';
 import TvDashboard from '@/components/Dashboard/TvDashboard';
@@ -21,7 +21,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Index = () => {
-  const { isTvMode, setIsTvMode } = useAppData();
+  const { leads, isTvMode, setIsTvMode } = useAppData();
   
   if (isTvMode) {
     return <TvDashboard />;
@@ -35,7 +35,7 @@ const Index = () => {
   };
 
   // Derived metrics for Actionable Insight
-  const dangerLeads = mockLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
+  const dangerLeads = leads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
   const financialRisk = dangerLeads.length * 300;
 
   return (

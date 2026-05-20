@@ -1,8 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Clock, AlertCircle, DollarSign, GripVertical } from 'lucide-react';
-import { Lead, mockUnits, FunnelStage } from '@/data/mockData';
-import { useAppData } from '@/context/AppDataContext';
+import { useAppData, Lead, FunnelStage } from '@/context/AppDataContext';
 
 interface Props {
   lead: Lead;
@@ -22,9 +21,9 @@ const formatMoney = (val: number) => {
 };
 
 const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
-  const { managers } = useAppData();
+  const { managers, units } = useAppData();
   const manager = managers.find(m => m.id === lead.manager_id);
-  const unit = mockUnits.find(u => u.id === lead.unit_id);
+  const unit = units.find(u => u.id === lead.unit_id);
   const isDanger = lead.sla_status === 'danger';
 
   return (

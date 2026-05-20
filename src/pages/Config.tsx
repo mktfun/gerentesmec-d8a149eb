@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info } from 'lucide-react';
-import { mockUnits, mockManagers } from '@/data/mockData';
+import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
+import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
+import { useAppData } from '@/context/AppDataContext';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -11,14 +12,20 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Config = () => {
+  const { units, managers, leads } = useAppData();
   const [apiUrl, setApiUrl] = useState('https://app.chatwoot.com');
   const [apiToken, setApiToken] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connected, setConnected] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
-  const [slaByUnit, setSlaByUnit] = useState<Record<string, number>>(
-    Object.fromEntries(mockUnits.map(u => [u.id, 20]))
-  );
+  const [slaByUnit, setSlaByUnit] = useState<Record<string, number>>({});
+  
+  // Initialize SLAs once units are loaded
+  React.useEffect(() => {
+    if (units.length > 0 && Object.keys(slaByUnit).length === 0) {
+      setSlaByUnit(Object.fromEntries(units.map(u => [u.id, 20])));
+    }
+  }, [units]);
 
   const testConnection = async () => {
     setTesting(true);
@@ -123,6 +130,15 @@ const Config = () => {
           </div>
         </motion.section>
 
+        {/* ── AI Router & Diagnóstico ───────────────────────────── */}
+        <motion.section {...fadeUp(0.07)}>
+          <div className="flex items-center gap-2 mb-4">
+            <Cpu className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-bold text-foreground">Inteligência Artificial (Hermes Router)</h2>
+          </div>
+          <AiRouterConfig />
+        </motion.section>
+
         {/* ── Unidades e Mapeamento de Canais ──────────────── */}
         <motion.section {...fadeUp(0.1)}>
           <div className="flex items-center justify-between mb-4">
@@ -130,7 +146,7 @@ const Config = () => {
               <Clock className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-bold text-foreground">Unidades e Canais</h2>
             </div>
-            <span className="text-xs text-muted-foreground">{mockUnits.length} unidades configuradas</span>
+            <span className="text-xs text-muted-foreground">{units.length} unidades configuradas</span>
           </div>
 
           {/* How it works banner */}
@@ -144,8 +160,13 @@ const Config = () => {
           </div>
 
           <div className="space-y-3">
-            {mockUnits.map((unit, i) => {
-              const manager = mockManagers.find(m => m.id === unit.manager_id);
+            {units.map((unit, i) => {
+              const manager = managers.find(m => m.unit_id === unit.id);
+              // Calculate average score for the unit
+              const unitLeads = leads.filter(l => l.unit_id === unit.id && l.score !== null);
+              const unitScore = unitLeads.length > 0
+                ? Math.round(unitLeads.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeads.length)
+                : 0;
               return (
                 <motion.div key={unit.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -156,6 +177,7 @@ const Config = () => {
                     unit={unit}
                     manager={manager}
                     slaMinutes={slaByUnit[unit.id] ?? 20}
+                    unitScore={unitScore}
                     onSlaChange={mins => setSlaByUnit(prev => ({ ...prev, [unit.id]: mins }))}
                   />
                 </motion.div>

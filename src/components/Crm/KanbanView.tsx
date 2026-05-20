@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lead, FunnelStage } from '@/data/mockData';
+import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import KanbanCard from './KanbanCard';
 

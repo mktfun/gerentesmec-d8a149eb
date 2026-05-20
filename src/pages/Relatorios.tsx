@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
-import { mockLeads } from '@/data/mockData';
+import { useAppData } from '@/context/AppDataContext';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -10,6 +10,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Relatorios = () => {
+  const { leads } = useAppData();
   const [dateFilter, setDateFilter] = useState<'today' | '7days' | 'month'>('month');
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -30,7 +31,7 @@ const Relatorios = () => {
     slasChange: dateFilter === 'month' ? -5 : 2,
   };
 
-  const auditedLeads = mockLeads.filter(l => l.score !== null);
+  const auditedLeads = leads.filter(l => l.score !== null);
 
   return (
     <div className="p-8 pb-20">
@@ -149,7 +150,7 @@ const Relatorios = () => {
                       <p className="font-bold text-white/90">{lead.customer_name}</p>
                       <p className="text-xs text-white/40">{lead.customer_vehicle}</p>
                     </td>
-                    <td className="px-8 py-4 text-white/60 font-semibold">{lead.unit_id.replace('unit_', 'Unidade ')}</td>
+                    <td className="px-8 py-4 text-white/60 font-semibold">{lead.unit_id ? lead.unit_id.replace('unit_', 'Unidade ') : 'Sem unidade'}</td>
                     <td className="px-8 py-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-white/40 border border-white/10 px-2 py-1 rounded-md bg-white/[0.02]">
                         {lead.funnel_stage.replace('_', ' ')}

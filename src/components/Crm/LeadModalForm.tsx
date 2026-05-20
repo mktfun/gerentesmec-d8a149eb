@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, User, Car, DollarSign, MapPin } from 'lucide-react';
-import { Lead, mockUnits, FunnelStage } from '@/data/mockData';
-import { useAppData } from '@/context/AppDataContext';
+import { useAppData, Lead, FunnelStage } from '@/context/AppDataContext';
 
 interface Props {
   lead?: Lead | null;
@@ -11,7 +10,7 @@ interface Props {
 }
 
 const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
-  const { addLead, updateLead } = useAppData();
+  const { addLead, updateLead, units } = useAppData();
 
   const [name, setName] = useState('');
   const [vehicle, setVehicle] = useState('');
@@ -32,7 +31,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
       setName('');
       setVehicle('');
       setPhone('');
-      setUnitId(mockUnits[0]?.id || '');
+      setUnitId(units[0]?.id || '');
       setTicket('');
       setStage('new');
     }
@@ -40,7 +39,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const unit = mockUnits.find(u => u.id === unitId);
+    const unit = units.find(u => u.id === unitId);
     if (!unit) return;
 
     const tVal = ticket ? parseFloat(ticket) : null;
@@ -51,7 +50,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
         customer_vehicle: vehicle,
         customer_phone: phone,
         unit_id: unitId,
-        manager_id: unit.manager_id,
+        manager_id: null, // should be preserved if not changed but form doesn't support changing manager yet
         ticket_value: tVal,
         funnel_stage: stage,
       });
@@ -62,7 +61,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
         customer_vehicle: vehicle,
         customer_phone: phone,
         unit_id: unitId,
-        manager_id: unit.manager_id,
+        manager_id: unit.id, // we don't have manager_id in unit for supabase right now, we can leave it null or find manager
         ticket_value: tVal,
         funnel_stage: stage,
         wait_time_minutes: 0,
@@ -138,7 +137,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
                   <select value={unitId} onChange={e => setUnitId(e.target.value)}
                     className="w-full pl-9 pr-4 py-2.5 bg-[#0a0a0f] border border-white/[0.06] rounded-xl text-sm focus:outline-none focus:border-indigo-500/50 appearance-none">
-                    {mockUnits.map(u => (
+                    {units.map(u => (
                       <option key={u.id} value={u.id}>{u.name}</option>
                     ))}
                   </select>

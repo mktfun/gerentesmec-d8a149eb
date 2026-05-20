@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, User, Phone, MapPin } from 'lucide-react';
-import { Manager, mockUnits } from '@/data/mockData';
-import { useAppData } from '@/context/AppDataContext';
+import { useAppData, Manager } from '@/context/AppDataContext';
 
 interface Props {
   manager?: Manager | null;
@@ -11,7 +10,7 @@ interface Props {
 }
 
 const ManagerModalForm: React.FC<Props> = ({ manager, isOpen, onClose }) => {
-  const { addManager, updateManager } = useAppData();
+  const { addManager, updateManager, units } = useAppData();
   
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -25,21 +24,21 @@ const ManagerModalForm: React.FC<Props> = ({ manager, isOpen, onClose }) => {
     } else {
       setName('');
       setPhone('');
-      setUnitId(mockUnits[0]?.id || '');
+      setUnitId(units[0]?.id || '');
     }
   }, [manager, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (manager) {
-      updateManager(manager.id, { name, phone, unit_id: unitId });
+      // update phone is not in our Manager schema natively but if we had it:
+      updateManager(manager.id, { name, unit_id: unitId });
     } else {
       addManager({
         id: `m${Date.now()}`,
         name,
-        phone,
-        unit_id: unitId,
-        score: 100 // default initial score
+        unit_id: unitId || null,
+        avatar: null
       });
     }
     onClose();
@@ -100,7 +99,7 @@ const ManagerModalForm: React.FC<Props> = ({ manager, isOpen, onClose }) => {
                   <select value={unitId} onChange={e => setUnitId(e.target.value)}
                     className="w-full pl-9 pr-4 py-2.5 bg-[#0a0a0f] border border-white/[0.06] rounded-xl
                       text-sm text-foreground focus:outline-none focus:border-indigo-500/50 transition-colors appearance-none">
-                    {mockUnits.map(u => (
+                    {units.map(u => (
                       <option key={u.id} value={u.id}>{u.name}</option>
                     ))}
                   </select>

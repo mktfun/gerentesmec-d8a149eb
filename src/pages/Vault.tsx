@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, ShieldCheck, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import KanbanBoard from '@/components/Vault/KanbanBoard';
+import { useAppData } from '@/context/AppDataContext';
 
 export interface CycleMock {
   id: string;
@@ -15,15 +16,24 @@ export interface CycleMock {
   is_sla_breached: boolean;
 }
 
-const mockData: CycleMock[] = [
-  { id: '1', customer_phone: '+55 11 9999-8888', manager_name: 'Renato Silva', unit_name: 'Dom Pedro', status: 'waiting', wait_time_minutes: 25, steps_completed: 0, is_sla_breached: true },
-  { id: '2', customer_phone: '+55 11 9777-6666', manager_name: 'Marcos Souza', unit_name: 'Jabaquara', status: 'waiting', wait_time_minutes: 5, steps_completed: 0, is_sla_breached: false },
-  { id: '3', customer_phone: '+55 11 9555-4444', manager_name: 'Amanda Costa', unit_name: 'Kennedy', status: 'in_progress', wait_time_minutes: 2, steps_completed: 1, is_sla_breached: false },
-  { id: '4', customer_phone: '+55 11 9444-3333', manager_name: 'Jorge Bereta', unit_name: 'Jabaquara', status: 'closed', wait_time_minutes: 0, steps_completed: 3, is_sla_breached: false },
-];
-
 const Vault = () => {
   const navigate = useNavigate();
+  const { leads, managers, units } = useAppData();
+
+  const mappedData: CycleMock[] = leads.map(lead => {
+    const manager = managers.find(m => m.id === lead.manager_id);
+    const unit = units.find(u => u.id === lead.unit_id);
+    return {
+      id: lead.id,
+      customer_phone: lead.customer_phone,
+      manager_name: manager?.name || 'Sem Gerente',
+      unit_name: unit?.name || 'Sem Unidade',
+      status: lead.funnel_stage === 'new' ? 'waiting' : lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost' ? 'closed' : 'in_progress',
+      wait_time_minutes: lead.wait_time_minutes,
+      steps_completed: lead.score !== null ? 4 : 0,
+      is_sla_breached: lead.sla_status === 'danger'
+    };
+  });
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden selection:bg-blue-500/30">
@@ -62,7 +72,7 @@ const Vault = () => {
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="h-full"
         >
-          <KanbanBoard data={mockData} />
+          <KanbanBoard data={mappedData} />
         </motion.div>
       </main>
     </div>

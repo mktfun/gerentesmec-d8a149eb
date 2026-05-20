@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { mockUnits, mockLeads } from '@/data/mockData';
 import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 
 const TvDashboard: React.FC = () => {
-  const { leads, setIsTvMode } = useAppData();
+  const { leads, units, setIsTvMode } = useAppData();
   const [ticker, setTicker] = useState(0);
 
   // Pulse effect
@@ -62,7 +61,7 @@ const TvDashboard: React.FC = () => {
 
       {/* COLUMNS */}
       <div className="flex-1 grid grid-cols-3 gap-6 p-6">
-        {mockUnits.map((unit, i) => {
+        {units.map((unit, i) => {
           const unitLeads = leads.filter(l => l.unit_id === unit.id);
           const dangerLeads = unitLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
           const score = getUnitScore(unit.id);
