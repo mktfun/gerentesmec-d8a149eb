@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign } from 'lucide-react';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Sparkles, Loader2 } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -153,6 +153,29 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+
+        {/* Closing Summary */}
+        {(lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost') && (
+          <div className="relative overflow-hidden rounded-xl bg-muted/30 border border-border p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+              <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Parecer de Fechamento</h4>
+            </div>
+
+            {lead.closing_summary ? (
+              <p className="text-sm text-muted-foreground leading-relaxed font-medium whitespace-pre-wrap relative z-10">
+                {lead.closing_summary}
+              </p>
+            ) : (
+              <div className="flex items-center gap-3 py-2">
+                <Loader2 className="w-4 h-4 text-muted-foreground/50 animate-spin" />
+                <p className="text-xs text-muted-foreground/50 font-medium">
+                  Aguardando parecer...
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Checklist */}
         <Accordion type="multiple" defaultValue={['step1', 'step2']} className="space-y-2">

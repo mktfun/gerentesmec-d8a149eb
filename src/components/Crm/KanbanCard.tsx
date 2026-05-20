@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, AlertCircle, DollarSign, GripVertical } from 'lucide-react';
+import { Clock, AlertCircle, DollarSign, GripVertical, FileText } from 'lucide-react';
 import { useAppData, Lead, FunnelStage } from '@/context/AppDataContext';
 
 interface Props {
@@ -48,6 +48,12 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
           <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400
             bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-full">
             <AlertCircle className="w-3 h-3" />SLA
+          </span>
+        )}
+        {lead.closing_summary && (
+          <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-muted-foreground
+            bg-muted border border-border px-1.5 py-0.5 rounded-full" title="Parecer disponível">
+            <FileText className="w-3 h-3" />
           </span>
         )}
       </div>

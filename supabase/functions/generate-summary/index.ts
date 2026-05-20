@@ -54,11 +54,9 @@ serve(async (req) => {
         // Simulating AI delay
         await new Promise(r => setTimeout(r, 1500));
         
-        const generatedSummary = `[Resumo AI Automático] 
-O atendimento com ${record.customer_name} (Veículo: ${record.customer_vehicle}) foi ${record.funnel_stage === 'closed_won' ? 'fechado com sucesso' : 'perdido'}. 
+        const generatedSummary = `O atendimento com ${record.customer_name} (Veículo: ${record.customer_vehicle}) foi ${record.funnel_stage === 'closed_won' ? 'fechado com sucesso' : 'perdido'}. 
 Ticket Final: ${record.ticket_value ? 'R$ ' + record.ticket_value : 'Não informado'}.
-Pontos fortes do atendimento: Rapidez na resposta inicial e orçamento claro.
-(Gerado por: ${aiSettings.model} / ${aiSettings.provider})`;
+Pontos fortes do atendimento: Rapidez na resposta inicial e orçamento claro.`;
 
         // Save summary to the lead
         const { error: updateError } = await supabaseClient
