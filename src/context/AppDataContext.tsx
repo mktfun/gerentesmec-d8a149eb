@@ -105,27 +105,35 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addManager = async (manager: Omit<Manager, 'id' | 'created_at'>) => {
-    await (supabase as any).from('managers').insert([manager]);
+    const newManager = { ...manager, id: `mgr_${Date.now()}`, created_at: new Date().toISOString() } as Manager;
+    setManagers(prev => [...prev, newManager]);
+    await (supabase as any).from('managers').insert([newManager]);
   };
 
   const updateManager = async (id: string, updates: Partial<Manager>) => {
+    setManagers(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
     await (supabase as any).from('managers').update(updates).eq('id', id);
   };
 
   const deleteManager = async (id: string) => {
+    setManagers(prev => prev.filter(m => m.id !== id));
     await (supabase as any).from('managers').delete().eq('id', id);
   };
 
   const addUnit = async (name: string, chatwoot_inbox_id?: number) => {
     const id = `unit_${Date.now()}`;
-    await (supabase as any).from('units').insert([{ id, name, chatwoot_inbox_id }]);
+    const newUnit = { id, name, chatwoot_inbox_id } as Unit;
+    setUnits(prev => [...prev, newUnit]);
+    await (supabase as any).from('units').insert([newUnit]);
   };
 
   const updateUnit = async (id: string, updates: Partial<Unit>) => {
+    setUnits(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
     await (supabase as any).from('units').update(updates).eq('id', id);
   };
 
   const deleteUnit = async (id: string) => {
+    setUnits(prev => prev.filter(u => u.id !== id));
     await (supabase as any).from('managers').delete().eq('unit_id', id);
     await (supabase as any).from('units').delete().eq('id', id);
   };
