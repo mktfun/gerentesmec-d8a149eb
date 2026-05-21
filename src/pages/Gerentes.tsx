@@ -64,15 +64,17 @@ const Gerentes = () => {
           const unitLeads = leads.filter(l => l.unit_id === unit.id && l.score !== null);
           const unitScore = unitLeads.length > 0
             ? Math.round(unitLeads.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeads.length)
-            : 0;
+            : null;
             
-          const scoreColor = unitScore >= 80 ? 'text-emerald-400' : unitScore >= 65 ? 'text-indigo-300' : 'text-rose-400';
-          const barColor   = unitScore >= 80 ? 'bg-emerald-400' : unitScore >= 65 ? 'bg-indigo-400' : 'bg-rose-400';
-          const glowColor  = unitScore >= 80
+          const scoreColor = unitScore === null ? 'text-white/30' : unitScore >= 80 ? 'text-emerald-400' : unitScore >= 65 ? 'text-indigo-300' : 'text-rose-400';
+          const barColor   = unitScore === null ? 'bg-white/10' : unitScore >= 80 ? 'bg-emerald-400' : unitScore >= 65 ? 'bg-indigo-400' : 'bg-rose-400';
+          const glowColor  = unitScore !== null && unitScore >= 80
             ? 'shadow-[0_0_30px_rgba(52,211,153,0.08)]'
-            : unitScore >= 65
+            : unitScore !== null && unitScore >= 65
             ? 'shadow-[0_0_30px_rgba(99,102,241,0.08)]'
-            : 'shadow-[0_0_30px_rgba(251,113,133,0.08)]';
+            : unitScore !== null
+            ? 'shadow-[0_0_30px_rgba(251,113,133,0.08)]'
+            : '';
 
           return (
             <motion.div
@@ -90,8 +92,8 @@ const Gerentes = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`text-3xl font-black ${scoreColor}`}>{unitScore}%</p>
-                  <p className="text-[10px] text-muted-foreground font-medium mt-0.5">Score médio</p>
+                  <p className={`text-3xl font-black ${scoreColor}`}>{unitScore !== null ? `${unitScore}%` : '—'}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{unitScore !== null ? 'Score médio' : 'Sem auditorias'}</p>
                 </div>
               </div>
 
@@ -99,7 +101,7 @@ const Gerentes = () => {
               <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden mb-5">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${unitScore}%` }}
+                  animate={{ width: `${unitScore ?? 0}%` }}
                   transition={{ delay: 0.1 + idx * 0.08, duration: 1, ease: 'easeOut' }}
                   className={`h-full rounded-full ${barColor}`}
                 />
@@ -118,8 +120,8 @@ const Gerentes = () => {
                   const managerLeads = leads.filter(l => l.manager_id === manager.id && l.score !== null);
                   const mScore = managerLeads.length > 0 
                     ? Math.round(managerLeads.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeads.length)
-                    : 0;
-                  const trend = mScore >= 70;
+                    : null;
+                  const trend = mScore !== null && mScore >= 70;
                   return (
                     <motion.div
                       key={manager.id}
