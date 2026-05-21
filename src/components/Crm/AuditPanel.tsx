@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles } from 'lucide-react';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -47,7 +47,7 @@ import { useAppData } from '@/context/AppDataContext';
 interface Props { lead: Lead; onClose: () => void; }
 
 const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
-  const { updateLead, saveLeadAudit } = useAppData();
+  const { updateLead, saveLeadAudit, integrationSettings } = useAppData();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState('');
   const [ticketValueStr, setTicketValueStr] = useState('');
@@ -135,11 +135,24 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           <h3 className="text-sm font-black text-foreground">Dossiê: {lead.customer_name}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">{lead.customer_phone}</p>
         </div>
-        <button onClick={onClose}
-          className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10]
-            flex items-center justify-center transition-colors focus-visible:outline-indigo-500">
-          <X className="w-4 h-4 text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-2">
+          {integrationSettings?.chatwoot_url && integrationSettings?.chatwoot_account_id && lead.chatwoot_conversation_id && (
+            <a 
+              href={`${integrationSettings.chatwoot_url}/app/accounts/${integrationSettings.chatwoot_account_id}/conversations/${lead.chatwoot_conversation_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[11px] font-bold tracking-widest flex items-center gap-1.5 transition-all"
+            >
+              CHATWOOT
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
+          <button onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10]
+              flex items-center justify-center transition-colors focus-visible:outline-indigo-500">
+            <X className="w-4 h-4 text-white/70" />
+          </button>
+        </div>
       </div>
 
       {/* Score ring */}

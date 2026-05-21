@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
+import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -40,10 +41,10 @@ const Relatorios = () => {
 
   const scoreCur  = round(avg(currentLeads.filter(l => l.score !== null).map(l => Number(l.score))));
   const scorePrev = round(avg(prevLeads.filter(l => l.score !== null).map(l => Number(l.score))));
-  const tmrCur    = round(avg(currentLeads.map(l => l.wait_time_minutes)));
-  const tmrPrev   = round(avg(prevLeads.map(l => l.wait_time_minutes)));
-  const slasCur   = currentLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length;
-  const slasPrev  = prevLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length;
+  const tmrCur    = currentLeads.length ? calculateTmr(currentLeads) : null;
+  const tmrPrev   = prevLeads.length ? calculateTmr(prevLeads) : null;
+  const slasCur   = calculateDangerLeads(currentLeads).length;
+  const slasPrev  = calculateDangerLeads(prevLeads).length;
 
   const metrics = {
     score: scoreCur,

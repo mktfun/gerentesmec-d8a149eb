@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle, Calendar } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
+import { calculateTmr } from '@/utils/metrics';
 
 const TvDashboard: React.FC = () => {
   const { leads, units, setIsTvMode } = useAppData();
@@ -103,22 +104,7 @@ const TvDashboard: React.FC = () => {
       diff = Math.round((a - b) * 10) / 10;
     }
 
-    const tmr = periodLeads.length
-      ? Math.round(periodLeads.reduce((s, l) => {
-          let wait = l.wait_time_minutes || 0;
-          // @ts-ignore
-          if (wait === 0 && l.last_client_message_at) {
-             // @ts-ignore
-             const cTime = new Date(l.last_client_message_at).getTime();
-             // @ts-ignore
-             const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
-             if (cTime > aTime) {
-                wait = Math.round((new Date().getTime() - cTime) / 60000);
-             }
-          }
-          return s + wait;
-        }, 0) / periodLeads.length)
-      : null;
+    const tmr = periodLeads.length ? calculateTmr(periodLeads) : null;
 
     return { score, diff, tmr, periodLeads };
   };

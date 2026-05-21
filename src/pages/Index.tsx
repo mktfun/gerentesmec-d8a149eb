@@ -6,7 +6,8 @@ import {
 import { 
   TrendingUp, Clock, CheckCircle2, AlertTriangle 
 } from 'lucide-react';
-import { useAppData } from '@/context/AppDataContext';
+import { useAppData, Lead } from '@/context/AppDataContext';
+import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import TvDashboard from '@/components/Dashboard/TvDashboard';
 
 const fadeUp = (delay = 0) => ({
@@ -45,6 +46,8 @@ const Index = () => {
   // Score series — last 7 days
   const scoreHistory = useMemo(() => {
     const series: { day: string; score: number | null }[] = [];
+    let validPoints = 0;
+    
     for (let i = 6; i >= 0; i--) {
       const day = new Date(today0); day.setDate(day.getDate() - i);
       const next = new Date(day); next.setDate(next.getDate() + 1);
@@ -53,8 +56,19 @@ const Index = () => {
         return t >= day.getTime() && t < next.getTime();
       });
       const a = avg(dayLeads.map(l => Number(l.score)));
+      if (a !== null) validPoints++;
       series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a) : null });
     }
+
+    // Chart Fallback: Se for o dia 1 de uso e só tem 1 ponto, vamos "esticar" essa linha horizontalmente 
+    // para preencher o gráfico de forma visualmente agradável ao invés de um ponto solto solitário.
+    if (validPoints === 1) {
+      const singleScore = series.find(s => s.score !== null)?.score;
+      if (singleScore !== undefined) {
+        return series.map(s => ({ ...s, score: singleScore }));
+      }
+    }
+    
     return series;
   }, [scoredLeads, today0]);
 
@@ -86,44 +100,14 @@ const Index = () => {
   // Today metrics
   const todayLeads = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
   
-  const calculateTmr = (leadsList: Lead[]) => {
-    if (!leadsList.length) return 0;
-    return Math.round(leadsList.reduce((acc, l) => {
-      let wait = l.wait_time_minutes || 0;
-      // @ts-ignore
-      if (wait === 0 && l.last_client_message_at) {
-        // @ts-ignore
-        const cTime = new Date(l.last_client_message_at).getTime();
-        // @ts-ignore
-        const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
-        if (cTime > aTime) {
-          wait = Math.round((new Date().getTime() - cTime) / 60000);
-        }
-      }
-      return acc + wait;
-    }, 0) / leadsList.length);
-  };
-  const todayTmr = calculateTmr(todayLeads);
+  const calculateTmrFallback = (leadsList: Lead[]) => calculateTmr(leadsList);
+  const todayTmr = calculateTmrFallback(todayLeads);
 
   const pendingAudits = todayLeads.filter(l => (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') && l.score === null).length;
   const completedLeads = todayLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
   const resolutionRate = todayLeads.length > 0 ? ((completedLeads.length / todayLeads.length) * 100).toFixed(1) : '0';
   
-  const dangerLeads = todayLeads.filter(l => {
-    if (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') return false;
-    let wait = l.wait_time_minutes || 0;
-    // @ts-ignore
-    if (wait === 0 && l.last_client_message_at) {
-      // @ts-ignore
-      const cTime = new Date(l.last_client_message_at).getTime();
-      // @ts-ignore
-      const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
-      if (cTime > aTime) {
-        wait = Math.round((new Date().getTime() - cTime) / 60000);
-      }
-    }
-    return l.sla_status === 'danger' || wait > 20;
-  });
+  const dangerLeads = calculateDangerLeads(todayLeads);
 
   // Manager ranking
   const managerRanking = managers.map(m => {
