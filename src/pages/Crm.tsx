@@ -322,9 +322,9 @@ const Crm = () => {
                   )}
                 </div>
               </div>
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 {selectedLead && view === 'list' && (
-                  <motion.div key={selectedLead.id}
+                  <motion.div key="audit-panel-list"
                     initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 28 }}
                     className="flex-1 overflow-hidden"
                   >

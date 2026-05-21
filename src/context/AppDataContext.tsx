@@ -200,13 +200,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       etapa_scores 
     } as any : l));
 
-    const { error } = await (supabase as any).rpc('save_lead_audit', {
-      p_lead_id: id,
-      p_score: score,
-      p_closing_summary: summary,
-      p_audit_checklist: checklist,
-      p_etapa_scores: etapa_scores
-    });
+    const { error } = await (supabase as any).from('leads').update({
+      score: score,
+      closing_summary: summary,
+      audit_checklist: checklist,
+      etapa_scores: etapa_scores
+    }).eq('id', id);
     
     if (error) {
       console.error('Error saving lead audit via RPC:', error);

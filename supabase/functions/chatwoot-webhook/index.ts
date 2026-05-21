@@ -95,7 +95,7 @@ serve(async (req) => {
     // Message specific data
     const message = payload.message || payload; // fallback to payload if not nested
     const messageId = event === 'message_created' ? message.id || payload.id : null;
-    const content = message.content || payload.content;
+    let content = message.content || payload.content || '';
     const rawMessageType = message.message_type ?? payload.message_type;
     const messageType = Number(rawMessageType);
     
@@ -217,6 +217,7 @@ serve(async (req) => {
       if (message.attachments && message.attachments.length > 0) {
         mediaUrl = message.attachments[0].data_url;
         mediaType = message.attachments[0].file_type;
+        content = (content + `\n[ANEXO ENVIADO: ${mediaType || 'mídia'}]`).trim();
       }
       
       // ignore errors for duplicates if message already exists
