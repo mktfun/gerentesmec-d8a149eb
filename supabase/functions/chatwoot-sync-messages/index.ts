@@ -32,7 +32,10 @@ serve(async (req) => {
       throw new Error('Chatwoot credentials not found in integration_settings')
     }
 
-    const baseUrl = settings.chatwoot_url.replace(/\/$/, '')
+    let baseUrl = settings.chatwoot_url.replace(/\/$/, '')
+    if (!baseUrl.startsWith('http')) {
+      baseUrl = 'https://' + baseUrl
+    }
     const token = settings.chatwoot_token
     const headers = { 'api_access_token': token }
 

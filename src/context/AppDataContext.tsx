@@ -151,6 +151,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
     console.log('Sending update to Supabase:', updates);
+    
+    // OPTIMISTIC UPDATE: Atualiza a UI na hora
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+    
     const { data, error } = await (supabase as any).from('leads').update(updates).eq('id', id).select();
     console.log('Supabase update response:', { data, error });
     if (error) {

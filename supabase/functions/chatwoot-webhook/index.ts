@@ -83,6 +83,16 @@ serve(async (req) => {
     // Sender/Contact can be in different places depending on version and event
     const contact = payload.meta?.sender || payload.conversation?.meta?.sender || payload.sender || payload.contact || {};
     const conversationId = payload.conversation?.id || payload.id; // in conversation_created, payload.id is conversation id
+
+    // Mechanic Filter: Ignore conversations from registered mechanic phones
+    const contactPhone = contact.phone_number;
+    if (contactPhone) {
+      const { data: ignoreUnit } = await supabase.from('units').select('id').eq('phone', contactPhone).maybeSingle();
+      if (ignoreUnit) {
+        console.log(`Ignored due to unit phone match: ${contactPhone}`);
+        return new Response(JSON.stringify({ message: "Ignored by unit phone filter" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
+      }
+    }
     
     // Message specific data
     const message = payload.message || payload; // fallback to payload if not nested
