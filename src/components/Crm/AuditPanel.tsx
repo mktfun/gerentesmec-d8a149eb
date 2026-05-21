@@ -136,17 +136,21 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           <p className="text-xs text-muted-foreground mt-0.5">{lead.customer_phone}</p>
         </div>
         <div className="flex items-center gap-2">
-          {lead.chatwoot_conversation_id && (
-            <a 
-              href={integrationSettings?.chatwoot_url ? `${integrationSettings.chatwoot_url}/app/accounts/${integrationSettings.chatwoot_account_id || 1}/conversations/${lead.chatwoot_conversation_id}` : `https://app.chatwoot.com/app/accounts/1/conversations/${lead.chatwoot_conversation_id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10] flex items-center justify-center transition-colors focus-visible:outline-indigo-500"
-              title="Abrir Conversa"
-            >
-              <ExternalLink className="w-4 h-4 text-white/70" />
-            </a>
-          )}
+          {lead.chatwoot_conversation_id && (() => {
+            const baseUrl = integrationSettings?.chatwoot_url || 'https://app.chatwoot.com';
+            const secureBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
+            return (
+              <a 
+                href={`${secureBaseUrl}/app/accounts/${integrationSettings?.chatwoot_account_id || 1}/conversations/${lead.chatwoot_conversation_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10] flex items-center justify-center transition-colors focus-visible:outline-indigo-500"
+                title="Abrir Conversa"
+              >
+                <ExternalLink className="w-4 h-4 text-white/70" />
+              </a>
+            );
+          })()}
           <button onClick={onClose}
             className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10]
               flex items-center justify-center transition-colors focus-visible:outline-indigo-500">
