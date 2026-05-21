@@ -106,8 +106,15 @@ const TvDashboard: React.FC = () => {
     const tmr = periodLeads.length
       ? Math.round(periodLeads.reduce((s, l) => {
           let wait = l.wait_time_minutes || 0;
-          if (wait === 0 && l.last_message_at && l.created_at) {
-             wait = Math.max(0, Math.round((new Date(l.last_message_at).getTime() - new Date(l.created_at).getTime()) / 60000));
+          // @ts-ignore
+          if (wait === 0 && l.last_client_message_at) {
+             // @ts-ignore
+             const cTime = new Date(l.last_client_message_at).getTime();
+             // @ts-ignore
+             const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
+             if (cTime > aTime) {
+                wait = Math.round((new Date().getTime() - cTime) / 60000);
+             }
           }
           return s + wait;
         }, 0) / periodLeads.length)
@@ -214,8 +221,8 @@ const TvDashboard: React.FC = () => {
                     {/* Massive Score */}
                     <div className="flex-1 flex flex-col items-center justify-center">
                       <div className="relative inline-flex items-center justify-center w-64 h-64 rounded-full border-[8px] border-white/5 mb-6">
-                        <svg className="absolute inset-0 w-full h-full -rotate-90">
-                          <circle cx="124" cy="124" r="120" stroke="currentColor" strokeWidth="8" fill="none"
+                        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 256 256">
+                          <circle cx="128" cy="128" r="120" stroke="currentColor" strokeWidth="8" fill="none"
                                   className={`${accentClass} transition-all duration-1000`}
                                   strokeDasharray={`${(displayScore / 100) * (2 * Math.PI * 120)} 1000`}
                                   strokeLinecap="round" />

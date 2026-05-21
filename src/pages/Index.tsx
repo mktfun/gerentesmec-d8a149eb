@@ -85,10 +85,45 @@ const Index = () => {
 
   // Today metrics
   const todayLeads = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
+  
+  const calculateTmr = (leadsList: Lead[]) => {
+    if (!leadsList.length) return 0;
+    return Math.round(leadsList.reduce((acc, l) => {
+      let wait = l.wait_time_minutes || 0;
+      // @ts-ignore
+      if (wait === 0 && l.last_client_message_at) {
+        // @ts-ignore
+        const cTime = new Date(l.last_client_message_at).getTime();
+        // @ts-ignore
+        const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
+        if (cTime > aTime) {
+          wait = Math.round((new Date().getTime() - cTime) / 60000);
+        }
+      }
+      return acc + wait;
+    }, 0) / leadsList.length);
+  };
+  const todayTmr = calculateTmr(todayLeads);
+
   const pendingAudits = todayLeads.filter(l => (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') && l.score === null).length;
   const completedLeads = todayLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
   const resolutionRate = todayLeads.length > 0 ? ((completedLeads.length / todayLeads.length) * 100).toFixed(1) : '0';
-  const dangerLeads = todayLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
+  
+  const dangerLeads = todayLeads.filter(l => {
+    if (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') return false;
+    let wait = l.wait_time_minutes || 0;
+    // @ts-ignore
+    if (wait === 0 && l.last_client_message_at) {
+      // @ts-ignore
+      const cTime = new Date(l.last_client_message_at).getTime();
+      // @ts-ignore
+      const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
+      if (cTime > aTime) {
+        wait = Math.round((new Date().getTime() - cTime) / 60000);
+      }
+    }
+    return l.sla_status === 'danger' || wait > 20;
+  });
 
   // Manager ranking
   const managerRanking = managers.map(m => {
@@ -139,7 +174,7 @@ const Index = () => {
             <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tempo Médio</p>
             <p className="text-3xl font-black text-indigo-400">
-              {todayLeads.length > 0 ? Math.round(avg(todayLeads.map(l => l.wait_time_minutes)) || 0) : 0}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
+              {todayTmr}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
             </p>
           </div>
 
@@ -170,7 +205,7 @@ const Index = () => {
           <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-6">
             <AlertTriangle className="w-5 h-5 text-rose-400" />
           </div>
-          <h3 className="text-4xl font-black text-white mb-2">{dangerLeads.length}</h3>
+          <h3 className={`text-4xl font-black mb-2 ${dangerLeads.length > 0 ? 'text-rose-500' : 'text-white'}`}>{dangerLeads.length}</h3>
           <p className="text-sm text-slate-300 font-medium mb-1">Leads em Alerta ({'>'}20m)</p>
           <p className="text-xs text-rose-400">Ação imediata necessária</p>
         </motion.div>

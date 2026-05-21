@@ -139,30 +139,46 @@ serve(async (req) => {
     if (existingLead) {
       leadId = existingLead.id;
       // Update existing lead's last message time
-      await supabase
+      const updateData: any = { last_message_at: now };
+      if (senderType === 'contact') {
+        updateData.last_client_message_at = now;
+      } else {
+        updateData.last_agent_message_at = now;
+      }
+      
+      const { error: updateError } = await supabase
         .from('leads')
-        .update({
-          last_message_at: now
-        })
+        .update(updateData)
         .eq('id', leadId)
+      
+      if (updateError) {
+        console.error('Error updating lead last_message_at:', updateError)
+      }
     } else {
       // Insert new lead
       leadId = crypto.randomUUID()
+      const insertData: any = {
+        id: leadId,
+        chatwoot_conversation_id: conversationId,
+        chatwoot_contact_id: contact.id,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        unit_id: unitData.id,
+        manager_id: managerData?.id || null,
+        funnel_stage: 'lead_new',
+        sla_status: 'ok',
+        wait_time_minutes: 0,
+        last_message_at: now,
+      };
+      if (senderType === 'contact') {
+        insertData.last_client_message_at = now;
+      } else {
+        insertData.last_agent_message_at = now;
+      }
+      
       await supabase
         .from('leads')
-        .insert({
-          id: leadId,
-          chatwoot_conversation_id: conversationId,
-          chatwoot_contact_id: contact.id,
-          customer_name: customerName,
-          customer_phone: customerPhone,
-          unit_id: unitData.id,
-          manager_id: managerData?.id || null,
-          funnel_stage: 'lead_new',
-          sla_status: 'ok',
-          wait_time_minutes: 0,
-          last_message_at: now,
-        })
+        .insert(insertData)
     }
 
     // 6. Insert Message History if it's a message
