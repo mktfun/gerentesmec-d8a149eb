@@ -59,6 +59,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setManagers(prev => prev.filter(m => m.id !== payload.old.id));
         }
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'units' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setUnits(prev => [...prev, payload.new as Unit]);
+        } else if (payload.eventType === 'UPDATE') {
+          setUnits(prev => prev.map(u => u.id === payload.new.id ? payload.new as Unit : u));
+        } else if (payload.eventType === 'DELETE') {
+          setUnits(prev => prev.filter(u => u.id !== payload.old.id));
+        }
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_settings' }, (payload) => {
         if (payload.eventType === 'UPDATE') {
           setAiSettings(payload.new as AiSettings);
