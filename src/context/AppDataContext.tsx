@@ -161,6 +161,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const saveLeadAudit = async (id: string, score: number, summary: string, checklist: Record<string, boolean>) => {
+    
+    // OPTIMISTIC UPDATE: Atualiza a UI na hora, sem depender do Realtime ou Cache
+    setLeads(prev => prev.map(l => l.id === id ? { 
+      ...l, 
+      score, 
+      closing_summary: summary, 
+      audit_checklist: checklist 
+    } as any : l));
+
     const { error } = await (supabase as any).rpc('save_lead_audit', {
       p_lead_id: id,
       p_score: score,
