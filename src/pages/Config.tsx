@@ -26,7 +26,8 @@ const Config = () => {
   const [addingUnit, setAddingUnit] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const webhookUrl = 'https://[SEU-PROJETO].supabase.co/functions/v1/chatwoot-webhook';
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://[SEU-PROJETO].supabase.co';
+  const webhookUrl = `${supabaseUrl}/functions/v1/chatwoot-webhook`;
 
   const handleCopyWebhook = () => {
     navigator.clipboard.writeText(webhookUrl);
