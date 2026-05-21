@@ -47,7 +47,7 @@ import { useAppData } from '@/context/AppDataContext';
 interface Props { lead: Lead; onClose: () => void; }
 
 const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
-  const { updateLead } = useAppData();
+  const { updateLead, saveLeadAudit } = useAppData();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState('');
   const [ticketValueStr, setTicketValueStr] = useState('');
@@ -301,7 +301,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       <div className="p-4 border-t border-white/[0.06] shrink-0 bg-white/[0.01]">
         <button 
           onClick={() => {
-            updateLead(lead.id, { score: rounded, closing_summary: notes, audit_checklist: checked } as any);
+            saveLeadAudit(lead.id, rounded, notes, checked);
             onClose();
           }}
           className="w-full py-3 rounded-xl text-sm font-bold text-white

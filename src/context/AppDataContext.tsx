@@ -24,6 +24,7 @@ interface AppDataContextType {
   deleteUnit: (id: string) => Promise<void>;
   addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
+  saveLeadAudit: (id: string, score: number, summary: string, checklist: Record<string, boolean>) => Promise<void>;
   deleteLead: (id: string) => Promise<void>;
   moveLeadStage: (id: string, stage: FunnelStage) => Promise<void>;
   isTvMode: boolean;
@@ -149,19 +150,36 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
-    const { error } = await (supabase as any).from('leads').update(updates).eq('id', id);
+    console.log('Sending update to Supabase:', updates);
+    const { data, error } = await (supabase as any).from('leads').update(updates).eq('id', id).select();
+    console.log('Supabase update response:', { data, error });
     if (error) {
       console.error('Error updating lead:', error);
       alert('Erro ao salvar no banco: ' + error.message);
       return;
     }
-    if (updates.score !== undefined) {
-      await (supabase as any).from('chat_messages').insert([{
-        lead_id: id,
-        content: `Auditado e pontuado: ${updates.score}%`,
-        sender_type: 'system',
-      }]);
+  };
+
+  const saveLeadAudit = async (id: string, score: number, summary: string, checklist: Record<string, boolean>) => {
+    const { error } = await (supabase as any).rpc('save_lead_audit', {
+      p_lead_id: id,
+      p_score: score,
+      p_closing_summary: summary,
+      p_audit_checklist: checklist
+    });
+    
+    if (error) {
+      console.error('Error saving lead audit via RPC:', error);
+      alert('Erro crítico ao salvar auditoria: ' + error.message);
+      return;
     }
+
+    // Apenas insere na timeline de chat se o RPC foi salvo com sucesso no banco.
+    await (supabase as any).from('chat_messages').insert([{
+      lead_id: id,
+      content: `Auditado e pontuado: ${score}%`,
+      sender_type: 'system',
+    }]);
   };
 
   const deleteLead = async (id: string) => {
@@ -200,7 +218,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       leads, managers, units, aiSettings, integrationSettings,
       addManager, updateManager, deleteManager,
       addUnit, updateUnit, deleteUnit,
-      addLead, updateLead, deleteLead, moveLeadStage,
+      addLead, updateLead, saveLeadAudit, deleteLead, moveLeadStage,
       isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings
     }}>
       {children}
