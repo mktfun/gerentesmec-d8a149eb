@@ -104,6 +104,16 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await (supabase as any).from('managers').delete().eq('id', id);
   };
 
+  const addUnit = async (name: string) => {
+    const id = `unit_${Date.now()}`;
+    await (supabase as any).from('units').insert([{ id, name }]);
+  };
+
+  const deleteUnit = async (id: string) => {
+    await (supabase as any).from('managers').delete().eq('unit_id', id);
+    await (supabase as any).from('units').delete().eq('id', id);
+  };
+
   const addLead = async (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => {
     const newLead = {
       ...lead,
