@@ -100,17 +100,20 @@ serve(async (req) => {
     const content = message.content || payload.content;
     const rawMessageType = message.message_type ?? payload.message_type;
     const messageType = Number(rawMessageType);
-    let senderType = payload.sender?.type?.toLowerCase() || message.sender?.type?.toLowerCase();
     
-    if (!senderType) {
-      if (messageType === 0 || rawMessageType === 'incoming') senderType = 'contact';
-      else if (messageType === 1 || messageType === 2 || rawMessageType === 'outgoing' || rawMessageType === 'template') senderType = 'user';
-      else senderType = 'bot';
-    }
-    
-    // Normalize in case of weird types
-    if (senderType !== 'contact' && senderType !== 'user' && senderType !== 'bot') {
-      senderType = 'bot';
+    let senderType = 'bot';
+
+    // 1. Variável de ouro: message_type
+    if (messageType === 0 || rawMessageType === 'incoming') {
+      senderType = 'contact';
+    } else if (messageType === 1 || messageType === 2 || rawMessageType === 'outgoing' || rawMessageType === 'template') {
+      senderType = 'user';
+    } else {
+      // 2. Fallback: se o message_type for vazio ou bizarro, tenta ler o sender.type
+      const sType = payload.sender?.type?.toLowerCase() || message.sender?.type?.toLowerCase();
+      if (sType === 'contact' || sType === 'user') {
+        senderType = sType;
+      }
     }
 
     // 3. Match Unit by chatwoot_inbox_id
