@@ -140,6 +140,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     <AppDataContext.Provider value={{
       leads, managers, units, aiSettings,
       addManager, updateManager, deleteManager,
+      addUnit, deleteUnit,
       addLead, updateLead, moveLeadStage,
       isTvMode, setIsTvMode, updateAiSettings
     }}>
