@@ -28,7 +28,7 @@ const Vault = () => {
       customer_phone: lead.customer_phone,
       manager_name: manager?.name || 'Sem Gerente',
       unit_name: unit?.name || 'Sem Unidade',
-      status: lead.funnel_stage === 'new' ? 'waiting' : lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost' ? 'closed' : 'in_progress',
+      status: lead.funnel_stage === 'lead_new' ? 'waiting' : lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost' ? 'closed' : 'in_progress',
       wait_time_minutes: lead.wait_time_minutes,
       steps_completed: lead.score !== null ? 4 : 0,
       is_sla_breached: lead.sla_status === 'danger'

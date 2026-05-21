@@ -28,10 +28,10 @@ const Config = () => {
   }, [units]);
 
   const testConnection = async () => {
+    // Verificação real será implementada quando a integração de canal estiver disponível.
     setTesting(true);
-    await new Promise(r => setTimeout(r, 1200)); // mock delay
-    setConnected(apiToken.length > 8); // mock: any token > 8 chars = connected
-    setTesting(false);
+    setConnected(null);
+    setTimeout(() => setTesting(false), 300);
   };
 
   return (
@@ -58,19 +58,13 @@ const Config = () => {
           <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
 
             {/* Connection status */}
-            {connected !== null && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold
-                  ${connected
-                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                    : 'bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400'
-                  }`}
-              >
-                {connected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-                {connected ? 'Canal conectado com sucesso' : 'Falha na conexão — verifique a URL e o token'}
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold bg-muted/50 border border-border text-muted-foreground"
+            >
+              <WifiOff className="w-4 h-4" />
+              Conexão ainda não testada — integração de canal será habilitada em breve.
+            </motion.div>
 
             {/* URL */}
             <div>

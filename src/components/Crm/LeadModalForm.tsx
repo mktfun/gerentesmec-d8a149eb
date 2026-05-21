@@ -17,7 +17,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
   const [phone, setPhone] = useState('');
   const [unitId, setUnitId] = useState('');
   const [ticket, setTicket] = useState('');
-  const [stage, setStage] = useState<FunnelStage>('new');
+  const [stage, setStage] = useState<FunnelStage>('lead_new');
 
   useEffect(() => {
     if (lead) {
@@ -33,7 +33,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
       setPhone('');
       setUnitId(units[0]?.id || '');
       setTicket('');
-      setStage('new');
+      setStage('lead_new');
     }
   }, [lead, isOpen]);
 
@@ -149,7 +149,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
                 <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">Etapa no Funil</label>
                 <select value={stage} onChange={e => setStage(e.target.value as FunnelStage)}
                   className="w-full px-4 py-2.5 bg-[#0a0a0f] border border-white/[0.06] rounded-xl text-sm focus:outline-none focus:border-indigo-500/50 appearance-none">
-                  <option value="new">Novo Lead</option>
+                  <option value="lead_new">Novo Lead</option>
                   <option value="quote">Em Orçamento</option>
                   <option value="negotiation">Em Negociação</option>
                   <option value="closed_won">Encerrado (Ganho)</option>

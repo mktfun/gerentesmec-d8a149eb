@@ -20,11 +20,36 @@ const TvDashboard: React.FC = () => {
     setIsTvMode(false);
   };
 
-  const getUnitScore = (unitId: string) => {
-    if (unitId === 'unit_1') return { val: 62.5, diff: -4 };
-    if (unitId === 'unit_2') return { val: 87.5, diff: 2 };
-    if (unitId === 'unit_3') return { val: 75.0, diff: 1 };
-    return { val: 0, diff: 0 };
+  const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+  const today0 = startOfDay(new Date());
+
+  const getUnitMetrics = (unitId: string) => {
+    const unitLeads = leads.filter(l => l.unit_id === unitId);
+    const scored = unitLeads.filter(l => l.score !== null);
+    const score = scored.length
+      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / scored.length) * 10) / 10
+      : null;
+
+    // Trend vs yesterday
+    const yesterdayScored = scored.filter(l => {
+      const t = new Date(l.last_message_at).getTime();
+      return t < today0.getTime() && t >= today0.getTime() - 86400000;
+    });
+    const todayScored = scored.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
+    let diff: number | null = null;
+    if (yesterdayScored.length && todayScored.length) {
+      const a = todayScored.reduce((s, l) => s + Number(l.score), 0) / todayScored.length;
+      const b = yesterdayScored.reduce((s, l) => s + Number(l.score), 0) / yesterdayScored.length;
+      diff = Math.round((a - b) * 10) / 10;
+    }
+
+    // TMR today
+    const todayUnit = unitLeads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
+    const tmr = todayUnit.length
+      ? Math.round(todayUnit.reduce((s, l) => s + l.wait_time_minutes, 0) / todayUnit.length)
+      : null;
+
+    return { score, diff, tmr };
   };
 
   return (
@@ -64,11 +89,13 @@ const TvDashboard: React.FC = () => {
         {units.map((unit, i) => {
           const unitLeads = leads.filter(l => l.unit_id === unit.id);
           const dangerLeads = unitLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
-          const score = getUnitScore(unit.id);
+          const { score, diff, tmr } = getUnitMetrics(unit.id);
+          const displayScore = score ?? 0;
           
-          const isDanger = score.val < 70;
-          const glowColor = isDanger ? 'rgba(244,63,94,0.15)' : score.val > 85 ? 'rgba(52,211,153,0.15)' : 'rgba(129,140,248,0.15)';
-          const accentClass = isDanger ? 'text-rose-500' : score.val > 85 ? 'text-emerald-500' : 'text-indigo-500';
+          const isDanger = score !== null && score < 70;
+          const isStrong = score !== null && score > 85;
+          const glowColor = isDanger ? 'rgba(244,63,94,0.15)' : isStrong ? 'rgba(52,211,153,0.15)' : 'rgba(129,140,248,0.15)';
+          const accentClass = isDanger ? 'text-rose-500' : isStrong ? 'text-emerald-500' : 'text-indigo-500';
 
           return (
             <motion.div
@@ -93,21 +120,25 @@ const TvDashboard: React.FC = () => {
                     <svg className="absolute inset-0 w-full h-full -rotate-90">
                       <circle cx="124" cy="124" r="120" stroke="currentColor" strokeWidth="8" fill="none"
                               className={`${accentClass} transition-all duration-1000`}
-                              strokeDasharray={`${(score.val / 100) * (2 * Math.PI * 120)} 1000`}
+                              strokeDasharray={`${(displayScore / 100) * (2 * Math.PI * 120)} 1000`}
                               strokeLinecap="round" />
                     </svg>
                     <div className="flex flex-col items-center justify-center">
                       <span className="text-7xl font-black tracking-tighter text-white">
-                        {score.val}
+                        {score !== null ? score : '—'}
                       </span>
-                      <span className="text-xl font-bold text-white/50">%</span>
+                      {score !== null && <span className="text-xl font-bold text-white/50">%</span>}
                     </div>
                   </div>
                   
-                  <div className={`flex items-center gap-2 text-xl font-bold ${score.diff >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                    {score.diff >= 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
-                    {Math.abs(score.diff)}% vs ontem
-                  </div>
+                  {diff !== null ? (
+                    <div className={`flex items-center gap-2 text-xl font-bold ${diff >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {diff >= 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+                      {Math.abs(diff)}% vs ontem
+                    </div>
+                  ) : (
+                    <div className="text-sm font-semibold text-white/30">Sem comparativo disponível</div>
+                  )}
                 </div>
 
               </div>
@@ -145,7 +176,7 @@ const TvDashboard: React.FC = () => {
                       <span className="text-[10px] font-bold uppercase tracking-wider">T.M.R.</span>
                     </div>
                     <span className="text-2xl font-black text-white/90">
-                      {isDanger ? '22m' : '7m'}
+                      {tmr !== null ? `${tmr}m` : '—'}
                     </span>
                   </div>
                 </div>
