@@ -17,7 +17,12 @@ const navItems = [
 
 const DashboardLayout: React.FC = () => {
   const { isDark, toggle } = useTheme();
-  const { isTvMode } = useAppData();
+  const { isTvMode, setIsTvMode } = useAppData();
+
+  const enterTvMode = () => {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+    setIsTvMode(true);
+  };
 
   if (isTvMode) {
     return (
