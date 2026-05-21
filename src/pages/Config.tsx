@@ -73,12 +73,6 @@ const Config = () => {
       
       if (!res.error && !res.data?.error) {
         setConnected(true);
-        await updateIntegrationSettings({
-          chatwoot_url: baseUrl,
-          chatwoot_token: apiToken,
-          chatwoot_webhook_secret: webhookSecret,
-          chatwoot_account_id: accountId ? Number(accountId) : null
-        });
       } else {
         setConnected(false);
       }
@@ -171,8 +165,39 @@ const Config = () => {
                   <p className="text-sm font-bold text-white">Sincronização Histórica</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">Puxe conversas passadas do Chatwoot para gerar o Dossiê e pontuar pela IA.</p>
                 </div>
-                <button onClick={() => alert('Em breve! O módulo RAG vai consumir o histórico automaticamente.')} className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold transition-colors">
-                  Puxar Histórico
+                <button 
+                  onClick={async () => {
+                    const btn = document.getElementById('sync-btn-text');
+                    if(btn) btn.innerText = 'Sincronizando...';
+                    try {
+                      const res = await supabase.functions.invoke('chatwoot-sync');
+                      if(res.error) throw res.error;
+                      alert(res.data?.message || 'Sincronização concluída!');
+                    } catch (e: any) {
+                      alert('Erro na sincronização: ' + e.message);
+                    } finally {
+                      if(btn) btn.innerText = 'Puxar Histórico';
+                    }
+                  }} 
+                  className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold transition-colors flex items-center gap-2"
+                >
+                  <span id="sync-btn-text">Puxar Histórico</span>
+                </button>
+              </div>
+              <div className="border-t border-white/10 pt-4 mt-4 flex items-center justify-end">
+                <button 
+                  onClick={async () => {
+                    await updateIntegrationSettings({
+                      chatwoot_url: apiUrl.trim().replace(/\/$/, ''),
+                      chatwoot_token: apiToken,
+                      chatwoot_webhook_secret: webhookSecret,
+                      chatwoot_account_id: accountId ? Number(accountId) : null
+                    });
+                    alert('Configurações salvas com sucesso!');
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-bold transition-all shadow-[0_0_20px_hsl(239_84%_67%_/_0.25)]"
+                >
+                  Salvar Configurações de API
                 </button>
               </div>
             </div>
