@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle } from 'lucide-react';
+import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle, Calendar } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 
 const TvDashboard: React.FC = () => {
@@ -36,36 +36,78 @@ const TvDashboard: React.FC = () => {
     setIsTvMode(false);
   };
 
-  const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
-  const today0 = startOfDay(new Date());
+  type DateFilter = 'today' | 'yesterday' | '7d' | 'month';
+  const [dateFilter, setDateFilter] = useState<DateFilter>(() => {
+    return (localStorage.getItem('tv_date_filter') as DateFilter) || 'today';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('tv_date_filter', dateFilter);
+  }, [dateFilter]);
+
+  const getDateRange = () => {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    switch(dateFilter) {
+      case 'today': return startOfDay.getTime();
+      case 'yesterday': return startOfDay.getTime() - 86400000;
+      case '7d': return startOfDay.getTime() - (86400000 * 7);
+      case 'month': return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      default: return startOfDay.getTime();
+    }
+  };
+
+  const getEndDate = () => {
+    if (dateFilter === 'yesterday') {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    }
+    return Infinity;
+  };
 
   const getUnitMetrics = (unitId: string) => {
+    const startDate = getDateRange();
+    const endDate = getEndDate();
+    
     const unitLeads = leads.filter(l => l.unit_id === unitId);
-    const scored = unitLeads.filter(l => l.score !== null);
+    
+    // Filter by selected date
+    const periodLeads = unitLeads.filter(l => {
+      // Fallback to created_at if last_message_at is missing
+      const t = new Date(l.last_message_at || l.created_at).getTime();
+      return t >= startDate && t < endDate;
+    });
+
+    const scored = periodLeads.filter(l => l.score !== null);
     const score = scored.length
       ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / scored.length) * 10) / 10
       : null;
 
-    // Trend vs yesterday
-    const yesterdayScored = scored.filter(l => {
-      const t = new Date(l.last_message_at).getTime();
-      return t < today0.getTime() && t >= today0.getTime() - 86400000;
+    // Trend vs previous identical period
+    const periodDuration = dateFilter === 'today' || dateFilter === 'yesterday' ? 86400000 
+                          : dateFilter === '7d' ? 86400000 * 7 
+                          : 86400000 * 30;
+    const prevStart = startDate - periodDuration;
+    const prevEnd = startDate;
+    
+    const prevLeads = unitLeads.filter(l => {
+      const t = new Date(l.last_message_at || l.created_at).getTime();
+      return t >= prevStart && t < prevEnd;
     });
-    const todayScored = scored.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
+    const prevScored = prevLeads.filter(l => l.score !== null);
+
     let diff: number | null = null;
-    if (yesterdayScored.length && todayScored.length) {
-      const a = todayScored.reduce((s, l) => s + Number(l.score), 0) / todayScored.length;
-      const b = yesterdayScored.reduce((s, l) => s + Number(l.score), 0) / yesterdayScored.length;
+    if (prevScored.length && scored.length) {
+      const a = scored.reduce((s, l) => s + Number(l.score), 0) / scored.length;
+      const b = prevScored.reduce((s, l) => s + Number(l.score), 0) / prevScored.length;
       diff = Math.round((a - b) * 10) / 10;
     }
 
-    // TMR today
-    const todayUnit = unitLeads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
-    const tmr = todayUnit.length
-      ? Math.round(todayUnit.reduce((s, l) => s + l.wait_time_minutes, 0) / todayUnit.length)
+    const tmr = periodLeads.length
+      ? Math.round(periodLeads.reduce((s, l) => s + (l.wait_time_minutes || 0), 0) / periodLeads.length)
       : null;
 
-    return { score, diff, tmr };
+    return { score, diff, tmr, periodLeads };
   };
 
   return (
@@ -96,6 +138,24 @@ const TvDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-6">
+          {/* Date Filter */}
+          <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/5">
+            <Calendar className="w-4 h-4 text-white/30 ml-3 mr-1" />
+            {(['today', 'yesterday', '7d', 'month'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setDateFilter(f)}
+                className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all uppercase tracking-wider ${
+                  dateFilter === f ? 'bg-indigo-500/20 text-indigo-400' : 'text-white/40 hover:text-white/80'
+                }`}
+              >
+                {f === 'today' ? 'Hoje' : f === 'yesterday' ? 'Ontem' : f === '7d' ? '7 Dias' : 'Mês'}
+              </button>
+            ))}
+          </div>
+
+          <div className="w-px h-6 bg-white/10" />
+
           {/* Pagination dots & Timer Controls */}
           <div className="flex items-center gap-4">
             <div className="flex gap-1">
@@ -132,9 +192,8 @@ const TvDashboard: React.FC = () => {
             className="grid grid-cols-3 gap-6 h-full absolute inset-6"
           >
             {visibleUnits.map((unit, i) => {
-              const unitLeads = leads.filter(l => l.unit_id === unit.id);
-              const dangerLeads = unitLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
-              const { score, diff, tmr } = getUnitMetrics(unit.id);
+              const { score, diff, tmr, periodLeads } = getUnitMetrics(unit.id);
+              const dangerLeads = periodLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
               const displayScore = score ?? 0;
               
               const isDanger = score !== null && score < 70;
@@ -145,20 +204,20 @@ const TvDashboard: React.FC = () => {
               return (
                 <div
                   key={unit.id}
-                  className="relative rounded-[2rem] bg-[#0a0a0f] border border-white/[0.05] overflow-hidden flex flex-col h-full"
+                  className="relative rounded-[2rem] bg-[#0a0a0f] border border-white/[0.05] flex flex-col h-full overflow-hidden"
                   style={{ boxShadow: `0 0 120px ${glowColor}` }}
                 >
-                  {/* Radial background glow */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[500px] rounded-[100%] opacity-20 pointer-events-none"
+                  {/* Radial background glow (Fixed Clipping) */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] opacity-20 pointer-events-none"
                        style={{ background: `radial-gradient(ellipse at top, ${glowColor.replace('0.15', '1')} 0%, transparent 70%)` }} />
 
-                  <div className="p-8 text-center relative z-10 flex-1 flex flex-col">
+                  <div className="px-8 pt-10 pb-6 text-center relative z-10 flex-1 flex flex-col">
                     <h2 className="text-3xl font-black text-white/90 mb-2">{unit.name}</h2>
-                    <p className="text-sm font-bold uppercase tracking-widest text-white/40 mb-12">Performance Atual</p>
+                    <p className="text-sm font-bold uppercase tracking-widest text-white/40 mb-8">Performance Atual</p>
 
                     {/* Massive Score */}
                     <div className="flex-1 flex flex-col items-center justify-center">
-                      <div className="relative inline-flex items-center justify-center w-64 h-64 rounded-full border-[8px] border-white/5 mb-8">
+                      <div className="relative inline-flex items-center justify-center w-64 h-64 rounded-full border-[8px] border-white/5 mb-6">
                         <svg className="absolute inset-0 w-full h-full -rotate-90">
                           <circle cx="124" cy="124" r="120" stroke="currentColor" strokeWidth="8" fill="none"
                                   className={`${accentClass} transition-all duration-1000`}
@@ -173,14 +232,16 @@ const TvDashboard: React.FC = () => {
                         </div>
                       </div>
                       
-                      {diff !== null ? (
-                        <div className={`flex items-center gap-2 text-xl font-bold ${diff >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                          {diff >= 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
-                          {Math.abs(diff)}% vs ontem
-                        </div>
-                      ) : (
-                        <div className="text-sm font-semibold text-white/30">Sem comparativo disponível</div>
-                      )}
+                      <div className="h-10 flex items-center justify-center">
+                        {diff !== null ? (
+                          <div className={`flex items-center gap-2 text-xl font-bold ${diff >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {diff >= 0 ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+                            {Math.abs(diff)}% vs ant.
+                          </div>
+                        ) : (
+                          <div className="text-sm font-semibold text-white/30">Sem comparativo disponível</div>
+                        )}
+                      </div>
                     </div>
 
                   </div>
