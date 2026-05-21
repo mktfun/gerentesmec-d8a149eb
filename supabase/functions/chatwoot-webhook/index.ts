@@ -29,13 +29,23 @@ serve(async (req) => {
     }
 
     // 2. Extract Data
-    const inboxId = payload.inbox?.id
+    // For `message_created`, it's in payload.inbox.id. For `conversation_created`, it's payload.inbox_id
+    const inboxId = payload.inbox?.id || payload.inbox_id;
     if (!inboxId) {
       return new Response(JSON.stringify({ message: "No inbox id found" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
-    const contact = payload.contact || (payload.conversation && payload.conversation.meta?.sender) || {}
-    const conversationId = payload.conversation?.id || payload.id // in conversation_created, payload.id is conversation id
+    // Sender/Contact can be in different places depending on version and event
+    const contact = payload.meta?.sender || payload.conversation?.meta?.sender || payload.sender || payload.contact || {};
+    const conversationId = payload.conversation?.id || payload.id; // in conversation_created, payload.id is conversation id
+    
+    // Message specific data
+    const messageId = event === 'message_created' ? payload.id : null;
+    const content = payload.content;
+    const messageType = payload.message_type; // 0=incoming, 1=outgoing
+    let senderType = 'bot';
+    if (messageType === 0) senderType = 'contact';
+    else if (messageType === 1 || messageType === 2) senderType = 'user';
 
     // 3. Match Unit by chatwoot_inbox_id
     const { data: unitData, error: unitError } = await supabase
@@ -68,21 +78,24 @@ serve(async (req) => {
     const customerName = contact.name || 'Cliente Desconhecido'
     const customerPhone = contact.phone_number || contact.email || 'Sem Contato'
 
+    let leadId = null;
+
     if (existingLead) {
+      leadId = existingLead.id;
       // Update existing lead's last message time
       await supabase
         .from('leads')
         .update({
           last_message_at: now
         })
-        .eq('id', existingLead.id)
+        .eq('id', leadId)
     } else {
       // Insert new lead
-      const newLeadId = crypto.randomUUID()
+      leadId = crypto.randomUUID()
       await supabase
         .from('leads')
         .insert({
-          id: newLeadId,
+          id: leadId,
           chatwoot_conversation_id: conversationId,
           chatwoot_contact_id: contact.id,
           customer_name: customerName,
@@ -94,6 +107,20 @@ serve(async (req) => {
           wait_time_minutes: 0,
           last_message_at: now,
         })
+    }
+
+    // 6. Insert Message History if it's a message
+    if (event === 'message_created' && messageId && content) {
+      // ignore errors for duplicates if message already exists
+      await supabase
+        .from('chat_messages')
+        .insert({
+          lead_id: leadId,
+          chatwoot_message_id: messageId,
+          content: content,
+          sender_type: senderType,
+          // created_at will default to now() in DB
+        });
     }
 
     return new Response(JSON.stringify({ success: true }), {

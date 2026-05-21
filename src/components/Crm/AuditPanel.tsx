@@ -6,6 +6,7 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
+import ChatHistoryView, { ChatMessage } from './ChatHistoryView';
 
 const auditStepsConfig = [
   {
@@ -80,10 +81,61 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   const scoreColor = rounded >= 75 ? '#34d399' : rounded >= 50 ? '#818cf8' : '#f87171';
   const circumference = 2 * Math.PI * 38;
 
-  return (
-    <div className="h-full flex flex-col bg-[#0f0f18] border-l border-white/[0.06]">
+  const [realMessages, setRealMessages] = useState<ChatMessage[]>([]);
+  const [loadingChat, setLoadingChat] = useState(true);
 
-      {/* Header */}
+  useEffect(() => {
+    const fetchMessages = async () => {
+      setLoadingChat(true);
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('lead_id', lead.id)
+        .order('created_at', { ascending: true });
+      
+      if (data && data.length > 0) {
+        setRealMessages(data as ChatMessage[]);
+      } else {
+        // Fallback to mocks if no real messages yet (for testing visual)
+        setRealMessages([
+          { id: 'm1', content: 'Olá, gostaria de saber se o orçamento do pneu ficou pronto?', sender_type: 'contact', created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
+          { id: 'm2', content: 'Olá! Sim, ficou pronto. O valor total com o balanceamento e alinhamento 3D é R$ 850,00.', sender_type: 'user', created_at: new Date(Date.now() - 1000 * 60 * 55).toISOString() },
+          { id: 'm3', content: 'Segue o link do vídeo mostrando o desgaste irregular que comentei mais cedo, provando a necessidade do alinhamento: https://link.tork.com/v/desgaste', sender_type: 'user', created_at: new Date(Date.now() - 1000 * 60 * 54).toISOString() },
+          { id: 'm4', content: 'Nossa, não sabia que tava assim. Entendi, faz muito sentido. Pode aprovar o serviço completo então!', sender_type: 'contact', created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
+        ]);
+      }
+      setLoadingChat(false);
+    };
+
+    fetchMessages();
+
+    // Subscribe to new messages for this lead
+    const channel = supabase.channel(`chat_messages_${lead.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `lead_id=eq.${lead.id}` }, (payload) => {
+        setRealMessages(prev => {
+          // ensure no mock messages are mixed with real ones if it was empty
+          const isMock = prev.length > 0 && prev[0].id === 'm1';
+          return isMock ? [payload.new as ChatMessage] : [...prev, payload.new as ChatMessage];
+        });
+      }).subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [lead.id]);
+
+  return (
+    <div className="h-full flex flex-col lg:flex-row bg-[#0f0f18] border-l border-white/[0.06] overflow-hidden">
+
+      {/* LEFT COLUMN: CHAT HISTORY */}
+      <div className="flex-1 border-b lg:border-b-0 lg:border-r border-white/[0.06] overflow-hidden min-w-[320px]">
+        <ChatHistoryView lead={lead} messages={realMessages} isLoading={loadingChat} />
+      </div>
+
+      {/* RIGHT COLUMN: AUDIT DOSSIER */}
+      <div className="w-full lg:w-[420px] xl:w-[460px] shrink-0 flex flex-col h-full bg-[#0a0a0f]">
+
+        {/* Header */}
       <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
         <div>
           <h3 className="text-sm font-black text-foreground">Dossiê: {lead.customer_name}</h3>
@@ -252,13 +304,15 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white/[0.06] shrink-0">
+      <div className="p-4 border-t border-white/[0.06] shrink-0 bg-white/[0.01]">
         <button className="w-full py-3 rounded-xl text-sm font-bold text-white
           bg-indigo-600 hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]
           hover:shadow-[0_0_30px_rgba(99,102,241,0.45)] focus-visible:outline-indigo-300">
           Salvar Auditoria
         </button>
       </div>
+
+      </div>{/* End Right Column */}
     </div>
   );
 };
