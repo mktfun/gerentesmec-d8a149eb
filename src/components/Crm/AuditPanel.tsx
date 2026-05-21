@@ -136,15 +136,15 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           <p className="text-xs text-muted-foreground mt-0.5">{lead.customer_phone}</p>
         </div>
         <div className="flex items-center gap-2">
-          {integrationSettings?.chatwoot_url && integrationSettings?.chatwoot_account_id && lead.chatwoot_conversation_id && (
+          {lead.chatwoot_conversation_id && (
             <a 
-              href={`${integrationSettings.chatwoot_url}/app/accounts/${integrationSettings.chatwoot_account_id}/conversations/${lead.chatwoot_conversation_id}`}
+              href={integrationSettings?.chatwoot_url ? `${integrationSettings.chatwoot_url}/app/accounts/${integrationSettings.chatwoot_account_id || 1}/conversations/${lead.chatwoot_conversation_id}` : `https://app.chatwoot.com/app/accounts/1/conversations/${lead.chatwoot_conversation_id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-[11px] font-bold tracking-widest flex items-center gap-1.5 transition-all"
+              className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10] flex items-center justify-center transition-colors focus-visible:outline-indigo-500"
+              title="Abrir Conversa"
             >
-              CHATWOOT
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-4 h-4 text-white/70" />
             </a>
           )}
           <button onClick={onClose}

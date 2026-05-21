@@ -22,9 +22,19 @@ const formatMoney = (val: number) => {
 
 const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
   const { managers, units, deleteLead } = useAppData();
-  const manager = managers.find(m => m.id === lead.manager_id);
+  let manager = managers.find(m => m.id === lead.manager_id);
+  if (!manager) manager = managers.find(m => m.unit_id === lead.unit_id);
   const unit = units.find(u => u.id === lead.unit_id);
   const isDanger = lead.sla_status === 'danger';
+
+  const getElapsed = () => {
+    const ms = new Date().getTime() - new Date(lead.last_message_at).getTime();
+    const mins = Math.floor(ms / 60000);
+    if (mins < 60) return `${mins}m`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h`;
+    return `${Math.floor(hours / 24)}d`;
+  };
 
   return (
     <div
@@ -90,7 +100,7 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
           isDanger ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'
         }`}>
           <Clock className="w-3 h-3" />
-          {lead.wait_time_minutes > 0 ? `${lead.wait_time_minutes}m` : '—'}
+          {getElapsed()}
         </div>
       </div>
 

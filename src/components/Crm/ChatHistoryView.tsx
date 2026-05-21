@@ -62,7 +62,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
           <h3 className="text-sm font-black text-white/90">{lead.customer_name}</h3>
           <p className="text-xs font-medium text-white/40 mt-0.5 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-            Online no Chatwoot
+            Canal Online
           </p>
         </div>
       </div>

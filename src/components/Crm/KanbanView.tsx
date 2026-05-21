@@ -23,10 +23,13 @@ const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEn
     : leads.filter(l => l.unit_id === unitFilter);
 
   const getColumnLeads = (stageId: FunnelStage) => {
+    let colLeads = [];
     if (stageId === 'closed_won') {
-      return filtered.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
+      colLeads = filtered.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
+    } else {
+      colLeads = filtered.filter(l => l.funnel_stage === stageId);
     }
-    return filtered.filter(l => l.funnel_stage === stageId);
+    return colLeads.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
   };
 
   return (
