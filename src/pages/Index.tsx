@@ -123,16 +123,26 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap items-stretch justify-start lg:justify-end gap-4 w-full lg:w-auto mt-6 lg:mt-0">
-          {unitScores.map((u) => {
-            const colorClass = u.score === null ? 'text-white/30' : u.score >= 80 ? 'text-emerald-400' : u.score >= 65 ? 'text-indigo-400' : 'text-rose-400';
-            return (
-              <div key={u.id} className="bg-black/20 backdrop-blur-md px-6 py-4 rounded-2xl flex flex-col items-center justify-center flex-1 min-w-[120px] max-w-[180px] border border-white/5 shadow-inner transition-transform hover:scale-105">
-                <span className={`text-2xl font-black ${colorClass} mb-1`}>{u.score !== null ? `${u.score}%` : '—'}</span>
-                <span className="text-[11px] font-semibold text-slate-400 w-full text-center truncate">{u.name}</span>
-              </div>
-            );
-          })}
+        <div className="flex flex-col sm:flex-row items-stretch justify-start lg:justify-end gap-4 w-full lg:w-auto mt-6 lg:mt-0">
+          
+          <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Unidades Ativas</p>
+            <p className="text-3xl font-black text-white">{units.length}</p>
+          </div>
+
+          <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Resolução Hoje</p>
+            <p className="text-3xl font-black text-emerald-400">{resolutionRate}%</p>
+          </div>
+
+          <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner relative overflow-hidden">
+            <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tempo Médio</p>
+            <p className="text-3xl font-black text-indigo-400">
+              {todayLeads.length > 0 ? Math.round(avg(todayLeads.map(l => l.wait_time_minutes)) || 0) : 0}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
+            </p>
+          </div>
+
         </div>
       </motion.div>
 
