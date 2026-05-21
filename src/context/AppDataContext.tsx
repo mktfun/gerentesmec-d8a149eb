@@ -52,7 +52,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (payload.eventType === 'INSERT') {
           setLeads(prev => [...prev, payload.new as Lead]);
         } else if (payload.eventType === 'UPDATE') {
-          setLeads(prev => prev.map(l => l.id === payload.new.id ? payload.new as Lead : l));
+          setLeads(prev => prev.map(l => l.id === payload.new.id ? { ...l, ...payload.new } as Lead : l));
         } else if (payload.eventType === 'DELETE') {
           setLeads(prev => prev.filter(l => l.id !== payload.old.id));
         }
