@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2 } from 'lucide-react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
 import { DropResult } from '@hello-pangea/dnd';
@@ -12,10 +12,11 @@ import UnitSwitcher from '@/components/Crm/UnitSwitcher';
 type ViewMode = 'list' | 'kanban';
 
 const Crm = () => {
-  const { leads, moveLeadStage, managers, units } = useAppData();
+  const { leads, moveLeadStage, managers, units, deleteLeads } = useAppData();
   
   const [view, setView] = useState<ViewMode>('kanban');
   const [unitFilter, setUnitFilter] = useState('all');
+  const [slaFilter, setSlaFilter] = useState(false);
   // Armazena apenas o ID — deriva o lead ao vivo do array (evita flash quando Realtime atualiza)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const selectedLead = selectedLeadId ? leads.find(l => l.id === selectedLeadId) ?? null : null;
@@ -27,6 +28,7 @@ const Crm = () => {
   // Search
   const [searchQuery, setSearchQuery] = useState('');
   const [searchScope, setSearchScope] = useState<'global' | 'pipeline'>('pipeline');
+  const [selectedForDeletion, setSelectedForDeletion] = useState<string[]>([]);
 
   // filteredLeads: por unidade (sem busca)
   const filteredLeads = unitFilter === 'all'
@@ -45,11 +47,20 @@ const Crm = () => {
       })
     : filteredLeads;
 
-  const displayLeads = searchedLeads;
+  const displayLeads = searchedLeads.filter(l => slaFilter ? l.sla_status === 'danger' : true);
 
   const danger  = displayLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
   const active  = displayLeads.filter(l => l.sla_status !== 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
   const closed  = displayLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
+
+  const isAllSelected = displayLeads.length > 0 && selectedForDeletion.length === displayLeads.length;
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedForDeletion([]);
+    } else {
+      setSelectedForDeletion(displayLeads.map(l => l.id));
+    }
+  };
 
   const onDragEnd = (result: DropResult) => {
     const { destination, draggableId } = result;
@@ -70,6 +81,7 @@ const Crm = () => {
     const unit    = units.find(u => u.id === lead.unit_id);
     const isDanger  = lead.sla_status === 'danger';
     const isSelected = selectedLead?.id === lead.id;
+    const isChecked = selectedForDeletion.includes(lead.id);
 
     return (
       <motion.div
@@ -77,8 +89,23 @@ const Crm = () => {
         whileHover={{ x: 3 }} onClick={() => setSelectedLeadId(lead.id)}
         className={`flex items-center gap-4 px-4 py-3.5 cursor-pointer rounded-xl transition-all duration-200 group
           ${isDanger ? 'status-danger bg-rose-500/[0.04] hover:bg-rose-500/[0.08]' : 'status-success bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]'}
-          ${isSelected ? 'ring-1 ring-primary/40' : ''}`}
+          ${isSelected ? 'ring-1 ring-primary/40' : ''}
+          ${isChecked ? 'bg-indigo-500/10 ring-1 ring-indigo-500/30' : ''}`}
       >
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedForDeletion(prev => 
+              prev.includes(lead.id) ? prev.filter(id => id !== lead.id) : [...prev, lead.id]
+            );
+          }}
+          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+        >
+          <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors border
+            ${isChecked ? 'bg-indigo-500 border-indigo-500 text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 'border-border bg-background group-hover:border-indigo-500/50'}`}>
+            {isChecked && <Check className="w-3.5 h-3.5" />}
+          </div>
+        </div>
         <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-sm font-black text-indigo-400 shrink-0">
           {lead.customer_name?.charAt(0) || '?'}
         </div>
@@ -189,13 +216,34 @@ const Crm = () => {
           </AnimatePresence>
         </div>
 
-        {/* Direita: Novo Atendimento */}
-        <button onClick={handleNewLead}
-          className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 text-white
-            hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)] active:scale-95">
-          <Plus className="w-3.5 h-3.5" />
-          Novo Atendimento
-        </button>
+        {/* Direita: SLA Filter + Novo Atendimento */}
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => setSlaFilter(!slaFilter)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+              slaFilter 
+                ? 'bg-rose-500/20 text-rose-500 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.15)]' 
+                : 'bg-white/5 text-white/40 border-white/10 hover:border-white/20'
+            }`}
+          >
+            <AlertTriangle className={`w-3.5 h-3.5 ${slaFilter ? 'text-rose-500' : 'text-white/40'}`} />
+            Apenas Urgentes
+            {leads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length > 0 && (
+              <span className={`ml-1 px-1.5 py-0.5 rounded-md text-[9px] ${
+                slaFilter ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-500'
+              }`}>
+                {leads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length}
+              </span>
+            )}
+          </button>
+          
+          <button onClick={handleNewLead}
+            className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 text-white
+              hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)] active:scale-95">
+            <Plus className="w-3.5 h-3.5" />
+            Novo Atendimento
+          </button>
+        </div>
       </div>
 
       {/* ── Content Area ─────────────────────────────────────── */}
@@ -216,9 +264,23 @@ const Crm = () => {
               className="flex overflow-hidden flex-1"
             >
               <div className={`flex flex-col bg-background overflow-hidden border-r border-border transition-all duration-300 ${selectedLead ? 'w-[340px] shrink-0' : 'flex-1'}`}>
-                <div className="px-5 py-4 border-b border-border shrink-0">
-                  <h2 className="text-sm font-black text-foreground">Inbox de Auditoria</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">{displayLeads.length} atendimentos{searchQuery && <span className="text-indigo-400 font-bold"> · buscando "{searchQuery}"</span>}</p>
+                <div className="px-5 py-4 border-b border-border shrink-0 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-sm font-black text-foreground">Inbox de Auditoria</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">{displayLeads.length} atendimentos{searchQuery && <span className="text-indigo-400 font-bold"> · buscando "{searchQuery}"</span>}</p>
+                  </div>
+                  {displayLeads.length > 0 && (
+                    <button 
+                      onClick={toggleSelectAll}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted hover:bg-indigo-500/10 text-xs font-bold text-muted-foreground hover:text-indigo-500 transition-colors"
+                    >
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors
+                        ${isAllSelected ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-border bg-background'}`}>
+                        {isAllSelected && <Check className="w-3 h-3" />}
+                      </div>
+                      Selecionar Tudo
+                    </button>
+                  )}
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-5">
                   {danger.length > 0 && (
@@ -297,6 +359,46 @@ const Crm = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Floating Action Bar (Bulk Delete) */}
+      <AnimatePresence>
+        {selectedForDeletion.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-4 px-6 py-4 rounded-2xl
+              bg-[#0A0A0A]/90 backdrop-blur-xl border border-white/10 shadow-2xl"
+          >
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-white">{selectedForDeletion.length} selecionados</span>
+              <span className="text-[10px] text-muted-foreground font-bold">Prontos para exclusão</span>
+            </div>
+            <div className="w-px h-8 bg-white/10 mx-2" />
+            <button
+              onClick={() => setSelectedForDeletion([])}
+              className="px-4 py-2 rounded-xl text-xs font-bold text-muted-foreground hover:bg-white/5 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={async () => {
+                if (window.confirm(`Tem certeza que deseja excluir ${selectedForDeletion.length} atendimentos? Essa ação é irreversível.`)) {
+                  await deleteLeads(selectedForDeletion);
+                  setSelectedForDeletion([]);
+                  if (selectedLeadId && selectedForDeletion.includes(selectedLeadId)) {
+                    setSelectedLeadId(null);
+                  }
+                }
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black text-white bg-rose-500 hover:bg-rose-600 transition-colors shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+            >
+              <Trash2 className="w-4 h-4" />
+              Excluir Selecionados
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <LeadModalForm isOpen={isFormOpen} lead={formLead} onClose={() => setIsFormOpen(false)} />
     </div>

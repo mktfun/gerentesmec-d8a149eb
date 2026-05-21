@@ -10,11 +10,13 @@ interface Props {
   unitScore: number;
   onSlaChange: (minutes: number) => void;
   onDelete?: () => void;
+  onUpdate?: (id: string, updates: Partial<Unit>) => Promise<void>;
 }
 
-const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore, onSlaChange, onDelete }) => {
+const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore, onSlaChange, onDelete, onUpdate }) => {
   const [expanded, setExpanded] = useState(false);
   const [slaInput, setSlaInput] = useState(String(slaMinutes));
+  const [placeIdInput, setPlaceIdInput] = useState((unit as any).google_place_id || '');
 
   const scoreColor = unitScore >= 80
     ? 'text-emerald-600 dark:text-emerald-400'
@@ -110,27 +112,43 @@ const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore
             </div>
           </div>
 
-          {/* SLA */}
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-              SLA de Alerta (minutos sem resposta)
-            </label>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 flex-1 px-3 py-2 bg-muted rounded-xl border border-border">
-                <input
-                  type="number" value={slaInput} min={5} max={120}
-                  onChange={e => setSlaInput(e.target.value)}
-                  onBlur={() => onSlaChange(parseInt(slaInput) || 20)}
-                  className="w-16 bg-transparent text-sm font-bold text-foreground focus:outline-none"
-                />
-                <span className="text-xs text-muted-foreground">minutos</span>
+            {/* SLA e Google Place ID */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                  SLA (minutos)
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 flex-1 px-3 py-2 bg-muted rounded-xl border border-border">
+                    <input
+                      type="number" value={slaInput} min={5} max={120}
+                      onChange={e => setSlaInput(e.target.value)}
+                      onBlur={() => onSlaChange(parseInt(slaInput) || 20)}
+                      className="w-16 bg-transparent text-sm font-bold text-foreground focus:outline-none"
+                    />
+                    <span className="text-xs text-muted-foreground">min</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
-                <AlertCircle className="w-3.5 h-3.5" />
-                Alerta após {slaInput || 20}m
+
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1">
+                  Google Place ID
+                  <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noreferrer" className="text-primary hover:underline" title="Como achar o Place ID">
+                    <AlertCircle className="w-3 h-3" />
+                  </a>
+                </label>
+                <div className="flex items-center gap-2 flex-1 px-3 py-2 bg-muted rounded-xl border border-border">
+                  <input
+                    type="text" value={placeIdInput}
+                    placeholder="ChIj..."
+                    onChange={e => setPlaceIdInput(e.target.value)}
+                    onBlur={() => onUpdate && onUpdate(unit.id, { google_place_id: placeIdInput.trim() } as any)}
+                    className="w-full bg-transparent text-sm font-medium text-foreground focus:outline-none placeholder:text-muted-foreground/30"
+                  />
+                </div>
               </div>
             </div>
-          </div>
         </div>
       </AnimatedExpand>
     </div>

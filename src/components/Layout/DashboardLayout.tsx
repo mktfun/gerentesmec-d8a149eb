@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAppData } from '@/context/AppDataContext';
+import { calculateDangerLeads } from '@/utils/metrics';
 
 const navItems = [
   { to: '/',         label: 'Dashboard',      icon: LayoutDashboard, end: true },
@@ -17,29 +18,24 @@ const navItems = [
 
 const DashboardLayout: React.FC = () => {
   const { isDark, toggle } = useTheme();
-  const { isTvMode, setIsTvMode } = useAppData();
+  const { isTvMode, setIsTvMode, leads, businessHours } = useAppData();
+
+  const dangerCount = React.useMemo(() => {
+    return leads ? calculateDangerLeads(leads, businessHours).length : 0;
+  }, [leads, businessHours]);
 
   const enterTvMode = () => {
     document.documentElement.requestFullscreen?.().catch(() => {});
     setIsTvMode(true);
   };
 
-  if (isTvMode) {
-    return (
-      <div className="min-h-screen bg-background text-foreground overflow-hidden">
-        <main className="h-screen w-full flex flex-col">
-          <Outlet />
-        </main>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex bg-[#0A0A0A] text-foreground">
+    <div className={`min-h-screen flex text-foreground ${isTvMode ? 'bg-background overflow-hidden' : 'bg-[#0A0A0A]'}`}>
 
       {/* ── Sidebar ─────────────────────────────────────────── */}
-      <aside className="w-[220px] shrink-0 fixed inset-y-0 left-0 z-20 flex flex-col
-        bg-sidebar border-r border-sidebar-border">
+      {!isTvMode && (
+        <aside className="w-[220px] shrink-0 fixed inset-y-0 left-0 z-20 flex flex-col
+          bg-sidebar border-r border-sidebar-border">
 
         {/* Logo */}
         <div className="h-16 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
@@ -71,7 +67,12 @@ const DashboardLayout: React.FC = () => {
               }
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              <span className="flex-1 text-left">{label}</span>
+              {to === '/crm' && dangerCount > 0 && (
+                <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-[10px] font-black text-rose-500 shrink-0">
+                  {dangerCount}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -88,13 +89,15 @@ const DashboardLayout: React.FC = () => {
           </button>
         </div>
       </aside>
+      )}
 
       {/* ── Main ──────────────────────────────────────────────── */}
-      <main className="flex-1 ml-[220px] flex flex-col min-h-screen">
+      <main className={`flex-1 flex flex-col ${isTvMode ? 'h-screen w-full' : 'ml-[220px] min-h-screen'}`}>
 
         {/* Topbar */}
-        <header className="h-16 sticky top-0 z-10 flex items-center justify-between px-8
-          bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-white/5">
+        {!isTvMode && (
+          <header className="h-16 sticky top-0 z-10 flex items-center justify-between px-8
+            bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-white/5">
           <div>
             <h2 className="text-xl font-black text-white">Olá, Administrador 👋</h2>
             <p className="text-xs text-muted-foreground">
@@ -111,8 +114,9 @@ const DashboardLayout: React.FC = () => {
               font-black text-sm text-white ring-2 ring-primary/30">
               DS
             </div>
-          </div>
-        </header>
+            </div>
+          </header>
+        )}
 
         {/* Page content */}
         <div className="flex-1 overflow-auto">

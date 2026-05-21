@@ -22,10 +22,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
     const rawBody = await req.text()
     
-    // Validate Signature if secret is configured
+    // Validate Signature and fetch ignored labels
     const { data: settings } = await supabase
       .from('integration_settings')
-      .select('chatwoot_webhook_secret')
+      .select('chatwoot_webhook_secret, ignored_labels')
       .limit(1)
       .maybeSingle()
 
@@ -65,8 +65,8 @@ serve(async (req) => {
     // Filter out conversations with specific labels
     const conversation = payload.conversation || payload;
     const labels: string[] = conversation.labels || [];
-    const ignoredLabels = ['fornecedor', 'dono', 'ignorar', 'ignore', 'equipe', 'grupo'];
-    const hasIgnoredLabel = labels.some(label => ignoredLabels.includes(label.toLowerCase()));
+    const ignoredLabels: string[] = settings?.ignored_labels || ['fornecedor', 'dono', 'ignorar', 'ignore', 'equipe', 'grupo', 'rh', 'socios'];
+    const hasIgnoredLabel = labels.some(label => ignoredLabels.some(ig => label.toLowerCase() === ig.toLowerCase()));
     
     if (hasIgnoredLabel) {
       console.log('Ignored due to label filter:', labels);
@@ -168,6 +168,21 @@ serve(async (req) => {
         console.error('Error updating lead last_message_at:', updateError)
       }
     } else {
+      // 5.1 Check for cross-unit duplicate
+      let isCrossUnit = false;
+      if (customerPhone && customerPhone !== 'Sem Contato') {
+        const { data: crossUnitLead } = await supabase
+          .from('leads')
+          .select('id')
+          .eq('customer_phone', customerPhone)
+          .neq('unit_id', unitData.id)
+          .limit(1)
+          .maybeSingle();
+        if (crossUnitLead) {
+          isCrossUnit = true;
+        }
+      }
+
       // Insert new lead
       leadId = crypto.randomUUID()
       const insertData: any = {
@@ -182,6 +197,7 @@ serve(async (req) => {
         sla_status: 'ok',
         wait_time_minutes: 0,
         last_message_at: now,
+        is_cross_unit: isCrossUnit,
       };
       if (senderType === 'contact') {
         insertData.last_client_message_at = now;
@@ -210,7 +226,7 @@ serve(async (req) => {
           .insert({
             lead_id: leadId,
             chatwoot_message_id: messageId,
-            content: content || null,
+            content: content || '',
             sender_type: senderType,
             media_url: mediaUrl,
             media_type: mediaType

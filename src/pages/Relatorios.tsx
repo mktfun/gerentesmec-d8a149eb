@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
+import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
 
 import { fadeUp } from '@/utils/motion';
 
@@ -10,28 +11,26 @@ import { fadeUp } from '@/utils/motion';
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 
 const Relatorios = () => {
-  const { leads, businessHours } = useAppData();
-  const [dateFilter, setDateFilter] = useState<'today' | '7days' | 'month'>('month');
+  const { leads, units, managers, businessHours } = useAppData();
+  const now = new Date();
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: startOfDay(new Date(now.getTime() - 29 * 86400000)),
+    to: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59),
+  });
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleFilterChange = (filter: 'today' | '7days' | 'month') => {
-    setIsUpdating(true);
-    setDateFilter(filter);
-    setTimeout(() => setIsUpdating(false), 300);
-  };
-
-  const periodDays = dateFilter === 'today' ? 1 : dateFilter === '7days' ? 7 : 30;
-  const now = new Date();
-  const periodStart = startOfDay(now).getTime() - (periodDays - 1) * 86400000;
+  const periodStart = dateRange.from.getTime();
+  const periodEnd = dateRange.to.getTime();
+  const periodDays = Math.max(1, Math.ceil((periodEnd - periodStart) / 86400000));
   const prevPeriodStart = periodStart - periodDays * 86400000;
 
   const inRange = (l: typeof leads[number], from: number, to: number) => {
     const t = new Date(l.last_message_at).getTime();
-    return t >= from && t < to;
+    return t >= from && t <= to;
   };
 
-  const currentLeads = leads.filter(l => inRange(l, periodStart, now.getTime() + 1));
-  const prevLeads    = leads.filter(l => inRange(l, prevPeriodStart, periodStart));
+  const currentLeads = leads.filter(l => inRange(l, periodStart, periodEnd));
+  const prevLeads    = leads.filter(l => inRange(l, prevPeriodStart, periodStart - 1));
 
   const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
   const round = (n: number | null) => n === null ? null : Math.round(n);
@@ -55,6 +54,57 @@ const Relatorios = () => {
   const hasData = currentLeads.length > 0;
   const auditedLeads = currentLeads.filter(l => l.score !== null);
 
+  // Performance por Etapa
+  const managerPerformanceMap: Record<string, {
+    managerName: string;
+    unitName: string;
+    e1: number[]; e2: number[]; e3: number[]; e4: number[];
+    scores: number[];
+  }> = {};
+
+  auditedLeads.forEach(lead => {
+    const managerId = lead.manager_id || 'sem_gerente';
+    if (!managerPerformanceMap[managerId]) {
+      const manager = managers.find(m => m.id === lead.manager_id);
+      const unit = units.find(u => u.id === lead.unit_id);
+      managerPerformanceMap[managerId] = {
+        managerName: manager?.name || 'Sem Gerente',
+        unitName: unit?.name || 'Sem Unidade',
+        e1: [], e2: [], e3: [], e4: [], scores: []
+      };
+    }
+    const mp = managerPerformanceMap[managerId];
+    if (lead.score !== null) mp.scores.push(Number(lead.score));
+    const es = (lead as any).etapa_scores || {};
+    if (es.e1 !== undefined) mp.e1.push(Number(es.e1));
+    if (es.e2 !== undefined) mp.e2.push(Number(es.e2));
+    if (es.e3 !== undefined) mp.e3.push(Number(es.e3));
+    if (es.e4 !== undefined) mp.e4.push(Number(es.e4));
+  });
+
+  const managerPerformance = Object.values(managerPerformanceMap).map(mp => ({
+    managerName: mp.managerName,
+    unitName: mp.unitName,
+    e1: round(avg(mp.e1)),
+    e2: round(avg(mp.e2)),
+    e3: round(avg(mp.e3)),
+    e4: round(avg(mp.e4)),
+    score: round(avg(mp.scores))
+  })).sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  const ScoreBadge = ({ score }: { score: number | null }) => {
+    if (score === null) return <span className="text-white/20">—</span>;
+    return (
+      <span className={`inline-flex items-center justify-center font-bold px-2 py-0.5 rounded text-[11px] border ${
+        score >= 75 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+        score >= 50 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+        'bg-rose-500/10 text-rose-400 border-rose-500/20'
+      }`}>
+        {score}%
+      </span>
+    );
+  };
+
 
   return (
     <div className="p-8 pb-20">
@@ -70,15 +120,14 @@ const Relatorios = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center p-1 bg-muted rounded-xl border border-border">
-            <button onClick={() => handleFilterChange('today')} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${dateFilter === 'today' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Hoje</button>
-            <button onClick={() => handleFilterChange('7days')} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${dateFilter === '7days' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>7 Dias</button>
-            <button onClick={() => handleFilterChange('month')} className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${dateFilter === 'month' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Este Mês</button>
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-muted text-foreground border border-border rounded-xl text-xs font-bold hover:bg-muted/80 transition-colors">
-            <Calendar className="w-4 h-4" />
-            Customizado
-          </button>
+          <DateRangePicker 
+            date={dateRange} 
+            onChange={(d) => {
+              setIsUpdating(true);
+              setDateRange(d);
+              setTimeout(() => setIsUpdating(false), 300);
+            }} 
+          />
           <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
             <Download className="w-4 h-4" />
             Exportar XLS
@@ -161,6 +210,51 @@ const Relatorios = () => {
 
       </div>
 
+      {/* ── Performance por Etapa ── */}
+      <motion.div {...fadeUp(0.25)} className={`mb-8 bg-[#0a0a0f] border border-white/[0.08] rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(255,255,255,0.02)]`}>
+        <div className="px-8 py-6 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
+          <div>
+            <h3 className="text-base font-black text-white">Performance por Etapa</h3>
+            <p className="text-xs font-medium text-white/50 mt-1">Detalhamento do cumprimento das 4 etapas fundamentais por gerente.</p>
+          </div>
+          <Target className="w-5 h-5 text-indigo-400/50" />
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-white/[0.01] border-b border-white/[0.08] text-xs uppercase text-white/40 tracking-wider font-bold">
+              <tr>
+                <th className="px-8 py-4">Gerente</th>
+                <th className="px-8 py-4">Unidade</th>
+                <th className="px-8 py-4 text-center">E1. Cordialidade</th>
+                <th className="px-8 py-4 text-center">E2. Orçamento+Vídeo</th>
+                <th className="px-8 py-4 text-center">E3. Upsell Mecânico</th>
+                <th className="px-8 py-4 text-center">E4. Encerramento</th>
+                <th className="px-8 py-4 text-center">Score Geral</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
+              {managerPerformance.length > 0 ? (
+                managerPerformance.map((mp, idx) => (
+                  <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
+                    <td className="px-8 py-4 font-bold text-white/90">{mp.managerName}</td>
+                    <td className="px-8 py-4 text-white/60 font-semibold">{mp.unitName}</td>
+                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e1} /></td>
+                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e2} /></td>
+                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e3} /></td>
+                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e4} /></td>
+                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.score} /></td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-8 py-8 text-center text-white/30">Sem dados de performance para este período.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+
       {/* ── Log de Auditoria ── */}
       <motion.div {...fadeUp(0.3)} className={`bg-[#0a0a0f] border border-white/[0.08] rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(255,255,255,0.02)]`}>
         <div className="px-8 py-6 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
@@ -189,7 +283,7 @@ const Relatorios = () => {
                       <p className="font-bold text-white/90">{lead.customer_name}</p>
                       <p className="text-xs text-white/40">{lead.customer_vehicle}</p>
                     </td>
-                    <td className="px-8 py-4 text-white/60 font-semibold">{lead.unit_id ? lead.unit_id.replace('unit_', 'Unidade ') : 'Sem unidade'}</td>
+                    <td className="px-8 py-4 text-white/60 font-semibold">{lead.unit_id ? (units.find(u => u.id === lead.unit_id)?.name || lead.unit_id) : 'Sem unidade'}</td>
                     <td className="px-8 py-4">
                       <span className="text-xs font-bold uppercase tracking-wider text-white/40 border border-white/10 px-2 py-1 rounded-md bg-white/[0.02]">
                         {lead.funnel_stage.replace('_', ' ')}

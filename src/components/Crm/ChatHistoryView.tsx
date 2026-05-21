@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Clock, MessageSquare, Wrench } from 'lucide-react';
+import { User, Clock, MessageSquare, Wrench, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 
 export interface ChatMessage {
@@ -41,12 +41,14 @@ interface Props {
 const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [expandedAudit, setExpandedAudit] = React.useState<string | null>(null);
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, expandedAudit]);
 
   return (
     <div className="flex flex-col h-full bg-[#0a0a10] relative overflow-hidden">
@@ -119,6 +121,9 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
               ) : null;
 
               if (isSystem) {
+                const isAudit = msg.content.startsWith('Auditado e pontuado:');
+                const isExpanded = expandedAudit === msg.id;
+
                 return (
                   <React.Fragment key={msg.id}>
                     {dividerEl}
@@ -128,9 +133,78 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                       transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
                       className="flex justify-center w-full my-4"
                     >
-                      <div className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-semibold text-emerald-400/80 backdrop-blur-sm shadow-sm flex items-center justify-center">
-                        {msg.content}
-                      </div>
+                      {isAudit ? (
+                        <div className="bg-[#12121a] border border-emerald-500/20 rounded-xl p-3 max-w-[300px] w-full shadow-[0_4px_20px_rgba(52,211,153,0.05)] relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none" />
+                          <div 
+                            className="flex items-center justify-between cursor-pointer relative z-10"
+                            onClick={() => setExpandedAudit(isExpanded ? null : msg.id)}
+                          >
+                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Auditoria Salva
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-black text-white">{msg.content.split(': ')[1]}</span>
+                              <ChevronDown className={`w-3 h-3 text-white/40 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                            </div>
+                          </div>
+                          
+                          {/* @ts-ignore */}
+                          <AnimatePresence>
+                            {/* @ts-ignore */}
+                            {isExpanded && lead.etapa_scores && (
+                              <motion.div 
+                                initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                                animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
+                                exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                                className="space-y-1.5 pt-3 border-t border-white/[0.05] relative z-10 overflow-hidden"
+                              >
+                                {/* @ts-ignore */}
+                                {['e1', 'e2', 'e3', 'e4'].map((etapa) => {
+                                  // @ts-ignore
+                                  const score = lead.etapa_scores[etapa];
+                                  if (score === undefined) return null;
+                                  const numScore = Number(score);
+                                  const isGood = numScore >= 75;
+                                  const isWarn = numScore >= 50 && numScore < 75;
+                                  const colorClass = isGood ? 'text-emerald-400' : isWarn ? 'text-amber-400' : 'text-rose-400';
+                                  const labels = {
+                                    e1: 'E1. Cordialidade',
+                                    e2: 'E2. Orçamento+Vídeo',
+                                    e3: 'E3. Upsell Mecânico',
+                                    e4: 'E4. Encerramento'
+                                  };
+                                  return (
+                                    <div key={etapa} className="flex items-center justify-between text-[10px]">
+                                      {/* @ts-ignore */}
+                                      <span className="text-white/50 font-medium">{labels[etapa]}</span>
+                                      <span className={`font-bold ${colorClass}`}>{score}%</span>
+                                    </div>
+                                  );
+                                })}
+                                {/* @ts-ignore */}
+                                {lead.audit_checklist && (
+                                  <div className="mt-2 pt-2 border-t border-white/[0.05] space-y-1">
+                                    <p className="text-[9px] uppercase tracking-wider text-white/30 font-bold mb-1">Checklist</p>
+                                    {/* @ts-ignore */}
+                                    {Object.entries(lead.audit_checklist).map(([key, val]) => (
+                                      <div key={key} className="flex items-center gap-1.5 text-[9px] text-white/40">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${val ? 'bg-emerald-500' : 'bg-white/10'}`} />
+                                        <span>Item {key}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ) : (
+                        <div className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-semibold text-emerald-400/80 backdrop-blur-sm shadow-sm flex items-center justify-center">
+                          {msg.content}
+                        </div>
+                      )}
                     </motion.div>
                   </React.Fragment>
                 );

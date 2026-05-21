@@ -6,7 +6,12 @@ import { BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/utils/businessHou
 export type Lead = Database['public']['Tables']['leads']['Row'];
 export type Manager = Database['public']['Tables']['managers']['Row'];
 export type Unit = Database['public']['Tables']['units']['Row'];
-export type AiSettings = Database['public']['Tables']['ai_settings']['Row'];
+export type AiSettings = Database['public']['Tables']['ai_settings']['Row'] & {
+  system_prompt?: string;
+  evaluation_criteria?: any;
+  features?: { auto_scoring?: boolean; auto_pipeline?: boolean; vision?: boolean; audio?: boolean; };
+  embedding_provider?: string;
+};
 export type IntegrationSettings = Database['public']['Tables']['integration_settings']['Row'];
 export type ChatwootInsights = {
   id: string;
@@ -36,6 +41,7 @@ interface AppDataContextType {
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
   saveLeadAudit: (id: string, score: number, summary: string, checklist: Record<string, boolean>) => Promise<void>;
   deleteLead: (id: string) => Promise<void>;
+  deleteLeads: (ids: string[]) => Promise<void>;
   moveLeadStage: (id: string, stage: FunnelStage) => Promise<void>;
   isTvMode: boolean;
   setIsTvMode: (val: boolean) => void;
@@ -172,19 +178,34 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const saveLeadAudit = async (id: string, score: number, summary: string, checklist: Record<string, boolean>) => {
     
+    const etapa_scores: Record<string, number> = {};
+    const auditStepsConfig = [
+      { id: 'e1', items: ['1a', '1b'] },
+      { id: 'e2', items: ['2a', '2b', '2c'] },
+      { id: 'e3', items: ['3a', '3b', '3c'] },
+      { id: 'e4', items: ['4a', '4b'] },
+    ];
+    
+    auditStepsConfig.forEach(step => {
+      const done = step.items.filter(i => checklist[i]).length;
+      etapa_scores[step.id] = Math.round((done / step.items.length) * 100);
+    });
+
     // OPTIMISTIC UPDATE: Atualiza a UI na hora, sem depender do Realtime ou Cache
     setLeads(prev => prev.map(l => l.id === id ? { 
       ...l, 
       score, 
       closing_summary: summary, 
-      audit_checklist: checklist 
+      audit_checklist: checklist,
+      etapa_scores 
     } as any : l));
 
     const { error } = await (supabase as any).rpc('save_lead_audit', {
       p_lead_id: id,
       p_score: score,
       p_closing_summary: summary,
-      p_audit_checklist: checklist
+      p_audit_checklist: checklist,
+      p_etapa_scores: etapa_scores
     });
     
     if (error) {
@@ -202,8 +223,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteLead = async (id: string) => {
-    await (supabase as any).from('leads').delete().eq('id', id);
+    // Optimistic update
     setLeads(prev => prev.filter(l => l.id !== id));
+    await (supabase as any).from('leads').delete().eq('id', id);
+  };
+
+  const deleteLeads = async (ids: string[]) => {
+    // Optimistic update
+    setLeads(prev => prev.filter(l => !ids.includes(l.id)));
+    await (supabase as any).from('leads').delete().in('id', ids);
   };
 
   const moveLeadStage = async (id: string, stage: FunnelStage) => {
@@ -252,7 +280,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       leads, managers, units, aiSettings, integrationSettings, chatwootInsights,
       addManager, updateManager, deleteManager,
       addUnit, updateUnit, deleteUnit,
-      addLead, updateLead, saveLeadAudit, deleteLead, moveLeadStage,
+      addLead,
+      updateLead,
+      saveLeadAudit,
+      deleteLead,
+      deleteLeads,
+      moveLeadStage,
       isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings,
       businessHours,
     }}>

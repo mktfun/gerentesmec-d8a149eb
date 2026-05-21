@@ -51,6 +51,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState('');
   const [ticketValueStr, setTicketValueStr] = useState('');
+  const [vehicleStr, setVehicleStr] = useState('');
 
   useEffect(() => {
     const checklist = (lead as any).audit_checklist;
@@ -63,7 +64,8 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     }
     setNotes(lead.closing_summary || '');
     setTicketValueStr(lead.ticket_value ? lead.ticket_value.toString() : '');
-  }, [lead.id, lead.ticket_value, (lead as any).audit_checklist, lead.closing_summary, lead.score]);
+    setVehicleStr(lead.customer_vehicle || '');
+  }, [lead.id, lead.ticket_value, (lead as any).audit_checklist, lead.closing_summary, lead.score, lead.customer_vehicle]);
 
   const handleTicketBlur = () => {
     const val = parseFloat(ticketValueStr);
@@ -71,6 +73,12 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       updateLead(lead.id, { ticket_value: val });
     } else {
       updateLead(lead.id, { ticket_value: undefined });
+    }
+  };
+
+  const handleVehicleBlur = () => {
+    if (vehicleStr.trim() !== lead.customer_vehicle) {
+      updateLead(lead.id, { customer_vehicle: vehicleStr.trim() || undefined });
     }
   };
 
@@ -132,7 +140,13 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         {/* Header */}
       <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
         <div>
-          <h3 className="text-sm font-black text-foreground">Dossiê: {lead.customer_name}</h3>
+          <h3 className="text-sm font-black text-foreground flex items-center gap-2">
+            Dossiê: {lead.customer_name}
+            {/* @ts-ignore */}
+            {lead.is_cross_unit && (
+              <span className="bg-amber-500/10 text-amber-500 text-[9px] px-1.5 py-0.5 rounded font-bold border border-amber-500/20 uppercase tracking-wider" title="Este contato também aparece em outra unidade">Cross-Unit</span>
+            )}
+          </h3>
           <p className="text-xs text-muted-foreground mt-0.5">{lead.customer_phone}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -194,23 +208,46 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         </div>
       </div>
 
-      {/* Inline Ticket Input */}
-      <div className="px-6 py-4 border-b border-white/[0.06] bg-white/[0.01] shrink-0">
-        <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-          Orçamento Estimado (R$)
-        </label>
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-500" />
-          <input
-            type="number"
-            value={ticketValueStr}
-            onChange={(e) => setTicketValueStr(e.target.value)}
-            onBlur={handleTicketBlur}
-            placeholder="Ex: 1500"
-            className="flex-1 bg-transparent border-b border-white/[0.1] focus:border-emerald-500
-              text-lg font-black text-emerald-400 placeholder:text-muted-foreground/30 
-              focus:outline-none transition-colors py-1"
-          />
+      {/* Inline Ticket & Vehicle Inputs */}
+      <div className="px-6 py-4 border-b border-white/[0.06] bg-white/[0.01] shrink-0 flex flex-col gap-4">
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            Orçamento Estimado (R$)
+          </label>
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-emerald-500" />
+            <input
+              type="number"
+              value={ticketValueStr}
+              onChange={(e) => setTicketValueStr(e.target.value)}
+              onBlur={handleTicketBlur}
+              placeholder="Ex: 1500"
+              className="flex-1 bg-transparent border-b border-white/[0.1] focus:border-emerald-500
+                text-lg font-black text-emerald-400 placeholder:text-muted-foreground/30 
+                focus:outline-none transition-colors py-1"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            Veículo do Cliente
+          </label>
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 15v2c0 .6.4 1 1 1h2m14 0a2 2 0 00-4 0m4 0a2 2 0 01-4 0m-10 0a2 2 0 00-4 0m4 0a2 2 0 01-4 0" />
+            </svg>
+            <input
+              type="text"
+              value={vehicleStr}
+              onChange={(e) => setVehicleStr(e.target.value)}
+              onBlur={handleVehicleBlur}
+              placeholder="Ex: Honda Civic 2020"
+              className="flex-1 bg-transparent border-b border-white/[0.1] focus:border-indigo-500
+                text-sm font-semibold text-white placeholder:text-muted-foreground/30 
+                focus:outline-none transition-colors py-1"
+            />
+          </div>
         </div>
       </div>
 
