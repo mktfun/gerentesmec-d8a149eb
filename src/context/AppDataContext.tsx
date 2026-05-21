@@ -17,6 +17,8 @@ interface AppDataContextType {
   addManager: (manager: Omit<Manager, 'id' | 'created_at'>) => Promise<void>;
   updateManager: (id: string, updates: Partial<Manager>) => Promise<void>;
   deleteManager: (id: string) => Promise<void>;
+  addUnit: (name: string) => Promise<void>;
+  deleteUnit: (id: string) => Promise<void>;
   addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
   moveLeadStage: (id: string, stage: FunnelStage) => Promise<void>;
