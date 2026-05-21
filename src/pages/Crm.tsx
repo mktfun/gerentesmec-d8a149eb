@@ -7,6 +7,7 @@ import { DropResult } from '@hello-pangea/dnd';
 import AuditPanel from '@/components/Crm/AuditPanel';
 import KanbanView from '@/components/Crm/KanbanView';
 import LeadModalForm from '@/components/Crm/LeadModalForm';
+import UnitSwitcher from '@/components/Crm/UnitSwitcher';
 
 type ViewMode = 'list' | 'kanban';
 
@@ -93,16 +94,8 @@ const Crm = () => {
       {/* ── Topbar: View Toggle + Unit Filter ───────────────── */}
       <div className="px-5 py-3 border-b border-border bg-background flex items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-2">
-          {/* Unit filter tabs */}
-          <div className="flex items-center gap-1">
-            {[{ id: 'all', label: 'Todos' }, ...units.map(u => ({ id: u.id, label: u.name }))].map(({ id, label }) => (
-              <button key={id} onClick={() => setUnitFilter(id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
-                  ${unitFilter === id ? 'bg-primary text-white shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
+          {/* Unit Switcher */}
+          <UnitSwitcher units={units} leads={leads} selectedUnitId={unitFilter} onSelect={setUnitFilter} />
 
           <div className="h-6 w-px bg-border mx-2" />
 
@@ -190,7 +183,7 @@ const Crm = () => {
                 </div>
               </div>
               <AnimatePresence mode="wait">
-                {selectedLead && (
+                {selectedLead && view === 'list' && (
                   <motion.div key={selectedLead.id}
                     initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 28 }}
                     className="flex-1 overflow-hidden"
@@ -199,6 +192,29 @@ const Crm = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Global Audit Panel Overlay for Kanban View */}
+        <AnimatePresence>
+          {selectedLead && view === 'kanban' && (
+            <motion.div
+              key="global-audit"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 100 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute inset-y-0 right-0 z-50 w-full md:w-[85vw] lg:w-[1200px] shadow-2xl flex border-l border-white/10"
+            >
+              {/* Backdrop */}
+              <div 
+                className="absolute -left-[100vw] inset-y-0 w-[100vw] bg-black/40 backdrop-blur-sm -z-10 cursor-pointer"
+                onClick={() => setSelectedLead(null)}
+              />
+              <div className="flex-1 w-full h-full bg-background overflow-hidden">
+                <AuditPanel lead={selectedLead} onClose={() => setSelectedLead(null)} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

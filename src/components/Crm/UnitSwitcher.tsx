@@ -1,0 +1,140 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, CheckCircle2, AlertTriangle, Globe } from 'lucide-react';
+import { Unit, Lead } from '@/context/AppDataContext';
+
+interface Props {
+  units: Unit[];
+  leads: Lead[];
+  selectedUnitId: string | 'all';
+  onSelect: (id: string | 'all') => void;
+}
+
+const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getUnitMetrics = (unitId: string | 'all') => {
+    const unitLeads = unitId === 'all' ? leads : leads.filter(l => l.unit_id === unitId);
+    
+    // Danger leads
+    const today0 = new Date();
+    today0.setHours(0,0,0,0);
+    const todayLeads = unitLeads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
+    const dangerCount = todayLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length;
+
+    // Score
+    const scored = unitLeads.filter(l => l.score !== null);
+    const score = scored.length
+      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / scored.length) * 10) / 10
+      : null;
+
+    return { dangerCount, score };
+  };
+
+  const selectedUnit = selectedUnitId === 'all' 
+    ? { id: 'all', name: 'Visão Global' } 
+    : units.find(u => u.id === selectedUnitId) || { id: 'all', name: 'Visão Global' };
+
+  const { dangerCount: selectedDanger, score: selectedScore } = getUnitMetrics(selectedUnit.id);
+
+  const options = [{ id: 'all', name: 'Visão Global' }, ...units];
+
+  return (
+    <div className="relative z-50" ref={containerRef}>
+      
+      {/* Trigger Button */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="group relative flex items-center gap-3 px-5 py-3 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] backdrop-blur-xl rounded-2xl transition-all outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
+      >
+        <div className="flex items-center gap-2">
+          {selectedUnit.id === 'all' ? (
+            <Globe className="w-5 h-5 text-indigo-400" />
+          ) : (
+            <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] ${selectedDanger > 0 ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-emerald-500 text-emerald-500'}`} />
+          )}
+          <span className="font-bold text-white tracking-wide">{selectedUnit.name}</span>
+        </div>
+
+        {/* Score Pill in Trigger */}
+        <div className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-black border ${selectedScore === null ? 'bg-white/5 border-white/10 text-white/40' : selectedScore >= 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : selectedScore >= 60 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+          {selectedScore !== null ? `${selectedScore}%` : '—'}
+        </div>
+
+        <ChevronDown className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Dropdown Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: 10, scale: 0.95, filter: 'blur(10px)' }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute top-full left-0 mt-3 w-80 bg-[#0f0f18]/90 backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden"
+          >
+            <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+              {options.map((opt, i) => {
+                const { dangerCount, score } = getUnitMetrics(opt.id);
+                const isSelected = selectedUnitId === opt.id;
+                
+                return (
+                  <motion.button
+                    key={opt.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.03 }}
+                    onClick={() => {
+                      onSelect(opt.id);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl mb-1 transition-all text-left outline-none
+                      ${isSelected ? 'bg-indigo-500/10' : 'hover:bg-white/[0.04] focus-visible:bg-white/[0.04]'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {opt.id === 'all' ? (
+                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/5">
+                          <Globe className="w-4 h-4 text-white/50" />
+                        </div>
+                      ) : (
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${dangerCount > 0 ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
+                          {dangerCount > 0 ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                        </div>
+                      )}
+                      <div>
+                        <h4 className={`text-sm font-bold ${isSelected ? 'text-indigo-400' : 'text-white/90'}`}>{opt.name}</h4>
+                        {dangerCount > 0 && <p className="text-[10px] font-bold text-rose-500 mt-0.5">{dangerCount} LEAD{dangerCount > 1 && 'S'} EM RISCO</p>}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className={`text-sm font-black ${score === null ? 'text-white/30' : score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-indigo-400' : 'text-rose-400'}`}>
+                        {score !== null ? `${score}%` : '—'}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-widest text-white/30 mt-0.5 font-bold">Score</div>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+};
+
+export default UnitSwitcher;
