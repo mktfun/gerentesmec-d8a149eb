@@ -6,6 +6,7 @@ export type Lead = Database['public']['Tables']['leads']['Row'];
 export type Manager = Database['public']['Tables']['managers']['Row'];
 export type Unit = Database['public']['Tables']['units']['Row'];
 export type AiSettings = Database['public']['Tables']['ai_settings']['Row'];
+export type IntegrationSettings = Database['public']['Tables']['integration_settings']['Row'];
 
 export type FunnelStage = Lead['funnel_stage'];
 
@@ -14,6 +15,7 @@ interface AppDataContextType {
   managers: Manager[];
   units: Unit[];
   aiSettings: AiSettings | null;
+  integrationSettings: IntegrationSettings | null;
   addManager: (manager: Omit<Manager, 'id' | 'created_at'>) => Promise<void>;
   updateManager: (id: string, updates: Partial<Manager>) => Promise<void>;
   deleteManager: (id: string) => Promise<void>;
@@ -25,6 +27,7 @@ interface AppDataContextType {
   isTvMode: boolean;
   setIsTvMode: (val: boolean) => void;
   updateAiSettings: (updates: Partial<AiSettings>) => Promise<void>;
+  updateIntegrationSettings: (updates: Partial<IntegrationSettings>) => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextType | null>(null);
@@ -34,6 +37,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [managers, setManagers] = useState<Manager[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [aiSettings, setAiSettings] = useState<AiSettings | null>(null);
+  const [integrationSettings, setIntegrationSettings] = useState<IntegrationSettings | null>(null);
   const [isTvMode, setIsTvMode] = useState(false);
 
   useEffect(() => {
@@ -73,6 +77,11 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setAiSettings(payload.new as AiSettings);
         }
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'integration_settings' }, (payload) => {
+        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+          setIntegrationSettings(payload.new as IntegrationSettings);
+        }
+      })
       .subscribe();
 
     return () => {
@@ -85,11 +94,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const managersRes = await (supabase as any).from('managers').select('*');
     const unitsRes = await (supabase as any).from('units').select('*');
     const aiRes = await (supabase as any).from('ai_settings').select('*').maybeSingle();
+    const intRes = await (supabase as any).from('integration_settings').select('*').maybeSingle();
 
     if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
     if (managersRes.data) setManagers(managersRes.data as Manager[]);
     if (unitsRes.data) setUnits(unitsRes.data as Unit[]);
     if (aiRes.data) setAiSettings(aiRes.data as AiSettings);
+    if (intRes.data) setIntegrationSettings(intRes.data as IntegrationSettings);
   };
 
   const addManager = async (manager: Omit<Manager, 'id' | 'created_at'>) => {
@@ -136,13 +147,22 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await (supabase as any).from('ai_settings').update(updates).eq('id', aiSettings.id);
   };
 
+  const updateIntegrationSettings = async (updates: Partial<IntegrationSettings>) => {
+    if (!integrationSettings?.id) {
+      // Create if doesn't exist
+      await (supabase as any).from('integration_settings').insert([updates]);
+      return;
+    }
+    await (supabase as any).from('integration_settings').update(updates).eq('id', integrationSettings.id);
+  };
+
   return (
     <AppDataContext.Provider value={{
-      leads, managers, units, aiSettings,
+      leads, managers, units, aiSettings, integrationSettings,
       addManager, updateManager, deleteManager,
       addUnit, deleteUnit,
       addLead, updateLead, moveLeadStage,
-      isTvMode, setIsTvMode, updateAiSettings
+      isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings
     }}>
       {children}
     </AppDataContext.Provider>

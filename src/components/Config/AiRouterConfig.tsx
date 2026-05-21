@@ -12,9 +12,11 @@ interface ProviderConfig {
 }
 
 export const AiRouterConfig: React.FC = () => {
-  const [provider, setProvider] = useState('Google');
-  const [model, setModel] = useState('gemini-1.5-flash');
-  const [apiKey, setApiKey] = useState('');
+  const { aiSettings, updateAiSettings } = useAppData();
+  
+  const [provider, setProvider] = useState(aiSettings?.provider || 'Google');
+  const [model, setModel] = useState(aiSettings?.model || 'gemini-1.5-flash');
+  const [apiKey, setApiKey] = useState(aiSettings?.api_key || '');
   const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [testLog, setTestLog] = useState<{ step: string; status: 'ok' | 'fail' | 'warn' }[]>([]);
   const [recommendation, setRecommendation] = useState<{ model: string; reason: string } | null>(null);
@@ -101,8 +103,12 @@ export const AiRouterConfig: React.FC = () => {
       if (provider === 'Google' && model === 'gemini-1.5-flash') {
         setRecommendation({ model: 'gemini-2.0-flash', reason: 'Embora o 1.5 Flash suporte análise de vídeo, o 2.0 Flash possui maior estabilidade e precisão para esse volume de dados. Recomendamos o upgrade.' });
       }
+      // Save even with warning, as it works partially
+      await updateAiSettings({ provider, model, api_key: apiKey });
     } else {
       setTestStatus('success');
+      await updateAiSettings({ provider, model, api_key: apiKey });
+      
       // Even if success, recommend elite alternative if on mini
       if (model === 'gpt-4o-mini') {
         setRecommendation({ model: 'gpt-4o', reason: 'O gpt-4o-mini atende a todos os requisitos. Para resumos complexos e raciocínio de vendas superior, o gpt-4o é a recomendação de elite.' });
@@ -112,11 +118,12 @@ export const AiRouterConfig: React.FC = () => {
     }
   };
 
-  const applyRecommendation = (recommendedModel: string) => {
+  const applyRecommendation = async (recommendedModel: string) => {
     setModel(recommendedModel);
     setTestStatus('idle');
     setTestLog([]);
     setRecommendation(null);
+    await updateAiSettings({ provider, model: recommendedModel, api_key: apiKey });
   };
 
   return (

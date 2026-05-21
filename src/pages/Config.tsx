@@ -12,7 +12,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Config = () => {
-  const { units, managers, leads, addUnit, deleteUnit } = useAppData();
+  const { units, managers, leads, addUnit, deleteUnit, integrationSettings, updateIntegrationSettings } = useAppData();
   const [apiUrl, setApiUrl] = useState('https://app.chatwoot.com');
   const [apiToken, setApiToken] = useState('');
   const [showToken, setShowToken] = useState(false);
@@ -22,6 +22,16 @@ const Config = () => {
   const [newUnitName, setNewUnitName] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
   
+  React.useEffect(() => {
+    if (integrationSettings) {
+      if (integrationSettings.chatwoot_url) setApiUrl(integrationSettings.chatwoot_url);
+      if (integrationSettings.chatwoot_token) setApiToken(integrationSettings.chatwoot_token);
+      if (integrationSettings.chatwoot_url && integrationSettings.chatwoot_token) {
+        setConnected(true);
+      }
+    }
+  }, [integrationSettings]);
+
   // Initialize SLAs once units are loaded
   React.useEffect(() => {
     if (units.length > 0 && Object.keys(slaByUnit).length === 0) {
@@ -30,10 +40,28 @@ const Config = () => {
   }, [units]);
 
   const testConnection = async () => {
-    // Verificação real será implementada quando a integração de canal estiver disponível.
+    if (!apiUrl || !apiToken) return;
     setTesting(true);
     setConnected(null);
-    setTimeout(() => setTesting(false), 300);
+    
+    try {
+      const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/profile`, {
+        headers: { api_access_token: apiToken }
+      });
+      if (res.ok) {
+        setConnected(true);
+        await updateIntegrationSettings({
+          chatwoot_url: apiUrl,
+          chatwoot_token: apiToken
+        });
+      } else {
+        setConnected(false);
+      }
+    } catch (err) {
+      setConnected(false);
+    } finally {
+      setTesting(false);
+    }
   };
 
   return (
@@ -62,10 +90,16 @@ const Config = () => {
             {/* Connection status */}
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold bg-muted/50 border border-border text-muted-foreground"
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold border ${
+                connected === true ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                connected === false ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' :
+                'bg-muted/50 border-border text-muted-foreground'
+              }`}
             >
-              <WifiOff className="w-4 h-4" />
-              Conexão ainda não testada — integração de canal será habilitada em breve.
+              {connected === true ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
+              {connected === true ? 'Conectado e validado com sucesso!' :
+               connected === false ? 'Falha na conexão. Verifique URL e Token.' :
+               'Conexão ainda não testada.'}
             </motion.div>
 
             {/* URL */}

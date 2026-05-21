@@ -41,8 +41,34 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_settings: {
+        Row: {
+          chatwoot_token: string | null
+          chatwoot_url: string | null
+          chatwoot_webhook_secret: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          chatwoot_token?: string | null
+          chatwoot_url?: string | null
+          chatwoot_webhook_secret?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          chatwoot_token?: string | null
+          chatwoot_url?: string | null
+          chatwoot_webhook_secret?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
+          chatwoot_contact_id: number | null
+          chatwoot_conversation_id: number | null
           closing_summary: string | null
           created_at: string
           customer_name: string
@@ -59,6 +85,8 @@ export type Database = {
           wait_time_minutes: number
         }
         Insert: {
+          chatwoot_contact_id?: number | null
+          chatwoot_conversation_id?: number | null
           closing_summary?: string | null
           created_at?: string
           customer_name: string
@@ -75,6 +103,8 @@ export type Database = {
           wait_time_minutes?: number
         }
         Update: {
+          chatwoot_contact_id?: number | null
+          chatwoot_conversation_id?: number | null
           closing_summary?: string | null
           created_at?: string
           customer_name?: string
