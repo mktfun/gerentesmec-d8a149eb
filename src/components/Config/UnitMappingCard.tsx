@@ -50,13 +50,22 @@ const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore
           </div>
         </div>
 
-        {/* Expand toggle */}
-        <button onClick={() => setExpanded(v => !v)}
-          className="p-2 rounded-xl hover:bg-muted text-muted-foreground transition-colors">
-          <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronDown className="w-4 h-4" />
-          </motion.div>
-        </button>
+        {/* Actions */}
+        <div className="flex items-center gap-1">
+          {onDelete && (
+            <button onClick={onDelete}
+              className="p-2 rounded-xl hover:bg-rose-500/10 text-muted-foreground hover:text-rose-500 transition-colors"
+              title="Remover unidade">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+          <button onClick={() => setExpanded(v => !v)}
+            className="p-2 rounded-xl hover:bg-muted text-muted-foreground transition-colors">
+            <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown className="w-4 h-4" />
+            </motion.div>
+          </button>
+        </div>
       </div>
 
       {/* Expanded Details */}
