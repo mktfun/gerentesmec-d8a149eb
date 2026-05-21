@@ -8,8 +8,8 @@ interface Props {
   onClick: () => void;
 }
 
-const stageColors: Record<FunnelStage, string> = {
-  new:          'border-t-indigo-500',
+const stageColors: Record<string, string> = {
+  lead_new:     'border-t-indigo-500',
   quote:        'border-t-amber-500',
   negotiation:  'border-t-orange-500',
   closed_won:   'border-t-emerald-500',
