@@ -10,6 +10,26 @@ export interface ChatMessage {
   created_at: string;
 }
 
+const formatDividerDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0 && date.getDate() === now.getDate()) return 'Hoje';
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear()) return 'Ontem';
+
+  if (diffDays < 7) {
+    const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    return days[date.getDay()];
+  }
+
+  return date.toLocaleDateString('pt-BR');
+};
+
 interface Props {
   lead: Lead;
   messages: ChatMessage[];
@@ -68,59 +88,88 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
               const isUser = msg.sender_type === 'user';
               const isBot = msg.sender_type === 'bot';
               const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              
+              let showDivider = false;
+              let dividerText = '';
+              if (i === 0) {
+                showDivider = true;
+                dividerText = formatDividerDate(msg.created_at);
+              } else {
+                const prevDate = formatDividerDate(messages[i - 1].created_at);
+                const currDate = formatDividerDate(msg.created_at);
+                if (prevDate !== currDate) {
+                  showDivider = true;
+                  dividerText = currDate;
+                }
+              }
+
+              const dividerEl = showDivider ? (
+                <motion.div
+                  key={`div-${msg.id}`}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-center w-full my-6"
+                >
+                  <div className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-bold text-white/40 uppercase tracking-widest backdrop-blur-sm shadow-sm">
+                    {dividerText}
+                  </div>
+                </motion.div>
+              ) : null;
 
               if (isSystem) {
                 return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
-                    className="flex justify-center w-full my-4"
-                  >
-                    <div className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-semibold text-white/50 backdrop-blur-sm shadow-sm flex items-center justify-center">
-                      {msg.content}
-                    </div>
-                  </motion.div>
+                  <React.Fragment key={msg.id}>
+                    {dividerEl}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
+                      className="flex justify-center w-full my-4"
+                    >
+                      <div className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-semibold text-emerald-400/80 backdrop-blur-sm shadow-sm flex items-center justify-center">
+                        {msg.content}
+                      </div>
+                    </motion.div>
+                  </React.Fragment>
                 );
               }
 
               return (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
-                  className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  {/* Avatar for Contact/Bot */}
-                  {!isUser && (
-                    <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center mb-1
-                      bg-white/[0.03] border border-white/[0.08] backdrop-blur-sm overflow-hidden">
-                      {isBot ? <Wrench className="w-3 h-3 text-indigo-400" /> : <span className="text-[10px] font-black text-emerald-400">{lead.customer_name.charAt(0)}</span>}
-                    </div>
-                  )}
+                <React.Fragment key={msg.id}>
+                  {dividerEl}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
+                    className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {/* Avatar for Contact/Bot */}
+                    {!isUser && (
+                      <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center mb-1
+                        bg-white/[0.03] border border-white/[0.08] backdrop-blur-sm overflow-hidden">
+                        {isBot ? <Wrench className="w-3 h-3 text-indigo-400" /> : <span className="text-[10px] font-black text-emerald-400">{lead.customer_name.charAt(0)}</span>}
+                      </div>
+                    )}
 
-                  {/* Bubble Container */}
-                  <div className={`relative max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-                    
-                    {/* Timestamp (revealed on hover) */}
-                    <div className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] font-bold text-white/20 flex items-center gap-1
-                      ${isUser ? 'right-[100%] mr-3' : 'left-[100%] ml-3'}`}>
-                      {timeStr}
+                    {/* Bubble Container */}
+                    <div className={`relative max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+                      {/* Bubble */}
+                      <div className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md relative
+                        ${isUser 
+                          ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
+                          : 'bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-2xl rounded-bl-sm'
+                        }`}
+                      >
+                        <div className="pb-3 pr-2">
+                          {msg.content}
+                        </div>
+                        <div className={`absolute bottom-1.5 right-3 text-[9px] font-bold ${isUser ? 'text-indigo-200' : 'text-white/30'}`}>
+                          {timeStr}
+                        </div>
+                      </div>
                     </div>
-
-                    {/* Bubble */}
-                    <div className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md
-                      ${isUser 
-                        ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
-                        : 'bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-2xl rounded-bl-sm'
-                      }`}
-                    >
-                      {msg.content}
-                    </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </React.Fragment>
               );
             })}
           </AnimatePresence>
