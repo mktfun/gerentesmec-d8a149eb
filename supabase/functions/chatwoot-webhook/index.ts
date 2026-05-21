@@ -74,9 +74,15 @@ serve(async (req) => {
     }
 
     // 2. Extract Data
-    // For `message_created`, it's in payload.inbox.id. For `conversation_created`, it's payload.inbox_id
-    const inboxId = payload.inbox?.id || payload.inbox_id;
+    // inboxId pode estar em locais diferentes dependendo do evento e versão do Chatwoot
+    const inboxId = payload.inbox_id                          // message_created (top-level)
+      || payload.conversation?.inbox_id                       // message_created (dentro de conversation)
+      || payload.inbox?.id;                                   // fallback legacy
+
+    console.log('[webhook] event:', event, '| inboxId:', inboxId, '| payload.inbox_id:', payload.inbox_id, '| payload.conversation?.inbox_id:', payload.conversation?.inbox_id);
+
     if (!inboxId) {
+      console.log('[webhook] No inbox id found, exiting. payload keys:', Object.keys(payload));
       return new Response(JSON.stringify({ message: "No inbox id found" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
@@ -84,16 +90,8 @@ serve(async (req) => {
     const contact = payload.meta?.sender || payload.conversation?.meta?.sender || payload.sender || payload.contact || {};
     const conversationId = payload.conversation?.id || payload.id; // in conversation_created, payload.id is conversation id
 
-    // Mechanic Filter: Ignore conversations from registered mechanic phones
-    const contactPhone = contact.phone_number;
-    if (contactPhone) {
-      const { data: ignoreUnit } = await supabase.from('units').select('id').eq('phone', contactPhone).maybeSingle();
-      if (ignoreUnit) {
-        console.log(`Ignored due to unit phone match: ${contactPhone}`);
-        return new Response(JSON.stringify({ message: "Ignored by unit phone filter" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
-      }
-    }
-    
+    console.log('[webhook] conversationId:', conversationId, '| contact.name:', contact.name, '| contact.phone:', contact.phone_number);
+
     // Message specific data
     const message = payload.message || payload; // fallback to payload if not nested
     const messageId = event === 'message_created' ? message.id || payload.id : null;
@@ -123,9 +121,11 @@ serve(async (req) => {
       .eq('chatwoot_inbox_id', inboxId)
       .maybeSingle()
 
+    console.log('[webhook] unitData:', JSON.stringify(unitData), '| unitError:', unitError?.message);
+
     if (unitError || !unitData) {
-      console.log(`No mapped unit found for inbox id: ${inboxId}`);
-      return new Response(JSON.stringify({ message: "Unmapped unit" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
+      console.log(`[webhook] No mapped unit found for inbox id: ${inboxId}`);
+      return new Response(JSON.stringify({ message: "Unmapped unit", inboxId }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
     // 4. Find Manager for the unit
