@@ -149,7 +149,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
-    await (supabase as any).from('leads').update(updates).eq('id', id);
+    const { error } = await (supabase as any).from('leads').update(updates).eq('id', id);
+    if (error) {
+      console.error('Error updating lead:', error);
+      alert('Erro ao salvar no banco: ' + error.message);
+      return;
+    }
     if (updates.score !== undefined) {
       await (supabase as any).from('chat_messages').insert([{
         lead_id: id,
