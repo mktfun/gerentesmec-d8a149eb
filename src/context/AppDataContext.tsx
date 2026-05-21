@@ -24,6 +24,7 @@ interface AppDataContextType {
   deleteUnit: (id: string) => Promise<void>;
   addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
+  deleteLead: (id: string) => Promise<void>;
   moveLeadStage: (id: string, stage: FunnelStage) => Promise<void>;
   isTvMode: boolean;
   setIsTvMode: (val: boolean) => void;
@@ -158,6 +159,11 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const deleteLead = async (id: string) => {
+    await (supabase as any).from('leads').delete().eq('id', id);
+    setLeads(prev => prev.filter(l => l.id !== id));
+  };
+
   const moveLeadStage = async (id: string, stage: FunnelStage) => {
     await (supabase as any).from('leads').update({ funnel_stage: stage }).eq('id', id);
     const STAGE_LABELS: Record<string, string> = {
@@ -189,7 +195,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       leads, managers, units, aiSettings, integrationSettings,
       addManager, updateManager, deleteManager,
       addUnit, updateUnit, deleteUnit,
-      addLead, updateLead, moveLeadStage,
+      addLead, updateLead, deleteLead, moveLeadStage,
       isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings
     }}>
       {children}

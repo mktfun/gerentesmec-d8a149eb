@@ -62,6 +62,17 @@ serve(async (req) => {
       return new Response(JSON.stringify({ message: "Event ignored" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
+    // Filter out conversations with specific labels
+    const conversation = payload.conversation || payload;
+    const labels: string[] = conversation.labels || [];
+    const ignoredLabels = ['fornecedor', 'dono', 'ignorar', 'ignore', 'equipe', 'grupo'];
+    const hasIgnoredLabel = labels.some(label => ignoredLabels.includes(label.toLowerCase()));
+    
+    if (hasIgnoredLabel) {
+      console.log('Ignored due to label filter:', labels);
+      return new Response(JSON.stringify({ message: "Ignored by label filter" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
+    }
+
     // 2. Extract Data
     // For `message_created`, it's in payload.inbox.id. For `conversation_created`, it's payload.inbox_id
     const inboxId = payload.inbox?.id || payload.inbox_id;

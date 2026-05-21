@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, AlertCircle, DollarSign, GripVertical, FileText } from 'lucide-react';
+import { Clock, AlertCircle, DollarSign, GripVertical, FileText, Trash2 } from 'lucide-react';
 import { useAppData, Lead, FunnelStage } from '@/context/AppDataContext';
 
 interface Props {
@@ -21,7 +21,7 @@ const formatMoney = (val: number) => {
 };
 
 const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
-  const { managers, units } = useAppData();
+  const { managers, units, deleteLead } = useAppData();
   const manager = managers.find(m => m.id === lead.manager_id);
   const unit = units.find(u => u.id === lead.unit_id);
   const isDanger = lead.sla_status === 'danger';
@@ -33,9 +33,18 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
         p-3.5 space-y-2.5 ${stageColors[lead.funnel_stage]} shadow-sm
         hover:border-primary/30 hover:shadow-md transition-shadow group relative`}
     >
-      {/* Drag Handle (visible on hover) */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <GripVertical className="w-4 h-4 text-muted-foreground/30" />
+      {/* Action Buttons (visible on hover) */}
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 items-center">
+        <div className="p-1 cursor-grab">
+          <GripVertical className="w-4 h-4 text-muted-foreground/30 hover:text-muted-foreground/80 transition-colors" />
+        </div>
+        <button 
+          onClick={(e) => { e.stopPropagation(); if(confirm('Mover para Lixeira? A exclusão é irreversível.')) deleteLead(lead.id); }}
+          className="p-1 hover:bg-rose-500/20 rounded text-muted-foreground/30 hover:text-rose-500 transition-colors"
+          title="Excluir Lead"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Header */}
