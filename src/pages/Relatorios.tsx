@@ -97,14 +97,20 @@ const Relatorios = () => {
           
           <div className="relative z-10">
             <p className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">Score Global de Qualidade</p>
-            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">{metrics.score}<span className="text-2xl text-white/40">%</span></h2>
-            <div className="flex items-center gap-2">
-              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                {metrics.scoreChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {Math.abs(metrics.scoreChange)}%
-              </span>
-              <span className="text-xs text-white/40 font-medium">vs período anterior</span>
-            </div>
+            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">
+              {metrics.score !== null ? <>{metrics.score}<span className="text-2xl text-white/40">%</span></> : <span className="text-white/30">—</span>}
+            </h2>
+            {metrics.scoreChange !== null ? (
+              <div className="flex items-center gap-2">
+                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                  {metrics.scoreChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {metrics.scoreChange >= 0 ? '+' : ''}{metrics.scoreChange}%
+                </span>
+                <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+              </div>
+            ) : (
+              <span className="text-xs text-white/30 font-medium">Sem comparativo disponível</span>
+            )}
           </div>
         </motion.div>
 
@@ -115,14 +121,20 @@ const Relatorios = () => {
           
           <div className="relative z-10">
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-3">Tempo Médio de Resposta (TMR)</p>
-            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">{metrics.tmr}<span className="text-2xl text-white/40">m</span></h2>
-            <div className="flex items-center gap-2">
-              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.tmrChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                {metrics.tmrChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                {Math.abs(metrics.tmrChange)}m (Melhoria)
-              </span>
-              <span className="text-xs text-white/40 font-medium">vs período anterior</span>
-            </div>
+            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">
+              {metrics.tmr !== null ? <>{metrics.tmr}<span className="text-2xl text-white/40">m</span></> : <span className="text-white/30">—</span>}
+            </h2>
+            {metrics.tmrChange !== null ? (
+              <div className="flex items-center gap-2">
+                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.tmrChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                  {metrics.tmrChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                  {metrics.tmrChange <= 0 ? '' : '+'}{metrics.tmrChange}m {metrics.tmrChange <= 0 ? '(Melhoria)' : ''}
+                </span>
+                <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+              </div>
+            ) : (
+              <span className="text-xs text-white/30 font-medium">Sem comparativo disponível</span>
+            )}
           </div>
         </motion.div>
 
@@ -134,13 +146,17 @@ const Relatorios = () => {
           <div className="relative z-10">
             <p className="text-xs font-bold uppercase tracking-widest text-rose-400 mb-3">Orçamentos em Risco (SLA)</p>
             <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">{metrics.slasRisk}</h2>
-            <div className="flex items-center gap-2">
-              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.slasChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                {metrics.slasChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
-                {Math.abs(metrics.slasChange)} leads
-              </span>
-              <span className="text-xs text-white/40 font-medium">vs período anterior</span>
-            </div>
+            {(metrics.slasChange !== 0 || hasData) ? (
+              <div className="flex items-center gap-2">
+                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.slasChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                  {metrics.slasChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                  {metrics.slasChange >= 0 ? '+' : ''}{metrics.slasChange} leads
+                </span>
+                <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+              </div>
+            ) : (
+              <span className="text-xs text-white/30 font-medium">Sem dados para o período</span>
+            )}
           </div>
         </motion.div>
 
