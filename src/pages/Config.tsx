@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu } from 'lucide-react';
+import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { useAppData } from '@/context/AppDataContext';
@@ -12,13 +12,15 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Config = () => {
-  const { units, managers, leads } = useAppData();
+  const { units, managers, leads, addUnit, deleteUnit } = useAppData();
   const [apiUrl, setApiUrl] = useState('https://app.chatwoot.com');
   const [apiToken, setApiToken] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connected, setConnected] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
   const [slaByUnit, setSlaByUnit] = useState<Record<string, number>>({});
+  const [newUnitName, setNewUnitName] = useState('');
+  const [addingUnit, setAddingUnit] = useState(false);
   
   // Initialize SLAs once units are loaded
   React.useEffect(() => {
