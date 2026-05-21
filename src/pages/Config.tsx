@@ -18,6 +18,7 @@ const Config = () => {
   const [apiUrl, setApiUrl] = useState('https://app.chatwoot.com');
   const [apiToken, setApiToken] = useState('');
   const [accountId, setAccountId] = useState('');
+  const [webhookSecret, setWebhookSecret] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connected, setConnected] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
@@ -39,6 +40,7 @@ const Config = () => {
     if (integrationSettings) {
       if (integrationSettings.chatwoot_url) setApiUrl(integrationSettings.chatwoot_url);
       if (integrationSettings.chatwoot_token) setApiToken(integrationSettings.chatwoot_token);
+      if (integrationSettings.chatwoot_webhook_secret) setWebhookSecret(integrationSettings.chatwoot_webhook_secret);
       if (integrationSettings.chatwoot_account_id) setAccountId(String(integrationSettings.chatwoot_account_id));
       if (integrationSettings.chatwoot_url && integrationSettings.chatwoot_token) {
         setConnected(true);
@@ -74,6 +76,7 @@ const Config = () => {
         await updateIntegrationSettings({
           chatwoot_url: baseUrl,
           chatwoot_token: apiToken,
+          chatwoot_webhook_secret: webhookSecret,
           chatwoot_account_id: accountId ? Number(accountId) : null
         });
       } else {
@@ -135,6 +138,21 @@ const Config = () => {
                 Marque os eventos: <code className="text-emerald-400 bg-emerald-400/10 px-1 rounded">message_created</code> e <code className="text-emerald-400 bg-emerald-400/10 px-1 rounded">conversation_created</code>.
               </p>
               
+              <div className="mb-4">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-1.5 block">
+                  Segredo do Webhook (Assinatura)
+                </label>
+                <input
+                  value={webhookSecret}
+                  onChange={e => setWebhookSecret(e.target.value)}
+                  placeholder="Ex: qGJePktjNUdsofr..."
+                  className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/10
+                    text-xs font-mono text-white/90 placeholder:text-muted-foreground/30
+                    focus:outline-none focus:border-emerald-500/50 transition-colors"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">Ao configurar o segredo, nosso servidor passará a validar a criptografia garantindo segurança 100%.</p>
+              </div>
+
               <div className="flex items-center gap-2 mb-4">
                 <code className="flex-1 px-3 py-2.5 rounded-lg bg-black border border-white/10 text-xs font-mono text-white/80 overflow-x-auto whitespace-nowrap">
                   {webhookUrl}
