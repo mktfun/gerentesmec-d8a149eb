@@ -85,9 +85,10 @@ serve(async (req) => {
     const conversationId = payload.conversation?.id || payload.id; // in conversation_created, payload.id is conversation id
     
     // Message specific data
-    const messageId = event === 'message_created' ? payload.id : null;
-    const content = payload.content;
-    const messageType = payload.message_type; // 0=incoming, 1=outgoing
+    const message = payload.message || payload; // fallback to payload if not nested
+    const messageId = event === 'message_created' ? message.id || payload.id : null;
+    const content = message.content || payload.content;
+    const messageType = Number(message.message_type ?? payload.message_type); // 0=incoming, 1=outgoing
     let senderType = 'bot';
     if (messageType === 0) senderType = 'contact';
     else if (messageType === 1 || messageType === 2) senderType = 'user';

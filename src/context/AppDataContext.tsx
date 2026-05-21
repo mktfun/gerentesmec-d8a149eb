@@ -197,6 +197,9 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const moveLeadStage = async (id: string, stage: FunnelStage) => {
+    // OPTIMISTIC UPDATE: atualiza a interface instantaneamente para o card não pular de volta
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, funnel_stage: stage } as Lead : l));
+
     await (supabase as any).from('leads').update({ funnel_stage: stage }).eq('id', id);
     const STAGE_LABELS: Record<string, string> = {
       lead_new: 'Novo Lead', quote: 'Em Orçamento', negotiation: 'Em Negociação', closed_won: 'Encerrado', closed_lost: 'Perdido'
