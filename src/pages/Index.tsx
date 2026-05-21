@@ -123,13 +123,13 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 w-full lg:w-auto overflow-x-auto flex-nowrap snap-x pb-4 lg:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap items-stretch justify-start lg:justify-end gap-4 w-full lg:w-auto mt-6 lg:mt-0">
           {unitScores.map((u) => {
             const colorClass = u.score === null ? 'text-white/30' : u.score >= 80 ? 'text-emerald-400' : u.score >= 65 ? 'text-indigo-400' : 'text-rose-400';
             return (
-              <div key={u.id} className="bg-black/20 backdrop-blur-md px-6 py-4 rounded-2xl flex flex-col items-center justify-center min-w-[140px] shrink-0 snap-center border border-white/5 shadow-inner transition-transform hover:scale-105 cursor-grab active:cursor-grabbing">
+              <div key={u.id} className="bg-black/20 backdrop-blur-md px-6 py-4 rounded-2xl flex flex-col items-center justify-center flex-1 min-w-[120px] max-w-[180px] border border-white/5 shadow-inner transition-transform hover:scale-105">
                 <span className={`text-2xl font-black ${colorClass} mb-1`}>{u.score !== null ? `${u.score}%` : '—'}</span>
-                <span className="text-[11px] font-semibold text-slate-400 truncate w-full text-center">{u.name}</span>
+                <span className="text-[11px] font-semibold text-slate-400 w-full text-center truncate">{u.name}</span>
               </div>
             );
           })}

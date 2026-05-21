@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 

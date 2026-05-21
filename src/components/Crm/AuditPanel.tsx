@@ -53,14 +53,17 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   const [ticketValueStr, setTicketValueStr] = useState('');
 
   useEffect(() => {
-    if (lead.score !== null) {
+    const checklist = (lead as any).audit_checklist;
+    if (checklist && Object.keys(checklist).length > 0) {
+      setChecked(checklist as Record<string, boolean>);
+    } else if (lead.score !== null) {
       setChecked({ '1a': true, '1b': true, '2a': true, '2b': true, '2c': true, '3a': true, '3b': true, '4a': true, '4b': true });
     } else {
       setChecked({});
     }
-    setNotes('');
+    setNotes(lead.closing_summary || '');
     setTicketValueStr(lead.ticket_value ? lead.ticket_value.toString() : '');
-  }, [lead.id, lead.ticket_value]);
+  }, [lead.id, lead.ticket_value, (lead as any).audit_checklist, lead.closing_summary, lead.score]);
 
   const handleTicketBlur = () => {
     const val = parseFloat(ticketValueStr);
@@ -306,10 +309,15 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
 
       {/* Footer */}
       <div className="p-4 border-t border-white/[0.06] shrink-0 bg-white/[0.01]">
-        <button className="w-full py-3 rounded-xl text-sm font-bold text-white
+        <button 
+          onClick={() => {
+            updateLead(lead.id, { score: rounded, closing_summary: notes, audit_checklist: checked } as any);
+            onClose();
+          }}
+          className="w-full py-3 rounded-xl text-sm font-bold text-white
           bg-indigo-600 hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]
           hover:shadow-[0_0_30px_rgba(99,102,241,0.45)] focus-visible:outline-indigo-300">
-          Salvar Auditoria
+          Salvar Auditoria ({rounded}%)
         </button>
       </div>
 

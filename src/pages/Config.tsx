@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw } from 'lucide-react';
+import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw, Copy, Check } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { InboxMappingPanel } from '@/components/Config/InboxMappingPanel';
@@ -24,6 +24,15 @@ const Config = () => {
   const [slaByUnit, setSlaByUnit] = useState<Record<string, number>>({});
   const [newUnitName, setNewUnitName] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const webhookUrl = 'https://[SEU-PROJETO].supabase.co/functions/v1/chatwoot-webhook';
+
+  const handleCopyWebhook = () => {
+    navigator.clipboard.writeText(webhookUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   React.useEffect(() => {
     if (integrationSettings) {
@@ -113,6 +122,44 @@ const Config = () => {
                connected === false ? 'Falha na conexão. Verifique URL e Token.' :
                'Conexão ainda não testada.'}
             </motion.div>
+
+            {/* Webhook Instructions */}
+            <div className="p-4 rounded-xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <RefreshCw className="w-24 h-24" />
+              </div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-primary mb-2">1. Webhook do Chatwoot</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                Copie a URL abaixo e cole no seu Chatwoot em <strong>Configurações &gt; Webhooks</strong>. 
+                Marque os eventos: <code className="text-emerald-400 bg-emerald-400/10 px-1 rounded">message_created</code> e <code className="text-emerald-400 bg-emerald-400/10 px-1 rounded">conversation_created</code>.
+              </p>
+              
+              <div className="flex items-center gap-2 mb-4">
+                <code className="flex-1 px-3 py-2.5 rounded-lg bg-black border border-white/10 text-xs font-mono text-white/80 overflow-x-auto whitespace-nowrap">
+                  {webhookUrl}
+                </code>
+                <button
+                  onClick={handleCopyWebhook}
+                  className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-all"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </button>
+              </div>
+
+              <div className="border-t border-white/10 pt-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-white">Sincronização Histórica</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Puxe conversas passadas do Chatwoot para gerar o Dossiê e pontuar pela IA.</p>
+                </div>
+                <button onClick={() => alert('Em breve! O módulo RAG vai consumir o histórico automaticamente.')} className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold transition-colors">
+                  Puxar Histórico
+                </button>
+              </div>
+            </div>
+
+            <div className="h-px bg-border w-full my-2" />
+            <h3 className="text-xs font-bold uppercase tracking-widest text-primary mb-2 mt-4">2. Conexão Reversa (API)</h3>
 
             {/* URL */}
             <div>
