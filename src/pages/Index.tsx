@@ -92,7 +92,7 @@ const Index = () => {
 
   // Manager ranking
   const managerRanking = managers.map(m => {
-    const mLeads = scoredLeads.filter(l => l.manager_id === m.id);
+    const mLeads = scoredLeads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
     const a = avg(mLeads.map(l => Number(l.score)));
     const unit = units.find(u => u.id === m.unit_id);
     return { ...m, score: a !== null ? Math.round(a) : null, unitName: unit?.name || 'N/A' };

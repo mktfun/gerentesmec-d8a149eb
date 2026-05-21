@@ -105,7 +105,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addManager = async (manager: Omit<Manager, 'id' | 'created_at'>) => {
-    const newManager = { ...manager, id: `mgr_${Date.now()}`, created_at: new Date().toISOString() } as Manager;
+    const newManager = { ...manager, id: crypto.randomUUID(), created_at: new Date().toISOString() } as Manager;
     setManagers(prev => [...prev, newManager]);
     await (supabase as any).from('managers').insert([newManager]);
   };
@@ -121,7 +121,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const addUnit = async (name: string, chatwoot_inbox_id?: number) => {
-    const id = `unit_${Date.now()}`;
+    const id = crypto.randomUUID();
     const newUnit = { id, name, chatwoot_inbox_id } as Unit;
     setUnits(prev => [...prev, newUnit]);
     await (supabase as any).from('units').insert([newUnit]);

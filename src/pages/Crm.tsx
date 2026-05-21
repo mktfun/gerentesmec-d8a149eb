@@ -46,7 +46,7 @@ const Crm = () => {
   };
 
   const LeadListCard = ({ lead, i }: { lead: Lead; i: number }) => {
-    const manager = managers.find(m => m.id === lead.manager_id);
+    const manager = managers.find(m => m.id === lead.manager_id) || managers.find(m => m.unit_id === lead.unit_id);
     const unit    = units.find(u => u.id === lead.unit_id);
     const isDanger  = lead.sla_status === 'danger';
     const isSelected = selectedLead?.id === lead.id;
