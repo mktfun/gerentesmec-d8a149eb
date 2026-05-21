@@ -13,22 +13,30 @@ export const calculateTmr = (leadsList: Lead[]) => {
     let wait = l.wait_time_minutes || 0;
     
     // @ts-ignore
-    if (l.last_client_message_at) {
+    const waitingSince = l.chatwoot_waiting_since;
+    // @ts-ignore
+    const snoozedUntil = l.chatwoot_snoozed_until;
+
+    if (snoozedUntil && new Date(snoozedUntil).getTime() > new Date().getTime()) {
+      // If snoozed, wait time is paused/0 for SLA purposes
+      wait = 0;
+    } else if (waitingSince) {
+      // Use official chatwoot waiting since
+      const wTime = new Date(waitingSince).getTime();
+      wait = Math.round((new Date().getTime() - wTime) / 60000);
+    } else if (l.last_client_message_at) {
+      // Fallback to our internal calculation
       // @ts-ignore
       const cTime = new Date(l.last_client_message_at).getTime();
       // @ts-ignore
       const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
       
-      // Se o cliente foi o último a mandar, calculamos o gap
       if (cTime > aTime) {
         wait = Math.round((new Date().getTime() - cTime) / 60000);
       } else {
-        // Se o agente respondeu, zera a espera dele atual.
         wait = 0;
       }
     } else {
-      // Fallback para leads antigos que não tem last_client_message_at
-      // Se ele estiver 'danger', a gente garante que mostre o wait dele se for > 0, ou se for <=0, assumimos 0.
       wait = wait > 0 ? wait : 0;
     }
     
@@ -43,8 +51,18 @@ export const calculateDangerLeads = (leadsList: Lead[]) => {
     if (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') return false;
     
     let wait = l.wait_time_minutes || 0;
+    
     // @ts-ignore
-    if (l.last_client_message_at) {
+    const waitingSince = l.chatwoot_waiting_since;
+    // @ts-ignore
+    const snoozedUntil = l.chatwoot_snoozed_until;
+
+    if (snoozedUntil && new Date(snoozedUntil).getTime() > new Date().getTime()) {
+      wait = 0;
+    } else if (waitingSince) {
+      const wTime = new Date(waitingSince).getTime();
+      wait = Math.round((new Date().getTime() - wTime) / 60000);
+    } else if (l.last_client_message_at) {
       // @ts-ignore
       const cTime = new Date(l.last_client_message_at).getTime();
       // @ts-ignore

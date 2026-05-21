@@ -22,7 +22,7 @@ const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); re
 const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
 
 const Index = () => {
-  const { leads, managers, units, isTvMode, setIsTvMode } = useAppData();
+  const { leads, managers, units, isTvMode, setIsTvMode, chatwootInsights } = useAppData();
   
   if (isTvMode) {
     return <TvDashboard />;
@@ -109,6 +109,20 @@ const Index = () => {
   
   const dangerLeads = calculateDangerLeads(todayLeads);
 
+  let chatwootTmr: string | null = null;
+  let chatwootRes: string | null = null;
+
+  if (chatwootInsights?.metrics) {
+    const tmrSec = chatwootInsights.metrics.avg_first_response_time;
+    if (tmrSec !== undefined && tmrSec !== null) {
+      chatwootTmr = (tmrSec / 60).toFixed(1);
+    }
+    const resSec = chatwootInsights.metrics.avg_resolution_time;
+    if (resSec !== undefined && resSec !== null) {
+      chatwootRes = (resSec / 3600).toFixed(1);
+    }
+  }
+
   // Manager ranking
   const managerRanking = managers.map(m => {
     const mLeads = scoredLeads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
@@ -150,15 +164,21 @@ const Index = () => {
           </div>
 
           <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Resolução Hoje</p>
-            <p className="text-3xl font-black text-emerald-400">{resolutionRate}%</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+              Resolução {chatwootRes ? '(Global)' : 'Hoje'}
+            </p>
+            <p className="text-3xl font-black text-emerald-400">
+              {chatwootRes ? <>{chatwootRes}<span className="text-sm font-bold text-emerald-400/50 ml-1">hrs</span></> : <>{resolutionRate}%</>}
+            </p>
           </div>
 
           <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner relative overflow-hidden">
             <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tempo Médio</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+              Tempo Médio {chatwootTmr ? '(Global)' : ''}
+            </p>
             <p className="text-3xl font-black text-indigo-400">
-              {todayTmr}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
+              {chatwootTmr ? chatwootTmr : todayTmr}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
             </p>
           </div>
 

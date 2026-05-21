@@ -7,6 +7,14 @@ export type Manager = Database['public']['Tables']['managers']['Row'];
 export type Unit = Database['public']['Tables']['units']['Row'];
 export type AiSettings = Database['public']['Tables']['ai_settings']['Row'];
 export type IntegrationSettings = Database['public']['Tables']['integration_settings']['Row'];
+export type ChatwootInsights = {
+  id: string;
+  type: string;
+  entity_id: string;
+  metrics: any;
+  created_at: string;
+  updated_at: string;
+};
 
 export type FunnelStage = Lead['funnel_stage'];
 
@@ -16,6 +24,7 @@ interface AppDataContextType {
   units: Unit[];
   aiSettings: AiSettings | null;
   integrationSettings: IntegrationSettings | null;
+  chatwootInsights: ChatwootInsights | null;
   addManager: (manager: Omit<Manager, 'id' | 'created_at'>) => Promise<void>;
   updateManager: (id: string, updates: Partial<Manager>) => Promise<void>;
   deleteManager: (id: string) => Promise<void>;
@@ -41,6 +50,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [units, setUnits] = useState<Unit[]>([]);
   const [aiSettings, setAiSettings] = useState<AiSettings | null>(null);
   const [integrationSettings, setIntegrationSettings] = useState<IntegrationSettings | null>(null);
+  const [chatwootInsights, setChatwootInsights] = useState<ChatwootInsights | null>(null);
   const [isTvMode, setIsTvMode] = useState(false);
 
   useEffect(() => {
@@ -58,31 +68,24 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'managers' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          setManagers(prev => [...prev, payload.new as Manager]);
-        } else if (payload.eventType === 'UPDATE') {
-          setManagers(prev => prev.map(m => m.id === payload.new.id ? payload.new as Manager : m));
-        } else if (payload.eventType === 'DELETE') {
-          setManagers(prev => prev.filter(m => m.id !== payload.old.id));
-        }
+        if (payload.eventType === 'INSERT') setManagers(prev => [...prev, payload.new as Manager]);
+        if (payload.eventType === 'UPDATE') setManagers(prev => prev.map(m => m.id === payload.new.id ? { ...m, ...payload.new } as Manager : m));
+        if (payload.eventType === 'DELETE') setManagers(prev => prev.filter(m => m.id !== payload.old.id));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'units' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          setUnits(prev => [...prev, payload.new as Unit]);
-        } else if (payload.eventType === 'UPDATE') {
-          setUnits(prev => prev.map(u => u.id === payload.new.id ? payload.new as Unit : u));
-        } else if (payload.eventType === 'DELETE') {
-          setUnits(prev => prev.filter(u => u.id !== payload.old.id));
-        }
+        if (payload.eventType === 'INSERT') setUnits(prev => [...prev, payload.new as Unit]);
+        if (payload.eventType === 'UPDATE') setUnits(prev => prev.map(u => u.id === payload.new.id ? { ...u, ...payload.new } as Unit : u));
+        if (payload.eventType === 'DELETE') setUnits(prev => prev.filter(u => u.id !== payload.old.id));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_settings' }, (payload) => {
-        if (payload.eventType === 'UPDATE') {
-          setAiSettings(payload.new as AiSettings);
-        }
+        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') setAiSettings(payload.new as AiSettings);
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'integration_settings' }, (payload) => {
+        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') setIntegrationSettings(payload.new as IntegrationSettings);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chatwoot_insights' }, (payload) => {
         if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-          setIntegrationSettings(payload.new as IntegrationSettings);
+          if (payload.new.type === 'account') setChatwootInsights(payload.new as ChatwootInsights);
         }
       })
       .subscribe();
@@ -93,11 +96,12 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const fetchInitialData = async () => {
-    const leadsRes = await (supabase as any).from('leads').select('*');
-    const managersRes = await (supabase as any).from('managers').select('*');
-    const unitsRes = await (supabase as any).from('units').select('*');
+    const leadsRes = await (supabase as any).from('leads').select('*').order('created_at', { ascending: false });
+    const managersRes = await (supabase as any).from('managers').select('*').order('name');
+    const unitsRes = await (supabase as any).from('units').select('*').order('name');
     const aiRes = await (supabase as any).from('ai_settings').select('*').maybeSingle();
     const intRes = await (supabase as any).from('integration_settings').select('*').maybeSingle();
+    const insightsRes = await (supabase as any).from('chatwoot_insights').select('*').eq('type', 'account').maybeSingle();
 
     if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
     if (managersRes.data) setManagers(managersRes.data as Manager[]);
@@ -231,7 +235,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   return (
     <AppDataContext.Provider value={{
-      leads, managers, units, aiSettings, integrationSettings,
+      leads, managers, units, aiSettings, integrationSettings, chatwootInsights,
       addManager, updateManager, deleteManager,
       addUnit, updateUnit, deleteUnit,
       addLead, updateLead, saveLeadAudit, deleteLead, moveLeadStage,
