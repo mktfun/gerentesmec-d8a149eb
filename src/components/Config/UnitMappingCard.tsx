@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Edit2, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { CheckCircle2, AlertCircle, ChevronDown, ExternalLink, Trash2 } from 'lucide-react';
 import { Unit, Manager } from '@/context/AppDataContext';
 
 interface Props {
@@ -9,11 +9,11 @@ interface Props {
   slaMinutes: number;
   unitScore: number;
   onSlaChange: (minutes: number) => void;
+  onDelete?: () => void;
 }
 
-const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore, onSlaChange }) => {
+const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore, onSlaChange, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
-  const [editing, setEditing] = useState(false);
   const [slaInput, setSlaInput] = useState(String(slaMinutes));
 
   const scoreColor = unitScore >= 80
