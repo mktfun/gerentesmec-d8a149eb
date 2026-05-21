@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION public.save_lead_audit(
-  p_lead_id uuid,
+  p_lead_id text,
   p_score integer,
   p_closing_summary text,
   p_audit_checklist jsonb
