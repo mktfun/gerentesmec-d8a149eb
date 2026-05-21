@@ -13,11 +13,9 @@ const fadeUp = (delay = 0) => ({
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 
 const Relatorios = () => {
-  const { leads, integrationSettings } = useAppData();
+  const { leads } = useAppData();
   const [dateFilter, setDateFilter] = useState<'today' | '7days' | 'month'>('month');
   const [isUpdating, setIsUpdating] = useState(false);
-  const [chatwootTmr, setChatwootTmr] = useState<number | null>(null);
-  const [chatwootTmrPrev, setChatwootTmrPrev] = useState<number | null>(null);
 
   const handleFilterChange = (filter: 'today' | '7days' | 'month') => {
     setIsUpdating(true);
@@ -51,42 +49,15 @@ const Relatorios = () => {
   const metrics = {
     score: scoreCur,
     scoreChange: scoreCur !== null && scorePrev !== null ? scoreCur - scorePrev : null,
-    tmr: chatwootTmr !== null ? Math.round(chatwootTmr / 60) : tmrCur,
-    tmrChange: chatwootTmr !== null && chatwootTmrPrev !== null
-      ? Math.round((chatwootTmr - chatwootTmrPrev) / 60)
-      : (tmrCur !== null && tmrPrev !== null ? tmrCur - tmrPrev : null),
+    tmr: tmrCur,
+    tmrChange: tmrCur !== null && tmrPrev !== null ? tmrCur - tmrPrev : null,
     slasRisk: slasCur,
     slasChange: slasCur - slasPrev,
   };
 
-  // Fetch real TMR from Chatwoot API
-  React.useEffect(() => {
-    if (!integrationSettings?.chatwoot_url || !integrationSettings?.chatwoot_token) return;
-    const fetchTmr = async () => {
-      try {
-        const base = integrationSettings.chatwoot_url.startsWith('http') ? integrationSettings.chatwoot_url : `https://${integrationSettings.chatwoot_url}`;
-        const token = integrationSettings.chatwoot_token;
-        const accountId = integrationSettings.chatwoot_account_id || 5;
-        const periodSec = periodDays * 86400;
-        const untilTs = Math.floor(Date.now() / 1000);
-        const sinceTs = untilTs - periodSec;
-        const prevSinceTs = sinceTs - periodSec;
-        const headers = { 'api_access_token': token };
-        const [cur, prev] = await Promise.all([
-          fetch(`${base.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_first_response_time&since=${sinceTs}&until=${untilTs}`, { headers }).then(r => r.json()),
-          fetch(`${base.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_first_response_time&since=${prevSinceTs}&until=${sinceTs}`, { headers }).then(r => r.json())
-        ]);
-        if (cur.avg_first_response_time) setChatwootTmr(cur.avg_first_response_time);
-        if (prev.avg_first_response_time) setChatwootTmrPrev(prev.avg_first_response_time);
-      } catch (e) {
-        console.error('Failed to fetch chatwoot TMR', e);
-      }
-    };
-    fetchTmr();
-  }, [integrationSettings, dateFilter]);
-
   const hasData = currentLeads.length > 0;
   const auditedLeads = currentLeads.filter(l => l.score !== null);
+
 
   return (
     <div className="p-8 pb-20">

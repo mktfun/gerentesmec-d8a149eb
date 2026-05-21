@@ -24,36 +24,7 @@ const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / 
 const Index = () => {
   const { leads, managers, units, isTvMode, setIsTvMode, chatwootInsights, integrationSettings } = useAppData();
 
-  // ── Chatwoot real TMR (must be before any early return — Rules of Hooks) ──
-  const [chatwootTmr, setChatwootTmr] = React.useState<string | null>(null);
-  const [chatwootRes, setChatwootRes] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (!integrationSettings?.chatwoot_url || !integrationSettings?.chatwoot_token) return;
-    const fetch7dayMetrics = async () => {
-      try {
-        const baseUrl = integrationSettings.chatwoot_url.startsWith('http') ? integrationSettings.chatwoot_url : `https://${integrationSettings.chatwoot_url}`;
-        const token = integrationSettings.chatwoot_token;
-        const accountId = integrationSettings.chatwoot_account_id || 5;
-        const since = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
-        const until = Math.floor(Date.now() / 1000);
-        const headers = { 'api_access_token': token };
-        const [tmrRes, resRes] = await Promise.all([
-          fetch(`${baseUrl.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_first_response_time&since=${since}&until=${until}`, { headers }),
-          fetch(`${baseUrl.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_resolution_time&since=${since}&until=${until}`, { headers })
-        ]);
-        const tmrData = await tmrRes.json();
-        const resData = await resRes.json();
-        const tmrSec = tmrData.avg_first_response_time || 0;
-        if (tmrSec > 0) setChatwootTmr((tmrSec / 60).toFixed(1));
-        const resSec = resData.avg_resolution_time || 0;
-        if (resSec > 0) setChatwootRes((resSec / 3600).toFixed(1));
-      } catch (e) {
-        console.error('Failed to fetch chatwoot metrics', e);
-      }
-    };
-    fetch7dayMetrics();
-  }, [integrationSettings?.chatwoot_url, integrationSettings?.chatwoot_token, integrationSettings?.chatwoot_account_id]);
+  // ── Hooks devem vir antes de qualquer early return (Rules of Hooks) ──
   
   if (isTvMode) {
     return <TvDashboard />;
@@ -183,21 +154,15 @@ const Index = () => {
           </div>
 
           <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              Resolução {chatwootRes ? '(Global)' : 'Hoje'}
-            </p>
-            <p className="text-3xl font-black text-emerald-400">
-              {chatwootRes ? <>{chatwootRes}<span className="text-sm font-bold text-emerald-400/50 ml-1">hrs</span></> : <>{resolutionRate}%</>}
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Resolução Hoje</p>
+            <p className="text-3xl font-black text-emerald-400">{resolutionRate}%</p>
           </div>
 
           <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner relative overflow-hidden">
             <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              Tempo Médio {chatwootTmr ? '(Global)' : ''}
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tempo Médio</p>
             <p className="text-3xl font-black text-indigo-400">
-              {chatwootTmr ? chatwootTmr : todayTmr}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
+              {todayTmr}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
             </p>
           </div>
 

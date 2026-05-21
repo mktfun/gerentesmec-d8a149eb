@@ -115,42 +115,7 @@ const TvDashboard: React.FC = () => {
     };
   };
 
-  const { integrationSettings } = useAppData();
-  const [unitMetricsMap, setUnitMetricsMap] = useState<Record<string, any>>({});
 
-  useEffect(() => {
-    if (!integrationSettings?.chatwoot_url || !integrationSettings?.chatwoot_token) return;
-
-    const fetchAllUnitMetrics = async () => {
-      const baseUrl = integrationSettings.chatwoot_url.startsWith('http') ? integrationSettings.chatwoot_url : `https://${integrationSettings.chatwoot_url}`;
-      const token = integrationSettings.chatwoot_token;
-      const accountId = integrationSettings.chatwoot_account_id || 5;
-
-      const since = Math.floor(getDateRange() / 1000);
-      const until = Math.floor((getEndDate() === Infinity ? Date.now() : getEndDate()) / 1000);
-
-      const headers = { 'api_access_token': token };
-
-      const newMap: Record<string, any> = {};
-
-      for (const unit of units) {
-        if (!unit.chatwoot_inbox_id) continue;
-        try {
-          const res = await fetch(`${baseUrl.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_first_response_time&since=${since}&until=${until}&inbox_id=${unit.chatwoot_inbox_id}`, { headers });
-          const data = await res.json();
-          const tmrSec = data.avg_first_response_time || 0;
-          newMap[unit.id] = { tmr: tmrSec > 0 ? (tmrSec / 60).toFixed(1) : null };
-        } catch (e) {
-          // ignore
-        }
-      }
-      setUnitMetricsMap(newMap);
-    };
-
-    fetchAllUnitMetrics();
-    const timer = setInterval(fetchAllUnitMetrics, 60000); // refresh every minute
-    return () => clearInterval(timer);
-  }, [units, integrationSettings, dateFilter]);
 
   return (
     <div className="fixed inset-0 z-50 bg-[#050508] text-white flex flex-col overflow-hidden">
@@ -225,8 +190,7 @@ const TvDashboard: React.FC = () => {
           >
             {visibleUnits.map((unit, i) => {
               const { score, diff, tmrFallback, dangerCount } = getUnitMetrics(unit.id);
-              const realTmr = unitMetricsMap[unit.id]?.tmr ?? null;
-              const displayTmr = realTmr !== null ? `${realTmr}m` : (tmrFallback > 0 ? `${tmrFallback}m` : '—');
+              const displayTmr = tmrFallback > 0 ? `${tmrFallback}m` : '—';
               const displayScore = score ?? 0;
               
               const isDanger = score !== null && score < 70;
