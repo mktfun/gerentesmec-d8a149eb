@@ -176,7 +176,7 @@ const TvDashboard: React.FC = () => {
                       <span className="text-[10px] font-bold uppercase tracking-wider">T.M.R.</span>
                     </div>
                     <span className="text-2xl font-black text-white/90">
-                      {isDanger ? '22m' : '7m'}
+                      {tmr !== null ? `${tmr}m` : '—'}
                     </span>
                   </div>
                 </div>

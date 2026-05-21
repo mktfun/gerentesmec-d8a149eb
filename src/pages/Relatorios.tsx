@@ -9,6 +9,8 @@ const fadeUp = (delay = 0) => ({
   transition: { type: 'spring', stiffness: 280, damping: 26, delay },
 });
 
+const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+
 const Relatorios = () => {
   const { leads } = useAppData();
   const [dateFilter, setDateFilter] = useState<'today' | '7days' | 'month'>('month');
@@ -17,21 +19,43 @@ const Relatorios = () => {
   const handleFilterChange = (filter: 'today' | '7days' | 'month') => {
     setIsUpdating(true);
     setDateFilter(filter);
-    setTimeout(() => setIsUpdating(false), 600);
+    setTimeout(() => setIsUpdating(false), 300);
   };
 
-  const multiplier = dateFilter === 'today' ? 0.1 : dateFilter === '7days' ? 0.3 : 1;
-  
+  const periodDays = dateFilter === 'today' ? 1 : dateFilter === '7days' ? 7 : 30;
+  const now = new Date();
+  const periodStart = startOfDay(now).getTime() - (periodDays - 1) * 86400000;
+  const prevPeriodStart = periodStart - periodDays * 86400000;
+
+  const inRange = (l: typeof leads[number], from: number, to: number) => {
+    const t = new Date(l.last_message_at).getTime();
+    return t >= from && t < to;
+  };
+
+  const currentLeads = leads.filter(l => inRange(l, periodStart, now.getTime() + 1));
+  const prevLeads    = leads.filter(l => inRange(l, prevPeriodStart, periodStart));
+
+  const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  const round = (n: number | null) => n === null ? null : Math.round(n);
+
+  const scoreCur  = round(avg(currentLeads.filter(l => l.score !== null).map(l => Number(l.score))));
+  const scorePrev = round(avg(prevLeads.filter(l => l.score !== null).map(l => Number(l.score))));
+  const tmrCur    = round(avg(currentLeads.map(l => l.wait_time_minutes)));
+  const tmrPrev   = round(avg(prevLeads.map(l => l.wait_time_minutes)));
+  const slasCur   = currentLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length;
+  const slasPrev  = prevLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length;
+
   const metrics = {
-    score: Math.round(78.5 * (1 + multiplier * 0.05)),
-    scoreChange: 4,
-    tmr: Math.round(14 * (1 - multiplier * 0.1)), // Tempo medio resposta (menor é melhor)
-    tmrChange: -2,
-    slasRisk: Math.floor(12 * multiplier),
-    slasChange: dateFilter === 'month' ? -5 : 2,
+    score: scoreCur,
+    scoreChange: scoreCur !== null && scorePrev !== null ? scoreCur - scorePrev : null,
+    tmr: tmrCur,
+    tmrChange: tmrCur !== null && tmrPrev !== null ? tmrCur - tmrPrev : null,
+    slasRisk: slasCur,
+    slasChange: slasCur - slasPrev,
   };
 
-  const auditedLeads = leads.filter(l => l.score !== null);
+  const hasData = currentLeads.length > 0;
+  const auditedLeads = currentLeads.filter(l => l.score !== null);
 
   return (
     <div className="p-8 pb-20">
