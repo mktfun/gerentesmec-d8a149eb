@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,130 +7,132 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    // 1. Get Chatwoot settings from system_settings
-    const { data: settings, error: settingsError } = await supabaseClient
-      .from('system_settings')
-      .select('*')
-      .in('key', ['chatwoot_url', 'chatwoot_api_token', 'chatwoot_account_id'])
-
-    if (settingsError || !settings) {
-      throw new Error('Could not fetch Chatwoot settings')
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      throw new Error('Supabase Config Missing')
     }
 
-    const config: Record<string, string> = {}
-    settings.forEach(s => {
-      config[s.key] = s.value
-    })
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
 
-    const { chatwoot_url, chatwoot_api_token, chatwoot_account_id } = config
+    // 1. Fetch integration settings from DB
+    const { data: settings, error: settingsErr } = await supabase
+      .from('integration_settings')
+      .select('chatwoot_url, chatwoot_token')
+      .limit(1)
+      .maybeSingle()
 
-    if (!chatwoot_url || !chatwoot_api_token || !chatwoot_account_id) {
-      return new Response(JSON.stringify({ message: "Chatwoot credentials not configured in system_settings" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200, // Returning 200 so it doesn't fail continuously
-      })
+    if (settingsErr || !settings || !settings.chatwoot_url || !settings.chatwoot_token) {
+      throw new Error('Chatwoot credentials not found in integration_settings')
     }
 
-    // 2. Fetch recent conversations from Chatwoot
-    // Chatwoot API: GET /api/v1/accounts/{account_id}/conversations
-    const cwUrl = `${chatwoot_url.replace(/\/$/, '')}/api/v1/accounts/${chatwoot_account_id}/conversations?status=all`
-    
-    const cwResponse = await fetch(cwUrl, {
-      headers: {
-        'api_access_token': chatwoot_api_token,
-        'Content-Type': 'application/json'
+    const baseUrl = settings.chatwoot_url.replace(/\/$/, '')
+    const token = settings.chatwoot_token
+    const headers = { 'api_access_token': token }
+
+    // 2. Fetch Profile to get account_id
+    const profileRes = await fetch(`${baseUrl}/api/v1/profile`, { headers })
+    if (!profileRes.ok) throw new Error(`Failed to fetch Chatwoot profile: ${profileRes.statusText}`)
+    const profileData = await profileRes.json()
+    const accountId = profileData.account_id
+
+    if (!accountId) throw new Error('Account ID not found in Chatwoot profile')
+
+    // 3. Fetch Inboxes to map inbox_id -> Unit
+    const inboxesRes = await fetch(`${baseUrl}/api/v1/accounts/${accountId}/inboxes`, { headers })
+    if (!inboxesRes.ok) throw new Error(`Failed to fetch inboxes: ${inboxesRes.statusText}`)
+    const inboxesData = await inboxesRes.json()
+    const inboxes = inboxesData.payload || []
+
+    // Fetch our Units from DB
+    const { data: units } = await supabase.from('units').select('id, name')
+    const { data: managers } = await supabase.from('managers').select('id, unit_id')
+
+    // Map Chatwoot Inbox ID to our Unit ID
+    const inboxToUnitMap = new Map<number, { unitId: string, managerId: string | null }>()
+    for (const inbox of inboxes) {
+      const matchedUnit = units?.find(u => u.name.toLowerCase() === inbox.name.toLowerCase())
+      if (matchedUnit) {
+        const manager = managers?.find(m => m.unit_id === matchedUnit.id)
+        inboxToUnitMap.set(inbox.id, { unitId: matchedUnit.id, managerId: manager?.id || null })
       }
-    })
-
-    if (!cwResponse.ok) {
-      const errText = await cwResponse.text()
-      throw new Error(`Chatwoot API error: ${cwResponse.status} ${errText}`)
     }
 
-    const cwData = await cwResponse.json()
-    const conversations = cwData.data?.payload || []
+    // 4. Fetch Open Conversations
+    const convRes = await fetch(`${baseUrl}/api/v1/accounts/${accountId}/conversations?status=open`, { headers })
+    if (!convRes.ok) throw new Error(`Failed to fetch conversations: ${convRes.statusText}`)
+    const convData = await convRes.json()
+    const conversations = convData.data?.payload || []
 
-    // 3. Simple sync logic
-    // We would map these to managers based on inbox_id and process them.
-    // For this stealth MVP, we will just log how many we fetched and stub the steps.
+    let importedCount = 0
+
+    // 5. Upsert Leads
+    const now = new Date().toISOString()
     
-    let processed = 0;
-
+    // Process conversations sequentially or via Promise.all mapping
     for (const conv of conversations) {
-      // Find manager by inbox_id
-      const inboxId = conv.inbox_id
-      const { data: managers } = await supabaseClient
-        .from('managers')
+      const mapped = inboxToUnitMap.get(conv.inbox_id)
+      if (!mapped) continue // Conversation belongs to an inbox not mapped to any unit
+
+      const contact = conv.meta?.sender || {}
+      const customerName = contact.name || 'Cliente Desconhecido'
+      const customerPhone = contact.phone_number || contact.email || 'Sem Contato'
+      const lastActivity = conv.timestamp ? new Date(conv.timestamp * 1000).toISOString() : now
+
+      // Check if already exists to decide between insert or update
+      const { data: existingLead } = await supabase
+        .from('leads')
         .select('id')
-        .eq('chatwoot_inbox_id', inboxId)
-        .limit(1)
+        .eq('chatwoot_conversation_id', conv.id)
+        .maybeSingle()
 
-      if (managers && managers.length > 0) {
-        const managerId = managers[0].id
-        const customerPhone = conv.meta?.sender?.phone_number || 'Unknown'
-        
-        // Check if cycle exists
-        const { data: existingCycle } = await supabaseClient
-          .from('whatsapp_cycles')
-          .select('id')
-          .eq('chatwoot_conversation_id', conv.id)
-          .limit(1)
-
-        if (!existingCycle || existingCycle.length === 0) {
-          // Create new cycle
-          const startedAt = new Date(conv.created_at * 1000).toISOString()
-          
-          const { data: newCycle, error: insertError } = await supabaseClient
-            .from('whatsapp_cycles')
-            .insert({
-              manager_id: managerId,
-              customer_phone: customerPhone,
-              chatwoot_conversation_id: conv.id,
-              started_at: startedAt,
-              max_response_time_breached: false // Simplified for MVP
-            })
-            .select()
-            .single()
-            
-          if (newCycle) {
-             processed++;
-             // Create stub steps for the cycle
-             const steps = [1, 2, 3, 4].map(step => ({
-                cycle_id: newCycle.id,
-                step_number: step,
-                is_compliant: Math.random() > 0.2, // Mocking compliance
-                reason_failed: null
-             }))
-             
-             await supabaseClient.from('cycle_steps').insert(steps)
-          }
-        }
+      if (existingLead) {
+        // Update last message time
+        await supabase
+          .from('leads')
+          .update({ last_message_at: lastActivity })
+          .eq('id', existingLead.id)
+      } else {
+        // Insert new lead
+        const newLeadId = crypto.randomUUID()
+        await supabase
+          .from('leads')
+          .insert({
+            id: newLeadId,
+            chatwoot_conversation_id: conv.id,
+            chatwoot_contact_id: contact.id,
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            unit_id: mapped.unitId,
+            manager_id: mapped.managerId,
+            funnel_stage: 'lead_new',
+            sla_status: 'ok',
+            wait_time_minutes: 0,
+            last_message_at: lastActivity,
+          })
+        importedCount++
       }
     }
 
     return new Response(JSON.stringify({ 
       success: true, 
-      fetched: conversations.length,
-      processed_new: processed
+      message: `Historical sync completed. ${importedCount} new leads imported.` 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
+
   } catch (error) {
+    console.error('Sync error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
+      status: 400,
     })
   }
 })

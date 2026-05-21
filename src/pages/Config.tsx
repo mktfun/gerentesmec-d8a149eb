@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X } from 'lucide-react';
+import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { useAppData } from '@/context/AppDataContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -21,6 +22,22 @@ const Config = () => {
   const [slaByUnit, setSlaByUnit] = useState<Record<string, number>>({});
   const [newUnitName, setNewUnitName] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('chatwoot-sync');
+      if (error) throw new Error(error.message);
+      setSyncResult(data?.message || 'Sincronizado com sucesso!');
+    } catch (err: any) {
+      setSyncResult(`Erro: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
   
   React.useEffect(() => {
     if (integrationSettings) {
@@ -157,6 +174,31 @@ const Config = () => {
                 e a integração funciona de forma discreta em background.
               </p>
             </div>
+
+            {/* Sync Histórico */}
+            {connected === true && (
+              <div className="mt-4 pt-4 border-t border-border flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Sincronização Histórica</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Importa conversas abertas que já existem no Chatwoot.</p>
+                  </div>
+                  <button 
+                    onClick={handleSync} 
+                    disabled={syncing}
+                    className="shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                    {syncing ? 'Sincronizando...' : 'Sincronizar Histórico'}
+                  </button>
+                </div>
+                {syncResult && (
+                  <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className={`text-xs font-semibold p-3 rounded-lg border ${syncResult.startsWith('Erro') ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
+                    {syncResult}
+                  </motion.div>
+                )}
+              </div>
+            )}
           </div>
         </motion.section>
 
