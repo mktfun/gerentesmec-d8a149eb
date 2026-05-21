@@ -98,10 +98,20 @@ serve(async (req) => {
     const message = payload.message || payload; // fallback to payload if not nested
     const messageId = event === 'message_created' ? message.id || payload.id : null;
     const content = message.content || payload.content;
-    const messageType = Number(message.message_type ?? payload.message_type); // 0=incoming, 1=outgoing
-    let senderType = 'bot';
-    if (messageType === 0) senderType = 'contact';
-    else if (messageType === 1 || messageType === 2) senderType = 'user';
+    const rawMessageType = message.message_type ?? payload.message_type;
+    const messageType = Number(rawMessageType);
+    let senderType = payload.sender?.type?.toLowerCase() || message.sender?.type?.toLowerCase();
+    
+    if (!senderType) {
+      if (messageType === 0 || rawMessageType === 'incoming') senderType = 'contact';
+      else if (messageType === 1 || messageType === 2 || rawMessageType === 'outgoing' || rawMessageType === 'template') senderType = 'user';
+      else senderType = 'bot';
+    }
+    
+    // Normalize in case of weird types
+    if (senderType !== 'contact' && senderType !== 'user' && senderType !== 'bot') {
+      senderType = 'bot';
+    }
 
     // 3. Match Unit by chatwoot_inbox_id
     const { data: unitData, error: unitError } = await supabase
