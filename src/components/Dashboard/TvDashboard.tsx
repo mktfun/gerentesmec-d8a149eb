@@ -98,16 +98,59 @@ const TvDashboard: React.FC = () => {
     const prevScored = prevLeads.filter(l => l.score !== null);
 
     let diff: number | null = null;
-    if (prevScored.length && scored.length) {
-      const a = scored.reduce((s, l) => s + Number(l.score), 0) / scored.length;
-      const b = prevScored.reduce((s, l) => s + Number(l.score), 0) / prevScored.length;
-      diff = Math.round((a - b) * 10) / 10;
+    if (prevScored.length && score !== null) {
+      const prevScore = prevScored.reduce((a, l) => a + Number(l.score), 0) / prevScored.length;
+      diff = Math.round((score - prevScore) * 10) / 10;
     }
 
-    const tmr = periodLeads.length ? calculateTmr(periodLeads) : null;
+    const tmrFallback = calculateTmr(periodLeads);
+    const dangerCount = periodLeads.filter(l => calculateTmr([l]) > 20 || l.sla_status === 'danger').length;
 
-    return { score, diff, tmr, periodLeads };
+    return {
+      score,
+      diff,
+      tmrFallback,
+      dangerCount,
+      periodLeadsCount: periodLeads.length
+    };
   };
+
+  const { integrationSettings } = useAppData();
+  const [unitMetricsMap, setUnitMetricsMap] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    if (!integrationSettings?.chatwoot_url || !integrationSettings?.chatwoot_token) return;
+
+    const fetchAllUnitMetrics = async () => {
+      const baseUrl = integrationSettings.chatwoot_url.startsWith('http') ? integrationSettings.chatwoot_url : `https://${integrationSettings.chatwoot_url}`;
+      const token = integrationSettings.chatwoot_token;
+      const accountId = integrationSettings.chatwoot_account_id || 5;
+
+      const since = Math.floor(getDateRange() / 1000);
+      const until = Math.floor((getEndDate() === Infinity ? Date.now() : getEndDate()) / 1000);
+
+      const headers = { 'api_access_token': token };
+
+      const newMap: Record<string, any> = {};
+
+      for (const unit of units) {
+        if (!unit.chatwoot_inbox_id) continue;
+        try {
+          const res = await fetch(`${baseUrl.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_first_response_time&since=${since}&until=${until}&inbox_id=${unit.chatwoot_inbox_id}`, { headers });
+          const data = await res.json();
+          const tmrSec = data.avg_first_response_time || 0;
+          newMap[unit.id] = { tmr: tmrSec > 0 ? (tmrSec / 60).toFixed(1) : null };
+        } catch (e) {
+          // ignore
+        }
+      }
+      setUnitMetricsMap(newMap);
+    };
+
+    fetchAllUnitMetrics();
+    const timer = setInterval(fetchAllUnitMetrics, 60000); // refresh every minute
+    return () => clearInterval(timer);
+  }, [units, integrationSettings, dateFilter]);
 
   return (
     <div className="fixed inset-0 z-50 bg-[#050508] text-white flex flex-col overflow-hidden">
@@ -181,8 +224,9 @@ const TvDashboard: React.FC = () => {
             className="grid grid-cols-3 gap-8 h-full"
           >
             {visibleUnits.map((unit, i) => {
-              const { score, diff, tmr, periodLeads } = getUnitMetrics(unit.id);
-              const dangerLeads = periodLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
+              const { score, diff, tmrFallback, dangerCount } = getUnitMetrics(unit.id);
+              const realTmr = unitMetricsMap[unit.id]?.tmr ?? null;
+              const displayTmr = realTmr !== null ? `${realTmr}m` : (tmrFallback > 0 ? `${tmrFallback}m` : '—');
               const displayScore = score ?? 0;
               
               const isDanger = score !== null && score < 70;
@@ -238,8 +282,8 @@ const TvDashboard: React.FC = () => {
                   {/* Footer Alertas */}
                   <div className="p-6 bg-black/40 border-t border-white/[0.05] relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-xs font-bold uppercase tracking-widest text-white/40">Status Operacional</span>
-                      {dangerLeads.length > 0 ? (
+                       <span className="text-xs font-bold uppercase tracking-widest text-white/40">Status Operacional</span>
+                      {dangerCount > 0 ? (
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20">
                           <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
                           <span className="text-xs font-bold text-rose-500">ALERTA SLA</span>
@@ -258,8 +302,8 @@ const TvDashboard: React.FC = () => {
                           <AlertTriangle className="w-4 h-4" />
                           <span className="text-[10px] font-bold uppercase tracking-wider">Leads em Risco</span>
                         </div>
-                        <span className={`text-2xl font-black ${dangerLeads.length > 0 ? 'text-rose-500' : 'text-white/90'}`}>
-                          {dangerLeads.length}
+                        <span className={`text-2xl font-black ${dangerCount > 0 ? 'text-rose-500' : 'text-white/90'}`}>
+                          {dangerCount}
                         </span>
                       </div>
                       <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
@@ -268,10 +312,11 @@ const TvDashboard: React.FC = () => {
                           <span className="text-[10px] font-bold uppercase tracking-wider">T.M.R.</span>
                         </div>
                         <span className="text-2xl font-black text-white/90">
-                          {tmr !== null ? `${tmr}m` : '—'}
+                          {displayTmr}
                         </span>
                       </div>
                     </div>
+                  </div>
                   </div>
                 </div>
               );

@@ -22,7 +22,7 @@ const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); re
 const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
 
 const Index = () => {
-  const { leads, managers, units, isTvMode, setIsTvMode, chatwootInsights } = useAppData();
+  const { leads, managers, units, isTvMode, setIsTvMode, chatwootInsights, integrationSettings } = useAppData();
   
   if (isTvMode) {
     return <TvDashboard />;
@@ -109,19 +109,44 @@ const Index = () => {
   
   const dangerLeads = calculateDangerLeads(todayLeads);
 
-  let chatwootTmr: string | null = null;
-  let chatwootRes: string | null = null;
+  const [chatwootTmr, setChatwootTmr] = React.useState<string | null>(null);
+  const [chatwootRes, setChatwootRes] = React.useState<string | null>(null);
 
-  if (chatwootInsights?.metrics) {
-    const tmrSec = chatwootInsights.metrics.avg_first_response_time;
-    if (tmrSec !== undefined && tmrSec !== null) {
-      chatwootTmr = (tmrSec / 60).toFixed(1);
+  React.useEffect(() => {
+    if (integrationSettings && integrationSettings.chatwoot_url && integrationSettings.chatwoot_token) {
+      const fetchMetrics = async () => {
+        try {
+          const baseUrl = integrationSettings.chatwoot_url.startsWith('http') ? integrationSettings.chatwoot_url : `https://${integrationSettings.chatwoot_url}`;
+          const token = integrationSettings.chatwoot_token;
+          const accountId = integrationSettings.chatwoot_account_id || 5; // using 5 as we found
+          
+          // last 7 days
+          const since = Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
+          const until = Math.floor(Date.now() / 1000);
+
+          const headers = { 'api_access_token': token };
+
+          const [tmrRes, resRes] = await Promise.all([
+            fetch(`${baseUrl.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_first_response_time&since=${since}&until=${until}`, { headers }),
+            fetch(`${baseUrl.replace(/\/$/, '')}/api/v2/accounts/${accountId}/reports/summary?metric=avg_resolution_time&since=${since}&until=${until}`, { headers })
+          ]);
+
+          const tmrData = await tmrRes.json();
+          const resData = await resRes.json();
+
+          const tmrSec = tmrData.avg_first_response_time || 0;
+          if (tmrSec > 0) setChatwootTmr((tmrSec / 60).toFixed(1));
+
+          const resSec = resData.avg_resolution_time || 0;
+          if (resSec > 0) setChatwootRes((resSec / 3600).toFixed(1));
+
+        } catch (e) {
+          console.error("Failed to fetch chatwoot metrics", e);
+        }
+      };
+      fetchMetrics();
     }
-    const resSec = chatwootInsights.metrics.avg_resolution_time;
-    if (resSec !== undefined && resSec !== null) {
-      chatwootRes = (resSec / 3600).toFixed(1);
-    }
-  }
+  }, [integrationSettings]);
 
   // Manager ranking
   const managerRanking = managers.map(m => {
