@@ -20,11 +20,36 @@ const TvDashboard: React.FC = () => {
     setIsTvMode(false);
   };
 
-  const getUnitScore = (unitId: string) => {
-    if (unitId === 'unit_1') return { val: 62.5, diff: -4 };
-    if (unitId === 'unit_2') return { val: 87.5, diff: 2 };
-    if (unitId === 'unit_3') return { val: 75.0, diff: 1 };
-    return { val: 0, diff: 0 };
+  const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+  const today0 = startOfDay(new Date());
+
+  const getUnitMetrics = (unitId: string) => {
+    const unitLeads = leads.filter(l => l.unit_id === unitId);
+    const scored = unitLeads.filter(l => l.score !== null);
+    const score = scored.length
+      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / scored.length) * 10) / 10
+      : null;
+
+    // Trend vs yesterday
+    const yesterdayScored = scored.filter(l => {
+      const t = new Date(l.last_message_at).getTime();
+      return t < today0.getTime() && t >= today0.getTime() - 86400000;
+    });
+    const todayScored = scored.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
+    let diff: number | null = null;
+    if (yesterdayScored.length && todayScored.length) {
+      const a = todayScored.reduce((s, l) => s + Number(l.score), 0) / todayScored.length;
+      const b = yesterdayScored.reduce((s, l) => s + Number(l.score), 0) / yesterdayScored.length;
+      diff = Math.round((a - b) * 10) / 10;
+    }
+
+    // TMR today
+    const todayUnit = unitLeads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
+    const tmr = todayUnit.length
+      ? Math.round(todayUnit.reduce((s, l) => s + l.wait_time_minutes, 0) / todayUnit.length)
+      : null;
+
+    return { score, diff, tmr };
   };
 
   return (
