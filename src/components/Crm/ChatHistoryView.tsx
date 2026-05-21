@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, User, Clock, MessageSquare } from 'lucide-react';
+import { User, Clock, MessageSquare, Wrench } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 
 export interface ChatMessage {
@@ -96,8 +96,8 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                   {/* Avatar for Contact/Bot */}
                   {!isUser && (
                     <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center mb-1
-                      bg-white/[0.03] border border-white/[0.08] backdrop-blur-sm">
-                      {isBot ? <Bot className="w-3 h-3 text-indigo-400" /> : <User className="w-3 h-3 text-white/40" />}
+                      bg-white/[0.03] border border-white/[0.08] backdrop-blur-sm overflow-hidden">
+                      {isBot ? <Wrench className="w-3 h-3 text-indigo-400" /> : <span className="text-[10px] font-black text-emerald-400">{lead.customer_name.charAt(0)}</span>}
                     </div>
                   )}
 

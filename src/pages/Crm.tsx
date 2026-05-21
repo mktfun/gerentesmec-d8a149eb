@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench } from 'lucide-react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
 import { DropResult } from '@hello-pangea/dnd';
@@ -59,8 +59,8 @@ const Crm = () => {
           ${isDanger ? 'status-danger bg-rose-500/[0.04] hover:bg-rose-500/[0.08]' : 'status-success bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]'}
           ${isSelected ? 'ring-1 ring-primary/40' : ''}`}
       >
-        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-black text-primary shrink-0">
-          {manager?.name[0] || '?'}
+        <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-sm font-black text-indigo-400 shrink-0">
+          {lead.customer_name?.charAt(0) || '?'}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -72,9 +72,10 @@ const Crm = () => {
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {manager?.name} · {unit?.name}
-            {lead.wait_time_minutes > 0 && <span className={isDanger ? ' text-rose-500 font-bold' : ''}> · <Clock className="w-3 h-3 inline" /> {lead.wait_time_minutes}m</span>}
+          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+            <Wrench className="w-3 h-3" />
+            <span className="truncate">{manager?.name} · {unit?.name}</span>
+            {lead.wait_time_minutes > 0 && <span className={isDanger ? ' text-rose-500 font-bold shrink-0' : 'shrink-0'}> · <Clock className="w-3 h-3 inline" /> {lead.wait_time_minutes}m</span>}
           </p>
         </div>
         <div className="shrink-0 text-right">
