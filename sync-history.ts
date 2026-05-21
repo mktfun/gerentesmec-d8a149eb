@@ -27,10 +27,12 @@ async function syncHistory() {
   const baseUrl = chatwoot_url.replace(/\/$/, '');
   const headers = { 'api_access_token': chatwoot_token };
 
-  // Fetch true account id
-  const profileRes = await fetch(`${baseUrl}/api/v1/profile`, { headers });
-  const profileData = await profileRes.json();
-  const chatwoot_account_id = profileData.account_id || settings.chatwoot_account_id || 1;
+  // Usar account_id salvo no banco (configurado na tela de Configurações)
+  const chatwoot_account_id = settings.chatwoot_account_id;
+  if (!chatwoot_account_id) {
+    console.error("❌ Account ID não configurado. Salve o Account ID na tela de Configurações antes de sincronizar.");
+    process.exit(1);
+  }
   console.log("Usando Account ID:", chatwoot_account_id);
 
   console.log(`🧹 Limpando tabelas chat_messages e leads...`);

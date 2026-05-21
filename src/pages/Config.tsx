@@ -26,6 +26,7 @@ const Config = () => {
   const [newUnitName, setNewUnitName] = useState('');
   const [addingUnit, setAddingUnit] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://[SEU-PROJETO].supabase.co';
   const webhookUrl = `${supabaseUrl}/functions/v1/chatwoot-webhook`;
@@ -184,20 +185,49 @@ const Config = () => {
                   <span id="sync-btn-text">Puxar Histórico</span>
                 </button>
               </div>
-              <div className="border-t border-white/10 pt-4 mt-4 flex items-center justify-end">
-                <button 
+              <div className="border-t border-white/10 pt-4 mt-4 flex items-center justify-between">
+                {saveStatus === 'ok' && (
+                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5" /> Salvo com sucesso!
+                  </span>
+                )}
+                {saveStatus === 'err' && (
+                  <span className="text-xs font-bold text-rose-400">Erro ao salvar. Tente novamente.</span>
+                )}
+                {(saveStatus === 'idle' || saveStatus === 'saving') && <span />}
+                <button
+                  disabled={saveStatus === 'saving'}
                   onClick={async () => {
-                    await updateIntegrationSettings({
-                      chatwoot_url: apiUrl.trim().replace(/\/$/, ''),
-                      chatwoot_token: apiToken,
-                      chatwoot_webhook_secret: webhookSecret,
-                      chatwoot_account_id: accountId ? Number(accountId) : null
-                    });
-                    alert('Configurações salvas com sucesso!');
+                    setSaveStatus('saving');
+                    try {
+                      // Normaliza URL
+                      let normalizedUrl = apiUrl.trim().replace(/\/$/, '');
+                      if (normalizedUrl && !/^https?:\/\//i.test(normalizedUrl)) {
+                        normalizedUrl = `https://${normalizedUrl}`;
+                      }
+                      setApiUrl(normalizedUrl);
+
+                      // Parseia account_id com segurança
+                      const trimmedId = accountId.trim();
+                      const parsedAccountId = trimmedId ? parseInt(trimmedId, 10) : null;
+                      const safeAccountId = parsedAccountId !== null && !isNaN(parsedAccountId) ? parsedAccountId : null;
+
+                      await updateIntegrationSettings({
+                        chatwoot_url: normalizedUrl,
+                        chatwoot_token: apiToken,
+                        chatwoot_webhook_secret: webhookSecret,
+                        chatwoot_account_id: safeAccountId
+                      });
+                      setSaveStatus('ok');
+                      setTimeout(() => setSaveStatus('idle'), 3000);
+                    } catch (e) {
+                      setSaveStatus('err');
+                      setTimeout(() => setSaveStatus('idle'), 4000);
+                    }
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-bold transition-all shadow-[0_0_20px_hsl(239_84%_67%_/_0.25)]"
+                  className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 text-white text-sm font-bold transition-all shadow-[0_0_20px_hsl(239_84%_67%_/_0.25)]"
                 >
-                  Salvar Configurações de API
+                  {saveStatus === 'saving' ? 'Salvando...' : 'Salvar Configurações de API'}
                 </button>
               </div>
             </div>
