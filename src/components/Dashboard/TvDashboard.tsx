@@ -104,7 +104,13 @@ const TvDashboard: React.FC = () => {
     }
 
     const tmr = periodLeads.length
-      ? Math.round(periodLeads.reduce((s, l) => s + (l.wait_time_minutes || 0), 0) / periodLeads.length)
+      ? Math.round(periodLeads.reduce((s, l) => {
+          let wait = l.wait_time_minutes || 0;
+          if (wait === 0 && l.last_message_at && l.created_at) {
+             wait = Math.max(0, Math.round((new Date(l.last_message_at).getTime() - new Date(l.created_at).getTime()) / 60000));
+          }
+          return s + wait;
+        }, 0) / periodLeads.length)
       : null;
 
     return { score, diff, tmr, periodLeads };
@@ -125,16 +131,6 @@ const TvDashboard: React.FC = () => {
               Live Feed • {new Date().toLocaleTimeString('pt-BR')}
             </p>
           </div>
-        </div>
-
-        {/* Actionable Insight Central */}
-        <div className="flex-1 max-w-3xl mx-8 relative overflow-hidden rounded-2xl bg-amber-500/10 border border-amber-500/20 px-6 py-3 flex items-center gap-4 shadow-[0_0_40px_rgba(245,158,11,0.1)]">
-          <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
-          <Target className="w-5 h-5 text-amber-500 shrink-0" />
-          <p className="text-sm font-bold text-amber-50/90 leading-tight">
-            <span className="text-amber-400 uppercase tracking-wider mr-2">Foco do Dia:</span>
-            Unidade <strong className="text-white">Dom Pedro</strong> com alto volume de orçamentos travados no SLA (+20m). <strong className="text-amber-400">Contato proativo exigido.</strong>
-          </p>
         </div>
 
         <div className="flex items-center gap-6">
@@ -181,7 +177,7 @@ const TvDashboard: React.FC = () => {
       </div>
 
       {/* COLUMNS */}
-      <div className="flex-1 relative overflow-hidden p-6">
+      <div className="flex-1 relative overflow-hidden p-8 pb-12">
         <AnimatePresence mode="wait">
           <motion.div
             key={page}
@@ -189,7 +185,7 @@ const TvDashboard: React.FC = () => {
             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, x: -100, filter: 'blur(10px)' }}
             transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-            className="grid grid-cols-3 gap-6 h-full absolute inset-6"
+            className="grid grid-cols-3 gap-8 h-full"
           >
             {visibleUnits.map((unit, i) => {
               const { score, diff, tmr, periodLeads } = getUnitMetrics(unit.id);
