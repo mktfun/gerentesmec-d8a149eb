@@ -14,7 +14,7 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Config = () => {
-  const { units, managers, leads, addUnit, deleteUnit, integrationSettings, updateIntegrationSettings } = useAppData();
+  const { units, managers, leads, addUnit, deleteUnit, integrationSettings, updateIntegrationSettings, businessHours } = useAppData();
   const [apiUrl, setApiUrl] = useState('https://app.chatwoot.com');
   const [apiToken, setApiToken] = useState('');
   const [accountId, setAccountId] = useState('');
@@ -27,6 +27,12 @@ const Config = () => {
   const [addingUnit, setAddingUnit] = useState(false);
   const [copied, setCopied] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
+  // Horário de Atendimento
+  const [bhDays, setBhDays] = useState<number[]>(businessHours.days);
+  const [bhStart, setBhStart] = useState(businessHours.start);
+  const [bhEnd, setBhEnd] = useState(businessHours.end);
+  const [bhSaveStatus, setBhSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
+
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://[SEU-PROJETO].supabase.co';
   const webhookUrl = `${supabaseUrl}/functions/v1/chatwoot-webhook`;
@@ -45,6 +51,13 @@ const Config = () => {
       if (integrationSettings.chatwoot_account_id) setAccountId(String(integrationSettings.chatwoot_account_id));
       if (integrationSettings.chatwoot_url && integrationSettings.chatwoot_token) {
         setConnected(true);
+      }
+      // Sincroniza horário do banco
+      const bh = (integrationSettings as any).business_hours;
+      if (bh) {
+        if (Array.isArray(bh.days)) setBhDays(bh.days);
+        if (bh.start) setBhStart(bh.start);
+        if (bh.end) setBhEnd(bh.end);
       }
     }
   }, [integrationSettings]);
@@ -311,6 +324,110 @@ const Config = () => {
             {connected === true && (
               <InboxMappingPanel apiUrl={apiUrl} apiToken={apiToken} accountId={accountId} />
             )}
+          </div>
+        </motion.section>
+
+        {/* ── Horário de Atendimento ─────────────────────────────── */}
+        <motion.section {...fadeUp(0.065)}>
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-bold text-foreground">Horário de Atendimento</h2>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-6 space-y-5">
+            {/* Dias */}
+            <div>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 block">
+                Dias de Atendimento
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {[{d:0,l:'Dom'},{d:1,l:'Seg'},{d:2,l:'Ter'},{d:3,l:'Qua'},{d:4,l:'Qui'},{d:5,l:'Sex'},{d:6,l:'Sáb'}].map(({ d, l }) => {
+                  const active = bhDays.includes(d);
+                  return (
+                    <button
+                      key={d}
+                      onClick={() => setBhDays(prev =>
+                        prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort()
+                      )}
+                      className={`w-11 h-11 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-150 active:scale-95 border ${
+                        active
+                          ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300 shadow-[0_0_12px_hsl(239_84%_67%_/_0.2)]'
+                          : 'bg-white/5 border-white/10 text-white/30 hover:border-indigo-500/30 hover:text-white/60'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Horários */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                  Abertura
+                </label>
+                <input
+                  type="time"
+                  value={bhStart}
+                  onChange={e => setBhStart(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-medium text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                  Fechamento
+                </label>
+                <input
+                  type="time"
+                  value={bhEnd}
+                  onChange={e => setBhEnd(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-medium text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-muted/50 border border-border">
+              <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                O TMR e os alertas de SLA só contabilizarão o tempo <strong className="text-foreground">dentro deste horário</strong>.
+                Mensagens fora do expediente não geram pressão de tempo.
+              </p>
+            </div>
+
+            {/* Salvar */}
+            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+              {bhSaveStatus === 'ok' && (
+                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" /> Horário salvo!
+                </span>
+              )}
+              {bhSaveStatus === 'err' && (
+                <span className="text-xs font-bold text-rose-400">Erro ao salvar. Tente novamente.</span>
+              )}
+              {(bhSaveStatus === 'idle' || bhSaveStatus === 'saving') && <span />}
+              <button
+                disabled={bhSaveStatus === 'saving'}
+                onClick={async () => {
+                  setBhSaveStatus('saving');
+                  try {
+                    await updateIntegrationSettings({
+                      business_hours: { days: bhDays, start: bhStart, end: bhEnd, timezone: 'America/Sao_Paulo' }
+                    } as any);
+                    setBhSaveStatus('ok');
+                    setTimeout(() => setBhSaveStatus('idle'), 3000);
+                  } catch {
+                    setBhSaveStatus('err');
+                    setTimeout(() => setBhSaveStatus('idle'), 4000);
+                  }
+                }}
+                className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 disabled:opacity-50 text-white text-sm font-bold transition-all shadow-[0_0_20px_hsl(239_84%_67%_/_0.25)]"
+              >
+                {bhSaveStatus === 'saving' ? 'Salvando...' : 'Salvar Horário'}
+              </button>
+            </div>
           </div>
         </motion.section>
 

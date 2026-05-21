@@ -5,7 +5,7 @@ import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr } from '@/utils/metrics';
 
 const TvDashboard: React.FC = () => {
-  const { leads, units, setIsTvMode } = useAppData();
+  const { leads, units, setIsTvMode, businessHours } = useAppData();
   const [ticker, setTicker] = useState(0);
   const [page, setPage] = useState(0);
   const [intervalTime, setIntervalTime] = useState(15000); // 15s default
@@ -103,8 +103,8 @@ const TvDashboard: React.FC = () => {
       diff = Math.round((score - prevScore) * 10) / 10;
     }
 
-    const tmrFallback = calculateTmr(periodLeads);
-    const dangerCount = periodLeads.filter(l => calculateTmr([l]) > 20 || l.sla_status === 'danger').length;
+    const tmrFallback = calculateTmr(periodLeads, businessHours);
+    const dangerCount = periodLeads.filter(l => calculateTmr([l], businessHours) > 20 || l.sla_status === 'danger').length;
 
     return {
       score,
@@ -198,6 +198,8 @@ const TvDashboard: React.FC = () => {
               const glowColor = isDanger ? 'rgba(244,63,94,0.15)' : isStrong ? 'rgba(52,211,153,0.15)' : 'rgba(129,140,248,0.15)';
               const accentClass = isDanger ? 'text-rose-500' : isStrong ? 'text-emerald-500' : 'text-indigo-500';
 
+              const glowColorFull = glowColor.slice(0, -5) + '1)';
+
               return (
                 <div
                   key={unit.id}
@@ -206,7 +208,7 @@ const TvDashboard: React.FC = () => {
                 >
                   {/* Radial background glow (Fixed Clipping) */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] opacity-20 pointer-events-none"
-                       style={{ background: `radial-gradient(ellipse at top, ${glowColor.replace('0.15', '1')} 0%, transparent 70%)` }} />
+                       style={{ background: `radial-gradient(ellipse at top, ${glowColorFull} 0%, transparent 70%)` }} />
 
                   <div className="px-8 pt-10 pb-6 text-center relative z-10 flex-1 flex flex-col">
                     <h2 className="text-3xl font-black text-white/90 mb-2">{unit.name}</h2>
@@ -280,7 +282,6 @@ const TvDashboard: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                  </div>
                   </div>
                 </div>
               );

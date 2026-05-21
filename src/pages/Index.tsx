@@ -22,7 +22,7 @@ const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); re
 const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
 
 const Index = () => {
-  const { leads, managers, units, isTvMode, setIsTvMode, chatwootInsights, integrationSettings } = useAppData();
+  const { leads, managers, units, isTvMode, setIsTvMode, businessHours } = useAppData();
 
   // ── Hooks devem vir antes de qualquer early return (Rules of Hooks) ──
   
@@ -102,14 +102,13 @@ const Index = () => {
   // Today metrics
   const todayLeads = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
   
-  const calculateTmrFallback = (leadsList: Lead[]) => calculateTmr(leadsList);
-  const todayTmr = calculateTmrFallback(todayLeads);
+  const todayTmr = calculateTmr(todayLeads, businessHours);
 
   const pendingAudits = todayLeads.filter(l => (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') && l.score === null).length;
   const completedLeads = todayLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
   const resolutionRate = todayLeads.length > 0 ? ((completedLeads.length / todayLeads.length) * 100).toFixed(1) : '0';
   
-  const dangerLeads = calculateDangerLeads(todayLeads);
+  const dangerLeads = calculateDangerLeads(todayLeads, businessHours);
 
 
 

@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/utils/businessHours';
 
 export type Lead = Database['public']['Tables']['leads']['Row'];
 export type Manager = Database['public']['Tables']['managers']['Row'];
@@ -39,7 +40,8 @@ interface AppDataContextType {
   isTvMode: boolean;
   setIsTvMode: (val: boolean) => void;
   updateAiSettings: (updates: Partial<AiSettings>) => Promise<void>;
-  updateIntegrationSettings: (updates: Partial<IntegrationSettings>) => Promise<void>;
+  updateIntegrationSettings: (updates: Partial<IntegrationSettings> & { business_hours?: any }) => Promise<void>;
+  businessHours: BusinessHoursConfig;
 }
 
 const AppDataContext = createContext<AppDataContextType | null>(null);
@@ -233,13 +235,26 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await (supabase as any).from('integration_settings').update(updates).eq('id', integrationSettings.id);
   };
 
+  // Deriva businessHours do integrationSettings (com fallback seguro)
+  const businessHours = useMemo<BusinessHoursConfig>(() => {
+    const bh = (integrationSettings as any)?.business_hours;
+    if (!bh) return DEFAULT_BUSINESS_HOURS;
+    return {
+      days: Array.isArray(bh.days) ? bh.days : DEFAULT_BUSINESS_HOURS.days,
+      start: bh.start || DEFAULT_BUSINESS_HOURS.start,
+      end: bh.end || DEFAULT_BUSINESS_HOURS.end,
+      timezone: bh.timezone || DEFAULT_BUSINESS_HOURS.timezone,
+    };
+  }, [integrationSettings]);
+
   return (
     <AppDataContext.Provider value={{
       leads, managers, units, aiSettings, integrationSettings, chatwootInsights,
       addManager, updateManager, deleteManager,
       addUnit, updateUnit, deleteUnit,
       addLead, updateLead, saveLeadAudit, deleteLead, moveLeadStage,
-      isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings
+      isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings,
+      businessHours,
     }}>
       {children}
     </AppDataContext.Provider>

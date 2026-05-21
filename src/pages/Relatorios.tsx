@@ -13,7 +13,7 @@ const fadeUp = (delay = 0) => ({
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 
 const Relatorios = () => {
-  const { leads } = useAppData();
+  const { leads, businessHours } = useAppData();
   const [dateFilter, setDateFilter] = useState<'today' | '7days' | 'month'>('month');
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -41,10 +41,10 @@ const Relatorios = () => {
 
   const scoreCur  = round(avg(currentLeads.filter(l => l.score !== null).map(l => Number(l.score))));
   const scorePrev = round(avg(prevLeads.filter(l => l.score !== null).map(l => Number(l.score))));
-  const tmrCur    = currentLeads.length ? calculateTmr(currentLeads) : null;
-  const tmrPrev   = prevLeads.length ? calculateTmr(prevLeads) : null;
-  const slasCur   = calculateDangerLeads(currentLeads).length;
-  const slasPrev  = calculateDangerLeads(prevLeads).length;
+  const tmrCur    = currentLeads.length ? calculateTmr(currentLeads, businessHours) : null;
+  const tmrPrev   = prevLeads.length ? calculateTmr(prevLeads, businessHours) : null;
+  const slasCur   = calculateDangerLeads(currentLeads, businessHours).length;
+  const slasPrev  = calculateDangerLeads(prevLeads, businessHours).length;
 
   const metrics = {
     score: scoreCur,
