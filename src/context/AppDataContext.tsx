@@ -19,7 +19,7 @@ interface AppDataContextType {
   addManager: (manager: Omit<Manager, 'id' | 'created_at'>) => Promise<void>;
   updateManager: (id: string, updates: Partial<Manager>) => Promise<void>;
   deleteManager: (id: string) => Promise<void>;
-  addUnit: (name: string) => Promise<void>;
+  addUnit: (name: string, chatwoot_inbox_id?: number) => Promise<void>;
   updateUnit: (id: string, updates: Partial<Unit>) => Promise<void>;
   deleteUnit: (id: string) => Promise<void>;
   addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => Promise<void>;
@@ -116,9 +116,9 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await (supabase as any).from('managers').delete().eq('id', id);
   };
 
-  const addUnit = async (name: string) => {
+  const addUnit = async (name: string, chatwoot_inbox_id?: number) => {
     const id = `unit_${Date.now()}`;
-    await (supabase as any).from('units').insert([{ id, name }]);
+    await (supabase as any).from('units').insert([{ id, name, chatwoot_inbox_id }]);
   };
 
   const updateUnit = async (id: string, updates: Partial<Unit>) => {

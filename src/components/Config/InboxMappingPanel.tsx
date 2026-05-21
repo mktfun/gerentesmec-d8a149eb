@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, RefreshCw, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, RefreshCw, Link as LinkIcon, CheckCircle2, Plus } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export const InboxMappingPanel = ({ apiUrl, apiToken, accountId }: { apiUrl: string, apiToken: string, accountId: string }) => {
-  const { units, updateUnit } = useAppData();
+  const { units, updateUnit, addUnit } = useAppData();
   const [inboxes, setInboxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +99,17 @@ export const InboxMappingPanel = ({ apiUrl, apiToken, accountId }: { apiUrl: str
                     <option key={u.id} value={u.id}>{u.name}</option>
                   ))}
                 </select>
-                {mappedUnit && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                {mappedUnit ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                ) : (
+                  <button
+                    onClick={() => addUnit(inbox.name, inbox.id)}
+                    title={`Criar unidade "${inbox.name}" automaticamente`}
+                    className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors flex items-center justify-center shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           );
