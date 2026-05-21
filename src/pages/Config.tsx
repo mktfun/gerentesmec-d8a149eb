@@ -17,6 +17,7 @@ const Config = () => {
   const { units, managers, leads, addUnit, deleteUnit, integrationSettings, updateIntegrationSettings } = useAppData();
   const [apiUrl, setApiUrl] = useState('https://app.chatwoot.com');
   const [apiToken, setApiToken] = useState('');
+  const [accountId, setAccountId] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connected, setConnected] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
@@ -28,6 +29,7 @@ const Config = () => {
     if (integrationSettings) {
       if (integrationSettings.chatwoot_url) setApiUrl(integrationSettings.chatwoot_url);
       if (integrationSettings.chatwoot_token) setApiToken(integrationSettings.chatwoot_token);
+      if (integrationSettings.chatwoot_account_id) setAccountId(String(integrationSettings.chatwoot_account_id));
       if (integrationSettings.chatwoot_url && integrationSettings.chatwoot_token) {
         setConnected(true);
       }
@@ -47,14 +49,22 @@ const Config = () => {
     setConnected(null);
     
     try {
-      const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/profile`, {
-        headers: { api_access_token: apiToken }
+      let baseUrl = apiUrl.trim().replace(/\/$/, '');
+      if (!/^https?:\/\//i.test(baseUrl)) {
+        baseUrl = `https://${baseUrl}`;
+      }
+      setApiUrl(baseUrl);
+
+      const res = await supabase.functions.invoke('chatwoot-inboxes', {
+        body: { chatwoot_url: baseUrl, chatwoot_token: apiToken, chatwoot_account_id: accountId ? Number(accountId) : undefined }
       });
-      if (res.ok) {
+      
+      if (!res.error && !res.data?.error) {
         setConnected(true);
         await updateIntegrationSettings({
-          chatwoot_url: apiUrl,
-          chatwoot_token: apiToken
+          chatwoot_url: baseUrl,
+          chatwoot_token: apiToken,
+          chatwoot_account_id: accountId ? Number(accountId) : null
         });
       } else {
         setConnected(false);
@@ -119,6 +129,22 @@ const Config = () => {
               />
             </div>
 
+            {/* Account ID */}
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                Account ID (Chatwoot)
+              </label>
+              <input
+                value={accountId}
+                onChange={e => setAccountId(e.target.value)}
+                type="number"
+                placeholder="Ex: 1"
+                className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border
+                  text-sm font-medium text-foreground placeholder:text-muted-foreground/50
+                  focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+
             {/* Token */}
             <div>
               <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
@@ -162,7 +188,7 @@ const Config = () => {
 
             {/* Inbox Mapping Panel - Now loads dynamically from Edge Function */}
             {connected === true && (
-              <InboxMappingPanel apiUrl={apiUrl} apiToken={apiToken} />
+              <InboxMappingPanel apiUrl={apiUrl} apiToken={apiToken} accountId={accountId} />
             )}
           </div>
         </motion.section>

@@ -11,22 +11,30 @@ serve(async (req) => {
   }
 
   try {
-    const { chatwoot_url, chatwoot_token } = await req.json()
+    const { chatwoot_url, chatwoot_token, chatwoot_account_id } = await req.json()
 
     if (!chatwoot_url || !chatwoot_token) {
       throw new Error('Missing URL or Token in payload')
     }
 
-    const baseUrl = chatwoot_url.replace(/\/$/, '')
+    let baseUrl = chatwoot_url.trim().replace(/\/$/, '')
+    if (!/^https?:\/\//i.test(baseUrl)) {
+      baseUrl = `https://${baseUrl}`
+    }
+
     const headers = { 'api_access_token': chatwoot_token }
 
-    // 1. Fetch Profile
-    const profileRes = await fetch(`${baseUrl}/api/v1/profile`, { headers })
-    if (!profileRes.ok) throw new Error(`Failed to fetch Chatwoot profile: ${profileRes.statusText}`)
-    const profileData = await profileRes.json()
-    const accountId = profileData.account_id
+    let accountId = chatwoot_account_id;
 
-    if (!accountId) throw new Error('Account ID not found in Chatwoot profile')
+    if (!accountId) {
+      // Fallback: Fetch Profile if accountId is not directly provided
+      const profileRes = await fetch(`${baseUrl}/api/v1/profile`, { headers })
+      if (!profileRes.ok) throw new Error(`Failed to fetch Chatwoot profile: ${profileRes.statusText}`)
+      const profileData = await profileRes.json()
+      accountId = profileData.account_id
+    }
+
+    if (!accountId) throw new Error('Account ID not found in Chatwoot profile or payload')
 
     // 2. Fetch Inboxes
     const inboxesRes = await fetch(`${baseUrl}/api/v1/accounts/${accountId}/inboxes`, { headers })

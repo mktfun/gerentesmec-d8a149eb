@@ -4,7 +4,7 @@ import { MessageSquare, RefreshCw, Link as LinkIcon, CheckCircle2 } from 'lucide
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 
-export const InboxMappingPanel = ({ apiUrl, apiToken }: { apiUrl: string, apiToken: string }) => {
+export const InboxMappingPanel = ({ apiUrl, apiToken, accountId }: { apiUrl: string, apiToken: string, accountId: string }) => {
   const { units, updateUnit } = useAppData();
   const [inboxes, setInboxes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ export const InboxMappingPanel = ({ apiUrl, apiToken }: { apiUrl: string, apiTok
     setError(null);
     try {
       const { data, error } = await supabase.functions.invoke('chatwoot-inboxes', {
-        body: { chatwoot_url: apiUrl, chatwoot_token: apiToken }
+        body: { chatwoot_url: apiUrl, chatwoot_token: apiToken, chatwoot_account_id: accountId ? Number(accountId) : undefined }
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
