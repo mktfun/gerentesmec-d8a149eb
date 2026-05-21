@@ -182,17 +182,28 @@ serve(async (req) => {
     }
 
     // 6. Insert Message History if it's a message
-    if (event === 'message_created' && messageId && content) {
+    if (event === 'message_created' && messageId) {
+      let mediaUrl = null;
+      let mediaType = null;
+      if (message.attachments && message.attachments.length > 0) {
+        mediaUrl = message.attachments[0].data_url;
+        mediaType = message.attachments[0].file_type;
+      }
+      
       // ignore errors for duplicates if message already exists
-      await supabase
-        .from('chat_messages')
-        .insert({
-          lead_id: leadId,
-          chatwoot_message_id: messageId,
-          content: content,
-          sender_type: senderType,
-          // created_at will default to now() in DB
-        });
+      if (content || mediaUrl) {
+        await supabase
+          .from('chat_messages')
+          .insert({
+            lead_id: leadId,
+            chatwoot_message_id: messageId,
+            content: content || null,
+            sender_type: senderType,
+            media_url: mediaUrl,
+            media_type: mediaType
+            // created_at will default to now() in DB
+          });
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {

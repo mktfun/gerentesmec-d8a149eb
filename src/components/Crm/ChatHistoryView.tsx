@@ -8,6 +8,8 @@ export interface ChatMessage {
   content: string;
   sender_type: 'contact' | 'user' | 'bot' | 'system';
   created_at: string;
+  media_url?: string;
+  media_type?: string;
 }
 
 const formatDividerDate = (dateStr: string) => {
@@ -153,15 +155,39 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
 
                     {/* Bubble Container */}
                     <div className={`relative max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+                      {/* Media Rendering */}
+                      {msg.media_url && msg.media_type === 'image' && (
+                        <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-white/10 shadow-md">
+                          <img src={msg.media_url} alt="Anexo" className="object-cover max-h-60" />
+                        </div>
+                      )}
+                      
+                      {msg.media_url && msg.media_type === 'audio' && (
+                        <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-white/10 bg-white/5 p-2">
+                          <audio controls className="h-10 w-48">
+                            <source src={msg.media_url} type="audio/mp3" />
+                            <source src={msg.media_url} type="audio/ogg" />
+                            Seu navegador não suporta áudio.
+                          </audio>
+                        </div>
+                      )}
+
+                      {msg.media_url && msg.media_type === 'video' && (
+                        <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-white/10 shadow-md">
+                          <video controls className="max-h-60">
+                            <source src={msg.media_url} />
+                          </video>
+                        </div>
+                      )}
+
                       {/* Bubble */}
                       <div className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md relative
                         ${isUser 
                           ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
                           : 'bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-2xl rounded-bl-sm'
-                        }`}
                       >
                         <div className="pb-3 pr-2">
-                          {msg.content}
+                          {msg.content || (msg.media_url ? 'Mídia anexada' : '')}
                         </div>
                         <div className={`absolute bottom-1.5 right-3 text-[9px] font-bold ${isUser ? 'text-indigo-200' : 'text-white/30'}`}>
                           {timeStr}
