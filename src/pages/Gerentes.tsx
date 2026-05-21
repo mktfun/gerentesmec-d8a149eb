@@ -157,13 +157,13 @@ const Gerentes = () => {
 
                       {/* Score + Trend */}
                       <div className="flex items-center gap-1.5 shrink-0 ml-1">
-                        {trend
+                        {mScore !== null && (trend
                           ? <TrendingUp className="w-3 h-3 text-emerald-400" />
                           : <TrendingDown className="w-3 h-3 text-rose-400" />
-                        }
+                        )}
                         <span className={`text-xs font-black ${
-                          mScore >= 80 ? 'text-emerald-400' : mScore >= 60 ? 'text-indigo-300' : 'text-rose-400'
-                        }`}>{mScore}%</span>
+                          mScore === null ? 'text-white/30' : mScore >= 80 ? 'text-emerald-400' : mScore >= 60 ? 'text-indigo-300' : 'text-rose-400'
+                        }`}>{mScore !== null ? `${mScore}%` : '—'}</span>
                       </div>
                     </motion.div>
                   );
