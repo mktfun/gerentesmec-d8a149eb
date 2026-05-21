@@ -4,11 +4,8 @@ import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, Shiel
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { type: 'spring', stiffness: 280, damping: 26, delay },
-});
+import { fadeUp } from '@/utils/motion';
+
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 

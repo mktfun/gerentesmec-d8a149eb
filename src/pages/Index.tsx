@@ -10,11 +10,7 @@ import { useAppData, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import TvDashboard from '@/components/Dashboard/TvDashboard';
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { type: 'spring', stiffness: 280, damping: 26, delay },
-});
+import { fadeUp } from '@/utils/motion';
 
 const WEEK_DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 

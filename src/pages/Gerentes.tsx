@@ -5,11 +5,8 @@ import { useAppData, Manager, Unit } from '@/context/AppDataContext';
 import ManagerModal from '@/components/Gerentes/ManagerModal';
 import ManagerModalForm from '@/components/Gerentes/ManagerModalForm';
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { type: 'spring', stiffness: 300, damping: 28, delay },
-});
+import { fadeUp } from '@/utils/motion';
+
 
 const Gerentes = () => {
   const { managers, deleteManager, units, leads } = useAppData();
@@ -126,7 +123,8 @@ const Gerentes = () => {
                     <motion.div
                       key={manager.id}
                       initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
                       transition={{ delay: 0.2 + idx * 0.08 + mIdx * 0.06, type: 'spring' }}
                       onClick={() => setSelectedManager(manager)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl

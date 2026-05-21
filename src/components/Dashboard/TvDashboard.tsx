@@ -6,7 +6,6 @@ import { calculateTmr } from '@/utils/metrics';
 
 const TvDashboard: React.FC = () => {
   const { leads, units, setIsTvMode, businessHours } = useAppData();
-  const [ticker, setTicker] = useState(0);
   const [page, setPage] = useState(0);
   const [intervalTime, setIntervalTime] = useState(15000); // 15s default
 
@@ -22,11 +21,6 @@ const TvDashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, [totalPages, intervalTime]);
 
-  // Pulse effect
-  useEffect(() => {
-    const interval = setInterval(() => setTicker(v => v + 1), 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   const visibleUnits = units.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 

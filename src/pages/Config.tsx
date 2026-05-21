@@ -7,11 +7,8 @@ import { InboxMappingPanel } from '@/components/Config/InboxMappingPanel';
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { type: 'spring', stiffness: 280, damping: 26, delay },
-});
+import { fadeUp } from '@/utils/motion';
+
 
 const Config = () => {
   const { units, managers, leads, addUnit, deleteUnit, integrationSettings, updateIntegrationSettings, businessHours } = useAppData();

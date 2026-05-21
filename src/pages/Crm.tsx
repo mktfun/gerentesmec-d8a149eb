@@ -16,7 +16,9 @@ const Crm = () => {
   
   const [view, setView] = useState<ViewMode>('kanban');
   const [unitFilter, setUnitFilter] = useState('all');
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  // Armazena apenas o ID — deriva o lead ao vivo do array (evita flash quando Realtime atualiza)
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const selectedLead = selectedLeadId ? leads.find(l => l.id === selectedLeadId) ?? null : null;
   const [closedOpen, setClosedOpen] = useState(false);
   
   // Lead CRUD
@@ -71,8 +73,8 @@ const Crm = () => {
 
     return (
       <motion.div
-        initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05, type: 'spring' }}
-        whileHover={{ x: 3 }} onClick={() => setSelectedLead(lead)}
+        initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.03, type: 'spring' }}
+        whileHover={{ x: 3 }} onClick={() => setSelectedLeadId(lead.id)}
         className={`flex items-center gap-4 px-4 py-3.5 cursor-pointer rounded-xl transition-all duration-200 group
           ${isDanger ? 'status-danger bg-rose-500/[0.04] hover:bg-rose-500/[0.08]' : 'status-success bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]'}
           ${isSelected ? 'ring-1 ring-primary/40' : ''}`}
@@ -205,7 +207,7 @@ const Crm = () => {
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
               className="flex-1 p-5 overflow-hidden"
             >
-              <KanbanView leads={searchQuery ? displayLeads : leads} unitFilter={searchQuery ? 'all' : unitFilter} onSelectLead={setSelectedLead} onDragEnd={onDragEnd} />
+              <KanbanView leads={searchQuery ? displayLeads : leads} unitFilter={searchQuery ? 'all' : unitFilter} onSelectLead={(lead) => setSelectedLeadId(lead.id)} onDragEnd={onDragEnd} />
             </motion.div>
           ) : (
             /* ── LIST ── */
@@ -264,7 +266,7 @@ const Crm = () => {
                     initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ type: 'spring', stiffness: 300, damping: 28 }}
                     className="flex-1 overflow-hidden"
                   >
-                    <AuditPanel lead={selectedLead} onClose={() => setSelectedLead(null)} />
+                    <AuditPanel lead={selectedLead} onClose={() => setSelectedLeadId(null)} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -286,10 +288,10 @@ const Crm = () => {
               {/* Backdrop */}
               <div 
                 className="absolute -left-[100vw] inset-y-0 w-[100vw] bg-black/40 backdrop-blur-sm -z-10 cursor-pointer"
-                onClick={() => setSelectedLead(null)}
+                onClick={() => setSelectedLeadId(null)}
               />
               <div className="flex-1 w-full h-full bg-background overflow-hidden">
-                <AuditPanel lead={selectedLead} onClose={() => setSelectedLead(null)} />
+                <AuditPanel lead={selectedLead} onClose={() => setSelectedLeadId(null)} />
               </div>
             </motion.div>
           )}
