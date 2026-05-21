@@ -20,7 +20,7 @@ export const AiRouterConfig: React.FC = () => {
   const [recommendation, setRecommendation] = useState<{ model: string; reason: string } | null>(null);
 
   const availableModels: Record<string, string[]> = {
-    'Google': ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-8b-latest', 'gemini-2.0-flash', 'gemini-2.0-pro-exp', 'gemini-2.5-pro-preview'],
+    'Google': ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-8b-latest', 'gemini-2.0-flash', 'gemini-2.0-pro-exp', 'gemini-2.5-pro-preview', 'gemini-3.1-pro', 'gemini-3.1-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash'],
     'OpenAI': ['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4o'],
     'Anthropic': ['claude-3-haiku-20240307', 'claude-3-5-sonnet-20240620'],
   };
