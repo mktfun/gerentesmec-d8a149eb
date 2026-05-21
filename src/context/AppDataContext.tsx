@@ -20,6 +20,7 @@ interface AppDataContextType {
   updateManager: (id: string, updates: Partial<Manager>) => Promise<void>;
   deleteManager: (id: string) => Promise<void>;
   addUnit: (name: string) => Promise<void>;
+  updateUnit: (id: string, updates: Partial<Unit>) => Promise<void>;
   deleteUnit: (id: string) => Promise<void>;
   addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
@@ -120,6 +121,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await (supabase as any).from('units').insert([{ id, name }]);
   };
 
+  const updateUnit = async (id: string, updates: Partial<Unit>) => {
+    await (supabase as any).from('units').update(updates).eq('id', id);
+  };
+
   const deleteUnit = async (id: string) => {
     await (supabase as any).from('managers').delete().eq('unit_id', id);
     await (supabase as any).from('units').delete().eq('id', id);
@@ -160,7 +165,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     <AppDataContext.Provider value={{
       leads, managers, units, aiSettings, integrationSettings,
       addManager, updateManager, deleteManager,
-      addUnit, deleteUnit,
+      addUnit, updateUnit, deleteUnit,
       addLead, updateLead, moveLeadStage,
       isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings
     }}>

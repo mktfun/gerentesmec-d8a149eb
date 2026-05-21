@@ -29,23 +29,23 @@ serve(async (req) => {
     }
 
     // 2. Extract Data
-    const inboxName = payload.inbox?.name
-    if (!inboxName) {
-      return new Response(JSON.stringify({ message: "No inbox name found" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
+    const inboxId = payload.inbox?.id
+    if (!inboxId) {
+      return new Response(JSON.stringify({ message: "No inbox id found" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
     const contact = payload.contact || (payload.conversation && payload.conversation.meta?.sender) || {}
     const conversationId = payload.conversation?.id || payload.id // in conversation_created, payload.id is conversation id
 
-    // 3. Match Unit
+    // 3. Match Unit by chatwoot_inbox_id
     const { data: unitData, error: unitError } = await supabase
       .from('units')
       .select('id')
-      .ilike('name', inboxName)
+      .eq('chatwoot_inbox_id', inboxId)
       .maybeSingle()
 
     if (unitError || !unitData) {
-      console.log(`No mapped unit found for inbox: ${inboxName}`);
+      console.log(`No mapped unit found for inbox id: ${inboxId}`);
       return new Response(JSON.stringify({ message: "Unmapped unit" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
