@@ -20,9 +20,37 @@ export const AiRouterConfig: React.FC = () => {
   const [recommendation, setRecommendation] = useState<{ model: string; reason: string } | null>(null);
 
   const availableModels: Record<string, string[]> = {
-    'Google': ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-8b-latest', 'gemini-2.0-flash', 'gemini-2.0-pro-exp', 'gemini-2.5-pro-preview', 'gemini-3.1-pro', 'gemini-3.1-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash'],
-    'OpenAI': ['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4o'],
-    'Anthropic': ['claude-3-haiku-20240307', 'claude-3-5-sonnet-20240620'],
+    'Google': [
+      // Gemini 1.5
+      'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-8b-latest',
+      'gemini-1.5-pro', 'gemini-1.5-pro-latest',
+      // Gemini 2.0
+      'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash-preview', 'gemini-2.0-pro-exp',
+      // Gemini 2.5
+      'gemini-2.5-flash-preview', 'gemini-2.5-pro-preview',
+      // Gemini 3.x (preview/experimental)
+      'gemini-3.1-flash', 'gemini-3.1-flash-lite', 'gemini-3.1-pro', 'gemini-3.5-flash',
+    ],
+    'OpenAI': ['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'o1-mini', 'o1', 'o3-mini'],
+    'Anthropic': ['claude-3-haiku-20240307', 'claude-3-5-sonnet-20240620', 'claude-3-5-haiku-latest', 'claude-opus-4-5', 'claude-sonnet-4-5'],
+    'OpenRouter': [
+      // Google via OpenRouter
+      'google/gemini-2.0-flash', 'google/gemini-2.5-pro-preview', 'google/gemini-flash-1.5',
+      // Anthropic via OpenRouter
+      'anthropic/claude-3.5-sonnet', 'anthropic/claude-3-haiku', 'anthropic/claude-opus-4',
+      // OpenAI via OpenRouter
+      'openai/gpt-4o', 'openai/gpt-4o-mini', 'openai/o3-mini',
+      // Meta Llama
+      'meta-llama/llama-3.3-70b-instruct', 'meta-llama/llama-3.1-8b-instruct',
+      // Mistral
+      'mistralai/mistral-large', 'mistralai/mistral-7b-instruct',
+      // DeepSeek
+      'deepseek/deepseek-chat', 'deepseek/deepseek-r1',
+      // Qwen
+      'qwen/qwen-2.5-72b-instruct',
+      // Free models
+      'google/gemma-3-27b-it:free', 'meta-llama/llama-3.1-8b-instruct:free', 'mistralai/mistral-7b-instruct:free',
+    ],
   };
 
   const handleTest = async () => {
