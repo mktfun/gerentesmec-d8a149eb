@@ -185,7 +185,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                         ${isUser 
                           ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
                           : 'bg-white/[0.04] border border-white/[0.08] text-white/80 rounded-2xl rounded-bl-sm'
-                      >
+                      }`}>
                         <div className="pb-3 pr-2">
                           {msg.content || (msg.media_url ? 'Mídia anexada' : '')}
                         </div>

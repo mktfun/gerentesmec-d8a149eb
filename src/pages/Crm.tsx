@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X } from 'lucide-react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
 import { DropResult } from '@hello-pangea/dnd';
@@ -22,14 +22,32 @@ const Crm = () => {
   // Lead CRUD
   const [formLead, setFormLead] = useState<Lead | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchScope, setSearchScope] = useState<'global' | 'pipeline'>('pipeline');
 
+  // filteredLeads: por unidade (sem busca)
   const filteredLeads = unitFilter === 'all'
     ? leads
     : leads.filter(l => l.unit_id === unitFilter);
 
-  const danger  = filteredLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
-  const active  = filteredLeads.filter(l => l.sla_status !== 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
-  const closed  = filteredLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
+  // searchedLeads: aplica busca por cima do filtro de unidade
+  const basePool = searchQuery && searchScope === 'global' ? leads : filteredLeads;
+  const searchedLeads = searchQuery
+    ? basePool.filter(l => {
+        const q = searchQuery.toLowerCase();
+        return (
+          l.customer_name?.toLowerCase().includes(q) ||
+          (l as any).customer_phone?.toLowerCase().includes(q)
+        );
+      })
+    : filteredLeads;
+
+  const displayLeads = searchedLeads;
+
+  const danger  = displayLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
+  const active  = displayLeads.filter(l => l.sla_status !== 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
+  const closed  = displayLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
 
   const onDragEnd = (result: DropResult) => {
     const { destination, draggableId } = result;
@@ -92,15 +110,12 @@ const Crm = () => {
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
-      {/* ── Topbar: View Toggle + Unit Filter ───────────────── */}
-      <div className="px-5 py-3 border-b border-border bg-background flex items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-2">
-          {/* Unit Switcher */}
+      {/* ── Topbar: View Toggle + Search + New ───────────── */}
+      <div className="px-5 py-3 border-b border-border bg-background flex items-center gap-3 shrink-0">
+        {/* Esquerda: Unit Switcher + View Toggle */}
+        <div className="flex items-center gap-2 shrink-0">
           <UnitSwitcher units={units} leads={leads} selectedUnitId={unitFilter} onSelect={setUnitFilter} />
-
-          <div className="h-6 w-px bg-border mx-2" />
-
-          {/* View toggle */}
+          <div className="h-6 w-px bg-border mx-1" />
           <div className="flex items-center gap-1 p-1 bg-muted rounded-xl">
             <button onClick={() => setView('list')}
               className={`p-2 rounded-lg transition-all ${view === 'list' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
@@ -113,9 +128,69 @@ const Crm = () => {
           </div>
         </div>
 
+        {/* Centro: Search Bar */}
+        <div className="flex-1 flex items-center gap-2 min-w-0">
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Buscar nome ou número..."
+              className="w-full h-9 pl-9 pr-8 rounded-xl text-xs font-medium
+                bg-white/[0.04] border border-white/[0.08] text-foreground
+                placeholder:text-muted-foreground/40
+                focus:outline-none focus:border-indigo-500/35 focus:bg-indigo-500/[0.06]
+                focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)]
+                transition-all duration-200"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Scope Pills — aparecem só quando há texto */}
+          <AnimatePresence>
+            {searchQuery && (
+              <motion.div
+                initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-1"
+              >
+                <button
+                  onClick={() => setSearchScope('pipeline')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                    searchScope === 'pipeline'
+                      ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                      : 'bg-white/5 text-white/40 border border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  Pipeline
+                </button>
+                <button
+                  onClick={() => setSearchScope('global')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                    searchScope === 'global'
+                      ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30'
+                      : 'bg-white/5 text-white/40 border border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  Global
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Direita: Novo Atendimento */}
         <button onClick={handleNewLead}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 text-white
-            hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
+          className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 text-white
+            hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)] active:scale-95">
           <Plus className="w-3.5 h-3.5" />
           Novo Atendimento
         </button>
@@ -130,7 +205,7 @@ const Crm = () => {
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
               className="flex-1 p-5 overflow-hidden"
             >
-              <KanbanView leads={leads} unitFilter={unitFilter} onSelectLead={setSelectedLead} onDragEnd={onDragEnd} />
+              <KanbanView leads={searchQuery ? displayLeads : leads} unitFilter={searchQuery ? 'all' : unitFilter} onSelectLead={setSelectedLead} onDragEnd={onDragEnd} />
             </motion.div>
           ) : (
             /* ── LIST ── */
@@ -141,7 +216,7 @@ const Crm = () => {
               <div className={`flex flex-col bg-background overflow-hidden border-r border-border transition-all duration-300 ${selectedLead ? 'w-[340px] shrink-0' : 'flex-1'}`}>
                 <div className="px-5 py-4 border-b border-border shrink-0">
                   <h2 className="text-sm font-black text-foreground">Inbox de Auditoria</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">{filteredLeads.length} atendimentos</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{displayLeads.length} atendimentos{searchQuery && <span className="text-indigo-400 font-bold"> · buscando "{searchQuery}"</span>}</p>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-5">
                   {danger.length > 0 && (

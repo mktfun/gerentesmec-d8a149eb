@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw, Copy, Check } from 'lucide-react';
+import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw, Copy, Check, AlertTriangle } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { InboxMappingPanel } from '@/components/Config/InboxMappingPanel';
@@ -32,6 +32,8 @@ const Config = () => {
   const [bhStart, setBhStart] = useState(businessHours.start);
   const [bhEnd, setBhEnd] = useState(businessHours.end);
   const [bhSaveStatus, setBhSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
+  // Ref para sincronizar integrationSettings apenas 1x (evita flash ao entrar na tela)
+  const settingsInitialized = useRef(false);
 
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://[SEU-PROJETO].supabase.co';
@@ -44,7 +46,9 @@ const Config = () => {
   };
 
   React.useEffect(() => {
-    if (integrationSettings) {
+    // Só sincroniza na primeira vez que os dados chegam — evita flash de re-render
+    if (integrationSettings && !settingsInitialized.current) {
+      settingsInitialized.current = true;
       if (integrationSettings.chatwoot_url) setApiUrl(integrationSettings.chatwoot_url);
       if (integrationSettings.chatwoot_token) setApiToken(integrationSettings.chatwoot_token);
       if (integrationSettings.chatwoot_webhook_secret) setWebhookSecret(integrationSettings.chatwoot_webhook_secret);
@@ -459,6 +463,27 @@ const Config = () => {
               Cada unidade deve ter exatamente <strong className="text-foreground">1 gerente responsável</strong>.
             </p>
           </div>
+
+          {/* Warning: Inbox ID duplicado entre unidades */}
+          {(() => {
+            const inboxIds = units.map(u => u.chatwoot_inbox_id).filter(Boolean);
+            const duplicates = inboxIds.filter((id, idx) => inboxIds.indexOf(id) !== idx);
+            const dupUnits = units.filter(u => duplicates.includes(u.chatwoot_inbox_id));
+            if (dupUnits.length === 0) return null;
+            return (
+              <div className="mb-4 flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold text-amber-400 mb-1">Conflito de Inbox Detectado</p>
+                  <p className="text-xs text-amber-400/80 leading-relaxed">
+                    As unidades <strong className="text-amber-300">{dupUnits.map(u => u.name).join(' e ')}</strong> estão
+                    usando o mesmo Inbox ID. Isso pode causar atribuição incorreta de conversas.
+                    Verifique a configuração no Chatwoot.
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="space-y-3">
             {units.map((unit, i) => {
