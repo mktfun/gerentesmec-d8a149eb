@@ -6,7 +6,7 @@ import { Lead } from '@/context/AppDataContext';
 export interface ChatMessage {
   id: string;
   content: string;
-  sender_type: 'contact' | 'user' | 'bot';
+  sender_type: 'contact' | 'user' | 'bot' | 'system';
   created_at: string;
 }
 
@@ -64,9 +64,26 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
         ) : (
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => {
+              const isSystem = msg.sender_type === 'system';
               const isUser = msg.sender_type === 'user';
               const isBot = msg.sender_type === 'bot';
               const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+              if (isSystem) {
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
+                    className="flex justify-center w-full my-4"
+                  >
+                    <div className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] font-semibold text-white/50 backdrop-blur-sm shadow-sm flex items-center justify-center">
+                      {msg.content}
+                    </div>
+                  </motion.div>
+                );
+              }
 
               return (
                 <motion.div

@@ -149,10 +149,25 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
     await (supabase as any).from('leads').update(updates).eq('id', id);
+    if (updates.score !== undefined) {
+      await (supabase as any).from('chat_messages').insert([{
+        lead_id: id,
+        content: `Auditado e pontuado: ${updates.score}%`,
+        sender_type: 'system',
+      }]);
+    }
   };
 
   const moveLeadStage = async (id: string, stage: FunnelStage) => {
     await (supabase as any).from('leads').update({ funnel_stage: stage }).eq('id', id);
+    const STAGE_LABELS: Record<string, string> = {
+      lead_new: 'Novo Lead', quote: 'Em Orçamento', negotiation: 'Em Negociação', closed_won: 'Encerrado', closed_lost: 'Perdido'
+    };
+    await (supabase as any).from('chat_messages').insert([{
+      lead_id: id,
+      content: `Movido para: ${STAGE_LABELS[stage] || stage}`,
+      sender_type: 'system',
+    }]);
   };
 
   const updateAiSettings = async (updates: Partial<AiSettings>) => {
