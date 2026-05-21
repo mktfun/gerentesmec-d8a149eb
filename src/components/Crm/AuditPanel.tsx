@@ -100,13 +100,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       if (data && data.length > 0) {
         setRealMessages(data as ChatMessage[]);
       } else {
-        // Fallback to mocks if no real messages yet (for testing visual)
-        setRealMessages([
-          { id: 'm1', content: 'Olá, gostaria de saber se o orçamento do pneu ficou pronto?', sender_type: 'contact', created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-          { id: 'm2', content: 'Olá! Sim, ficou pronto. O valor total com o balanceamento e alinhamento 3D é R$ 850,00.', sender_type: 'user', created_at: new Date(Date.now() - 1000 * 60 * 55).toISOString() },
-          { id: 'm3', content: 'Segue o link do vídeo mostrando o desgaste irregular que comentei mais cedo, provando a necessidade do alinhamento: https://link.tork.com/v/desgaste', sender_type: 'user', created_at: new Date(Date.now() - 1000 * 60 * 54).toISOString() },
-          { id: 'm4', content: 'Nossa, não sabia que tava assim. Entendi, faz muito sentido. Pode aprovar o serviço completo então!', sender_type: 'contact', created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
-        ]);
+        setRealMessages([]);
       }
       setLoadingChat(false);
     };
@@ -116,11 +110,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     // Subscribe to new messages for this lead
     const channel = supabase.channel(`chat_messages_${lead.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `lead_id=eq.${lead.id}` }, (payload) => {
-        setRealMessages(prev => {
-          // ensure no mock messages are mixed with real ones if it was empty
-          const isMock = prev.length > 0 && prev[0].id === 'm1';
-          return isMock ? [payload.new as ChatMessage] : [...prev, payload.new as ChatMessage];
-        });
+        setRealMessages(prev => [...prev, payload.new as ChatMessage]);
       }).subscribe();
 
     return () => {
