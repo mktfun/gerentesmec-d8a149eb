@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu } from 'lucide-react';
+import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { useAppData } from '@/context/AppDataContext';
@@ -12,13 +12,15 @@ const fadeUp = (delay = 0) => ({
 });
 
 const Config = () => {
-  const { units, managers, leads } = useAppData();
+  const { units, managers, leads, addUnit, deleteUnit } = useAppData();
   const [apiUrl, setApiUrl] = useState('https://app.chatwoot.com');
   const [apiToken, setApiToken] = useState('');
   const [showToken, setShowToken] = useState(false);
   const [connected, setConnected] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
   const [slaByUnit, setSlaByUnit] = useState<Record<string, number>>({});
+  const [newUnitName, setNewUnitName] = useState('');
+  const [addingUnit, setAddingUnit] = useState(false);
   
   // Initialize SLAs once units are loaded
   React.useEffect(() => {
@@ -156,7 +158,6 @@ const Config = () => {
           <div className="space-y-3">
             {units.map((unit, i) => {
               const manager = managers.find(m => m.unit_id === unit.id);
-              // Calculate average score for the unit
               const unitLeads = leads.filter(l => l.unit_id === unit.id && l.score !== null);
               const unitScore = unitLeads.length > 0
                 ? Math.round(unitLeads.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeads.length)
@@ -173,18 +174,59 @@ const Config = () => {
                     slaMinutes={slaByUnit[unit.id] ?? 20}
                     unitScore={unitScore}
                     onSlaChange={mins => setSlaByUnit(prev => ({ ...prev, [unit.id]: mins }))}
+                    onDelete={() => {
+                      if (confirm(`Remover a unidade "${unit.name}"? Gerentes vinculados também serão removidos.`)) {
+                        deleteUnit(unit.id);
+                      }
+                    }}
                   />
                 </motion.div>
               );
             })}
+            {units.length === 0 && (
+              <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-border rounded-2xl">
+                Nenhuma unidade cadastrada ainda. Adicione abaixo ou conecte um canal para importar automaticamente.
+              </div>
+            )}
           </div>
 
-          <button className="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-2xl
-            border-2 border-dashed border-border hover:border-primary/30 hover:bg-primary/5
-            text-sm font-semibold text-muted-foreground hover:text-primary transition-all">
-            <Plus className="w-4 h-4" />
-            Adicionar unidade
-          </button>
+          {addingUnit ? (
+            <div className="mt-3 flex items-center gap-2 p-3 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5">
+              <input
+                autoFocus
+                value={newUnitName}
+                onChange={e => setNewUnitName(e.target.value)}
+                onKeyDown={async e => {
+                  if (e.key === 'Enter' && newUnitName.trim()) {
+                    await addUnit(newUnitName.trim());
+                    setNewUnitName(''); setAddingUnit(false);
+                  }
+                  if (e.key === 'Escape') { setNewUnitName(''); setAddingUnit(false); }
+                }}
+                placeholder='Nome da unidade (deve bater com inbox.name do Chatwoot)'
+                className="flex-1 px-3 py-2 rounded-xl bg-muted border border-border text-sm font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50"
+              />
+              <button
+                onClick={async () => {
+                  if (!newUnitName.trim()) return;
+                  await addUnit(newUnitName.trim());
+                  setNewUnitName(''); setAddingUnit(false);
+                }}
+                className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90"
+              >Salvar</button>
+              <button
+                onClick={() => { setNewUnitName(''); setAddingUnit(false); }}
+                className="p-2 rounded-xl text-muted-foreground hover:bg-muted"
+              ><X className="w-4 h-4" /></button>
+            </div>
+          ) : (
+            <button onClick={() => setAddingUnit(true)} className="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-2xl
+              border-2 border-dashed border-border hover:border-primary/30 hover:bg-primary/5
+              text-sm font-semibold text-muted-foreground hover:text-primary transition-all">
+              <Plus className="w-4 h-4" />
+              Adicionar unidade
+            </button>
+          )}
         </motion.section>
       </div>
     </div>

@@ -17,6 +17,8 @@ interface AppDataContextType {
   addManager: (manager: Omit<Manager, 'id' | 'created_at'>) => Promise<void>;
   updateManager: (id: string, updates: Partial<Manager>) => Promise<void>;
   deleteManager: (id: string) => Promise<void>;
+  addUnit: (name: string) => Promise<void>;
+  deleteUnit: (id: string) => Promise<void>;
   addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
   moveLeadStage: (id: string, stage: FunnelStage) => Promise<void>;
@@ -57,6 +59,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setManagers(prev => prev.filter(m => m.id !== payload.old.id));
         }
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'units' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setUnits(prev => [...prev, payload.new as Unit]);
+        } else if (payload.eventType === 'UPDATE') {
+          setUnits(prev => prev.map(u => u.id === payload.new.id ? payload.new as Unit : u));
+        } else if (payload.eventType === 'DELETE') {
+          setUnits(prev => prev.filter(u => u.id !== payload.old.id));
+        }
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_settings' }, (payload) => {
         if (payload.eventType === 'UPDATE') {
           setAiSettings(payload.new as AiSettings);
@@ -93,6 +104,16 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await (supabase as any).from('managers').delete().eq('id', id);
   };
 
+  const addUnit = async (name: string) => {
+    const id = `unit_${Date.now()}`;
+    await (supabase as any).from('units').insert([{ id, name }]);
+  };
+
+  const deleteUnit = async (id: string) => {
+    await (supabase as any).from('managers').delete().eq('unit_id', id);
+    await (supabase as any).from('units').delete().eq('id', id);
+  };
+
   const addLead = async (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => {
     const newLead = {
       ...lead,
@@ -119,6 +140,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     <AppDataContext.Provider value={{
       leads, managers, units, aiSettings,
       addManager, updateManager, deleteManager,
+      addUnit, deleteUnit,
       addLead, updateLead, moveLeadStage,
       isTvMode, setIsTvMode, updateAiSettings
     }}>

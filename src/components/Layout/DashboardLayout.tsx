@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3
+  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAppData } from '@/context/AppDataContext';
@@ -17,7 +17,12 @@ const navItems = [
 
 const DashboardLayout: React.FC = () => {
   const { isDark, toggle } = useTheme();
-  const { isTvMode } = useAppData();
+  const { isTvMode, setIsTvMode } = useAppData();
+
+  const enterTvMode = () => {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+    setIsTvMode(true);
+  };
 
   if (isTvMode) {
     return (
@@ -71,8 +76,12 @@ const DashboardLayout: React.FC = () => {
           ))}
         </nav>
 
-        {/* Theme Toggle */}
-        <div className="p-3 border-t border-sidebar-border">
+        {/* Footer actions */}
+        <div className="p-3 border-t border-sidebar-border space-y-1">
+          <button onClick={enterTvMode} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent transition-colors" title="Abrir Modo TV (tela cheia)">
+            <Tv className="w-4 h-4" />
+            Modo TV
+          </button>
           <button onClick={toggle} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent">
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {isDark ? 'Modo Claro' : 'Modo Escuro'}
