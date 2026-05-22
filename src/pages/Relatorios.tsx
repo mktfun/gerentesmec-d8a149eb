@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
-import AuditPanel from '@/components/Crm/AuditPanel';
+import ChatHistoryView from '@/components/Crm/ChatHistoryView';
 import { AnimatePresence } from 'framer-motion';
 
 import { fadeUp } from '@/utils/motion';
@@ -13,7 +13,7 @@ import { fadeUp } from '@/utils/motion';
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 
 const Relatorios = () => {
-  const { leads, units, managers, businessHours } = useAppData();
+  const { leads, units, managers, businessHours, chatMessages } = useAppData();
   const now = new Date();
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay(new Date(now.getTime() - 29 * 86400000)),
@@ -409,15 +409,24 @@ const Relatorios = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 100 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 right-0 z-50 w-full md:w-[85vw] lg:w-[1200px] shadow-2xl flex border-l border-border"
+            className="fixed inset-y-0 right-0 z-50 w-full md:w-[600px] shadow-2xl flex border-l border-border"
           >
             {/* Backdrop */}
             <div 
               className="absolute -left-[100vw] inset-y-0 w-[100vw] bg-black/40 backdrop-blur-sm -z-10 cursor-pointer"
               onClick={() => setSelectedLeadId(null)}
             />
-            <div className="flex-1 w-full h-full bg-background overflow-hidden relative">
-              <AuditPanel lead={selectedLead} onClose={() => setSelectedLeadId(null)} />
+            <div className="flex-1 w-full h-full bg-background overflow-hidden relative flex flex-col">
+              <button 
+                onClick={() => setSelectedLeadId(null)}
+                className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 dark:bg-white/10 hover:bg-black/30 dark:hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <ChatHistoryView 
+                lead={selectedLead} 
+                messages={chatMessages.filter(m => m.lead_id === selectedLeadId).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())} 
+              />
             </div>
           </motion.div>
         )}
