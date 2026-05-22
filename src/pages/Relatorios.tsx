@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
+import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
 import ChatHistoryView from '@/components/Crm/ChatHistoryView';
@@ -13,7 +14,7 @@ import { fadeUp } from '@/utils/motion';
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 
 const Relatorios = () => {
-  const { leads, units, managers, businessHours, chatMessages } = useAppData();
+  const { leads, units, managers, businessHours } = useAppData();
   const now = new Date();
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay(new Date(now.getTime() - 29 * 86400000)),
@@ -29,6 +30,21 @@ const Relatorios = () => {
   // Audit Modal
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const selectedLead = leads.find(l => l.id === selectedLeadId);
+  const [modalMessages, setModalMessages] = useState<any[]>([]);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
+  useEffect(() => {
+    if (selectedLeadId) {
+      setIsLoadingMessages(true);
+      supabase.from('chat_messages').select('*').eq('lead_id', selectedLeadId).order('created_at', { ascending: true })
+        .then(({ data }) => {
+          if (data) setModalMessages(data);
+          setIsLoadingMessages(false);
+        });
+    } else {
+      setModalMessages([]);
+    }
+  }, [selectedLeadId]);
 
   const periodStart = dateRange.from.getTime();
   const periodEnd = dateRange.to.getTime();
@@ -429,7 +445,8 @@ const Relatorios = () => {
               </button>
               <ChatHistoryView 
                 lead={selectedLead} 
-                messages={chatMessages.filter(m => m.lead_id === selectedLeadId).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())} 
+                messages={modalMessages}
+                isLoading={isLoadingMessages} 
               />
             </div>
           </motion.div>
