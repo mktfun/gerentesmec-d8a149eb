@@ -87,7 +87,7 @@ serve(async (req) => {
       3. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional para melhorar o carro além do que o cliente pediu inicialmente, marque como true.
       4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina (mandando link ou texto claro).
       5. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente. Nunca reverta um 'true' para 'false' se já foi cumprido no histórico.
-      ${(media_url && media_type?.startsWith('video')) || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]') ? '\n[SISTEMA]: O gerente anexou um VÍDEO ou ÁUDIO. Assuma que a mídia contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de evidência (ex: 2b, 3b) e considere que ele está justificando o serviço.' : ''}
+      ${(media_url || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]')) ? '\n[SISTEMA]: O gerente anexou um vídeo, imagem ou áudio. SE o arquivo pôde ser carregado pelo sistema, você o receberá nesta requisição e deve ouvir/assistir o conteúdo REAL da mídia para julgar se ele de fato explicou o defeito (2c, 3c) ou enviou evidência clara (2b, 3b). NÃO confie apenas no fato de que "tem áudio/vídeo", ouça o que ele fala.' : ''}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
@@ -117,26 +117,51 @@ serve(async (req) => {
     // Preparar payload de mensagem
     let userMessageContent: any = prompt;
     
-    console.log("[AI-EVALUATOR] Chamando LLM (Gemini)...");
-    // Se for OpenAI e tiver imagem, usar formato array vision
-    const isImage = media_url && media_type?.startsWith('image');
-    if (apiKey.startsWith("sk-") && isImage) {
-      userMessageContent = [
-        { type: "text", text: prompt },
-        { type: "image_url", image_url: { url: media_url } }
-      ];
-    }
+    console.log("[AI-EVALUATOR] Chamando LLM...");
     
+    // Processamento de Mídia: Fetch e Base64
+    let mediaBase64 = null;
+    let actualMime = media_type || 'application/octet-stream';
+    if (media_url) {
+      try {
+        console.log(`[AI-EVALUATOR] Baixando mídia de ${media_url} ...`);
+        const mediaRes = await fetch(media_url);
+        if (mediaRes.ok) {
+          const arrayBuffer = await mediaRes.arrayBuffer();
+          // Limite de segurança de 15MB para não estourar a memória da Edge Function
+          if (arrayBuffer.byteLength < 15 * 1024 * 1024) {
+            mediaBase64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            actualMime = mediaRes.headers.get('content-type') || actualMime;
+            console.log(`[AI-EVALUATOR] Mídia baixada com sucesso. Tamanho: ${arrayBuffer.byteLength} bytes. Tipo: ${actualMime}`);
+          } else {
+            console.log("[AI-EVALUATOR] Mídia ignorada por exceder o limite de 15MB.");
+          }
+        }
+      } catch (err) {
+        console.error("[AI-EVALUATOR] Erro ao baixar mídia:", err);
+      }
+    }
+
     if (apiKey.startsWith("sk-")) {
-      // OpenAI
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      // OpenAI / OpenRouter
+      if (mediaBase64) {
+        // Formato compátivel com visao/audio em APIs padrão OpenAI (suportado pelo OpenRouter)
+        userMessageContent = [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: `data:${actualMime};base64,${mediaBase64}` } }
+        ];
+      }
+      
+      const requestModel = aiSettings.model?.includes('gpt') || aiSettings.model?.includes('flash') || aiSettings.model?.includes('claude') || aiSettings.model?.includes('gemini') ? aiSettings.model : 'gpt-4o';
+      
+      const res = await fetch(aiSettings.api_url || 'https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: aiSettings.model?.includes('gpt') ? aiSettings.model : 'gpt-4o', // Forçar gpt-4o pra ter vision
+          model: requestModel,
           response_format: { type: "json_object" },
           messages: [{ role: 'user', content: userMessageContent }]
         })
@@ -145,17 +170,25 @@ serve(async (req) => {
       if (data.error) throw new Error(data.error.message);
       llmOutputText = data.choices[0].message.content;
     } else {
-      // Gemini (suporta imagem na URL? O Gemini API requer base64 inline ou file API.
-      // Como não temos base64 fácil da URL, mandamos apenas texto por enquanto, ou implementamos fetch da imagem.
-      // Para manter a rapidez do webhook, vamos assumir o texto, mas dizer que tem anexo.
-      const promptWithMediaInfo = isImage ? prompt + `\n\n[SISTEMA]: O usuário anexou uma imagem nesta mensagem. Assuma que a imagem contém evidências mecânicas válidas do que ele está dizendo.` : prompt;
+      // Gemini (Direct Google API)
+      let parts: any[] = [{ text: prompt }];
+      if (mediaBase64) {
+        parts.push({
+          inlineData: {
+            mimeType: actualMime,
+            data: mediaBase64
+          }
+        });
+      } else if (media_url) {
+        parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
+      }
       
       const model = aiSettings.model?.includes('gemini') ? aiSettings.model : 'gemini-1.5-flash';
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: promptWithMediaInfo }] }],
+          contents: [{ parts: parts }],
           generationConfig: { responseMimeType: "application/json" }
         })
       });

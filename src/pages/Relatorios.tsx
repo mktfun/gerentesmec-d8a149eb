@@ -99,11 +99,24 @@ const Relatorios = () => {
   const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
   const round = (n: number | null) => n === null ? null : Math.round(n);
 
-  const scoreCur = currentLeads.length > 0 
-    ? round(currentLeads.reduce((acc, l) => acc + (l.score !== null ? Number(l.score) : 0), 0) / currentLeads.length) 
+  const getMathScore = (lead: any) => {
+    const c = lead.audit_checklist as Record<string, boolean> | null;
+    if (!c) return lead.score !== null ? Number(lead.score) : null;
+    const e1 = ((c['1a'] ? 1 : 0) + (c['1b'] ? 1 : 0)) / 2 * 100;
+    const e2 = ((c['2a'] ? 1 : 0) + (c['2b'] ? 1 : 0) + (c['2c'] ? 1 : 0)) / 3 * 100;
+    const e3 = ((c['3a'] ? 1 : 0) + (c['3b'] ? 1 : 0) + (c['3c'] ? 1 : 0)) / 3 * 100;
+    const e4 = ((c['4a'] ? 1 : 0) + (c['4b'] ? 1 : 0)) / 2 * 100;
+    return (e1 + e2 + e3 + e4) / 4;
+  };
+
+  const currentLeadsWithScore = currentLeads.filter(l => getMathScore(l) !== null);
+  const prevLeadsWithScore = prevLeads.filter(l => getMathScore(l) !== null);
+
+  const scoreCur = currentLeadsWithScore.length > 0 
+    ? round(currentLeadsWithScore.reduce((acc, l) => acc + getMathScore(l)!, 0) / currentLeadsWithScore.length) 
     : null;
-  const scorePrev = prevLeads.length > 0 
-    ? round(prevLeads.reduce((acc, l) => acc + (l.score !== null ? Number(l.score) : 0), 0) / prevLeads.length) 
+  const scorePrev = prevLeadsWithScore.length > 0 
+    ? round(prevLeadsWithScore.reduce((acc, l) => acc + getMathScore(l)!, 0) / prevLeadsWithScore.length) 
     : null;
   const tmrCur    = currentLeads.length ? calculateTmr(currentLeads, businessHours) : null;
   const tmrPrev   = prevLeads.length ? calculateTmr(prevLeads, businessHours) : null;
@@ -144,7 +157,7 @@ const Relatorios = () => {
     }
     const mp = managerPerformanceMap[managerId];
     mp.totalLeads += 1;
-    if (lead.score !== null) mp.scores.push(Number(lead.score));
+    
     const checklist = lead.audit_checklist as Record<string, boolean> | null;
     if (checklist) {
       // E1: Cordialidade (1a, 1b)
@@ -162,6 +175,9 @@ const Relatorios = () => {
       // E4: Encerramento (4a, 4b)
       let e4Val = ((checklist['4a'] ? 1 : 0) + (checklist['4b'] ? 1 : 0)) / 2 * 100;
       mp.e4.push(e4Val);
+      
+      let mathScore = (e1Val + e2Val + e3Val + e4Val) / 4;
+      mp.scores.push(mathScore);
     }
   });
 

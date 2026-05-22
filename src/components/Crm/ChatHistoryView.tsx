@@ -169,9 +169,14 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                                 {/* @ts-ignore */}
                                 {['e1', 'e2', 'e3', 'e4'].map((etapa) => {
                                   // @ts-ignore
-                                  const score = lead.etapa_scores[etapa];
-                                  if (score === undefined) return null;
-                                  const numScore = Number(score);
+                                  const c = lead.audit_checklist as Record<string, boolean> | null;
+                                  if (!c) return null;
+                                  let score = 0;
+                                  if (etapa === 'e1') score = ((c['1a'] ? 1 : 0) + (c['1b'] ? 1 : 0)) / 2 * 100;
+                                  if (etapa === 'e2') score = ((c['2a'] ? 1 : 0) + (c['2b'] ? 1 : 0) + (c['2c'] ? 1 : 0)) / 3 * 100;
+                                  if (etapa === 'e3') score = ((c['3a'] ? 1 : 0) + (c['3b'] ? 1 : 0) + (c['3c'] ? 1 : 0)) / 3 * 100;
+                                  if (etapa === 'e4') score = ((c['4a'] ? 1 : 0) + (c['4b'] ? 1 : 0)) / 2 * 100;
+                                  const numScore = Math.round(score);
                                   const isGood = numScore >= 75;
                                   const isWarn = numScore >= 50 && numScore < 75;
                                   const colorClass = isGood ? 'text-emerald-400' : isWarn ? 'text-amber-400' : 'text-rose-400';
@@ -185,7 +190,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                                     <div key={etapa} className="flex items-center justify-between text-[10px]">
                                       {/* @ts-ignore */}
                                       <span className="text-muted-foreground font-medium">{labels[etapa as keyof typeof labels]}</span>
-                                      <span className={`font-bold ${colorClass}`}>{score}%</span>
+                                      <span className={`font-bold ${colorClass}`}>{numScore}%</span>
                                     </div>
                                   );
                                 })}
@@ -215,6 +220,19 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                   </div>
                 );
               }
+
+              // Verifica se esta mensagem foi o gatilho para algum score
+              const checklistMessages = (lead as any).audit_checklist_messages || {};
+              const triggeredItems = Object.entries(checklistMessages)
+                .filter(([key, msgId]) => msgId === msg.id)
+                .map(([key]) => key);
+                
+              const itemLabels: Record<string, string> = {
+                '1a': 'Cordialidade', '1b': 'Resumo no texto', 
+                '2a': 'Passou orçamento', '2b': 'Enviou vídeo do defeito', '2c': 'Explicou consequências',
+                '3a': 'Ofereceu Upsell', '3b': 'Vídeo do Upsell', '3c': 'Justificou Upsell',
+                '4a': 'Agradeceu', '4b': 'Pediu Google'
+              };
 
               return (
                 <div key={msg.id} className="w-full">
@@ -297,6 +315,24 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Renderiza as tags de Gatilho de Score abaixo do balão se houver */}
+                    {triggeredItems.length > 0 && (
+                      <div className={`flex flex-col gap-1 mt-1.5 ${isUser ? 'items-end' : 'items-start'}`}>
+                        {triggeredItems.map(item => (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            key={item} 
+                            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest shadow-sm backdrop-blur-sm"
+                          >
+                            <CheckCircle2 className="w-3 h-3" />
+                            Gatilho: Item {item} ({itemLabels[item] || 'Score'})
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                    
                   </motion.div>
                 </div>
               );
