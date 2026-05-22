@@ -63,6 +63,14 @@ serve(async (req) => {
       return new Response(JSON.stringify({ message: "Event ignored" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
+    // Ignore activity messages (message_type: 2) and private notes
+    const messageObj = payload.message || payload;
+    const rawMsgType = messageObj.message_type ?? payload.message_type;
+    if (event === 'message_created' && (rawMsgType === 2 || rawMsgType === '2' || rawMsgType === 'activity' || messageObj.private === true)) {
+      console.log('Ignored activity/private message');
+      return new Response(JSON.stringify({ message: "Activity or private message ignored" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
+    }
+
     // Filter out conversations with specific labels
     const conversation = payload.conversation || payload;
     const labels: string[] = conversation.labels || [];
