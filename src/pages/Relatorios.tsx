@@ -126,7 +126,7 @@ const Relatorios = () => {
     if (es.e4 !== undefined) mp.e4.push(Number(es.e4));
   });
 
-  const customAvg = (nums: number[], total: number) => total > 0 ? nums.reduce((a, b) => a + b, 0) / total : null;
+  const customAvg = (nums: number[], total: number) => (total > 0 && nums.length > 0) ? nums.reduce((a, b) => a + b, 0) / total : null;
 
   const managerPerformance = Object.values(managerPerformanceMap).map(mp => ({
     managerName: mp.managerName,

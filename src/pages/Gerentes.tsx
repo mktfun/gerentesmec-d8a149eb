@@ -60,7 +60,7 @@ const Gerentes = () => {
           // Calculate average score for the unit
           const unitLeadsTotal = leads.filter(l => l.unit_id === unit.id);
           const unitLeadsScored = unitLeadsTotal.filter(l => l.score !== null);
-          const unitScore = unitLeadsTotal.length > 0
+          const unitScore = (unitLeadsTotal.length > 0 && unitLeadsScored.length > 0)
             ? Math.round(unitLeadsScored.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeadsTotal.length)
             : null;
             
@@ -117,7 +117,7 @@ const Gerentes = () => {
                 ) : unitManagers.map((manager, mIdx) => {
                   const managerLeadsTotal = leads.filter(l => l.manager_id === manager.id);
                   const managerLeadsScored = managerLeadsTotal.filter(l => l.score !== null);
-                  const mScore = managerLeadsTotal.length > 0 
+                  const mScore = (managerLeadsTotal.length > 0 && managerLeadsScored.length > 0)
                     ? Math.round(managerLeadsScored.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeadsTotal.length)
                     : null;
                   const trend = mScore !== null && mScore >= 70;

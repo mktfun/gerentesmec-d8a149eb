@@ -74,7 +74,7 @@ const TvDashboard: React.FC = () => {
     });
 
     const scored = periodLeads.filter(l => l.score !== null);
-    const score = periodLeads.length
+    const score = (periodLeads.length > 0 && scored.length > 0)
       ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / periodLeads.length) * 10) / 10
       : null;
 

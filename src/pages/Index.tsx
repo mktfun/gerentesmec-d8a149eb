@@ -38,7 +38,7 @@ const Index = () => {
   const today0 = startOfDay(now);
 
   const scoredLeads = leads.filter(l => l.score !== null);
-  const globalScore = leads.length > 0 
+  const globalScore = (leads.length > 0 && scoredLeads.length > 0)
     ? Math.round((scoredLeads.reduce((sum, l) => sum + Number(l.score), 0) / leads.length) * 10) / 10 
     : null;
 
@@ -55,7 +55,7 @@ const Index = () => {
         return t >= day.getTime() && t < next.getTime();
       });
       const dayLeadsScored = dayLeadsAll.filter(l => l.score !== null);
-      const a = dayLeadsAll.length ? dayLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / dayLeadsAll.length : null;
+      const a = (dayLeadsAll.length > 0 && dayLeadsScored.length > 0) ? dayLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / dayLeadsAll.length : null;
       if (a !== null || dayLeadsAll.length > 0) validPoints++;
       series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a) : null });
     }
@@ -94,7 +94,7 @@ const Index = () => {
   const unitScores = units.map(u => {
     const uLeadsAll = leads.filter(l => l.unit_id === u.id);
     const uLeadsScored = uLeadsAll.filter(l => l.score !== null);
-    const a = uLeadsAll.length ? uLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / uLeadsAll.length : null;
+    const a = (uLeadsAll.length > 0 && uLeadsScored.length > 0) ? uLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / uLeadsAll.length : null;
     return { ...u, score: a !== null ? Math.round(a) : null };
   });
 
@@ -115,7 +115,8 @@ const Index = () => {
   const managerRanking = managers.map(m => {
     const unit = units.find(u => u.id === m.unit_id);
     const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
-    const a = mLeadsAll.length ? mLeadsAll.reduce((sum, l) => sum + (l.score !== null ? Number(l.score) : 0), 0) / mLeadsAll.length : null;
+    const mLeadsScored = mLeadsAll.filter(l => l.score !== null);
+    const a = (mLeadsAll.length > 0 && mLeadsScored.length > 0) ? mLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / mLeadsAll.length : null;
     
     return { ...m, score: a !== null ? Math.round(a) : null, unitName: unit?.name || 'N/A' };
   }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
