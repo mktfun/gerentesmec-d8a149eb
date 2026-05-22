@@ -302,14 +302,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         )}
 
         {/* Checklist */}
-        <div className={aiSettings?.features?.auto_scoring ? "opacity-40 pointer-events-none relative" : ""}>
-          {aiSettings?.features?.auto_scoring && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/40 dark:bg-black/20 backdrop-blur-[1px] rounded-xl border border-border">
-              <span className="bg-amber-500/80 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.4)] flex items-center gap-2">
-                🔒 Avaliação Fechada
-              </span>
-            </div>
-          )}
+        <div className="">
           <Accordion type="multiple" defaultValue={['step1', 'step2']} className="space-y-2">
           {auditStepsConfig.map(step => {
             const doneCount = step.items.filter(i => checked[i.id]).length;

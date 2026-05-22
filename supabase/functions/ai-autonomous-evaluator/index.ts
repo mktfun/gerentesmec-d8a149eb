@@ -146,26 +146,49 @@ serve(async (req) => {
     const mockOutput = JSON.parse(llmOutputText);
 
     // 5. Rastreabilidade de Auditoria: descobrir quais checks viraram true agora
-    const { data: leadData } = await supabaseClient.from('leads').select('audit_checklist, audit_checklist_messages').eq('id', lead_id).single();
+    const { data: leadData } = await supabaseClient.from('leads').select('ticket_value, customer_vehicle, audit_checklist, audit_checklist_messages').eq('id', lead_id).single();
     const currentChecklist = leadData?.audit_checklist || {};
     const newMessagesMap = leadData?.audit_checklist_messages || {};
 
+    // 5.1 Mesclar checklist (A IA só pode setar como TRUE, nunca apagar um TRUE existente)
+    const mergedChecklist = { ...currentChecklist };
     if (mockOutput.audit_checklist) {
       for (const key of Object.keys(mockOutput.audit_checklist)) {
-        if (mockOutput.audit_checklist[key] === true && !currentChecklist[key]) {
+        if (mockOutput.audit_checklist[key] === true) {
+          mergedChecklist[key] = true;
+          if (!currentChecklist[key]) {
             // Este item do checklist ficou VERDE por conta desta mensagem!
             newMessagesMap[key] = message_id;
+          }
         }
       }
     }
 
+    // 5.2 Calcular o Score Determinístico (Idêntico ao AuditPanel)
+    const auditStepsConfig = [
+      { id: 'step1', weight: 25, items: ['1a', '1b'] },
+      { id: 'step2', weight: 25, items: ['2a', '2b', '2c'] },
+      { id: 'step3', weight: 25, items: ['3a', '3b', '3c'] },
+      { id: 'step4', weight: 25, items: ['4a', '4b'] },
+    ];
+    let calculatedScore = 0;
+    auditStepsConfig.forEach(step => {
+      const done = step.items.filter(id => mergedChecklist[id]).length;
+      calculatedScore += (done / step.items.length) * step.weight;
+    });
+    calculatedScore = Math.round(calculatedScore);
+
+    // 5.3 Preservação de Valores Críticos
+    const finalTicket = mockOutput.ticket_value ?? leadData?.ticket_value;
+    const finalVehicle = mockOutput.customer_vehicle ?? leadData?.customer_vehicle;
+
     // 6. Atualiza o DB (Score, Funil, Ticket, Dossiê, Veículo, Checklist e Traceability)
     const updatePayload: any = {
-      score: mockOutput.score,
-      ticket_value: mockOutput.ticket_value,
-      customer_vehicle: mockOutput.customer_vehicle,
+      score: calculatedScore,
+      ticket_value: finalTicket,
+      customer_vehicle: finalVehicle,
       closing_summary: mockOutput.closing_summary,
-      audit_checklist: mockOutput.audit_checklist,
+      audit_checklist: mergedChecklist,
       audit_checklist_messages: newMessagesMap
     };
     if (aiSettings.features?.auto_pipeline && mockOutput.funnel_stage) {
