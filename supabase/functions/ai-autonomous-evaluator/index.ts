@@ -223,7 +223,7 @@ serve(async (req) => {
       last_processed_message_id: message_id
     });
 
-    return new Response(JSON.stringify({ status: 'success', evaluated: mockOutput }), {
+    return new Response(JSON.stringify({ status: 'success', evaluated: updatePayload }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: any) {

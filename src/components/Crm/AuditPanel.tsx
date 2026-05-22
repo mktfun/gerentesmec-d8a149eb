@@ -176,8 +176,20 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           message_id: 'manual_sync_' + new Date().getTime()
         }
       });
-
+      
       if (error) throw error;
+      
+      if (data && data.status === 'success' && data.evaluated) {
+        // OPTIMISTIC UPDATE: atualiza a interface instantaneamente!
+        updateLead(lead.id, {
+          score: data.evaluated.score,
+          closing_summary: data.evaluated.closing_summary,
+          audit_checklist: data.evaluated.audit_checklist,
+          ticket_value: data.evaluated.ticket_value ?? lead.ticket_value,
+          customer_vehicle: data.evaluated.customer_vehicle ?? lead.customer_vehicle,
+          funnel_stage: data.evaluated.funnel_stage ?? lead.funnel_stage,
+        });
+      }
       
       // Optionally notify success
     } catch (error) {
