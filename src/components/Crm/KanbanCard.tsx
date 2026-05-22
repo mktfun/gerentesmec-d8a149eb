@@ -49,11 +49,15 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
   const waitMins = Math.floor(waitMs / 60000);
 
   let timeColor = 'text-muted-foreground';
-  if (!isAnswered) {
-    if (waitMins >= 120) timeColor = 'text-rose-600 dark:text-rose-400 font-bold';
-    else if (waitMins >= 20) timeColor = 'text-amber-500 font-bold';
-  } else {
-    timeColor = 'text-muted-foreground/60';
+  const isClosed = lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost';
+
+  if (!isClosed) {
+    if (!isAnswered) {
+      if (waitMins >= 120) timeColor = 'text-rose-600 dark:text-rose-400 font-bold';
+      else if (waitMins >= 20) timeColor = 'text-amber-500 font-bold';
+    } else {
+      timeColor = 'text-muted-foreground/60';
+    }
   }
 
   return (
@@ -111,7 +115,12 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
           </p>
         </div>
         <div className={`flex items-center gap-1 text-[11px] font-semibold ${timeColor}`}>
-          {isAnswered ? (
+          {isClosed ? (
+            <div className="flex items-center gap-1 text-muted-foreground/40" title="Venda Finalizada">
+              <CheckCheck className="w-3.5 h-3.5" />
+              Finalizado
+            </div>
+          ) : isAnswered ? (
             <div className="flex items-center gap-1" title="Respondido pelo Gerente">
               <CheckCheck className="w-3.5 h-3.5" />
               {getElapsed()}
