@@ -240,26 +240,17 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // 1. Apply "ignorar" label on Chatwoot for each lead with a conversation_id
     //    so the webhook ignores any future messages from those conversations.
     try {
-      const { data: settings } = await (supabase as any)
-        .from('integration_settings')
-        .select('chatwoot_url, chatwoot_token, chatwoot_account_id')
-        .limit(1)
-        .maybeSingle();
-
-      if (settings?.chatwoot_url && settings?.chatwoot_token && settings?.chatwoot_account_id) {
-        const baseUrl = settings.chatwoot_url.startsWith('http')
-          ? settings.chatwoot_url.replace(/\/$/, '')
-          : `https://${settings.chatwoot_url.replace(/\/$/, '')}`;
-
-        const leadsToLabel = leads.filter(l => ids.includes(l.id) && (l as any).chatwoot_conversation_id);
-        await Promise.allSettled(leadsToLabel.map(l =>
-          fetch(`${baseUrl}/api/v1/accounts/${settings.chatwoot_account_id}/conversations/${(l as any).chatwoot_conversation_id}/labels`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'api_access_token': settings.chatwoot_token },
-            body: JSON.stringify({ labels: ['ignorar'] })
-          })
-        ));
-      }
+      const leadsToLabel = leads.filter(l => ids.includes(l.id) && (l as any).chatwoot_conversation_id);
+      
+      await Promise.allSettled(leadsToLabel.map(l =>
+        supabase.functions.invoke('chatwoot-action', {
+          body: {
+            action: 'add_labels',
+            conversation_id: (l as any).chatwoot_conversation_id,
+            labels: ['ignorar']
+          }
+        })
+      ));
     } catch (e) {
       console.warn('[deleteLeads] Failed to apply Chatwoot label:', e);
     }
