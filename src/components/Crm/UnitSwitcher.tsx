@@ -35,8 +35,8 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
 
     // Score
     const scored = unitLeads.filter(l => l.score !== null);
-    const score = scored.length
-      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / scored.length) * 10) / 10
+    const score = (unitLeads.length > 0 && scored.length > 0)
+      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / unitLeads.length) * 10) / 10
       : null;
 
     return { dangerCount, score };

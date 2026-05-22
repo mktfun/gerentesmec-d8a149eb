@@ -18,9 +18,7 @@ interface Props {
 }
 
 const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEnd }) => {
-  const filtered = unitFilter === 'all'
-    ? leads
-    : leads.filter(l => l.unit_id === unitFilter);
+  const filtered = leads;
 
   const getColumnLeads = (stageId: FunnelStage) => {
     let colLeads = [];

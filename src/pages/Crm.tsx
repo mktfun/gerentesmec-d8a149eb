@@ -255,7 +255,7 @@ const Crm = () => {
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
               className="flex-1 p-5 overflow-hidden"
             >
-              <KanbanView leads={searchQuery ? displayLeads : leads} unitFilter={searchQuery ? 'all' : unitFilter} onSelectLead={(lead) => setSelectedLeadId(lead.id)} onDragEnd={onDragEnd} />
+              <KanbanView leads={displayLeads} unitFilter={searchQuery ? 'all' : unitFilter} onSelectLead={(lead) => setSelectedLeadId(lead.id)} onDragEnd={onDragEnd} />
             </motion.div>
           ) : (
             /* ── LIST ── */
