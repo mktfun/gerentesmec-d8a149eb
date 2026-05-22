@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { routeMessage } from "./skills/router.ts";
+import { updateFunnelStage } from "./skills/funnel.ts";
 import { judgeLead } from "./skills/judge.ts";
 import { analyzeVision } from "./skills/vision.ts";
 import { analyzeAudio } from "./skills/audio.ts";
@@ -29,19 +31,46 @@ serve(async (req) => {
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
     if (!OPENAI_API_KEY) throw new Error("Missing OPENAI_API_KEY");
 
-    let analysisResult = null;
-    const content = record.content.toLowerCase();
+    // Fetch Lead Context and History
+    const { data: lead } = await supabaseClient
+      .from('leads')
+      .select('funnel_stage')
+      .eq('id', record.lead_id)
+      .single();
+      
+    const currentStage = lead?.funnel_stage || 'lead_new';
 
-    // Cognitive Router (Simulated via fast heuristics for performance, could be an LLM call)
-    if (content.includes('http') && (content.includes('.jpg') || content.includes('.png') || content.includes('.mp4') || content.includes('video'))) {
-      analysisResult = await analyzeVision(record.content, OPENAI_API_KEY);
-    } else if (content.includes('http') && (content.includes('.ogg') || content.includes('.mp3') || content.includes('.wav') || content.includes('audio'))) {
-      analysisResult = await analyzeAudio(record.content, OPENAI_API_KEY);
-    } else {
-      analysisResult = { type: 'text', summary: record.content };
+    const { data: messages } = await supabaseClient
+      .from('chat_messages')
+      .select('content, sender_type')
+      .eq('lead_id', record.lead_id)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    const history = (messages || []).reverse().map(m => `${m.sender_type}: ${m.content}`);
+
+    // Cognitive Router Brain
+    const content = record.content;
+    const routerResult = await routeMessage(content, history, OPENAI_API_KEY);
+
+    // Funnel Brain
+    let newStage = currentStage;
+    if (routerResult.requires_funnel_update) {
+      newStage = await updateFunnelStage(record.lead_id, currentStage, routerResult, supabaseClient);
     }
 
-    // Invoke Judge Mind
+    let analysisResult: any = { type: 'text', summary: routerResult.summary };
+
+    // Media Brains (Invoked only if required by router)
+    if (routerResult.requires_vision) {
+      analysisResult = await analyzeVision(record.content, OPENAI_API_KEY);
+      analysisResult.summary = routerResult.summary + "\n" + analysisResult.summary;
+    } else if (routerResult.requires_audio) {
+      analysisResult = await analyzeAudio(record.content, OPENAI_API_KEY);
+      analysisResult.summary = routerResult.summary + "\n" + analysisResult.summary;
+    }
+
+    // Invoke Judge Brain
     const auditRes = await judgeLead(record.lead_id, analysisResult, supabaseClient, OPENAI_API_KEY);
 
     // Update message as audited
@@ -50,7 +79,12 @@ serve(async (req) => {
       ai_summary: analysisResult.summary 
     }).eq('id', record.id);
 
-    return new Response(JSON.stringify({ status: 'audited', auditRes }), { 
+    return new Response(JSON.stringify({ 
+      status: 'audited', 
+      intent: routerResult.intent,
+      newStage,
+      auditRes 
+    }), { 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
 
