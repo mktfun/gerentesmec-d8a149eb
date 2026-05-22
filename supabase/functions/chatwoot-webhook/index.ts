@@ -245,8 +245,10 @@ serve(async (req) => {
              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseKey}` },
              body: JSON.stringify({
                 lead_id: leadId,
-                message_content: content || '[MEDIA ENVIADA]',
-                message_id: messageId
+                message_content: content || `[MEDIA ENVIADA: ${mediaType}]`,
+                message_id: messageId,
+                media_url: mediaUrl,
+                media_type: mediaType
              })
           }).catch(err => console.error('Error invoking AI Evaluator:', err));
         }
