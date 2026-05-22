@@ -32,7 +32,9 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
   // @ts-ignore
   const aTime = lead.last_agent_message_at ? new Date(lead.last_agent_message_at).getTime() : 0;
   
-  const isAnswered = aTime >= cTime && cTime > 0;
+  // Se cTime é 0 (foi anulado pelo webhook após resposta do gerente) ou aTime >= cTime, então está respondido.
+  // Só não está respondido se cTime for maior que aTime e cTime > 0.
+  const isAnswered = cTime === 0 || aTime >= cTime;
   
   const getElapsed = () => {
     const ms = new Date().getTime() - new Date(lead.last_message_at).getTime();
