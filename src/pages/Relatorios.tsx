@@ -145,23 +145,36 @@ const Relatorios = () => {
     const mp = managerPerformanceMap[managerId];
     mp.totalLeads += 1;
     if (lead.score !== null) mp.scores.push(Number(lead.score));
-    const es = (lead as any).etapa_scores || {};
-    if (es.e1 !== undefined) mp.e1.push(Number(es.e1));
-    if (es.e2 !== undefined) mp.e2.push(Number(es.e2));
-    if (es.e3 !== undefined) mp.e3.push(Number(es.e3));
-    if (es.e4 !== undefined) mp.e4.push(Number(es.e4));
+    const checklist = lead.audit_checklist as Record<string, boolean> | null;
+    if (checklist) {
+      // E1: Cordialidade (1a, 1b)
+      let e1Val = ((checklist['1a'] ? 1 : 0) + (checklist['1b'] ? 1 : 0)) / 2 * 100;
+      mp.e1.push(e1Val);
+
+      // E2: Orçamento + Vídeo (2a, 2b, 2c)
+      let e2Val = ((checklist['2a'] ? 1 : 0) + (checklist['2b'] ? 1 : 0) + (checklist['2c'] ? 1 : 0)) / 3 * 100;
+      mp.e2.push(e2Val);
+
+      // E3: Upsell Mecânico (3a, 3b, 3c)
+      let e3Val = ((checklist['3a'] ? 1 : 0) + (checklist['3b'] ? 1 : 0) + (checklist['3c'] ? 1 : 0)) / 3 * 100;
+      mp.e3.push(e3Val);
+
+      // E4: Encerramento (4a, 4b)
+      let e4Val = ((checklist['4a'] ? 1 : 0) + (checklist['4b'] ? 1 : 0)) / 2 * 100;
+      mp.e4.push(e4Val);
+    }
   });
 
-  const customAvg = (nums: number[], total: number) => (total > 0 && nums.length > 0) ? nums.reduce((a, b) => a + b, 0) / total : null;
+  const customAvg = (nums: number[]) => (nums.length > 0) ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
 
   const managerPerformance = Object.values(managerPerformanceMap).map(mp => ({
     managerName: mp.managerName,
     unitName: mp.unitName,
-    e1: round(customAvg(mp.e1, mp.totalLeads)),
-    e2: round(customAvg(mp.e2, mp.totalLeads)),
-    e3: round(customAvg(mp.e3, mp.totalLeads)),
-    e4: round(customAvg(mp.e4, mp.totalLeads)),
-    score: round(customAvg(mp.scores, mp.totalLeads))
+    e1: round(customAvg(mp.e1)),
+    e2: round(customAvg(mp.e2)),
+    e3: round(customAvg(mp.e3)),
+    e4: round(customAvg(mp.e4)),
+    score: round(customAvg(mp.scores))
   })).sort((a, b) => (b.score || 0) - (a.score || 0));
 
   const ScoreBadge = ({ score }: { score: number | null }) => {
