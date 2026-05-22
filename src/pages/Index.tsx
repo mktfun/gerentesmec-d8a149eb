@@ -78,7 +78,7 @@ const Index = () => {
     }
     
     return series;
-  }, [scoredLeads, today0]);
+  }, [leads, today0]);
 
   const hasHistory = scoreHistory.some(d => d.score !== null);
 
