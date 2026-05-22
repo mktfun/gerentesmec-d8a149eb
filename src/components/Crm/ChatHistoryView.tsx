@@ -231,27 +231,37 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                     <div className={`relative max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                       {/* Media Rendering */}
                       {msg.media_url && msg.media_type?.startsWith('image') && (
-                        <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-border shadow-md">
-                          <img src={msg.media_url} alt="Anexo" className="object-cover max-h-60" />
+                        <div className="mb-2 max-w-[250px] overflow-hidden rounded-xl border border-border shadow-md bg-black/5">
+                          <a href={msg.media_url} target="_blank" rel="noreferrer">
+                            <img src={msg.media_url} alt="Anexo" className="object-cover w-full h-auto max-h-60 transition-transform hover:scale-[1.02] cursor-pointer" loading="lazy" />
+                          </a>
                         </div>
                       )}
                       
                       {msg.media_url && msg.media_type?.startsWith('audio') && (
-                        <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-border bg-black/5 dark:bg-white/5 p-2">
-                          <audio controls className="h-10 w-48">
-                            <source src={msg.media_url} type="audio/mp3" />
-                            <source src={msg.media_url} type="audio/ogg" />
+                        <div className="mb-2 max-w-[280px] w-full overflow-hidden rounded-xl border border-border bg-black/5 dark:bg-white/5 p-2 shadow-sm">
+                          <audio controls preload="metadata" className="h-10 w-full" src={msg.media_url}>
                             Seu navegador não suporta áudio.
                           </audio>
                         </div>
                       )}
 
                       {msg.media_url && msg.media_type?.startsWith('video') && (
-                        <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-border shadow-md">
-                          <video controls className="max-h-60">
-                            <source src={msg.media_url} />
+                        <div className="mb-2 max-w-[280px] overflow-hidden rounded-xl border border-border shadow-md bg-black/5">
+                          <video controls preload="metadata" className="w-full max-h-60 object-contain bg-black/10" src={msg.media_url}>
+                            Seu navegador não suporta vídeo.
                           </video>
                         </div>
+                      )}
+
+                      {/* Other Document Types */}
+                      {msg.media_url && !msg.media_type?.match(/^(image|audio|video)/) && (
+                        <a href={msg.media_url} target="_blank" rel="noreferrer" className="mb-2 inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors shadow-sm">
+                          <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center shrink-0">
+                            <span className="text-[10px] font-black text-primary">FILE</span>
+                          </div>
+                          <span className="text-xs font-semibold text-foreground underline truncate max-w-[150px]">Baixar Anexo</span>
+                        </a>
                       )}
 
                       {/* Bubble */}
