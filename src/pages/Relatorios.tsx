@@ -83,8 +83,12 @@ const Relatorios = () => {
   const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
   const round = (n: number | null) => n === null ? null : Math.round(n);
 
-  const scoreCur  = round(avg(currentLeads.filter(l => l.score !== null).map(l => Number(l.score))));
-  const scorePrev = round(avg(prevLeads.filter(l => l.score !== null).map(l => Number(l.score))));
+  const scoreCur = currentLeads.length > 0 
+    ? round(currentLeads.reduce((acc, l) => acc + (l.score !== null ? Number(l.score) : 0), 0) / currentLeads.length) 
+    : null;
+  const scorePrev = prevLeads.length > 0 
+    ? round(prevLeads.reduce((acc, l) => acc + (l.score !== null ? Number(l.score) : 0), 0) / prevLeads.length) 
+    : null;
   const tmrCur    = currentLeads.length ? calculateTmr(currentLeads, businessHours) : null;
   const tmrPrev   = prevLeads.length ? calculateTmr(prevLeads, businessHours) : null;
   const slasCur   = calculateDangerLeads(currentLeads, businessHours).length;
@@ -221,17 +225,17 @@ const Relatorios = () => {
       </motion.div>
 
       {/* ── KPI Cards Premium ── */}
-      <div className={`grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'}`}>
+      <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'}`}>
         
         {/* Score Geral */}
-        <motion.div {...fadeUp(0.1)} className="p-6 rounded-3xl bg-card border border-border relative overflow-hidden shadow-[0_0_40px_rgba(99,102,241,0.05)]">
-          <div className="absolute top-0 right-0 p-6 opacity-10"><ShieldCheck className="w-24 h-24" /></div>
-          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15)_0%,transparent_70%)] pointer-events-none" />
+        <motion.div {...fadeUp(0.1)} className="p-8 rounded-[2rem] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/10 backdrop-blur-3xl relative overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.1)] group hover:-translate-y-1.5 hover:shadow-[0_30px_60px_rgba(99,102,241,0.15)] transition-all duration-500 cursor-default">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:rotate-12 transition-all duration-500"><ShieldCheck className="w-32 h-32 text-indigo-500" /></div>
+          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.12)_0%,transparent_70%)] pointer-events-none group-hover:opacity-100 opacity-60 transition-opacity duration-500" />
           
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-3">Score Global de Qualidade</p>
-            <h2 className="text-5xl font-black text-foreground mb-4 tracking-tighter">
-              {metrics.score !== null ? <>{metrics.score}<span className="text-2xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400 mb-4 opacity-80">Score Global de Qualidade</p>
+            <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500">
+              {metrics.score !== null ? <>{metrics.score}<span className="text-3xl text-muted-foreground/60">%</span></> : <span className="text-muted-foreground/30">—</span>}
             </h2>
             {metrics.scoreChange !== null ? (
               <div className="flex items-center gap-2">
@@ -248,14 +252,14 @@ const Relatorios = () => {
         </motion.div>
 
         {/* TMR */}
-        <motion.div {...fadeUp(0.15)} className="p-6 rounded-3xl bg-card border border-border relative overflow-hidden shadow-[0_0_40px_rgba(52,211,153,0.05)]">
-          <div className="absolute top-0 right-0 p-6 opacity-10"><Clock className="w-24 h-24" /></div>
-          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.15)_0%,transparent_70%)] pointer-events-none" />
+        <motion.div {...fadeUp(0.15)} className="p-8 rounded-[2rem] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/10 backdrop-blur-3xl relative overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.1)] group hover:-translate-y-1.5 hover:shadow-[0_30px_60px_rgba(52,211,153,0.15)] transition-all duration-500 cursor-default">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:-rotate-12 transition-all duration-500"><Clock className="w-32 h-32 text-emerald-500" /></div>
+          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.12)_0%,transparent_70%)] pointer-events-none group-hover:opacity-100 opacity-60 transition-opacity duration-500" />
           
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-500 dark:text-emerald-400 mb-3">Tempo Médio de Resposta (TMR)</p>
-            <h2 className="text-5xl font-black text-foreground mb-4 tracking-tighter">
-              {metrics.tmr !== null ? <>{metrics.tmr}<span className="text-2xl text-muted-foreground">m</span></> : <span className="text-muted-foreground/50">—</span>}
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 mb-4 opacity-80">Tempo Médio de Resposta (TMR)</p>
+            <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500">
+              {metrics.tmr !== null ? <>{metrics.tmr}<span className="text-3xl text-muted-foreground/60">m</span></> : <span className="text-muted-foreground/30">—</span>}
             </h2>
             {metrics.tmrChange !== null ? (
               <div className="flex items-center gap-2">
@@ -272,13 +276,13 @@ const Relatorios = () => {
         </motion.div>
 
         {/* SLAs */}
-        <motion.div {...fadeUp(0.2)} className="p-6 rounded-3xl bg-card border border-border relative overflow-hidden shadow-[0_0_40px_rgba(244,63,94,0.05)]">
-          <div className="absolute top-0 right-0 p-6 opacity-10"><AlertTriangle className="w-24 h-24" /></div>
-          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.15)_0%,transparent_70%)] pointer-events-none" />
+        <motion.div {...fadeUp(0.2)} className="p-8 rounded-[2rem] bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/10 backdrop-blur-3xl relative overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.1)] group hover:-translate-y-1.5 hover:shadow-[0_30px_60px_rgba(244,63,94,0.15)] transition-all duration-500 cursor-default">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:rotate-12 transition-all duration-500"><AlertTriangle className="w-32 h-32 text-rose-500" /></div>
+          <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.12)_0%,transparent_70%)] pointer-events-none group-hover:opacity-100 opacity-60 transition-opacity duration-500" />
           
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-rose-500 dark:text-rose-400 mb-3">Orçamentos em Risco (SLA)</p>
-            <h2 className="text-5xl font-black text-foreground mb-4 tracking-tighter">{metrics.slasRisk}</h2>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400 mb-4 opacity-80">Orçamentos em Risco (SLA)</p>
+            <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500">{metrics.slasRisk}</h2>
             {(metrics.slasChange !== 0 || hasData) ? (
               <div className="flex items-center gap-2">
                 <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.slasChange <= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
