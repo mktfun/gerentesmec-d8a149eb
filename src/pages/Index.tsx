@@ -37,12 +37,14 @@ const Index = () => {
   const now = new Date();
   const today0 = startOfDay(now);
 
-  const scoredLeads = leads.filter(l => l.score !== null);
-  const globalScore = (leads.length > 0 && scoredLeads.length > 0)
-    ? Math.round((scoredLeads.reduce((sum, l) => sum + Number(l.score), 0) / leads.length) * 10) / 10 
+  // Global score (Últimos 30 dias)
+  const leads30Days = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime() - 29 * 86400000);
+  const scoredLeads30Days = leads30Days.filter(l => l.score !== null);
+  const globalScore = (leads30Days.length > 0 && scoredLeads30Days.length > 0)
+    ? Math.round((scoredLeads30Days.reduce((sum, l) => sum + Number(l.score), 0) / leads30Days.length) * 10) / 10 
     : null;
 
-  // Score series — last 7 days
+  // Score series — last 7 days (trailing 30-day average for each day to show true global evolution)
   const scoreHistory = useMemo(() => {
     const series: { day: string; score: number | null }[] = [];
     let validPoints = 0;
@@ -50,14 +52,20 @@ const Index = () => {
     for (let i = 6; i >= 0; i--) {
       const day = new Date(today0); day.setDate(day.getDate() - i);
       const next = new Date(day); next.setDate(next.getDate() + 1);
-      const dayLeadsAll = leads.filter(l => {
+      
+      const windowStart = new Date(day); windowStart.setDate(windowStart.getDate() - 29);
+      
+      const trailingLeads = leads.filter(l => {
         const t = new Date(l.last_message_at).getTime();
-        return t >= day.getTime() && t < next.getTime();
+        return t >= windowStart.getTime() && t < next.getTime();
       });
-      const dayLeadsScored = dayLeadsAll.filter(l => l.score !== null);
-      const a = (dayLeadsAll.length > 0 && dayLeadsScored.length > 0) ? dayLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / dayLeadsAll.length : null;
-      if (a !== null || dayLeadsAll.length > 0) validPoints++;
-      series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a) : null });
+      const trailingScored = trailingLeads.filter(l => l.score !== null);
+      const a = (trailingLeads.length > 0 && trailingScored.length > 0) 
+        ? trailingScored.reduce((sum, l) => sum + Number(l.score), 0) / trailingLeads.length 
+        : null;
+        
+      if (a !== null || trailingLeads.length > 0) validPoints++;
+      series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a * 10) / 10 : null });
     }
 
     // Chart Fallback: Se for o dia 1 de uso e só tem 1 ponto, vamos "esticar" essa linha horizontalmente 
@@ -76,19 +84,24 @@ const Index = () => {
 
   // Week-over-week trend
   const weekTrend = useMemo(() => {
-    const lastWeek = scoredLeads.filter(l => {
+    const lastWeek = leads.filter(l => {
       const t = new Date(l.last_message_at).getTime();
       return t >= today0.getTime() - 7 * 86400000 && t < today0.getTime() + 86400000;
     });
-    const prevWeek = scoredLeads.filter(l => {
+    const prevWeek = leads.filter(l => {
       const t = new Date(l.last_message_at).getTime();
       return t >= today0.getTime() - 14 * 86400000 && t < today0.getTime() - 7 * 86400000;
     });
-    const a = avg(lastWeek.map(l => Number(l.score)));
-    const b = avg(prevWeek.map(l => Number(l.score)));
+    
+    const lwScored = lastWeek.filter(l => l.score !== null);
+    const pwScored = prevWeek.filter(l => l.score !== null);
+    
+    const a = (lastWeek.length > 0 && lwScored.length > 0) ? lwScored.reduce((sum, l) => sum + Number(l.score), 0) / lastWeek.length : null;
+    const b = (prevWeek.length > 0 && pwScored.length > 0) ? pwScored.reduce((sum, l) => sum + Number(l.score), 0) / prevWeek.length : null;
+    
     if (a === null || b === null) return null;
     return Math.round((a - b) * 10) / 10;
-  }, [scoredLeads, today0]);
+  }, [leads, today0]);
 
   // Unit scores
   const unitScores = units.map(u => {
@@ -142,7 +155,7 @@ const Index = () => {
             )}
           </div>
           <p className="text-sm text-slate-400 mt-4">
-            {globalScore !== null ? `Média de qualidade de atendimento · Hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
+            {globalScore !== null ? `Média dos últimos 30 dias · Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
           </p>
         </div>
 
