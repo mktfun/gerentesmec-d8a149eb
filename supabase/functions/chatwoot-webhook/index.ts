@@ -103,9 +103,9 @@ serve(async (req) => {
     let senderType = 'bot';
 
     // 1. Variável de ouro: message_type
-    if (messageType === 0 || rawMessageType === 'incoming') {
+    if (rawMessageType === 0 || rawMessageType === 'incoming' || rawMessageType === '0') {
       senderType = 'contact';
-    } else if (messageType === 1 || messageType === 2 || rawMessageType === 'outgoing' || rawMessageType === 'template') {
+    } else if (rawMessageType === 1 || rawMessageType === 2 || rawMessageType === 'outgoing' || rawMessageType === 'template' || rawMessageType === '1' || rawMessageType === '2') {
       senderType = 'user';
     } else {
       // 2. Fallback: se o message_type for vazio ou bizarro, tenta ler o sender.type
@@ -113,6 +113,11 @@ serve(async (req) => {
       if (sType === 'contact' || sType === 'user') {
         senderType = sType;
       }
+    }
+
+    // Se for Evolution API e for 'fromMe: true', forçamos agent!
+    if (message.message_attributes?.fromMe === true || payload.message_attributes?.fromMe === true) {
+      senderType = 'user';
     }
 
     // 3. Match Unit by chatwoot_inbox_id
@@ -140,11 +145,12 @@ serve(async (req) => {
     // 5. Check if Lead already exists
     const { data: existingLead } = await supabase
       .from('leads')
-      .select('id')
+      .select('id, last_client_message_at, total_response_time_minutes, response_count')
       .eq('chatwoot_conversation_id', conversationId)
       .maybeSingle()
 
     const now = new Date().toISOString()
+    const nowTime = new Date().getTime();
     const customerName = contact.name || 'Cliente Desconhecido'
     const customerPhone = contact.phone_number || contact.email || 'Sem Contato'
 
@@ -152,12 +158,33 @@ serve(async (req) => {
 
     if (existingLead) {
       leadId = existingLead.id;
-      // Update existing lead's last message time
       const updateData: any = { last_message_at: now };
+      
       if (senderType === 'contact') {
         updateData.last_client_message_at = now;
       } else {
         updateData.last_agent_message_at = now;
+        
+        // CALCULO DO TMR HISTÓRICO
+        // Se o cliente mandou mensagem antes e agora o agente respondeu
+        if (existingLead.last_client_message_at) {
+          const clientTime = new Date(existingLead.last_client_message_at).getTime();
+          // Só contabilizamos se o agente demorou mais que 0 (ou seja, está respondendo a uma mensagem recente do cliente)
+          // Mas como não temos o 'last_agent_message_at' do DB aqui, vamos assumir que cada resposta conta, 
+          // ou melhor: contar o diff se clientTime for recente?
+          // Para não somar multiplas respostas do agente seguidas, verificamos se clientTime < now
+          // (Na verdade, se o agente mandar 2 seguidas, o last_client_message_at não mudou. 
+          // Precisamos evitar contar duas vezes).
+          // Uma forma simples é adicionar uma lógica: só conta se last_client_message_at não foi contado ainda.
+          // Mas vamos simplificar: só soma se a diferença for < 24h para evitar lixo.
+          const diffMins = Math.round((nowTime - clientTime) / 60000);
+          if (diffMins >= 0 && diffMins < 1440) {
+            updateData.total_response_time_minutes = (existingLead.total_response_time_minutes || 0) + diffMins;
+            updateData.response_count = (existingLead.response_count || 0) + 1;
+            // Zera o last_client_message_at pra não contar a mesma espera na próxima mensagem do agente
+            updateData.last_client_message_at = null; 
+          }
+        }
       }
       
       const { error: updateError } = await supabase

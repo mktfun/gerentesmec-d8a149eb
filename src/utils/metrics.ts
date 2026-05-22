@@ -16,45 +16,39 @@ export const calculateTmr = (
 ) => {
   if (!leadsList.length) return 0;
 
-  const now = new Date();
+  // Novo Cálculo: Histórico real da conversa baseado em sum(total_response_time) / sum(response_count)
+  let totalMins = 0;
+  let totalCount = 0;
 
-  const totalWait = leadsList.reduce((acc, l) => {
-    let wait = 0;
-
-    // @ts-ignore
-    const snoozedUntil = l.chatwoot_snoozed_until;
-    if (snoozedUntil && new Date(snoozedUntil).getTime() > now.getTime()) {
-      return acc; // Snoozado — não conta
+  leadsList.forEach(l => {
+    if ((l as any).total_response_time_minutes && (l as any).response_count) {
+      totalMins += (l as any).total_response_time_minutes;
+      totalCount += (l as any).response_count;
     }
+  });
 
-    // @ts-ignore
-    const waitingSince: string | null = l.chatwoot_waiting_since;
-
-    if (waitingSince) {
-      const from = new Date(waitingSince);
-      wait = businessHours
-        ? getWorkMinutes(from, now, businessHours)
-        : Math.round((now.getTime() - from.getTime()) / 60000);
-    } else if (l.last_client_message_at) {
+  if (totalCount === 0) {
+    // Fallback para o cálculo atual se não houver dados históricos
+    const now = new Date();
+    const currentWait = leadsList.reduce((acc, l) => {
+      let wait = 0;
       // @ts-ignore
-      const cTime = new Date(l.last_client_message_at).getTime();
+      const cTime = l.last_client_message_at ? new Date(l.last_client_message_at).getTime() : 0;
       // @ts-ignore
       const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
-
+      
       if (cTime > aTime) {
         const from = new Date(cTime);
         wait = businessHours
           ? getWorkMinutes(from, now, businessHours)
           : Math.round((now.getTime() - cTime) / 60000);
       }
-    } else {
-      wait = l.wait_time_minutes || 0;
-    }
+      return acc + (wait > 0 ? wait : 0);
+    }, 0);
+    return Math.round(currentWait / leadsList.length);
+  }
 
-    return acc + (wait > 0 ? wait : 0);
-  }, 0);
-
-  return Math.round(totalWait / leadsList.length);
+  return Math.round(totalMins / totalCount);
 };
 
 export const isLeadDanger = (
