@@ -73,12 +73,20 @@ serve(async (req) => {
       IMPORTANTE:
       1. Para "ticket_value", NUNCA invente ou extraia valores de chaves PIX, CNPJ, números de telefone ou links de pagamento. Só preencha se o gerente falar EXPLICITAMENTE o valor total do orçamento (ex: "ficou 1650,00", "total de 2700"). Se ele enviou apenas um link de pagamento e não falou o valor, deixe como null.
       2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANEXO ENVIADO: image]" como evidência cabal de envio de mídia.
-      3. Se o orçamento for aprovado ou o cliente enviar comprovante, mude a etapa (funnel_stage) para 'closed_won'. Se estiverem discutindo valores, 'negotiation'. Se o cliente sumir ou rejeitar, 'closed_lost'. Se o gerente enviou o orçamento e o cliente não respondeu, 'quote'. Se a conversa não tem orçamento ainda, 'lead_new'.
       
-      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO (Foque na INTENÇÃO, não nas palavras exatas):
-      1. Os gerentes usam linguagem informal, gírias, ou enviam áudios transcritos. Não procure frases perfeitas. Se a INTENÇÃO da mensagem for explicar um defeito (mesmo de forma informal), marque que ele justificou serviços (itens 2c e 3c).
-      2. Se a INTENÇÃO for oferecer qualquer serviço ou peça adicional que melhore o carro, considere como upsell (item 3a).
-      3. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente, à medida que a conversa avança em tempo real.
+      CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
+      - 'closed_won' (Ganho): USE APENAS SE o cliente pagou (enviou comprovante) OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado", "Manda brasa", "Vou levar o carro amanhã para fazer"). Um simples "Ok", "Beleza" ou "Obrigado" NÃO é aprovação. Na dúvida, não feche.
+      - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer (ex: "Tá caro, deixa pra lá", "Vou fazer em outro lugar") ou se o gerente encerrou o atendimento negativamente.
+      - 'negotiation' (Em Negociação): O gerente passou o valor/orçamento e eles estão conversando sobre formas de pagamento, parcelamento, prazos, ou o cliente está tirando dúvidas.
+      - 'quote' (Em Orçamento): O gerente acabou de mandar o orçamento mas o cliente ainda não respondeu (ou respondeu apenas algo genérico como "Vou analisar").
+      - 'lead_new' (Novo Lead): Estão apenas diagnosticando o problema ou agendando visita. Não há orçamento final passado ainda.
+
+      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST (Seja Rigoroso):
+      1. Foco na Intenção Real: Os gerentes usam linguagem informal. Se a INTENÇÃO da mensagem for explicar um defeito (mesmo com gírias), marque que ele justificou serviços.
+      2. Orçamento (2a): Só marque true se o gerente de fato passar o valor total ou enviar um PDF/link claro do orçamento.
+      3. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional para melhorar o carro além do que o cliente pediu inicialmente, marque como true.
+      4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina (mandando link ou texto claro).
+      5. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente. Nunca reverta um 'true' para 'false' se já foi cumprido no histórico.
       ${(media_url && media_type?.startsWith('video')) || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]') ? '\n[SISTEMA]: O gerente anexou um VÍDEO ou ÁUDIO. Assuma que a mídia contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de evidência (ex: 2b, 3b) e considere que ele está justificando o serviço.' : ''}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
