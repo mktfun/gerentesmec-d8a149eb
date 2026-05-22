@@ -232,8 +232,15 @@ serve(async (req) => {
           // Precisamos evitar contar duas vezes).
           // Uma forma simples é adicionar uma lógica: só conta se last_client_message_at não foi contado ainda.
           // Mas vamos simplificar: só soma se a diferença for < 24h para evitar lixo.
-          // Só contabilizamos o diff real em horário útil
-          const diffMins = getWorkMinutes(new Date(clientTime), new Date(nowTime), settings?.business_hours);
+          // Default business hours se não houver no banco para não usar raw minutes distorcidos
+          const bhConfig = settings?.business_hours || {
+            days: [1, 2, 3, 4, 5],
+            start: '08:00',
+            end: '18:00',
+            timezone: 'America/Sao_Paulo'
+          };
+          
+          const diffMins = getWorkMinutes(new Date(clientTime), new Date(nowTime), bhConfig);
           // Aceitamos se for maior ou igual a 0 (até limites absurdos pra proteção de looping longo, ex 30 dias utéis = ~14400)
           if (diffMins >= 0 && diffMins < 14400) {
             updateData.total_response_time_minutes = (existingLead.total_response_time_minutes || 0) + diffMins;

@@ -21,9 +21,17 @@ export const calculateTmr = (
   let totalCount = 0;
 
   leadsList.forEach(l => {
-    if ((l as any).total_response_time_minutes && (l as any).response_count) {
-      totalMins += (l as any).total_response_time_minutes;
-      totalCount += (l as any).response_count;
+    const leadTotal = (l as any).total_response_time_minutes;
+    const leadCount = (l as any).response_count;
+    
+    if (leadTotal && leadCount) {
+      // Hotfix: Se a média por resposta deste lead for > 24h úteis (1440 min),
+      // provavelmente é dado legado de antes de implementarmos o bloqueio de fds.
+      // Ignorar para não distorcer a média da equipe.
+      if (leadTotal / leadCount > 1440) return;
+
+      totalMins += leadTotal;
+      totalCount += leadCount;
     }
   });
 
