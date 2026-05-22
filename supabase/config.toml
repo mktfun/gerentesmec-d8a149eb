@@ -1,4 +1,10 @@
 project_id = "qtjitszradxsmnilnqtj"
+
+[functions.ai-autonomous-evaluator]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ai-autonomous-evaluator/index.ts"
+
 [functions.chatwoot-webhook]
 enabled = true
 verify_jwt = false
