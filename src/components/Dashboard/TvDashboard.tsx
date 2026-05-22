@@ -74,8 +74,8 @@ const TvDashboard: React.FC = () => {
     });
 
     const scored = periodLeads.filter(l => l.score !== null);
-    const score = scored.length
-      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / scored.length) * 10) / 10
+    const score = periodLeads.length
+      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / periodLeads.length) * 10) / 10
       : null;
 
     // Trend vs previous identical period
@@ -92,8 +92,8 @@ const TvDashboard: React.FC = () => {
     const prevScored = prevLeads.filter(l => l.score !== null);
 
     let diff: number | null = null;
-    if (prevScored.length && score !== null) {
-      const prevScore = prevScored.reduce((a, l) => a + Number(l.score), 0) / prevScored.length;
+    if (prevLeads.length && score !== null) {
+      const prevScore = prevScored.reduce((a, l) => a + Number(l.score), 0) / prevLeads.length;
       diff = Math.round((score - prevScore) * 10) / 10;
     }
 

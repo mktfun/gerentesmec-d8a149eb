@@ -38,8 +38,9 @@ const Index = () => {
   const today0 = startOfDay(now);
 
   const scoredLeads = leads.filter(l => l.score !== null);
-  const globalScoreAvg = avg(scoredLeads.map(l => Number(l.score)));
-  const globalScore = globalScoreAvg !== null ? Math.round(globalScoreAvg * 10) / 10 : null;
+  const globalScore = leads.length > 0 
+    ? Math.round((scoredLeads.reduce((sum, l) => sum + Number(l.score), 0) / leads.length) * 10) / 10 
+    : null;
 
   // Score series — last 7 days
   const scoreHistory = useMemo(() => {
@@ -49,12 +50,13 @@ const Index = () => {
     for (let i = 6; i >= 0; i--) {
       const day = new Date(today0); day.setDate(day.getDate() - i);
       const next = new Date(day); next.setDate(next.getDate() + 1);
-      const dayLeads = scoredLeads.filter(l => {
+      const dayLeadsAll = leads.filter(l => {
         const t = new Date(l.last_message_at).getTime();
         return t >= day.getTime() && t < next.getTime();
       });
-      const a = avg(dayLeads.map(l => Number(l.score)));
-      if (a !== null) validPoints++;
+      const dayLeadsScored = dayLeadsAll.filter(l => l.score !== null);
+      const a = dayLeadsAll.length ? dayLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / dayLeadsAll.length : null;
+      if (a !== null || dayLeadsAll.length > 0) validPoints++;
       series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a) : null });
     }
 
@@ -90,8 +92,9 @@ const Index = () => {
 
   // Unit scores
   const unitScores = units.map(u => {
-    const uLeads = scoredLeads.filter(l => l.unit_id === u.id);
-    const a = avg(uLeads.map(l => Number(l.score)));
+    const uLeadsAll = leads.filter(l => l.unit_id === u.id);
+    const uLeadsScored = uLeadsAll.filter(l => l.score !== null);
+    const a = uLeadsAll.length ? uLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / uLeadsAll.length : null;
     return { ...u, score: a !== null ? Math.round(a) : null };
   });
 
@@ -110,9 +113,10 @@ const Index = () => {
 
   // Manager ranking
   const managerRanking = managers.map(m => {
-    const mLeads = scoredLeads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
-    const a = avg(mLeads.map(l => Number(l.score)));
     const unit = units.find(u => u.id === m.unit_id);
+    const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
+    const a = mLeadsAll.length ? mLeadsAll.reduce((sum, l) => sum + (l.score !== null ? Number(l.score) : 0), 0) / mLeadsAll.length : null;
+    
     return { ...m, score: a !== null ? Math.round(a) : null, unitName: unit?.name || 'N/A' };
   }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 
