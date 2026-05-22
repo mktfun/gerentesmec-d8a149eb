@@ -131,7 +131,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                 const isExpanded = expandedAudit === msg.id;
 
                 return (
-                  <React.Fragment key={msg.id}>
+                  <div key={msg.id} className="w-full">
                     {dividerEl}
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -212,12 +212,12 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         </div>
                       )}
                     </motion.div>
-                  </React.Fragment>
+                  </div>
                 );
               }
 
               return (
-                <React.Fragment key={msg.id}>
+                <div key={msg.id} className="w-full">
                   {dividerEl}
                   <motion.div
                     ref={(el) => (messageRefs.current[msg.id] = el)}
@@ -298,7 +298,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                       </div>
                     </div>
                   </motion.div>
-                </React.Fragment>
+                </div>
               );
             })}
           </AnimatePresence>
