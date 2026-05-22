@@ -67,6 +67,11 @@ serve(async (req) => {
       
       Você é um auditor de qualidade de vendas mecânicas automotivas.
       Analise a conversa e preencha os itens da auditoria. Se a informação já foi passada antes (segundo o resumo), mantenha como true.
+      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO:
+      1. Seja flexível: Se o gerente está explicando defeitos ("tá ruim", "contaminado"), marque que ele justificou serviços (3c e 2c).
+      2. Se ele sugeriu trocar algo extra ("posso substituir", "revisão completa"), marque upsell (3a).
+      3. Atualização de Etapa: Se a conversa já envolve envio de vídeo, diagnóstico ou negociação de peças/serviços, mude o "funnel_stage" imediatamente para "negotiation".
+      4. Vá pontuando aos poucos: Não espere a conversa acabar. O objetivo é ver os checks ficando verdes em tempo real.
       ${(media_url && media_type?.startsWith('video')) || text.includes('[ANEXO ENVIADO: video]') ? '\n[SISTEMA]: O gerente anexou um VÍDEO nesta mensagem ou histórico. Assuma que o vídeo contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de vídeo (ex: 2b, 3b).' : ''}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
