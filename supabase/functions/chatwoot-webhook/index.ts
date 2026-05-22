@@ -30,9 +30,10 @@ serve(async (req) => {
       .maybeSingle()
 
     if (settings?.chatwoot_webhook_secret) {
-      const signatureHeader = req.headers.get('x-hub-signature')
+      const signatureHeader = req.headers.get('x-chatwoot-signature');
+      
       if (!signatureHeader) {
-        console.warn('Missing x-hub-signature from Chatwoot payload. Proceeding insecurely.');
+        console.warn('Missing x-chatwoot-signature from Chatwoot payload. Proceeding insecurely.');
       } else {
         const encoder = new TextEncoder();
         const key = await crypto.subtle.importKey(

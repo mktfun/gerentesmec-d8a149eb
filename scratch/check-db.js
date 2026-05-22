@@ -5,12 +5,18 @@ const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3Mi
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-async function checkDb() {
-  const { data: units } = await supabase.from('units').select('*');
-  console.log('Units:', units);
+async function checkStatus() {
+  console.log("Checking integration_settings...");
+  const { data: settings } = await supabase.from('integration_settings').select('*');
+  console.log(settings);
 
-  const { data: integrationSettings } = await supabase.from('integration_settings').select('*').limit(1).maybeSingle();
-  console.log('Integration Settings:', integrationSettings);
+  console.log("\nChecking last 5 messages...");
+  const { data: msgs } = await supabase.from('chat_messages').select('id, lead_id, created_at, content, chatwoot_message_id').order('created_at', { ascending: false }).limit(5);
+  console.log(msgs);
+  
+  console.log("\nChecking leads updated recently...");
+  const { data: leads } = await supabase.from('leads').select('id, customer_name, last_message_at').order('last_message_at', { ascending: false }).limit(5);
+  console.log(leads);
 }
 
-checkDb();
+checkStatus();
