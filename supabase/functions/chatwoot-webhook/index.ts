@@ -223,7 +223,7 @@ serve(async (req) => {
       
       // ignore errors for duplicates if message already exists
       if (content || mediaUrl) {
-        await supabase
+        const { error: insertError } = await supabase
           .from('chat_messages')
           .insert({
             lead_id: leadId,
@@ -234,6 +234,22 @@ serve(async (req) => {
             media_type: mediaType
             // created_at will default to now() in DB
           });
+
+        if (!insertError) {
+          // Trigger AI Autonomous Evaluator asynchronously
+          const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+          const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+          
+          fetch(`${supabaseUrl}/functions/v1/ai-autonomous-evaluator`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseKey}` },
+             body: JSON.stringify({
+                lead_id: leadId,
+                message_content: content || '[MEDIA ENVIADA]',
+                message_id: messageId
+             })
+          }).catch(err => console.error('Error invoking AI Evaluator:', err));
+        }
       }
     }
 

@@ -50,9 +50,8 @@ serve(async (req) => {
     }
 
     // 4. LLM Routing e Chamada
-    // (Exemplo simbólico chamando o provedor configurado)
-    const geminiKey = aiSettings.api_key;
-    if (!geminiKey) throw new Error("Chave Gemini não configurada");
+    const apiKey = aiSettings.api_key;
+    if (!apiKey) throw new Error("API Key não configurada");
 
     const prompt = `
       ${aiSettings.system_prompt}
@@ -66,36 +65,82 @@ serve(async (req) => {
       NOVA MENSAGEM DO CLIENTE/GERENTE:
       "${text}"
       
+      Você é um auditor de qualidade de vendas mecânicas automotivas.
+      Analise a conversa e preencha os itens da auditoria. Se a informação já foi passada antes (segundo o resumo), mantenha como true.
+      
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
-        "score": (número de 0 a 100),
-        "funnel_stage": (sugestão de nova etapa),
-        "new_compressed_history": (novo histórico resumido),
-        "closing_summary": (Texto narrativo claro com o parecer da auditoria/dossiê. Obrigatório ao fechar o lead),
-        "ticket_value": (número correspondente ao orçamento final negociado, ou null se não houver),
+        "audit_checklist": {
+          "1a": true ou false, // Atendimento foi cordial e respeitoso?
+          "1b": true ou false, // Registrou no WhatsApp o que foi acordado?
+          "2a": true ou false, // Enviou o link do orçamento?
+          "2b": true ou false, // Enviou vídeo mostrando o defeito?
+          "2c": true ou false, // Explicou os efeitos de não fazer o reparo?
+          "3a": true ou false, // Enviou o checklist complementar?
+          "3b": true ou false, // Enviou vídeo do que mais precisa ser feito?
+          "3c": true ou false, // Explicou o texto justificando serviços extras?
+          "4a": true ou false, // Enviou mensagem de agradecimento padrão?
+          "4b": true ou false  // Pediu avaliação no Google?
+        },
+        "score": (número de 0 a 100, baseado no preenchimento do checklist: 4 blocos de 25 pontos cada),
+        "funnel_stage": (sugestão de nova etapa do funil: lead_new, quote, negotiation, closed_won, closed_lost. Só mude se houver clareza),
+        "new_compressed_history": (novo histórico resumido somando a mensagem atual),
+        "closing_summary": (Texto claro com o parecer atual da auditoria. O que falta o vendedor fazer?),
+        "ticket_value": (número correspondente ao orçamento final negociado, ex: 1500, ou null se não houver),
         "customer_vehicle": (string do modelo do veículo mencionado, ou null se não houver)
       }
     `;
 
-    // Chamada real ao Gemini ficaria aqui. 
-    // Mockando a resposta estruturada baseada no processamento:
-    const mockOutput = {
-      score: 85,
-      ticket_value: 1200,
-      customer_vehicle: "Honda Civic",
-      closing_summary: "O gerente cumpriu quase todo o protocolo. O orçamento de R$1200 para o Honda Civic foi aprovado. Pendente apenas oferecer os serviços adicionais preventivos.",
-      funnel_stage: 'budget_sent',
-      new_compressed_history: compressedHistory + " | Cliente (Honda Civic) pediu orçamento e enviamos valor de R$1200."
-    };
+    let llmOutputText = "";
+    
+    if (apiKey.startsWith("sk-")) {
+      // OpenAI
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: aiSettings.model?.includes('gpt') ? aiSettings.model : 'gpt-4o-mini',
+          response_format: { type: "json_object" },
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      llmOutputText = data.choices[0].message.content;
+    } else {
+      // Gemini
+      const model = aiSettings.model?.includes('gemini') ? aiSettings.model : 'gemini-1.5-flash';
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      llmOutputText = data.candidates[0].content.parts[0].text;
+    }
 
-    // 5. Atualiza o DB (Score, Funil, Ticket, Dossiê, Veículo)
-    await supabaseClient.from('leads').update({
+    const mockOutput = JSON.parse(llmOutputText);
+
+    // 5. Atualiza o DB (Score, Funil, Ticket, Dossiê, Veículo, Checklist)
+    const updatePayload: any = {
       score: mockOutput.score,
       ticket_value: mockOutput.ticket_value,
       customer_vehicle: mockOutput.customer_vehicle,
       closing_summary: mockOutput.closing_summary,
-      ...(aiSettings.features?.auto_pipeline ? { funnel_stage: mockOutput.funnel_stage } : {})
-    }).eq('id', lead_id);
+      audit_checklist: mockOutput.audit_checklist
+    };
+    if (aiSettings.features?.auto_pipeline && mockOutput.funnel_stage) {
+      updatePayload.funnel_stage = mockOutput.funnel_stage;
+    }
+
+    await supabaseClient.from('leads').update(updatePayload).eq('id', lead_id);
 
     // 6. Atualiza a Memoization (Lead Memories)
     await supabaseClient.from('lead_memories').upsert({
