@@ -66,7 +66,15 @@ serve(async (req) => {
       NOVA MENSAGEM DO CLIENTE/GERENTE:
       "${text}"
       
-      Retorne APENAS um JSON válido com o novo score, etapa sugerida (pipeline), e a nova versão do histórico comprimido.
+      Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
+      {
+        "score": (número de 0 a 100),
+        "funnel_stage": (sugestão de nova etapa),
+        "new_compressed_history": (novo histórico resumido),
+        "closing_summary": (Texto narrativo claro com o parecer da auditoria/dossiê. Obrigatório ao fechar o lead),
+        "ticket_value": (número correspondente ao orçamento final negociado, ou null se não houver),
+        "customer_vehicle": (string do modelo do veículo mencionado, ou null se não houver)
+      }
     `;
 
     // Chamada real ao Gemini ficaria aqui. 
@@ -74,14 +82,18 @@ serve(async (req) => {
     const mockOutput = {
       score: 85,
       ticket_value: 1200,
+      customer_vehicle: "Honda Civic",
+      closing_summary: "O gerente cumpriu quase todo o protocolo. O orçamento de R$1200 para o Honda Civic foi aprovado. Pendente apenas oferecer os serviços adicionais preventivos.",
       funnel_stage: 'budget_sent',
-      new_compressed_history: compressedHistory + " | Cliente pediu orçamento e enviamos valor de R$1200."
+      new_compressed_history: compressedHistory + " | Cliente (Honda Civic) pediu orçamento e enviamos valor de R$1200."
     };
 
-    // 5. Atualiza o DB (Score, Funil, Ticket)
+    // 5. Atualiza o DB (Score, Funil, Ticket, Dossiê, Veículo)
     await supabaseClient.from('leads').update({
       score: mockOutput.score,
       ticket_value: mockOutput.ticket_value,
+      customer_vehicle: mockOutput.customer_vehicle,
+      closing_summary: mockOutput.closing_summary,
       ...(aiSettings.features?.auto_pipeline ? { funnel_stage: mockOutput.funnel_stage } : {})
     }).eq('id', lead_id);
 

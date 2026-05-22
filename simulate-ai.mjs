@@ -124,8 +124,10 @@ async function simulate() {
   const { error: errDomPedro } = await supabase.from('leads').update({
     score: mockDomPedroResult.score,
     ticket_value: mockDomPedroResult.ticket_value,
+    customer_vehicle: 'Honda Civic',
     funnel_stage: mockDomPedroResult.funnel_stage,
-    ai_feedback: mockDomPedroResult.motivo
+    ai_feedback: mockDomPedroResult.motivo,
+    closing_summary: mockDomPedroResult.motivo
   }).eq('id', lead1Id);
   
   if (errDomPedro) {
@@ -139,14 +141,18 @@ async function simulate() {
     score: 20,
     ticket_value: 250,
     funnel_stage: 'closed_won',
-    motivo: "Atendimento não seguiu o padrão premium. O gerente não enviou orçamento formal, não detalhou tecnicamente o problema e falhou em pedir a avaliação no Google (Review)."
+    motivo: "Atendimento não seguiu o padrão premium. O gerente não enviou orçamento formal, não detalhou tecnicamente o problema e falhou em pedir a avaliação no Google (Review).",
+    audit_checklist: { "1a": true } // 20% score = 1 out of 5 items, approximately. Let's say only 1a is true.
   };
 
   const { error: errJabaquara } = await supabase.from('leads').update({
     score: mockJabaquaraResult.score,
     ticket_value: mockJabaquaraResult.ticket_value,
+    customer_vehicle: 'VW Gol',
     funnel_stage: mockJabaquaraResult.funnel_stage,
-    ai_feedback: mockJabaquaraResult.motivo
+    ai_feedback: mockJabaquaraResult.motivo,
+    closing_summary: mockJabaquaraResult.motivo,
+    audit_checklist: mockJabaquaraResult.audit_checklist
   }).eq('id', lead2Id);
 
   if (errJabaquara) {

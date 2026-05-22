@@ -230,13 +230,13 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                     {/* Bubble Container */}
                     <div className={`relative max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                       {/* Media Rendering */}
-                      {msg.media_url && msg.media_type === 'image' && (
+                      {msg.media_url && msg.media_type?.startsWith('image') && (
                         <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-white/10 shadow-md">
                           <img src={msg.media_url} alt="Anexo" className="object-cover max-h-60" />
                         </div>
                       )}
                       
-                      {msg.media_url && msg.media_type === 'audio' && (
+                      {msg.media_url && msg.media_type?.startsWith('audio') && (
                         <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-white/10 bg-white/5 p-2">
                           <audio controls className="h-10 w-48">
                             <source src={msg.media_url} type="audio/mp3" />
@@ -246,7 +246,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                         </div>
                       )}
 
-                      {msg.media_url && msg.media_type === 'video' && (
+                      {msg.media_url && msg.media_type?.startsWith('video') && (
                         <div className="mb-2 max-w-full overflow-hidden rounded-xl border border-white/10 shadow-md">
                           <video controls className="max-h-60">
                             <source src={msg.media_url} />

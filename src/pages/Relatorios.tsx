@@ -19,6 +19,11 @@ const Relatorios = () => {
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Novos Filtros
+  const [selectedUnit, setSelectedUnit] = useState<string>('all');
+  const [scoreOrder, setScoreOrder] = useState<string>('none');
+  const [slaOrder, setSlaOrder] = useState<string>('none');
+
   const periodStart = dateRange.from.getTime();
   const periodEnd = dateRange.to.getTime();
   const periodDays = Math.max(1, Math.ceil((periodEnd - periodStart) / 86400000));
@@ -29,8 +34,45 @@ const Relatorios = () => {
     return t >= from && t <= to;
   };
 
-  const currentLeads = leads.filter(l => inRange(l, periodStart, periodEnd));
-  const prevLeads    = leads.filter(l => inRange(l, prevPeriodStart, periodStart - 1));
+  // Base leads filtered by date and unit
+  let baseCurrentLeads = leads.filter(l => inRange(l, periodStart, periodEnd));
+  let basePrevLeads    = leads.filter(l => inRange(l, prevPeriodStart, periodStart - 1));
+
+  if (selectedUnit !== 'all') {
+    baseCurrentLeads = baseCurrentLeads.filter(l => l.unit_id === selectedUnit);
+    basePrevLeads    = basePrevLeads.filter(l => l.unit_id === selectedUnit);
+  }
+
+  // Calculate danger leads to assign risk status for sorting
+  const dangerLeadIds = new Set(calculateDangerLeads(baseCurrentLeads, businessHours).map(l => l.id));
+
+  // Sorting
+  baseCurrentLeads.sort((a, b) => {
+    if (slaOrder === 'critical') {
+      const aDanger = dangerLeadIds.has(a.id) ? 1 : 0;
+      const bDanger = dangerLeadIds.has(b.id) ? 1 : 0;
+      if (aDanger !== bDanger) return bDanger - aDanger; // critical first
+    } else if (slaOrder === 'ok') {
+      const aDanger = dangerLeadIds.has(a.id) ? 1 : 0;
+      const bDanger = dangerLeadIds.has(b.id) ? 1 : 0;
+      if (aDanger !== bDanger) return aDanger - bDanger; // ok first
+    }
+
+    if (scoreOrder === 'asc') {
+      const aScore = a.score !== null ? Number(a.score) : 999;
+      const bScore = b.score !== null ? Number(b.score) : 999;
+      if (aScore !== bScore) return aScore - bScore;
+    } else if (scoreOrder === 'desc') {
+      const aScore = a.score !== null ? Number(a.score) : -1;
+      const bScore = b.score !== null ? Number(b.score) : -1;
+      if (aScore !== bScore) return bScore - aScore;
+    }
+    
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  const currentLeads = baseCurrentLeads;
+  const prevLeads = basePrevLeads;
 
   const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
   const round = (n: number | null) => n === null ? null : Math.round(n);
@@ -119,19 +161,52 @@ const Relatorios = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <DateRangePicker 
-            date={dateRange} 
-            onChange={(d) => {
-              setIsUpdating(true);
-              setDateRange(d);
-              setTimeout(() => setIsUpdating(false), 300);
-            }} 
-          />
-          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
-            <Download className="w-4 h-4" />
-            Exportar XLS
-          </button>
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex items-center gap-2">
+            <select
+              value={selectedUnit}
+              onChange={(e) => { setIsUpdating(true); setSelectedUnit(e.target.value); setTimeout(() => setIsUpdating(false), 300); }}
+              className="px-3 py-2 bg-[#0a0a0f] border border-white/10 rounded-xl text-xs text-white/80 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="all">Todas Unidades</option>
+              {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </select>
+            
+            <select
+              value={scoreOrder}
+              onChange={(e) => { setIsUpdating(true); setScoreOrder(e.target.value); setTimeout(() => setIsUpdating(false), 300); }}
+              className="px-3 py-2 bg-[#0a0a0f] border border-white/10 rounded-xl text-xs text-white/80 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="none">Ordenação (Score)</option>
+              <option value="desc">Melhor Score</option>
+              <option value="asc">Pior Score</option>
+            </select>
+
+            <select
+              value={slaOrder}
+              onChange={(e) => { setIsUpdating(true); setSlaOrder(e.target.value); setTimeout(() => setIsUpdating(false), 300); }}
+              className="px-3 py-2 bg-[#0a0a0f] border border-white/10 rounded-xl text-xs text-white/80 focus:outline-none focus:border-indigo-500"
+            >
+              <option value="none">Filtro de SLA</option>
+              <option value="critical">Risco/Críticos Topo</option>
+              <option value="ok">Atendidos Topo</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <DateRangePicker 
+              date={dateRange} 
+              onChange={(d) => {
+                setIsUpdating(true);
+                setDateRange(d);
+                setTimeout(() => setIsUpdating(false), 300);
+              }} 
+            />
+            <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
+              <Download className="w-4 h-4" />
+              Exportar XLS
+            </button>
+          </div>
         </div>
       </motion.div>
 
