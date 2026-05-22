@@ -70,9 +70,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const channel = supabase.channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          setLeads(prev => [...prev, payload.new as Lead]);
+          if (!(payload.new.audit_checklist as any)?.is_deleted) {
+            setLeads(prev => [...prev, payload.new as Lead]);
+          }
         } else if (payload.eventType === 'UPDATE') {
-          setLeads(prev => prev.map(l => l.id === payload.new.id ? { ...l, ...payload.new } as Lead : l));
+          if ((payload.new.audit_checklist as any)?.is_deleted) {
+            setLeads(prev => prev.filter(l => l.id !== payload.new.id));
+          } else {
+            setLeads(prev => prev.map(l => l.id === payload.new.id ? { ...l, ...payload.new } as Lead : l));
+          }
         } else if (payload.eventType === 'DELETE') {
           setLeads(prev => prev.filter(l => l.id !== payload.old.id));
         }
@@ -113,7 +119,10 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const intRes = await (supabase as any).from('integration_settings').select('*').maybeSingle();
     const insightsRes = await (supabase as any).from('chatwoot_insights').select('*').eq('type', 'account').maybeSingle();
 
-    if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
+    if (leadsRes.data) {
+      const validLeads = (leadsRes.data as Lead[]).filter(l => !(l.audit_checklist as any)?.is_deleted);
+      setLeads(validLeads);
+    }
     if (managersRes.data) setManagers(managersRes.data as Manager[]);
     if (unitsRes.data) setUnits(unitsRes.data as Unit[]);
     if (aiRes.data) setAiSettings(aiRes.data as AiSettings);
@@ -255,10 +264,21 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.warn('[deleteLeads] Failed to apply Chatwoot label:', e);
     }
 
-    // 2. Optimistic update + delete from DB
+    // 2. Optimistic update + "soft delete" from DB using audit_checklist
     setLeads(prev => prev.filter(l => !ids.includes(l.id)));
-    await (supabase as any).from('chat_messages').delete().in('lead_id', ids);
-    await (supabase as any).from('leads').delete().in('id', ids);
+    // We update audit_checklist to contain is_deleted: true.
+    // Since we can't easily jsonb_set with Supabase JS update without overwriting,
+    // we fetch current checklist and merge it for each lead to be safe.
+    
+    for (const id of ids) {
+      const lead = leads.find(l => l.id === id);
+      if (lead) {
+        const currentChecklist = lead.audit_checklist as Record<string, any> || {};
+        await (supabase as any).from('leads').update({
+          audit_checklist: { ...currentChecklist, is_deleted: true }
+        }).eq('id', id);
+      }
+    }
   };
 
 
