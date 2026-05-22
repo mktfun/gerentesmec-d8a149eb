@@ -69,11 +69,16 @@ serve(async (req) => {
       
       Você é um auditor de qualidade de vendas mecânicas automotivas.
       Analise a conversa e preencha os itens da auditoria. Se a informação já foi passada antes (segundo o resumo), mantenha como true.
+      
+      IMPORTANTE:
+      1. Para "ticket_value", NUNCA invente ou extraia valores de chaves PIX, CNPJ, números de telefone ou links de pagamento. Só preencha se o gerente falar EXPLICITAMENTE o valor total do orçamento (ex: "ficou 1650,00", "total de 2700"). Se ele enviou apenas um link de pagamento e não falou o valor, deixe como null.
+      2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANEXO ENVIADO: image]" como evidência cabal de envio de mídia.
+      3. Se o orçamento for aprovado ou o cliente enviar comprovante, mude a etapa (funnel_stage) para 'closed_won'. Se estiverem discutindo valores, 'negotiation'. Se o cliente sumir ou rejeitar, 'closed_lost'. Se o gerente enviou o orçamento e o cliente não respondeu, 'quote'. Se a conversa não tem orçamento ainda, 'lead_new'.
+      
       INTRUÇÕES CRÍTICAS DE AVALIAÇÃO (Foque na INTENÇÃO, não nas palavras exatas):
       1. Os gerentes usam linguagem informal, gírias, ou enviam áudios transcritos. Não procure frases perfeitas. Se a INTENÇÃO da mensagem for explicar um defeito (mesmo de forma informal), marque que ele justificou serviços (itens 2c e 3c).
       2. Se a INTENÇÃO for oferecer qualquer serviço ou peça adicional que melhore o carro, considere como upsell (item 3a).
-      3. Atualização de Etapa: Assim que identificar que o gerente está diagnosticando um problema, mostrando evidências (vídeo/foto) ou oferecendo soluções, mude o "funnel_stage" para "negotiation".
-      4. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente, à medida que a conversa avança em tempo real.
+      3. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente, à medida que a conversa avança em tempo real.
       ${(media_url && media_type?.startsWith('video')) || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]') ? '\n[SISTEMA]: O gerente anexou um VÍDEO ou ÁUDIO. Assuma que a mídia contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de evidência (ex: 2b, 3b) e considere que ele está justificando o serviço.' : ''}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
@@ -189,20 +194,23 @@ serve(async (req) => {
     });
     calculatedScore = Math.round(calculatedScore);
 
-    // 5.3 Preservação de Valores Críticos
-    const finalTicket = mockOutput.ticket_value ?? leadData?.ticket_value;
-    const finalVehicle = mockOutput.customer_vehicle ?? leadData?.customer_vehicle;
-
-    // 6. Atualiza o DB (Score, Funil, Ticket, Dossiê, Veículo, Checklist e Traceability)
     const updatePayload: any = {
       score: calculatedScore,
-      ticket_value: finalTicket,
-      customer_vehicle: finalVehicle,
       closing_summary: mockOutput.closing_summary,
       audit_checklist: mergedChecklist,
       audit_checklist_messages: newMessagesMap
     };
-    if (aiSettings.features?.auto_pipeline && mockOutput.funnel_stage) {
+    
+    // Atualiza ticket apenas se a IA não retornou null
+    if (mockOutput.ticket_value !== null && mockOutput.ticket_value !== undefined) {
+      updatePayload.ticket_value = mockOutput.ticket_value;
+    }
+    
+    if (mockOutput.customer_vehicle) {
+      updatePayload.customer_vehicle = mockOutput.customer_vehicle;
+    }
+
+    if (mockOutput.funnel_stage) {
       updatePayload.funnel_stage = mockOutput.funnel_stage;
     }
     
