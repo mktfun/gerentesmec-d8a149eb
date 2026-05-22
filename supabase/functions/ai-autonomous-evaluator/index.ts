@@ -41,66 +41,6 @@ serve(async (req) => {
     // const embedding = await generateEmbedding(text);
     // const { data: cacheHit } = await supabaseClient.rpc('match_semantic_cache', { query_embedding: embedding, match_threshold: 0.95 });
     
-    // ── 3. Parser de Orçamento oiapi.com.br ──────────────────────────────
-    // Detecta link oiapi na mensagem, busca o PDF e extrai ticket_value e 
-    // customer_vehicle SEM custo de LLM.
-    const oiapiMatch = text.match(/https?:\/\/(?:www\.)?oiapi\.com\.br\/WA\.aspx\?tk=[^\s\n"')>]+/i);
-    if (oiapiMatch) {
-      try {
-        console.log('[oiapi] Fetching PDF:', oiapiMatch[0]);
-        const pdfRes = await fetch(oiapiMatch[0], {
-          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; GerentesMec/1.0)' }
-        });
-        const pdfBuffer = await pdfRes.arrayBuffer();
-
-        // Extração raw de texto do binário PDF (sem biblioteca externa)
-        const bytes = new Uint8Array(pdfBuffer);
-        const decoder = new TextDecoder('latin1');
-        const rawText = decoder.decode(bytes);
-        const chunks = rawText.match(/[\x20-\x7E\xC0-\xFF]{3,}/g) || [];
-        const pdfText = chunks.join(' ');
-        console.log('[oiapi] PDF text sample:', pdfText.substring(0, 300));
-
-        const extracted: { ticket_value?: number; customer_vehicle?: string } = {};
-
-        // Extrair Veículo
-        const vehiclePatterns = [
-          /Ve[íi]culo[:\s]+([A-ZÀ-Ú][A-Za-zÀ-Ú0-9\s\-\/]+?)(?:\s{2,}|\n|Placa|Ano|Modelo)/i,
-          /Modelo[:\s]+([A-ZÀ-Ú][A-Za-zÀ-Ú0-9\s\-\/]+?)(?:\s{2,}|\n|Placa|Cor)/i,
-        ];
-        for (const pat of vehiclePatterns) {
-          const m = pdfText.match(pat);
-          if (m?.[1]?.trim().length > 3) { extracted.customer_vehicle = m[1].trim().replace(/\s+/g, ' '); break; }
-        }
-        if (!extracted.customer_vehicle) {
-          const plate = pdfText.match(/([A-Z]{3}[-\s]?\d{4}|[A-Z]{3}\d[A-Z]\d{2})/);
-          if (plate) extracted.customer_vehicle = plate[1];
-        }
-
-        // Extrair Valor Total
-        const totalPatterns = [
-          /Total\s+Geral[:\s]+R?\$?\s*([\d.,]+)/i,
-          /Valor\s+Total[:\s]+R?\$?\s*([\d.,]+)/i,
-          /Total[:\s]+R?\$?\s*([\d.,]+)/i,
-          /R\$\s*([\d.]{4,}[\d,]+)/,
-        ];
-        for (const pat of totalPatterns) {
-          const m = pdfText.match(pat);
-          if (m?.[1]) {
-            const val = parseFloat(m[1].replace(/\./g, '').replace(',', '.'));
-            if (!isNaN(val) && val > 0 && val < 999999) { extracted.ticket_value = val; break; }
-          }
-        }
-
-        console.log('[oiapi] Extracted:', JSON.stringify(extracted));
-        if (extracted.ticket_value || extracted.customer_vehicle) {
-          await supabaseClient.from('leads').update(extracted).eq('id', lead_id);
-        }
-      } catch (pdfErr: any) {
-        console.warn('[oiapi] PDF parse failed:', pdfErr.message);
-      }
-    }
-
     // 3. Prompt Compression & Memoization
     // Busca o histórico resumido para poupar tokens do histórico raw enorme.
     let compressedHistory = '';
@@ -147,8 +87,8 @@ serve(async (req) => {
         "funnel_stage": (sugestão de nova etapa do funil: lead_new, quote, negotiation, closed_won, closed_lost. Só mude se houver clareza),
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
         "closing_summary": (Texto claro com o parecer atual da auditoria. O que falta o vendedor fazer?),
-        "ticket_value": (número correspondente ao orçamento final negociado, ex: 1500, ou null se não houver),
-        "customer_vehicle": (string do modelo do veículo mencionado, ou null se não houver)
+        "ticket_value": (número decimal correspondente ao orçamento final negociado, extraído do texto. Ex: 2600. Se houver 'R$ 2.600,00', retorne 2600. Se não houver clareza, retorne null),
+        "customer_vehicle": (string extraída do texto correspondente ao modelo do veículo ou placa. Ex: 'SVH4B83' ou 'Honda Civic'. Se não houver, retorne null)
       }
     `;
 
