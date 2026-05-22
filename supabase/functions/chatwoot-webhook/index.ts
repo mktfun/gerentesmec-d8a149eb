@@ -15,6 +15,53 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
+    const timeToMinutes = (time: string): number => {
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const getWorkMinutes = (from: Date, to: Date, config: any): number => {
+      if (from >= to) return 0;
+      if (!config || !config.start || !config.end || !config.days) return Math.round((to.getTime() - from.getTime()) / 60000);
+
+      const startMin = timeToMinutes(config.start);
+      const endMin = timeToMinutes(config.end);
+      const dayWorkMinutes = endMin - startMin;
+      if (dayWorkMinutes <= 0) return 0;
+
+      let totalMinutes = 0;
+      const cursor = new Date(from);
+      cursor.setSeconds(0, 0);
+      const limit = new Date(to);
+      limit.setSeconds(0, 0);
+
+      let daysProcessed = 0;
+      while (cursor < limit && daysProcessed < 90) {
+        const dayOfWeek = cursor.getDay();
+        if (!config.days.includes(dayOfWeek)) {
+          cursor.setDate(cursor.getDate() + 1);
+          cursor.setHours(0, 0, 0, 0);
+          daysProcessed++;
+          continue;
+        }
+        const dayStart = new Date(cursor);
+        dayStart.setHours(Math.floor(startMin / 60), startMin % 60, 0, 0);
+        const dayEnd = new Date(cursor);
+        dayEnd.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
+
+        const windowStart = cursor < dayStart ? dayStart : cursor;
+        const windowEnd = limit < dayEnd ? limit : dayEnd;
+
+        if (windowStart < windowEnd) {
+          totalMinutes += Math.round((windowEnd.getTime() - windowStart.getTime()) / 60000);
+        }
+        cursor.setDate(cursor.getDate() + 1);
+        cursor.setHours(0, 0, 0, 0);
+        daysProcessed++;
+      }
+      return totalMinutes;
+    };
+
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       throw new Error('Supabase Config Missing')
     }
@@ -25,7 +72,7 @@ serve(async (req) => {
     // Validate Signature and fetch ignored labels
     const { data: settings } = await supabase
       .from('integration_settings')
-      .select('chatwoot_webhook_secret, ignored_labels')
+      .select('chatwoot_webhook_secret, ignored_labels, business_hours')
       .limit(1)
       .maybeSingle()
 
@@ -185,8 +232,10 @@ serve(async (req) => {
           // Precisamos evitar contar duas vezes).
           // Uma forma simples é adicionar uma lógica: só conta se last_client_message_at não foi contado ainda.
           // Mas vamos simplificar: só soma se a diferença for < 24h para evitar lixo.
-          const diffMins = Math.round((nowTime - clientTime) / 60000);
-          if (diffMins >= 0 && diffMins < 1440) {
+          // Só contabilizamos o diff real em horário útil
+          const diffMins = getWorkMinutes(new Date(clientTime), new Date(nowTime), settings?.business_hours);
+          // Aceitamos se for maior ou igual a 0 (até limites absurdos pra proteção de looping longo, ex 30 dias utéis = ~14400)
+          if (diffMins >= 0 && diffMins < 14400) {
             updateData.total_response_time_minutes = (existingLead.total_response_time_minutes || 0) + diffMins;
             updateData.response_count = (existingLead.response_count || 0) + 1;
             // Zera o last_client_message_at pra não contar a mesma espera na próxima mensagem do agente
