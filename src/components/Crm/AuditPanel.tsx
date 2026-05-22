@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target } from 'lucide-react';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target, RefreshCw } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -152,6 +152,37 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     };
   }, [lead.id]);
 
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleManualSync = async () => {
+    if (isSyncing || realMessages.length === 0) return;
+    setIsSyncing(true);
+    try {
+      let consolidated = "CONVERSA CONSOLIDADA PARA AVALIAÇÃO MANUAL:\n\n";
+      realMessages.forEach(msg => {
+        const sender = msg.sender_type === 'contact' ? 'Contato' : 'Agente';
+        consolidated += `[${sender}]: ${msg.content}\n`;
+      });
+
+      const { data, error } = await supabase.functions.invoke('ai-autonomous-evaluator', {
+        body: {
+          lead_id: lead.id,
+          message_content: consolidated,
+          message_id: 'manual_sync_' + new Date().getTime()
+        }
+      });
+
+      if (error) throw error;
+      
+      // Optionally notify success
+    } catch (error) {
+      console.error("Manual sync failed:", error);
+      alert("Falha ao sincronizar com a IA.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col lg:flex-row bg-background border-l border-border overflow-hidden">
 
@@ -216,6 +247,15 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                 </a>
               );
             })()}
+            
+            <button 
+              onClick={handleManualSync}
+              disabled={isSyncing}
+              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Sincronizar IA (Avaliar Conversa Inteira)"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${isSyncing ? 'animate-spin' : ''}`} />
+            </button>
             <button onClick={onClose}
               className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors">
               <X className="w-3.5 h-3.5 text-muted-foreground" />
