@@ -4,6 +4,7 @@ import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, Shiel
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
+import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
 import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
 import ChatHistoryView from '@/components/Crm/ChatHistoryView';
 import { AnimatePresence } from 'framer-motion';
@@ -97,28 +98,12 @@ const Relatorios = () => {
   const currentLeads = baseCurrentLeads;
   const prevLeads = basePrevLeads;
 
-  const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
-  const round = (n: number | null) => n === null ? null : Math.round(n);
+  // Score global do período — usa apenas leads auditados (lead.score da IA)
+  const currentLeadsWithScore = currentLeads.filter(l => l.score !== null);
+  const prevLeadsWithScore    = prevLeads.filter(l => l.score !== null);
 
-  const getMathScore = (lead: any) => {
-    const c = lead.audit_checklist as Record<string, boolean> | null;
-    if (!c) return lead.score !== null ? Number(lead.score) : null;
-    const e1 = ((c['1a'] ? 1 : 0) + (c['1b'] ? 1 : 0)) / 2 * 100;
-    const e2 = ((c['2a'] ? 1 : 0) + (c['2b'] ? 1 : 0) + (c['2c'] ? 1 : 0)) / 3 * 100;
-    const e3 = ((c['3a'] ? 1 : 0) + (c['3b'] ? 1 : 0) + (c['3c'] ? 1 : 0)) / 3 * 100;
-    const e4 = ((c['4a'] ? 1 : 0) + (c['4b'] ? 1 : 0)) / 2 * 100;
-    return (e1 + e2 + e3 + e4) / 4;
-  };
-
-  const currentLeadsWithScore = currentLeads.filter(l => getMathScore(l) !== null);
-  const prevLeadsWithScore = prevLeads.filter(l => getMathScore(l) !== null);
-
-  const scoreCur = currentLeadsWithScore.length > 0 
-    ? round(currentLeadsWithScore.reduce((acc, l) => acc + getMathScore(l)!, 0) / currentLeadsWithScore.length) 
-    : null;
-  const scorePrev = prevLeadsWithScore.length > 0 
-    ? round(prevLeadsWithScore.reduce((acc, l) => acc + getMathScore(l)!, 0) / prevLeadsWithScore.length) 
-    : null;
+  const scoreCur  = avgScore(currentLeads);
+  const scorePrev = avgScore(prevLeads);
   const tmrCur    = currentLeads.length ? calculateTmr(currentLeads, businessHours) : null;
   const tmrPrev   = prevLeads.length ? calculateTmr(prevLeads, businessHours) : null;
   const slasCur   = calculateDangerLeads(currentLeads, businessHours).length;
@@ -151,9 +136,10 @@ const Relatorios = () => {
       const manager = managers.find(m => m.id === lead.manager_id);
       const unit = units.find(u => u.id === lead.unit_id);
       managerPerformanceMap[managerId] = {
+        managerId,
         managerName: manager?.name || 'Sem Gerente',
         unitName: unit?.name || 'Sem Unidade',
-        e1: [], e2: [], e3: [], e4: [], scores: [], totalLeads: 0,
+        e1: [], e2: [], e3: [], e4: [], totalLeads: 0,
         items: {
           '1a': [], '1b': [], '2a': [], '2b': [], '2c': [],
           '3a': [], '3b': [], '3c': [], '4a': [], '4b': []
@@ -186,19 +172,22 @@ const Relatorios = () => {
       // E4: Encerramento (4a, 4b)
       let e4Val = ((checklist['4a'] ? 1 : 0) + (checklist['4b'] ? 1 : 0)) / 2 * 100;
       mp.e4.push(e4Val);
-      
-      let mathScore = (e1Val + e2Val + e3Val + e4Val) / 4;
-      mp.scores.push(mathScore);
     }
+    // Sempre acumula lead.score (se auditado) para o Score Geral
+    // (independente de ter checklist ou não)
   });
 
   const customAvg = (nums: number[]) => (nums.length > 0) ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  const round = (n: number | null) => n === null ? null : Math.round(n);
 
-  const managerPerformance = Object.values(managerPerformanceMap).map(mp => {
+  const managerPerformance = Object.entries(managerPerformanceMap).map(([mId, mp]) => {
     const itemAvgs: Record<string, number | null> = {};
     Object.keys(mp.items).forEach(key => {
       itemAvgs[key] = round((customAvg(mp.items[key]) || 0) * 100);
     });
+
+    // Score Geral = média do lead.score (fonte da IA), apenas auditados
+    const mLeads = currentLeads.filter(l => (l.manager_id || 'sem_gerente') === mId);
     
     return {
       managerName: mp.managerName,
@@ -207,7 +196,7 @@ const Relatorios = () => {
       e2: round(customAvg(mp.e2)),
       e3: round(customAvg(mp.e3)),
       e4: round(customAvg(mp.e4)),
-      score: round(customAvg(mp.scores)),
+      score: avgScoreInt(mLeads),
       itemAvgs
     };
   }).sort((a, b) => (b.score || 0) - (a.score || 0));

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle, Calendar } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, isLeadDanger } from '@/utils/metrics';
+import { avgScore } from '@/utils/scoreUtils';
 
 const TvDashboard: React.FC = () => {
   const { leads, units, setIsTvMode, businessHours } = useAppData();
@@ -81,10 +82,7 @@ const TvDashboard: React.FC = () => {
       return t >= startDate && t < endDate;
     });
 
-    const scored = periodLeads.filter(l => l.score !== null);
-    const score = (scored.length > 0)
-      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / scored.length) * 10) / 10
-      : null;
+    const score = avgScore(periodLeads);
 
     // Trend vs previous identical period
     const periodDuration = dateFilter === 'today' || dateFilter === 'yesterday' ? 86400000 

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAppData, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
+import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
 import TvDashboard from '@/components/Dashboard/TvDashboard';
 
 import { fadeUp } from '@/utils/motion';
@@ -37,12 +38,9 @@ const Index = () => {
   const now = new Date();
   const today0 = startOfDay(now);
 
-  // Global score (Últimos 30 dias)
+  // Global score (Últimos 30 dias) — usa APENAS leads auditados no denominador
   const leads30Days = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime() - 29 * 86400000);
-  const scoredLeads30Days = leads30Days.filter(l => l.score !== null);
-  const globalScore = (leads30Days.length > 0 && scoredLeads30Days.length > 0)
-    ? Math.round((scoredLeads30Days.reduce((sum, l) => sum + Number(l.score), 0) / leads30Days.length) * 10) / 10 
-    : null;
+  const globalScore = avgScore(leads30Days);
 
   // Score series — last 7 days (trailing 30-day average for each day to show true global evolution)
   const scoreHistory = useMemo(() => {
@@ -59,10 +57,7 @@ const Index = () => {
         const t = new Date(l.last_message_at).getTime();
         return t >= windowStart.getTime() && t < next.getTime();
       });
-      const trailingScored = trailingLeads.filter(l => l.score !== null);
-      const a = (trailingLeads.length > 0 && trailingScored.length > 0) 
-        ? trailingScored.reduce((sum, l) => sum + Number(l.score), 0) / trailingLeads.length 
-        : null;
+      const a = avgScore(trailingLeads);
         
       if (a !== null || trailingLeads.length > 0) validPoints++;
       series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a * 10) / 10 : null });
@@ -93,22 +88,17 @@ const Index = () => {
       return t >= today0.getTime() - 14 * 86400000 && t < today0.getTime() - 7 * 86400000;
     });
     
-    const lwScored = lastWeek.filter(l => l.score !== null);
-    const pwScored = prevWeek.filter(l => l.score !== null);
-    
-    const a = (lastWeek.length > 0 && lwScored.length > 0) ? lwScored.reduce((sum, l) => sum + Number(l.score), 0) / lastWeek.length : null;
-    const b = (prevWeek.length > 0 && pwScored.length > 0) ? pwScored.reduce((sum, l) => sum + Number(l.score), 0) / prevWeek.length : null;
+    const a = avgScore(lastWeek);
+    const b = avgScore(prevWeek);
     
     if (a === null || b === null) return null;
     return Math.round((a - b) * 10) / 10;
   }, [leads, today0]);
 
-  // Unit scores
+  // Unit scores — usa apenas auditados no denominador
   const unitScores = units.map(u => {
     const uLeadsAll = leads.filter(l => l.unit_id === u.id);
-    const uLeadsScored = uLeadsAll.filter(l => l.score !== null);
-    const a = (uLeadsAll.length > 0 && uLeadsScored.length > 0) ? uLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / uLeadsAll.length : null;
-    return { ...u, score: a !== null ? Math.round(a) : null };
+    return { ...u, score: avgScoreInt(uLeadsAll) };
   });
 
   // Today metrics
@@ -124,14 +114,11 @@ const Index = () => {
 
 
 
-  // Manager ranking
+  // Manager ranking — usa apenas auditados no denominador
   const managerRanking = managers.map(m => {
     const unit = units.find(u => u.id === m.unit_id);
     const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
-    const mLeadsScored = mLeadsAll.filter(l => l.score !== null);
-    const a = (mLeadsAll.length > 0 && mLeadsScored.length > 0) ? mLeadsScored.reduce((sum, l) => sum + Number(l.score), 0) / mLeadsAll.length : null;
-    
-    return { ...m, score: a !== null ? Math.round(a) : null, unitName: unit?.name || 'N/A' };
+    return { ...m, score: avgScoreInt(mLeadsAll), unitName: unit?.name || 'N/A' };
   }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 
   const todayStr = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date());
