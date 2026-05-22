@@ -234,12 +234,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const deleteLead = async (id: string) => {
-    // Optimistic update
-    setLeads(prev => prev.filter(l => l.id !== id));
-    await (supabase as any).from('chat_messages').delete().eq('lead_id', id);
-    await (supabase as any).from('leads').delete().eq('id', id);
+    await deleteLeads([id]);
   };
-
   const deleteLeads = async (ids: string[]) => {
     // 1. Apply "ignorar" label on Chatwoot for each lead with a conversation_id
     //    so the webhook ignores any future messages from those conversations.
