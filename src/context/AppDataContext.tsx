@@ -131,6 +131,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteManager = async (id: string) => {
     setManagers(prev => prev.filter(m => m.id !== id));
+    await (supabase as any).from('leads').update({ manager_id: null }).eq('manager_id', id);
     await (supabase as any).from('managers').delete().eq('id', id);
   };
 
@@ -148,6 +149,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteUnit = async (id: string) => {
     setUnits(prev => prev.filter(u => u.id !== id));
+    
+    // Find all leads for this unit to cascade delete chat_messages
+    const { data: unitLeads } = await (supabase as any).from('leads').select('id').eq('unit_id', id);
+    if (unitLeads && unitLeads.length > 0) {
+      const leadIds = unitLeads.map((l: any) => l.id);
+      await (supabase as any).from('chat_messages').delete().in('lead_id', leadIds);
+      await (supabase as any).from('leads').delete().in('id', leadIds);
+    }
+    
     await (supabase as any).from('managers').delete().eq('unit_id', id);
     await (supabase as any).from('units').delete().eq('id', id);
   };
