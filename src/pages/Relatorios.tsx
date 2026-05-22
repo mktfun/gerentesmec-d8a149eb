@@ -4,6 +4,8 @@ import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, Shiel
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
+import AuditPanel from '@/components/Crm/AuditPanel';
+import { AnimatePresence } from 'framer-motion';
 
 import { fadeUp } from '@/utils/motion';
 
@@ -23,6 +25,10 @@ const Relatorios = () => {
   const [selectedUnit, setSelectedUnit] = useState<string>('all');
   const [scoreOrder, setScoreOrder] = useState<string>('none');
   const [slaOrder, setSlaOrder] = useState<string>('none');
+
+  // Audit Modal
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const selectedLead = leads.find(l => l.id === selectedLeadId);
 
   const periodStart = dateRange.from.getTime();
   const periodEnd = dateRange.to.getTime();
@@ -357,7 +363,11 @@ const Relatorios = () => {
             <tbody className="divide-y divide-border">
               {auditedLeads.length > 0 ? (
                 auditedLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors">
+                  <tr 
+                    key={lead.id} 
+                    onClick={() => setSelectedLeadId(lead.id)}
+                    className="hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                  >
                     <td className="px-8 py-4">
                       <p className="font-bold text-foreground">{lead.customer_name}</p>
                       <p className="text-xs text-muted-foreground">{lead.customer_vehicle}</p>
@@ -389,6 +399,29 @@ const Relatorios = () => {
           </table>
         </div>
       </motion.div>
+
+      {/* Global Audit Panel Overlay */}
+      <AnimatePresence>
+        {selectedLead && (
+          <motion.div
+            key="global-audit"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="fixed inset-y-0 right-0 z-50 w-full md:w-[85vw] lg:w-[1200px] shadow-2xl flex border-l border-border"
+          >
+            {/* Backdrop */}
+            <div 
+              className="absolute -left-[100vw] inset-y-0 w-[100vw] bg-black/40 backdrop-blur-sm -z-10 cursor-pointer"
+              onClick={() => setSelectedLeadId(null)}
+            />
+            <div className="flex-1 w-full h-full bg-background overflow-hidden relative">
+              <AuditPanel lead={selectedLead} onClose={() => setSelectedLeadId(null)} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
