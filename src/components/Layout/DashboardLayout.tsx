@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv
+  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAppData } from '@/context/AppDataContext';
@@ -79,6 +79,16 @@ const DashboardLayout: React.FC = () => {
 
         {/* Footer actions */}
         <div className="p-3 border-t border-sidebar-border space-y-1">
+          <NavLink
+            to="/apresentacao"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors
+               ${isActive ? 'bg-primary/15 text-primary' : 'text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`
+            }
+          >
+            <BookOpen className="w-4 h-4" />
+            Como Funciona
+          </NavLink>
           <button onClick={enterTvMode} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent transition-colors" title="Abrir Modo TV (tela cheia)">
             <Tv className="w-4 h-4" />
             Modo TV
