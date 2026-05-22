@@ -7,7 +7,8 @@ const COLUMNS: { id: FunnelStage; label: string; color: string; dot: string }[] 
   { id: 'lead_new',    label: 'Novo Lead',     color: 'text-indigo-600 dark:text-indigo-400',   dot: 'bg-indigo-500' },
   { id: 'quote',       label: 'Em Orçamento',  color: 'text-amber-600 dark:text-amber-400',     dot: 'bg-amber-500' },
   { id: 'negotiation', label: 'Em Negociação', color: 'text-orange-600 dark:text-orange-400',   dot: 'bg-orange-500' },
-  { id: 'closed_won',  label: 'Encerrado',     color: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  { id: 'closed_won',  label: 'Ganho',         color: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  { id: 'closed_lost', label: 'Perdido',       color: 'text-rose-600 dark:text-rose-400',       dot: 'bg-rose-500' },
 ];
 
 interface Props {
@@ -21,12 +22,7 @@ const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEn
   const filtered = leads;
 
   const getColumnLeads = (stageId: FunnelStage) => {
-    let colLeads = [];
-    if (stageId === 'closed_won') {
-      colLeads = filtered.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
-    } else {
-      colLeads = filtered.filter(l => l.funnel_stage === stageId);
-    }
+    let colLeads = filtered.filter(l => l.funnel_stage === stageId);
     return colLeads.sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
   };
 
