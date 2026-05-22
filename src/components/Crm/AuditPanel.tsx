@@ -254,14 +254,13 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
 
-        {/* AI Feedback (Liquid Glass) */}
+        {/* AI Feedback (Liquid Glass) - Stealth Mode */}
         {(lead as any).ai_feedback && (
-          <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex gap-3 shadow-[0_0_15px_rgba(99,102,241,0.15)] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-[50px] rounded-full pointer-events-none" />
-            <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-            <div className="relative z-10">
-              <h4 className="text-xs font-black text-indigo-300 uppercase tracking-widest mb-1">Motivo do Score (IA)</h4>
-              <p className="text-[13px] text-indigo-200/90 leading-relaxed font-medium">
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-3 shadow-[0_0_15px_rgba(245,158,11,0.15)] relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 blur-[50px] rounded-full pointer-events-none" />
+            <div className="relative z-10 w-full">
+              <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest mb-1">Parecer da Auditoria</h4>
+              <p className="text-[13px] text-amber-200/90 leading-relaxed font-medium">
                 {(lead as any).ai_feedback}
               </p>
             </div>
@@ -292,11 +291,11 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         )}
 
         {/* Checklist */}
-        <div className={aiSettings?.features?.auto_scoring ? "opacity-50 pointer-events-none relative" : ""}>
+        <div className={aiSettings?.features?.auto_scoring ? "opacity-40 pointer-events-none relative" : ""}>
           {aiSettings?.features?.auto_scoring && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-[1px] rounded-xl border border-indigo-500/20">
-              <span className="bg-indigo-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full tracking-widest shadow-[0_0_10px_rgba(99,102,241,0.4)] flex items-center gap-2">
-                <Sparkles className="w-3 h-3" /> Gerenciado por IA
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded-xl border border-white/5">
+              <span className="bg-amber-500/80 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.4)] flex items-center gap-2">
+                🔒 Avaliação Fechada
               </span>
             </div>
           )}

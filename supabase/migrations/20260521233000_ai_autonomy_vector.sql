@@ -23,7 +23,7 @@ CREATE INDEX IF NOT EXISTS semantic_cache_embedding_idx ON public.semantic_cache
 
 -- 3. Tabela lead_memories
 CREATE TABLE IF NOT EXISTS public.lead_memories (
-    lead_id uuid REFERENCES public.leads(id) ON DELETE CASCADE PRIMARY KEY,
+    lead_id text REFERENCES public.leads(id) ON DELETE CASCADE PRIMARY KEY,
     compressed_history text NOT NULL,
     last_processed_message_id uuid, -- Para rastrear até onde a IA leu
     created_at timestamptz DEFAULT now(),
