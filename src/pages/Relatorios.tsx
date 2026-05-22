@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
