@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2 } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2, User as UserIcon, CheckCheck } from 'lucide-react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
 import { isLeadDanger } from '@/utils/metrics';
@@ -83,13 +83,36 @@ const Crm = () => {
     const isDanger  = isLeadDanger(lead, undefined, 20);
     const isSelected = selectedLead?.id === lead.id;
     const isChecked = selectedForDeletion.includes(lead.id);
+    // @ts-ignore
+    const cTime = lead.last_client_message_at ? new Date(lead.last_client_message_at).getTime() : 0;
+    // @ts-ignore
+    const aTime = lead.last_agent_message_at ? new Date(lead.last_agent_message_at).getTime() : 0;
+    const isAnswered = aTime >= cTime && cTime > 0;
+    
+    const waitMs = new Date().getTime() - new Date(lead.last_message_at).getTime();
+    const waitMins = Math.floor(waitMs / 60000);
+    
+    const getElapsed = () => {
+      if (waitMins < 60) return `${waitMins}m`;
+      const hours = Math.floor(waitMins / 60);
+      if (hours < 24) return `${hours}h`;
+      return `${Math.floor(hours / 24)}d`;
+    };
+
+    let timeColor = 'text-muted-foreground';
+    if (!isAnswered) {
+      if (waitMins >= 120) timeColor = 'text-rose-600 dark:text-rose-400 font-bold';
+      else if (waitMins >= 20) timeColor = 'text-amber-500 font-bold';
+    } else {
+      timeColor = 'text-muted-foreground/60';
+    }
 
     return (
       <motion.div
         initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.03, type: 'spring' }}
         whileHover={{ x: 3 }} onClick={() => setSelectedLeadId(lead.id)}
         className={`flex items-center gap-4 px-4 py-3.5 cursor-pointer rounded-xl transition-all duration-200 group
-          ${isDanger ? 'status-danger bg-rose-500/[0.04] hover:bg-rose-500/[0.08]' : 'status-success bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]'}
+          hover:bg-accent/50
           ${isSelected ? 'ring-1 ring-primary/40' : ''}
           ${isChecked ? 'bg-indigo-500/10 ring-1 ring-indigo-500/30' : ''}`}
       >
@@ -113,17 +136,15 @@ const Crm = () => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-bold text-foreground truncate">{lead.customer_name} · {lead.customer_vehicle}</p>
-            {isDanger && (
-              <span className="flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400
-                bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-full shrink-0">
-                <span className="w-1 h-1 rounded-full bg-rose-500 pulse-dot" />SLA
-              </span>
-            )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
             <Wrench className="w-3 h-3" />
             <span className="truncate">{manager?.name} · {unit?.name}</span>
-            {lead.wait_time_minutes > 0 && <span className={isDanger ? ' text-rose-500 font-bold shrink-0' : 'shrink-0'}> · <Clock className="w-3 h-3 inline" /> {lead.wait_time_minutes}m</span>}
+            <span className="shrink-0 text-muted-foreground/30">·</span>
+            <span className={`flex items-center gap-1 shrink-0 ${timeColor}`}>
+              {isAnswered ? <CheckCheck className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
+              {getElapsed()}
+            </span>
           </p>
         </div>
         <div className="shrink-0 text-right">
