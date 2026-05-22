@@ -161,7 +161,12 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       let consolidated = "CONVERSA CONSOLIDADA PARA AVALIAÇÃO MANUAL:\n\n";
       realMessages.forEach(msg => {
         const sender = msg.sender_type === 'contact' ? 'Contato' : 'Agente';
-        consolidated += `[${sender}]: ${msg.content}\n`;
+        let contentStr = msg.content || '';
+        if (msg.media_url || msg.media_type) {
+          const type = msg.media_type?.split('/')[0] || 'anexo';
+          contentStr += ` [ANEXO ENVIADO: ${type}]`;
+        }
+        consolidated += `[${sender}]: ${contentStr.trim()}\n`;
       });
 
       const { data, error } = await supabase.functions.invoke('ai-autonomous-evaluator', {

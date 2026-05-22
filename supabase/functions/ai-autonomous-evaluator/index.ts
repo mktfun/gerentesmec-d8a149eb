@@ -67,7 +67,7 @@ serve(async (req) => {
       
       Você é um auditor de qualidade de vendas mecânicas automotivas.
       Analise a conversa e preencha os itens da auditoria. Se a informação já foi passada antes (segundo o resumo), mantenha como true.
-      ${media_url && media_type?.startsWith('video') ? '\n[SISTEMA]: O gerente/cliente anexou um VÍDEO nesta mensagem. Assuma que o vídeo contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de vídeo (ex: 2b, 3b).' : ''}
+      ${(media_url && media_type?.startsWith('video')) || text.includes('[ANEXO ENVIADO: video]') ? '\n[SISTEMA]: O gerente anexou um VÍDEO nesta mensagem ou histórico. Assuma que o vídeo contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de vídeo (ex: 2b, 3b).' : ''}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
@@ -143,6 +143,9 @@ serve(async (req) => {
       llmOutputText = data.candidates[0].content.parts[0].text;
     }
 
+    console.log("=== LLM OUTPUT ===");
+    console.log(llmOutputText);
+
     const mockOutput = JSON.parse(llmOutputText);
 
     // 5. Rastreabilidade de Auditoria: descobrir quais checks viraram true agora
@@ -150,11 +153,11 @@ serve(async (req) => {
     const currentChecklist = leadData?.audit_checklist || {};
     const newMessagesMap = leadData?.audit_checklist_messages || {};
 
-    // 5.1 Mesclar checklist (A IA só pode setar como TRUE, nunca apagar um TRUE existente)
     const mergedChecklist = { ...currentChecklist };
     if (mockOutput.audit_checklist) {
       for (const key of Object.keys(mockOutput.audit_checklist)) {
-        if (mockOutput.audit_checklist[key] === true) {
+        const val = mockOutput.audit_checklist[key];
+        if (val === true || val === "true") {
           mergedChecklist[key] = true;
           if (!currentChecklist[key]) {
             // Este item do checklist ficou VERDE por conta desta mensagem!
