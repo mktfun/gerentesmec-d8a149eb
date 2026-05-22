@@ -166,7 +166,7 @@ const Relatorios = () => {
             <select
               value={selectedUnit}
               onChange={(e) => { setIsUpdating(true); setSelectedUnit(e.target.value); setTimeout(() => setIsUpdating(false), 300); }}
-              className="px-3 py-2 bg-[#0a0a0f] border border-white/10 rounded-xl text-xs text-white/80 focus:outline-none focus:border-indigo-500"
+              className="px-3 py-2 bg-card border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500"
             >
               <option value="all">Todas Unidades</option>
               {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -175,7 +175,7 @@ const Relatorios = () => {
             <select
               value={scoreOrder}
               onChange={(e) => { setIsUpdating(true); setScoreOrder(e.target.value); setTimeout(() => setIsUpdating(false), 300); }}
-              className="px-3 py-2 bg-[#0a0a0f] border border-white/10 rounded-xl text-xs text-white/80 focus:outline-none focus:border-indigo-500"
+              className="px-3 py-2 bg-card border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500"
             >
               <option value="none">Ordenação (Score)</option>
               <option value="desc">Melhor Score</option>
@@ -185,7 +185,7 @@ const Relatorios = () => {
             <select
               value={slaOrder}
               onChange={(e) => { setIsUpdating(true); setSlaOrder(e.target.value); setTimeout(() => setIsUpdating(false), 300); }}
-              className="px-3 py-2 bg-[#0a0a0f] border border-white/10 rounded-xl text-xs text-white/80 focus:outline-none focus:border-indigo-500"
+              className="px-3 py-2 bg-card border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500"
             >
               <option value="none">Filtro de SLA</option>
               <option value="critical">Risco/Críticos Topo</option>
@@ -214,71 +214,71 @@ const Relatorios = () => {
       <div className={`grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'}`}>
         
         {/* Score Geral */}
-        <motion.div {...fadeUp(0.1)} className="p-6 rounded-3xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden shadow-[0_0_40px_rgba(99,102,241,0.05)]">
+        <motion.div {...fadeUp(0.1)} className="p-6 rounded-3xl bg-card border border-border relative overflow-hidden shadow-[0_0_40px_rgba(99,102,241,0.05)]">
           <div className="absolute top-0 right-0 p-6 opacity-10"><ShieldCheck className="w-24 h-24" /></div>
           <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15)_0%,transparent_70%)] pointer-events-none" />
           
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">Score Global de Qualidade</p>
-            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">
-              {metrics.score !== null ? <>{metrics.score}<span className="text-2xl text-white/40">%</span></> : <span className="text-white/30">—</span>}
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-3">Score Global de Qualidade</p>
+            <h2 className="text-5xl font-black text-foreground mb-4 tracking-tighter">
+              {metrics.score !== null ? <>{metrics.score}<span className="text-2xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
             </h2>
             {metrics.scoreChange !== null ? (
               <div className="flex items-center gap-2">
-                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
                   {metrics.scoreChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {metrics.scoreChange >= 0 ? '+' : ''}{metrics.scoreChange}%
                 </span>
-                <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+                <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
               </div>
             ) : (
-              <span className="text-xs text-white/30 font-medium">Sem comparativo disponível</span>
+              <span className="text-xs text-muted-foreground/50 font-medium">Sem comparativo disponível</span>
             )}
           </div>
         </motion.div>
 
         {/* TMR */}
-        <motion.div {...fadeUp(0.15)} className="p-6 rounded-3xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden shadow-[0_0_40px_rgba(52,211,153,0.05)]">
+        <motion.div {...fadeUp(0.15)} className="p-6 rounded-3xl bg-card border border-border relative overflow-hidden shadow-[0_0_40px_rgba(52,211,153,0.05)]">
           <div className="absolute top-0 right-0 p-6 opacity-10"><Clock className="w-24 h-24" /></div>
           <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.15)_0%,transparent_70%)] pointer-events-none" />
           
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-3">Tempo Médio de Resposta (TMR)</p>
-            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">
-              {metrics.tmr !== null ? <>{metrics.tmr}<span className="text-2xl text-white/40">m</span></> : <span className="text-white/30">—</span>}
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-500 dark:text-emerald-400 mb-3">Tempo Médio de Resposta (TMR)</p>
+            <h2 className="text-5xl font-black text-foreground mb-4 tracking-tighter">
+              {metrics.tmr !== null ? <>{metrics.tmr}<span className="text-2xl text-muted-foreground">m</span></> : <span className="text-muted-foreground/50">—</span>}
             </h2>
             {metrics.tmrChange !== null ? (
               <div className="flex items-center gap-2">
-                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.tmrChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.tmrChange <= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
                   {metrics.tmrChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
                   {metrics.tmrChange <= 0 ? '' : '+'}{metrics.tmrChange}m {metrics.tmrChange <= 0 ? '(Melhoria)' : ''}
                 </span>
-                <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+                <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
               </div>
             ) : (
-              <span className="text-xs text-white/30 font-medium">Sem comparativo disponível</span>
+              <span className="text-xs text-muted-foreground/50 font-medium">Sem comparativo disponível</span>
             )}
           </div>
         </motion.div>
 
         {/* SLAs */}
-        <motion.div {...fadeUp(0.2)} className="p-6 rounded-3xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden shadow-[0_0_40px_rgba(244,63,94,0.05)]">
+        <motion.div {...fadeUp(0.2)} className="p-6 rounded-3xl bg-card border border-border relative overflow-hidden shadow-[0_0_40px_rgba(244,63,94,0.05)]">
           <div className="absolute top-0 right-0 p-6 opacity-10"><AlertTriangle className="w-24 h-24" /></div>
           <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.15)_0%,transparent_70%)] pointer-events-none" />
           
           <div className="relative z-10">
-            <p className="text-xs font-bold uppercase tracking-widest text-rose-400 mb-3">Orçamentos em Risco (SLA)</p>
-            <h2 className="text-5xl font-black text-white mb-4 tracking-tighter">{metrics.slasRisk}</h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-rose-500 dark:text-rose-400 mb-3">Orçamentos em Risco (SLA)</p>
+            <h2 className="text-5xl font-black text-foreground mb-4 tracking-tighter">{metrics.slasRisk}</h2>
             {(metrics.slasChange !== 0 || hasData) ? (
               <div className="flex items-center gap-2">
-                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.slasChange <= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.slasChange <= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
                   {metrics.slasChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
                   {metrics.slasChange >= 0 ? '+' : ''}{metrics.slasChange} leads
                 </span>
-                <span className="text-xs text-white/40 font-medium">vs período anterior</span>
+                <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
               </div>
             ) : (
-              <span className="text-xs text-white/30 font-medium">Sem dados para o período</span>
+              <span className="text-xs text-muted-foreground/50 font-medium">Sem dados para o período</span>
             )}
           </div>
         </motion.div>
@@ -286,17 +286,17 @@ const Relatorios = () => {
       </div>
 
       {/* ── Performance por Etapa ── */}
-      <motion.div {...fadeUp(0.25)} className={`mb-8 bg-[#0a0a0f] border border-white/[0.08] rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(255,255,255,0.02)]`}>
-        <div className="px-8 py-6 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
+      <motion.div {...fadeUp(0.25)} className={`mb-8 bg-card border border-border rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(0,0,0,0.02)]`}>
+        <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-black/5 dark:bg-white/[0.02]">
           <div>
-            <h3 className="text-base font-black text-white">Performance por Etapa</h3>
-            <p className="text-xs font-medium text-white/50 mt-1">Detalhamento do cumprimento das 4 etapas fundamentais por gerente.</p>
+            <h3 className="text-base font-black text-foreground">Performance por Etapa</h3>
+            <p className="text-xs font-medium text-muted-foreground mt-1">Detalhamento do cumprimento das 4 etapas fundamentais por gerente.</p>
           </div>
-          <Target className="w-5 h-5 text-indigo-400/50" />
+          <Target className="w-5 h-5 text-indigo-500/50 dark:text-indigo-400/50" />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/[0.01] border-b border-white/[0.08] text-xs uppercase text-white/40 tracking-wider font-bold">
+            <thead className="bg-black/5 dark:bg-white/[0.01] border-b border-border text-xs uppercase text-muted-foreground tracking-wider font-bold">
               <tr>
                 <th className="px-8 py-4">Gerente</th>
                 <th className="px-8 py-4">Unidade</th>
@@ -307,12 +307,12 @@ const Relatorios = () => {
                 <th className="px-8 py-4 text-center">Score Geral</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-border">
               {managerPerformance.length > 0 ? (
                 managerPerformance.map((mp, idx) => (
-                  <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
-                    <td className="px-8 py-4 font-bold text-white/90">{mp.managerName}</td>
-                    <td className="px-8 py-4 text-white/60 font-semibold">{mp.unitName}</td>
+                  <tr key={idx} className="hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors">
+                    <td className="px-8 py-4 font-bold text-foreground">{mp.managerName}</td>
+                    <td className="px-8 py-4 text-muted-foreground font-semibold">{mp.unitName}</td>
                     <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e1} /></td>
                     <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e2} /></td>
                     <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e3} /></td>
@@ -322,7 +322,7 @@ const Relatorios = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-8 py-8 text-center text-white/30">Sem dados de performance para este período.</td>
+                  <td colSpan={7} className="px-8 py-8 text-center text-muted-foreground/50">Sem dados de performance para este período.</td>
                 </tr>
               )}
             </tbody>
@@ -331,18 +331,18 @@ const Relatorios = () => {
       </motion.div>
 
       {/* ── Log de Auditoria ── */}
-      <motion.div {...fadeUp(0.3)} className={`bg-[#0a0a0f] border border-white/[0.08] rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(255,255,255,0.02)]`}>
-        <div className="px-8 py-6 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
+      <motion.div {...fadeUp(0.3)} className={`bg-card border border-border rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(0,0,0,0.02)]`}>
+        <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-black/5 dark:bg-white/[0.02]">
           <div>
-            <h3 className="text-base font-black text-white">Log de Auditorias Recentes</h3>
-            <p className="text-xs font-medium text-white/50 mt-1">Transparência total nos apontamentos de qualidade.</p>
+            <h3 className="text-base font-black text-foreground">Log de Auditorias Recentes</h3>
+            <p className="text-xs font-medium text-muted-foreground mt-1">Transparência total nos apontamentos de qualidade.</p>
           </div>
-          <Target className="w-5 h-5 text-white/20" />
+          <Target className="w-5 h-5 text-muted-foreground/30" />
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/[0.01] border-b border-white/[0.08] text-xs uppercase text-white/40 tracking-wider font-bold">
+            <thead className="bg-black/5 dark:bg-white/[0.01] border-b border-border text-xs uppercase text-muted-foreground tracking-wider font-bold">
               <tr>
                 <th className="px-8 py-4">Cliente / Veículo</th>
                 <th className="px-8 py-4">Unidade</th>
@@ -350,26 +350,26 @@ const Relatorios = () => {
                 <th className="px-8 py-4 text-right">Score Auditado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-border">
               {auditedLeads.length > 0 ? (
                 auditedLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-white/[0.03] transition-colors">
+                  <tr key={lead.id} className="hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors">
                     <td className="px-8 py-4">
-                      <p className="font-bold text-white/90">{lead.customer_name}</p>
-                      <p className="text-xs text-white/40">{lead.customer_vehicle}</p>
+                      <p className="font-bold text-foreground">{lead.customer_name}</p>
+                      <p className="text-xs text-muted-foreground">{lead.customer_vehicle}</p>
                     </td>
-                    <td className="px-8 py-4 text-white/60 font-semibold">{lead.unit_id ? (units.find(u => u.id === lead.unit_id)?.name || lead.unit_id) : 'Sem unidade'}</td>
+                    <td className="px-8 py-4 text-muted-foreground font-semibold">{lead.unit_id ? (units.find(u => u.id === lead.unit_id)?.name || lead.unit_id) : 'Sem unidade'}</td>
                     <td className="px-8 py-4">
-                      <span className="text-xs font-bold uppercase tracking-wider text-white/40 border border-white/10 px-2 py-1 rounded-md bg-white/[0.02]">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground border border-border px-2 py-1 rounded-md bg-black/5 dark:bg-white/[0.02]">
                         {lead.funnel_stage.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-8 py-4 text-right">
                       {lead.score && (
                         <div className={`inline-flex items-center gap-1 font-black px-2.5 py-1 rounded-lg border
-                          ${lead.score >= 75 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
-                            : lead.score >= 50 ? 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' 
-                            : 'text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
+                          ${lead.score >= 75 ? 'text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
+                            : lead.score >= 50 ? 'text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20' 
+                            : 'text-rose-500 dark:text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
                           {Math.round(lead.score)}%
                         </div>
                       )}
@@ -378,7 +378,7 @@ const Relatorios = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-8 py-8 text-center text-white/30">Nenhuma auditoria registrada neste período.</td>
+                  <td colSpan={4} className="px-8 py-8 text-center text-muted-foreground/50">Nenhuma auditoria registrada neste período.</td>
                 </tr>
               )}
             </tbody>

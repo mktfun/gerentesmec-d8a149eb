@@ -112,16 +112,16 @@ const TvDashboard: React.FC = () => {
 
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#050508] text-white flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-background text-foreground flex flex-col overflow-hidden">
       
       {/* HEADER */}
-      <div className="h-20 border-b border-white/[0.05] px-10 flex items-center justify-between shrink-0 bg-black/40 backdrop-blur-md">
+      <div className="h-20 border-b border-border px-10 flex items-center justify-between shrink-0 bg-black/5 dark:bg-black/40 backdrop-blur-md">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center">
             <span className="text-indigo-500 font-black text-xl">M</span>
           </div>
           <div>
-            <h1 className="text-xl font-black tracking-tight text-white/90">COMANDO CENTRAL</h1>
+            <h1 className="text-xl font-black tracking-tight text-foreground">COMANDO CENTRAL</h1>
             <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
               Live Feed • {new Date().toLocaleTimeString('pt-BR')}
             </p>
@@ -130,8 +130,8 @@ const TvDashboard: React.FC = () => {
 
         <div className="flex items-center gap-6">
           {/* Date Filter */}
-          <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/5">
-            <Calendar className="w-4 h-4 text-white/30 ml-3 mr-1" />
+          <div className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 border border-border">
+            <Calendar className="w-4 h-4 text-muted-foreground ml-3 mr-1" />
             {(['today', 'yesterday', '7d', 'month'] as const).map(f => (
               <button
                 key={f}
@@ -145,27 +145,27 @@ const TvDashboard: React.FC = () => {
             ))}
           </div>
 
-          <div className="w-px h-6 bg-white/10" />
+          <div className="w-px h-6 bg-border" />
 
           {/* Pagination dots & Timer Controls */}
           <div className="flex items-center gap-4">
             <div className="flex gap-1">
               {Array.from({ length: totalPages }).map((_, i) => (
-                <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === page ? 'w-6 bg-indigo-500' : 'w-1.5 bg-white/20'}`} />
+                <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i === page ? 'w-6 bg-indigo-500' : 'w-1.5 bg-black/20 dark:bg-white/20'}`} />
               ))}
             </div>
-            <div className="w-px h-6 bg-white/10" />
-            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full">
+            <div className="w-px h-6 bg-border" />
+            <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-full">
               {[15, 30, 60].map(s => (
                 <button key={s} onClick={() => { setIntervalTime(s * 1000); setPage(0); }}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${intervalTime === s * 1000 ? 'bg-white/20 text-white' : 'text-white/40 hover:text-white/80'}`}>
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${intervalTime === s * 1000 ? 'bg-black/10 dark:bg-white/20 text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                   {s}s
                 </button>
               ))}
             </div>
           </div>
 
-          <button onClick={toggleTvMode} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 transition-colors text-xs font-bold text-white/50">
+          <button onClick={toggleTvMode} className="flex items-center gap-2 px-4 py-2 rounded-full bg-black/5 dark:bg-white/5 hover:bg-rose-500/20 hover:text-rose-400 transition-colors text-xs font-bold text-muted-foreground">
             <XCircle className="w-4 h-4" /> Sair
           </button>
         </div>
@@ -197,7 +197,7 @@ const TvDashboard: React.FC = () => {
               return (
                 <div
                   key={unit.id}
-                  className="relative rounded-[2rem] bg-[#0a0a0f] border border-white/[0.05] flex flex-col h-full overflow-hidden"
+                  className="relative rounded-[2rem] bg-card border border-border flex flex-col h-full overflow-hidden"
                   style={{ boxShadow: `0 0 120px ${glowColor}` }}
                 >
                   {/* Radial background glow (Fixed Clipping) */}
@@ -205,12 +205,12 @@ const TvDashboard: React.FC = () => {
                        style={{ background: `radial-gradient(ellipse at top, ${glowColorFull} 0%, transparent 70%)` }} />
 
                   <div className="px-8 pt-10 pb-6 text-center relative z-10 flex-1 flex flex-col">
-                    <h2 className="text-3xl font-black text-white/90 mb-2">{unit.name}</h2>
-                    <p className="text-sm font-bold uppercase tracking-widest text-white/40 mb-8">Performance Atual</p>
+                    <h2 className="text-3xl font-black text-foreground mb-2">{unit.name}</h2>
+                    <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-8">Performance Atual</p>
 
                     {/* Massive Score */}
                     <div className="flex-1 flex flex-col items-center justify-center">
-                      <div className="relative inline-flex items-center justify-center w-64 h-64 rounded-full border-[8px] border-white/5 mb-6">
+                      <div className="relative inline-flex items-center justify-center w-64 h-64 rounded-full border-[8px] border-border mb-6">
                         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 256 256">
                           <circle cx="128" cy="128" r="120" stroke="currentColor" strokeWidth="8" fill="none"
                                   className={`${accentClass} transition-all duration-1000`}
@@ -218,10 +218,10 @@ const TvDashboard: React.FC = () => {
                                   strokeLinecap="round" />
                         </svg>
                         <div className="flex flex-col items-center justify-center">
-                          <span className="text-7xl font-black tracking-tighter text-white">
+                          <span className="text-7xl font-black tracking-tighter text-foreground">
                             {score !== null ? score : '—'}
                           </span>
-                          {score !== null && <span className="text-xl font-bold text-white/50">%</span>}
+                          {score !== null && <span className="text-xl font-bold text-muted-foreground">%</span>}
                         </div>
                       </div>
                       
@@ -240,9 +240,9 @@ const TvDashboard: React.FC = () => {
                   </div>
 
                   {/* Footer Alertas */}
-                  <div className="p-6 bg-black/40 border-t border-white/[0.05] relative z-10">
+                  <div className="p-6 bg-black/5 dark:bg-black/40 border-t border-border relative z-10">
                     <div className="flex items-center justify-between mb-4">
-                       <span className="text-xs font-bold uppercase tracking-widest text-white/40">Status Operacional</span>
+                       <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Status Operacional</span>
                       {dangerCount > 0 ? (
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20">
                           <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
@@ -257,21 +257,21 @@ const TvDashboard: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                        <div className="flex items-center gap-2 mb-2 text-white/50">
+                      <div className="p-4 rounded-xl bg-black/5 dark:bg-white/[0.02] border border-border">
+                        <div className="flex items-center gap-2 mb-2 text-muted-foreground">
                           <AlertTriangle className="w-4 h-4" />
                           <span className="text-[10px] font-bold uppercase tracking-wider">Leads em Risco</span>
                         </div>
-                        <span className={`text-2xl font-black ${dangerCount > 0 ? 'text-rose-500' : 'text-white/90'}`}>
+                        <span className={`text-2xl font-black ${dangerCount > 0 ? 'text-rose-500' : 'text-foreground'}`}>
                           {dangerCount}
                         </span>
                       </div>
-                      <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                        <div className="flex items-center gap-2 mb-2 text-white/50">
+                      <div className="p-4 rounded-xl bg-black/5 dark:bg-white/[0.02] border border-border">
+                        <div className="flex items-center gap-2 mb-2 text-muted-foreground">
                           <Clock className="w-4 h-4" />
                           <span className="text-[10px] font-bold uppercase tracking-wider">T.M.R.</span>
                         </div>
-                        <span className="text-2xl font-black text-white/90">
+                        <span className="text-2xl font-black text-foreground">
                           {displayTmr}
                         </span>
                       </div>

@@ -30,7 +30,7 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex text-foreground ${isTvMode ? 'bg-background overflow-hidden' : 'bg-[#0A0A0A]'}`}>
+    <div className={`min-h-screen flex text-foreground ${isTvMode ? 'bg-background overflow-hidden' : 'bg-background'}`}>
 
       {/* ── Sidebar ─────────────────────────────────────────── */}
       {!isTvMode && (
@@ -97,9 +97,9 @@ const DashboardLayout: React.FC = () => {
         {/* Topbar */}
         {!isTvMode && (
           <header className="h-16 sticky top-0 z-10 flex items-center justify-between px-8
-            bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-white/5">
+            bg-background/80 backdrop-blur-xl border-b border-border">
           <div>
-            <h2 className="text-xl font-black text-white">Olá, Administrador 👋</h2>
+            <h2 className="text-xl font-black text-foreground">Olá, Administrador 👋</h2>
             <p className="text-xs text-muted-foreground">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>

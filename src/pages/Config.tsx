@@ -158,14 +158,14 @@ const Config = () => {
             </motion.div>
 
             {/* Webhook Instructions */}
-            <div className="p-4 rounded-xl bg-[#0a0a0f] border border-white/[0.08] relative overflow-hidden">
+            <div className="p-4 rounded-xl bg-card border border-border relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <RefreshCw className="w-24 h-24" />
               </div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-primary mb-2">1. Webhook do Chatwoot</h3>
               <p className="text-xs text-muted-foreground leading-relaxed mb-4">
                 Copie a URL abaixo e cole no seu Chatwoot em <strong>Configurações &gt; Webhooks</strong>. 
-                Marque os eventos: <code className="text-emerald-400 bg-emerald-400/10 px-1 rounded">message_created</code> e <code className="text-emerald-400 bg-emerald-400/10 px-1 rounded">conversation_created</code>.
+                Marque os eventos: <code className="text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-400/10 px-1 rounded">message_created</code> e <code className="text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-400/10 px-1 rounded">conversation_created</code>.
               </p>
               
               <div className="mb-4">
@@ -176,22 +176,22 @@ const Config = () => {
                   value={webhookSecret}
                   onChange={e => setWebhookSecret(e.target.value)}
                   placeholder="Ex: qGJePktjNUdsofr..."
-                  className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/10
-                    text-xs font-mono text-white/90 placeholder:text-muted-foreground/30
+                  className="w-full px-3 py-2 rounded-lg bg-muted border border-border
+                    text-xs font-mono text-foreground placeholder:text-muted-foreground/30
                     focus:outline-none focus:border-emerald-500/50 transition-colors"
                 />
                 <p className="text-[10px] text-muted-foreground mt-1">Ao configurar o segredo, nosso servidor passará a validar a criptografia garantindo segurança 100%.</p>
               </div>
 
               <div className="flex items-center gap-2 mb-4">
-                <code className="flex-1 px-3 py-2.5 rounded-lg bg-black border border-white/10 text-xs font-mono text-white/80 overflow-x-auto whitespace-nowrap">
+                <code className="flex-1 px-3 py-2.5 rounded-lg bg-muted border border-border text-xs font-mono text-foreground/80 overflow-x-auto whitespace-nowrap">
                   {webhookUrl}
                 </code>
                 <button
                   onClick={handleCopyWebhook}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-all"
+                  className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-border text-xs font-bold text-foreground transition-all"
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
                   {copied ? 'Copiado!' : 'Copiar'}
                 </button>
               </div>
@@ -204,16 +204,16 @@ const Config = () => {
                   value={ignoredLabelsStr}
                   onChange={e => setIgnoredLabelsStr(e.target.value)}
                   placeholder="Ex: fornecedor, dono, ignorar"
-                  className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/10
-                    text-xs font-mono text-white/90 placeholder:text-muted-foreground/30
+                  className="w-full px-3 py-2 rounded-lg bg-muted border border-border
+                    text-xs font-mono text-foreground placeholder:text-muted-foreground/30
                     focus:outline-none focus:border-emerald-500/50 transition-colors"
                 />
                 <p className="text-[10px] text-muted-foreground mt-1">Conversas no Chatwoot com essas etiquetas (labels) serão ignoradas pelo webhook.</p>
               </div>
 
-              <div className="border-t border-white/10 pt-4 flex items-center justify-between">
+              <div className="border-t border-border pt-4 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-white">Sincronização Histórica</p>
+                  <p className="text-sm font-bold text-foreground">Sincronização Histórica</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">Puxe conversas passadas do Chatwoot para gerar o Dossiê e pontuar pela IA.</p>
                 </div>
                 <button 
@@ -235,14 +235,14 @@ const Config = () => {
                   <span id="sync-btn-text">Puxar Histórico</span>
                 </button>
               </div>
-              <div className="border-t border-white/10 pt-4 mt-4 flex items-center justify-between">
+              <div className="border-t border-border pt-4 mt-4 flex items-center justify-between">
                 {saveStatus === 'ok' && (
-                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                  <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
                     <Check className="w-3.5 h-3.5" /> Salvo com sucesso!
                   </span>
                 )}
                 {saveStatus === 'err' && (
-                  <span className="text-xs font-bold text-rose-400">Erro ao salvar. Tente novamente.</span>
+                  <span className="text-xs font-bold text-rose-500 dark:text-rose-400">Erro ao salvar. Tente novamente.</span>
                 )}
                 {(saveStatus === 'idle' || saveStatus === 'saving') && <span />}
                 <button
@@ -372,7 +372,7 @@ const Config = () => {
             <h2 className="text-sm font-bold text-foreground">Horário de Atendimento</h2>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-6 space-y-5">
+          <div className="rounded-2xl border border-border bg-black/5 dark:bg-white/[0.03] backdrop-blur-md p-6 space-y-5">
             {/* Dias */}
             <div>
               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3 block">
@@ -389,8 +389,8 @@ const Config = () => {
                       )}
                       className={`w-11 h-11 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-150 active:scale-95 border ${
                         active
-                          ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300 shadow-[0_0_12px_hsl(239_84%_67%_/_0.2)]'
-                          : 'bg-white/5 border-white/10 text-white/30 hover:border-indigo-500/30 hover:text-white/60'
+                          ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-500 dark:text-indigo-300 shadow-[0_0_12px_hsl(239_84%_67%_/_0.2)]'
+                          : 'bg-black/5 dark:bg-white/5 border-border text-muted-foreground/50 hover:border-indigo-500/30 hover:text-muted-foreground'
                       }`}
                     >
                       {l}
@@ -436,14 +436,14 @@ const Config = () => {
             </div>
 
             {/* Salvar */}
-            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+            <div className="flex items-center justify-between border-t border-border pt-4">
               {bhSaveStatus === 'ok' && (
-                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                <span className="text-xs font-bold text-emerald-500 dark:text-emerald-400 flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" /> Horário salvo!
                 </span>
               )}
               {bhSaveStatus === 'err' && (
-                <span className="text-xs font-bold text-rose-400">Erro ao salvar. Tente novamente.</span>
+                <span className="text-xs font-bold text-rose-500 dark:text-rose-400">Erro ao salvar. Tente novamente.</span>
               )}
               {(bhSaveStatus === 'idle' || bhSaveStatus === 'saving') && <span />}
               <button
@@ -599,7 +599,7 @@ const Config = () => {
       <div className="mt-20 flex justify-center opacity-10 hover:opacity-100 transition-opacity duration-300">
         <button 
           onClick={() => setIsAiPanelOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-black text-muted-foreground hover:bg-white/5 hover:text-indigo-400 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] uppercase tracking-widest font-black text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
         >
           <Cpu className="w-3.5 h-3.5" /> Acesso de Engenharia
         </button>

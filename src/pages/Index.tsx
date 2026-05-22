@@ -122,12 +122,12 @@ const Index = () => {
     <div className="p-8 pb-20 min-h-screen">
       
       {/* ── HERO CARD: SCORE GLOBAL ── */}
-      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
+      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-border p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
         <div className="flex-1">
-          <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-300/70 mb-4">Score Global da Rede</p>
+          <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-500/70 dark:text-indigo-300/70 mb-4">Score Global da Rede</p>
           <div className="flex items-end gap-6 mb-2">
-            <h2 className="text-7xl lg:text-8xl font-black text-white tracking-tighter leading-none">
-              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-white/50">%</span></> : <span className="text-white/40">—</span>}
+            <h2 className="text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
+              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
             </h2>
             {weekTrend !== null && (
               <div className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
@@ -143,21 +143,21 @@ const Index = () => {
 
         <div className="flex flex-col sm:flex-row items-stretch justify-start lg:justify-end gap-4 w-full lg:w-auto mt-6 lg:mt-0">
           
-          <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Unidades Ativas</p>
-            <p className="text-3xl font-black text-white">{units.length}</p>
+          <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Unidades Ativas</p>
+            <p className="text-3xl font-black text-foreground">{units.length}</p>
           </div>
 
-          <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Resolução Hoje</p>
-            <p className="text-3xl font-black text-emerald-400">{resolutionRate}%</p>
+          <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Resolução Hoje</p>
+            <p className="text-3xl font-black text-emerald-500 dark:text-emerald-400">{resolutionRate}%</p>
           </div>
 
-          <div className="bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-white/5 shadow-inner relative overflow-hidden">
+          <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner relative overflow-hidden">
             <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tempo Médio</p>
-            <p className="text-3xl font-black text-indigo-400">
-              {todayTmr}<span className="text-sm font-bold text-indigo-400/50 ml-1">min</span>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Tempo Médio</p>
+            <p className="text-3xl font-black text-indigo-500 dark:text-indigo-400">
+              {todayTmr}<span className="text-sm font-bold text-indigo-500/50 dark:text-indigo-400/50 ml-1">min</span>
             </p>
           </div>
 
@@ -166,31 +166,31 @@ const Index = () => {
 
       {/* ── METRICS ROW ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <motion.div {...fadeUp(0.1)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
+        <motion.div {...fadeUp(0.1)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
-            <Clock className="w-5 h-5 text-indigo-400" />
+            <Clock className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
           </div>
-          <h3 className="text-4xl font-black text-white mb-2">{todayLeads.length}</h3>
-          <p className="text-sm text-slate-300 font-medium mb-1">Atendimentos Hoje</p>
-          <p className="text-xs text-indigo-400">{pendingAudits} auditorias pendentes</p>
+          <h3 className="text-4xl font-black text-foreground mb-2">{todayLeads.length}</h3>
+          <p className="text-sm text-muted-foreground font-medium mb-1">Atendimentos Hoje</p>
+          <p className="text-xs text-indigo-500 dark:text-indigo-400">{pendingAudits} auditorias pendentes</p>
         </motion.div>
 
-        <motion.div {...fadeUp(0.15)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
+        <motion.div {...fadeUp(0.15)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
           </div>
-          <h3 className="text-4xl font-black text-white mb-2">{completedLeads.length}</h3>
-          <p className="text-sm text-slate-300 font-medium mb-1">Concluídos com Sucesso</p>
-          <p className="text-xs text-emerald-400">{resolutionRate}% de resolução</p>
+          <h3 className="text-4xl font-black text-foreground mb-2">{completedLeads.length}</h3>
+          <p className="text-sm text-muted-foreground font-medium mb-1">Concluídos com Sucesso</p>
+          <p className="text-xs text-emerald-500 dark:text-emerald-400">{resolutionRate}% de resolução</p>
         </motion.div>
 
-        <motion.div {...fadeUp(0.2)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
+        <motion.div {...fadeUp(0.2)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-6">
-            <AlertTriangle className="w-5 h-5 text-rose-400" />
+            <AlertTriangle className="w-5 h-5 text-rose-500 dark:text-rose-400" />
           </div>
-          <h3 className={`text-4xl font-black mb-2 ${dangerLeads.length > 0 ? 'text-rose-500' : 'text-white'}`}>{dangerLeads.length}</h3>
-          <p className="text-sm text-slate-300 font-medium mb-1">Leads em Alerta ({'>'}20m)</p>
-          <p className="text-xs text-rose-400">Ação imediata necessária</p>
+          <h3 className={`text-4xl font-black mb-2 ${dangerLeads.length > 0 ? 'text-rose-500' : 'text-foreground'}`}>{dangerLeads.length}</h3>
+          <p className="text-sm text-muted-foreground font-medium mb-1">Leads em Alerta ({'>'}20m)</p>
+          <p className="text-xs text-rose-500 dark:text-rose-400">Ação imediata necessária</p>
         </motion.div>
       </div>
 
@@ -198,14 +198,14 @@ const Index = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Area Chart */}
-        <motion.div {...fadeUp(0.25)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 lg:col-span-2 shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
+        <motion.div {...fadeUp(0.25)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border lg:col-span-2 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h3 className="text-lg font-bold text-white">Evolução do Score Global</h3>
-              <p className="text-sm text-slate-400 mt-1">Últimos 7 dias</p>
+              <h3 className="text-lg font-bold text-foreground">Evolução do Score Global</h3>
+              <p className="text-sm text-muted-foreground mt-1">Últimos 7 dias</p>
             </div>
             {weekTrend !== null && (
-              <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+              <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
                 {weekTrend >= 0 ? '▲' : '▼'} {weekTrend >= 0 ? '+' : ''}{weekTrend}%
               </div>
             )}
@@ -240,33 +240,33 @@ const Index = () => {
         </motion.div>
 
         {/* Ranking */}
-        <motion.div {...fadeUp(0.3)} className="rounded-2xl p-6 bg-white/5 backdrop-blur-xl border border-white/10 lg:col-span-1 shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
+        <motion.div {...fadeUp(0.3)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border lg:col-span-1 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-white">Ranking de Gerentes</h3>
+            <h3 className="text-lg font-bold text-foreground">Ranking de Gerentes</h3>
           </div>
           <div className="flex-1 flex flex-col gap-5">
             {managerRanking.map((m, idx) => (
               <div key={m.id} className="flex items-center gap-4">
-                <span className="text-sm font-bold text-slate-500 w-4">{idx + 1}</span>
-                <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm shrink-0">
+                <span className="text-sm font-bold text-muted-foreground w-4">{idx + 1}</span>
+                <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 font-black text-sm shrink-0">
                   {m.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-white truncate">{m.name}</h4>
-                  <p className="text-xs text-slate-400 truncate">{m.unitName}</p>
+                  <h4 className="text-sm font-bold text-foreground truncate">{m.name}</h4>
+                  <p className="text-xs text-muted-foreground truncate">{m.unitName}</p>
                 </div>
                 <div className="text-right">
-                  <div className={`text-sm font-black flex items-center justify-end gap-1 mb-1 ${m.score === null ? 'text-white/30' : m.score >= 75 ? 'text-emerald-400' : m.score >= 50 ? 'text-indigo-300' : 'text-rose-400'}`}>
+                  <div className={`text-sm font-black flex items-center justify-end gap-1 mb-1 ${m.score === null ? 'text-muted-foreground/30' : m.score >= 75 ? 'text-emerald-500 dark:text-emerald-400' : m.score >= 50 ? 'text-indigo-400 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400'}`}>
                     {m.score !== null ? `${m.score}%` : '—'}
                   </div>
-                  <div className="w-16 h-1.5 bg-[#13111A] rounded-full overflow-hidden">
+                  <div className="w-16 h-1.5 bg-black/5 dark:bg-[#13111A] rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${m.score ?? 0}%` }} />
                   </div>
                 </div>
               </div>
             ))}
             {managerRanking.length === 0 && (
-              <p className="text-xs text-slate-500 text-center py-8">Cadastre gerentes para ver o ranking.</p>
+              <p className="text-xs text-muted-foreground text-center py-8">Cadastre gerentes para ver o ranking.</p>
             )}
           </div>
         </motion.div>

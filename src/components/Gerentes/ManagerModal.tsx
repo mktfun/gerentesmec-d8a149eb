@@ -43,10 +43,10 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 280, damping: 28 }}
             className="fixed top-0 right-0 h-full w-full max-w-[420px] z-50
-              bg-[#0f0f18] border-l border-white/[0.06] flex flex-col shadow-2xl"
+              bg-card border-l border-border flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="px-6 py-5 border-b border-white/[0.06] flex items-center justify-between">
+            <div className="px-6 py-5 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 flex items-center justify-center
                   text-lg font-black text-indigo-300">
@@ -58,21 +58,21 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                 </div>
               </div>
               <button onClick={onClose}
-                className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10]
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10]
                   flex items-center justify-center transition-colors">
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
 
             {/* Score highlight */}
-            <div className="px-6 py-5 border-b border-white/[0.06]">
+            <div className="px-6 py-5 border-b border-border">
               <p className="label-caps text-indigo-400/70 mb-2">Score Atual</p>
               <div className="flex items-end gap-3">
                 <span className={`text-5xl font-black ${
-                  avgScore >= 80 ? 'text-emerald-400' : avgScore >= 60 ? 'text-indigo-300' : 'text-rose-400'
+                  avgScore >= 80 ? 'text-emerald-500 dark:text-emerald-400' : avgScore >= 60 ? 'text-indigo-500 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400'
                 }`}>{avgScore}%</span>
-                <span className="flex items-center gap-1 text-xs font-bold text-emerald-400
-                  bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full mb-1.5">
+                <span className="flex items-center gap-1 text-xs font-bold text-emerald-500 dark:text-emerald-400
+                  bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 px-2 py-0.5 rounded-full mb-1.5">
                   <TrendingUp className="w-3 h-3" />
                   +8% no mês
                 </span>
@@ -80,7 +80,7 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
             </div>
 
             {/* History Chart */}
-            <div className="px-6 py-5 border-b border-white/[0.06]">
+            <div className="px-6 py-5 border-b border-border">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart2 className="w-3.5 h-3.5 text-indigo-400" />
                 <p className="text-xs font-bold text-foreground/70 uppercase tracking-wider">Evolução (4 semanas)</p>
@@ -115,13 +115,13 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                   { date: 'Ontem, 16:30', client: 'Rafael (Gol)', score: 50 },
                 ].map((audit, i) => (
                   <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl
-                    bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] transition-colors">
+                    bg-black/5 dark:bg-white/[0.03] border border-border hover:bg-black/10 dark:hover:bg-white/[0.06] transition-colors">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-foreground/80 truncate">{audit.client}</p>
                       <p className="text-[10px] text-muted-foreground">{audit.date}</p>
                     </div>
                     <span className={`text-xs font-black ${
-                      audit.score >= 75 ? 'text-emerald-400' : audit.score >= 50 ? 'text-amber-400' : 'text-rose-400'
+                      audit.score >= 75 ? 'text-emerald-500 dark:text-emerald-400' : audit.score >= 50 ? 'text-amber-500 dark:text-amber-400' : 'text-rose-500 dark:text-rose-400'
                     }`}>{audit.score}%</span>
                   </div>
                 ))}

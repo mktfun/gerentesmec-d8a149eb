@@ -56,7 +56,7 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
       {/* Trigger Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="group relative flex items-center gap-3 px-5 py-3 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] backdrop-blur-xl rounded-2xl transition-all outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
+        className="group relative flex items-center gap-3 px-5 py-3 bg-card hover:bg-accent border border-border backdrop-blur-xl rounded-2xl transition-all outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
       >
         <div className="flex items-center gap-2">
           {selectedUnit.id === 'all' ? (
@@ -64,15 +64,15 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
           ) : (
             <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] ${selectedDanger > 0 ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-emerald-500 text-emerald-500'}`} />
           )}
-          <span className="font-bold text-white tracking-wide">{selectedUnit.name}</span>
+          <span className="font-bold text-foreground tracking-wide">{selectedUnit.name}</span>
         </div>
 
         {/* Score Pill in Trigger */}
-        <div className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-black border ${selectedScore === null ? 'bg-white/5 border-white/10 text-white/40' : selectedScore >= 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : selectedScore >= 60 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+        <div className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-black border ${selectedScore === null ? 'bg-muted border-border text-muted-foreground/40' : selectedScore >= 80 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 dark:text-emerald-400' : selectedScore >= 60 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-500 dark:text-indigo-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400'}`}>
           {selectedScore !== null ? `${selectedScore}%` : '—'}
         </div>
 
-        <ChevronDown className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
@@ -83,7 +83,7 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
             animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 10, scale: 0.95, filter: 'blur(10px)' }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute top-full left-0 mt-3 w-80 bg-[#0f0f18]/90 backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden"
+            className="absolute top-full left-0 mt-3 w-80 bg-card/90 backdrop-blur-3xl border border-border rounded-3xl p-2 shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden"
           >
             <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
               {options.map((opt, i) => {
@@ -101,12 +101,12 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
                       setIsOpen(false);
                     }}
                     className={`w-full flex items-center justify-between p-3 rounded-2xl mb-1 transition-all text-left outline-none
-                      ${isSelected ? 'bg-indigo-500/10' : 'hover:bg-white/[0.04] focus-visible:bg-white/[0.04]'}`}
+                      ${isSelected ? 'bg-indigo-500/10' : 'hover:bg-black/5 dark:hover:bg-white/[0.04] focus-visible:bg-black/5 dark:focus-visible:bg-white/[0.04]'}`}
                   >
                     <div className="flex items-center gap-3">
                       {opt.id === 'all' ? (
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/5">
-                          <Globe className="w-4 h-4 text-white/50" />
+                        <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 border border-border">
+                          <Globe className="w-4 h-4 text-muted-foreground" />
                         </div>
                       ) : (
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${dangerCount > 0 ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
@@ -114,16 +114,16 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
                         </div>
                       )}
                       <div>
-                        <h4 className={`text-sm font-bold ${isSelected ? 'text-indigo-400' : 'text-white/90'}`}>{opt.name}</h4>
+                        <h4 className={`text-sm font-bold ${isSelected ? 'text-indigo-400' : 'text-foreground/90'}`}>{opt.name}</h4>
                         {dangerCount > 0 && <p className="text-[10px] font-bold text-rose-500 mt-0.5">{dangerCount} LEAD{dangerCount > 1 && 'S'} EM RISCO</p>}
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className={`text-sm font-black ${score === null ? 'text-white/30' : score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-indigo-400' : 'text-rose-400'}`}>
+                      <div className={`text-sm font-black ${score === null ? 'text-muted-foreground/30' : score >= 80 ? 'text-emerald-500 dark:text-emerald-400' : score >= 60 ? 'text-indigo-500 dark:text-indigo-400' : 'text-rose-500 dark:text-rose-400'}`}>
                         {score !== null ? `${score}%` : '—'}
                       </div>
-                      <div className="text-[9px] uppercase tracking-widest text-white/30 mt-0.5 font-bold">Score</div>
+                      <div className="text-[9px] uppercase tracking-widest text-muted-foreground/30 mt-0.5 font-bold">Score</div>
                     </div>
                   </motion.button>
                 );

@@ -51,12 +51,41 @@ serve(async (req) => {
 
         console.log("AI Prompt:", prompt);
         
-        // Simulating AI delay
-        await new Promise(r => setTimeout(r, 1500));
-        
-        const generatedSummary = `O atendimento com ${record.customer_name} (Veículo: ${record.customer_vehicle}) foi ${record.funnel_stage === 'closed_won' ? 'fechado com sucesso' : 'perdido'}. 
-Ticket Final: ${record.ticket_value ? 'R$ ' + record.ticket_value : 'Não informado'}.
-Pontos fortes do atendimento: Rapidez na resposta inicial e orçamento claro.`;
+        let generatedSummary = '';
+        try {
+          const openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${aiSettings.api_key}`
+            },
+            body: JSON.stringify({
+              model: aiSettings.model || 'gpt-4o-mini',
+              messages: [{
+                role: 'system',
+                content: 'Você é um analista de qualidade sênior de uma rede de oficinas premium. Crie um parecer detalhado e premium do fechamento deste atendimento de vendas, baseado nas informações fornecidas. Crie um texto em um único parágrafo, sem formatação excessiva, destacando os pontos fortes e o resultado.'
+              }, {
+                role: 'user',
+                content: prompt
+              }]
+            })
+          });
+          
+          if (!openAiRes.ok) {
+            const errBody = await openAiRes.text();
+            throw new Error(`OpenAI API Error: ${openAiRes.status} ${errBody}`);
+          }
+          
+          const data = await openAiRes.json();
+          if (data.choices && data.choices.length > 0) {
+            generatedSummary = data.choices[0].message.content;
+          } else {
+            throw new Error('No completion returned from OpenAI');
+          }
+        } catch (e: any) {
+          console.error("OpenAI fallback:", e.message);
+          generatedSummary = `O atendimento com ${record.customer_name} (Veículo: ${record.customer_vehicle || 'Não informado'}) foi ${record.funnel_stage === 'closed_won' ? 'fechado com sucesso' : 'perdido'}. Ticket Final: ${record.ticket_value ? 'R$ ' + record.ticket_value : 'Não informado'}. (Resumo automático devido a falha na API da IA)`;
+        }
 
         // Save summary to the lead
         const { error: updateError } = await supabaseClient

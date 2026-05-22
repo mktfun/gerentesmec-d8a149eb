@@ -63,8 +63,8 @@ const Gerentes = () => {
             ? Math.round(unitLeads.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeads.length)
             : null;
             
-          const scoreColor = unitScore === null ? 'text-white/30' : unitScore >= 80 ? 'text-emerald-400' : unitScore >= 65 ? 'text-indigo-300' : 'text-rose-400';
-          const barColor   = unitScore === null ? 'bg-white/10' : unitScore >= 80 ? 'bg-emerald-400' : unitScore >= 65 ? 'bg-indigo-400' : 'bg-rose-400';
+          const scoreColor = unitScore === null ? 'text-muted-foreground/30' : unitScore >= 80 ? 'text-emerald-500 dark:text-emerald-400' : unitScore >= 65 ? 'text-indigo-500 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400';
+          const barColor   = unitScore === null ? 'bg-black/10 dark:bg-white/10' : unitScore >= 80 ? 'bg-emerald-500 dark:bg-emerald-400' : unitScore >= 65 ? 'bg-indigo-500 dark:bg-indigo-400' : 'bg-rose-500 dark:bg-rose-400';
           const glowColor  = unitScore !== null && unitScore >= 80
             ? 'shadow-[0_0_30px_rgba(52,211,153,0.08)]'
             : unitScore !== null && unitScore >= 65
@@ -77,7 +77,7 @@ const Gerentes = () => {
             <motion.div
               key={unit.id}
               {...fadeUp(0.08 * idx)}
-              className={`rounded-2xl p-6 bg-[#111118] border border-white/[0.08] ${glowColor} cursor-default`}
+              className={`rounded-2xl p-6 bg-card border border-border ${glowColor} cursor-default`}
             >
               {/* Unit header */}
               <div className="flex items-center justify-between mb-5">
@@ -95,7 +95,7 @@ const Gerentes = () => {
               </div>
 
               {/* Unit progress bar */}
-              <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden mb-5">
+              <div className="h-1.5 bg-black/10 dark:bg-white/[0.06] rounded-full overflow-hidden mb-5">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${unitScore ?? 0}%` }}
@@ -110,7 +110,7 @@ const Gerentes = () => {
                   Gerentes ({unitManagers.length})
                 </p>
                 {unitManagers.length === 0 ? (
-                  <div className="p-4 rounded-xl border border-dashed border-white/10 text-center">
+                  <div className="p-4 rounded-xl border border-dashed border-border text-center">
                     <span className="text-xs text-muted-foreground">Sem gerentes</span>
                   </div>
                 ) : unitManagers.map((manager, mIdx) => {
@@ -128,12 +128,12 @@ const Gerentes = () => {
                       transition={{ delay: 0.2 + idx * 0.08 + mIdx * 0.06, type: 'spring' }}
                       onClick={() => setSelectedManager(manager)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
-                        bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.05]
+                        bg-black/5 dark:bg-white/[0.03] hover:bg-black/10 dark:hover:bg-white/[0.07] border border-border
                         hover:border-indigo-500/30 transition-all text-left group cursor-pointer"
                     >
                       {/* Avatar */}
                       <div className="w-7 h-7 rounded-full bg-indigo-500/20 flex items-center justify-center
-                        text-xs font-black text-indigo-300 shrink-0">
+                        text-xs font-black text-indigo-500 dark:text-indigo-300 shrink-0">
                         {manager.name[0]}
                       </div>
 
@@ -145,7 +145,7 @@ const Gerentes = () => {
 
                       {/* Actions */}
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={(e) => handleEdit(manager, e)} className="p-1.5 rounded-md hover:bg-white/10 text-muted-foreground hover:text-white">
+                        <button onClick={(e) => handleEdit(manager, e)} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground hover:text-foreground">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={(e) => handleDelete(manager, e)} className="p-1.5 rounded-md hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400">
@@ -160,7 +160,7 @@ const Gerentes = () => {
                           : <TrendingDown className="w-3 h-3 text-rose-400" />
                         )}
                         <span className={`text-xs font-black ${
-                          mScore === null ? 'text-white/30' : mScore >= 80 ? 'text-emerald-400' : mScore >= 60 ? 'text-indigo-300' : 'text-rose-400'
+                          mScore === null ? 'text-muted-foreground/30' : mScore >= 80 ? 'text-emerald-500 dark:text-emerald-400' : mScore >= 60 ? 'text-indigo-500 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400'
                         }`}>{mScore !== null ? `${mScore}%` : '—'}</span>
                       </div>
                     </motion.div>

@@ -82,6 +82,31 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     }
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const fileName = `${lead.id}-${Date.now()}.${ext}`;
+      
+      const { data, error } = await supabase.storage.from('evidences').upload(fileName, file);
+      if (error) throw error;
+      
+      const { data: urlData } = supabase.storage.from('evidences').getPublicUrl(fileName);
+      setNotes(prev => prev + (prev ? '\n' : '') + `[Evidência: ${file.name}](${urlData.publicUrl})\n`);
+    } catch (err: any) {
+      alert('Erro ao subir imagem: ' + err.message);
+    } finally {
+      setIsUploading(false);
+      // reset input
+      e.target.value = '';
+    }
+  };
+
   // Fractional score
   let score = 0;
   auditStepsConfig.forEach(step => {
@@ -127,18 +152,18 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   }, [lead.id]);
 
   return (
-    <div className="h-full flex flex-col lg:flex-row bg-[#0f0f18] border-l border-white/[0.06] overflow-hidden">
+    <div className="h-full flex flex-col lg:flex-row bg-background border-l border-border overflow-hidden">
 
       {/* LEFT COLUMN: CHAT HISTORY */}
-      <div className="flex-1 border-b lg:border-b-0 lg:border-r border-white/[0.06] overflow-hidden min-w-[320px]">
+      <div className="flex-1 border-b lg:border-b-0 lg:border-r border-border overflow-hidden min-w-[320px]">
         <ChatHistoryView lead={lead} messages={realMessages} isLoading={loadingChat} />
       </div>
 
       {/* RIGHT COLUMN: AUDIT DOSSIER */}
-      <div className="w-full lg:w-[420px] xl:w-[460px] shrink-0 flex flex-col h-full bg-[#0a0a0f]">
+      <div className="w-full lg:w-[420px] xl:w-[460px] shrink-0 flex flex-col h-full bg-card">
 
         {/* Header */}
-      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+      <div className="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
         <div>
           <h3 className="text-sm font-black text-foreground flex items-center gap-2">
             Dossiê: {lead.customer_name}
@@ -158,23 +183,23 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                 href={`${secureBaseUrl}/app/accounts/${integrationSettings?.chatwoot_account_id || 1}/conversations/${lead.chatwoot_conversation_id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10] flex items-center justify-center transition-colors focus-visible:outline-indigo-500"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors focus-visible:outline-indigo-500"
                 title="Abrir Conversa"
               >
-                <ExternalLink className="w-4 h-4 text-white/70" />
+                <ExternalLink className="w-4 h-4 text-muted-foreground" />
               </a>
             );
           })()}
           <button onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.10]
+            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10]
               flex items-center justify-center transition-colors focus-visible:outline-indigo-500">
-            <X className="w-4 h-4 text-white/70" />
+            <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
       </div>
 
       {/* Score ring */}
-      <div className="px-6 py-5 border-b border-white/[0.06] flex items-center gap-5 shrink-0">
+      <div className="px-6 py-5 border-b border-border flex items-center gap-5 shrink-0">
         <div className="relative w-[88px] h-[88px] shrink-0">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="38" stroke="rgba(255,255,255,0.06)" strokeWidth="7" fill="none" />
@@ -195,9 +220,9 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
               key={rounded}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-xl font-black text-white leading-none"
+              className="text-xl font-black text-foreground leading-none"
             >{rounded}</motion.span>
-            <span className="text-[9px] text-white/30 font-bold uppercase tracking-wider">Score</span>
+            <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Score</span>
           </div>
         </div>
         <div>
@@ -209,7 +234,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       </div>
 
       {/* Inline Ticket & Vehicle Inputs */}
-      <div className="px-6 py-4 border-b border-white/[0.06] bg-white/[0.01] shrink-0 flex flex-col gap-4">
+      <div className="px-6 py-4 border-b border-border bg-black/5 dark:bg-white/[0.01] shrink-0 flex flex-col gap-4">
         <div>
           <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
             Orçamento Estimado (R$)
@@ -222,8 +247,8 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
               onChange={(e) => setTicketValueStr(e.target.value)}
               onBlur={handleTicketBlur}
               placeholder="Ex: 1500"
-              className="flex-1 bg-transparent border-b border-white/[0.1] focus:border-emerald-500
-                text-lg font-black text-emerald-400 placeholder:text-muted-foreground/30 
+              className="flex-1 bg-transparent border-b border-black/10 dark:border-white/[0.1] focus:border-emerald-500
+                text-lg font-black text-emerald-500 dark:text-emerald-400 placeholder:text-muted-foreground/30 
                 focus:outline-none transition-colors py-1"
             />
           </div>
@@ -243,8 +268,8 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
               onChange={(e) => setVehicleStr(e.target.value)}
               onBlur={handleVehicleBlur}
               placeholder="Ex: Honda Civic 2020"
-              className="flex-1 bg-transparent border-b border-white/[0.1] focus:border-indigo-500
-                text-sm font-semibold text-white placeholder:text-muted-foreground/30 
+              className="flex-1 bg-transparent border-b border-black/10 dark:border-white/[0.1] focus:border-indigo-500
+                text-sm font-semibold text-foreground placeholder:text-muted-foreground/30 
                 focus:outline-none transition-colors py-1"
             />
           </div>
@@ -254,13 +279,14 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
 
-        {/* AI Feedback (Liquid Glass) - Stealth Mode */}
         {(lead as any).ai_feedback && (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-3 shadow-[0_0_15px_rgba(245,158,11,0.15)] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 blur-[50px] rounded-full pointer-events-none" />
+          <div className="p-4 rounded-xl bg-muted/30 border border-border relative overflow-hidden">
             <div className="relative z-10 w-full">
-              <h4 className="text-xs font-black text-amber-500 uppercase tracking-widest mb-1">Parecer da Auditoria</h4>
-              <p className="text-[13px] text-amber-200/90 leading-relaxed font-medium">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Parecer da Auditoria</h4>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                 {(lead as any).ai_feedback}
               </p>
             </div>
@@ -293,7 +319,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         {/* Checklist */}
         <div className={aiSettings?.features?.auto_scoring ? "opacity-40 pointer-events-none relative" : ""}>
           {aiSettings?.features?.auto_scoring && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 backdrop-blur-[1px] rounded-xl border border-white/5">
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/40 dark:bg-black/20 backdrop-blur-[1px] rounded-xl border border-border">
               <span className="bg-amber-500/80 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.4)] flex items-center gap-2">
                 🔒 Avaliação Fechada
               </span>
@@ -306,17 +332,17 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
 
             return (
               <AccordionItem key={step.id} value={step.id}
-                className="border border-white/[0.08] rounded-xl bg-white/[0.02] hover:bg-white/[0.04]
+                className="border border-border rounded-xl bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.04]
                   transition-colors px-4">
                 <AccordionTrigger className="hover:no-underline py-3.5">
                   <div className="flex items-center gap-3 text-left">
                     {isFull
-                      ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                      : <Circle className="w-4 h-4 text-white/20 shrink-0" />
+                      ? <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                      : <Circle className="w-4 h-4 text-muted-foreground/30 shrink-0" />
                     }
                     <span className="text-xs font-bold text-foreground/80">{step.title}</span>
                     <span className="text-[10px] font-bold text-muted-foreground
-                      bg-white/[0.06] px-1.5 py-0.5 rounded-full ml-1">
+                      bg-black/5 dark:bg-white/[0.06] px-1.5 py-0.5 rounded-full ml-1">
                       {doneCount}/{step.items.length}
                     </span>
                   </div>
@@ -330,7 +356,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                           id={item.id}
                           checked={checked[item.id] || false}
                           onCheckedChange={() => setChecked(p => ({ ...p, [item.id]: !p[item.id] }))}
-                          className="mt-0.5 border-white/20 data-[state=checked]:bg-indigo-500
+                          className="mt-0.5 border-border dark:border-white/20 data-[state=checked]:bg-indigo-500
                             data-[state=checked]:border-indigo-500"
                         />
                         <label htmlFor={item.id}
@@ -359,22 +385,33 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
             onChange={e => setNotes(e.target.value)}
             placeholder="Anotações, justificativas, links..."
             className="w-full h-20 p-3 text-xs text-foreground placeholder:text-muted-foreground/50
-              bg-white/[0.04] border border-white/[0.08] rounded-xl resize-none focus:outline-none
+              bg-black/5 dark:bg-white/[0.04] border border-border rounded-xl resize-none focus:outline-none
               focus:border-indigo-500/50 transition-colors"
           />
-          <div className="mt-3 border-2 border-dashed border-white/[0.08] rounded-xl p-5
-            flex flex-col items-center justify-center gap-2 bg-white/[0.02]
-            hover:border-indigo-500/30 hover:bg-indigo-500/[0.03] transition-all cursor-pointer group">
-            <UploadCloud className="w-5 h-5 text-white/20 group-hover:text-indigo-400 transition-colors" />
+          <label className="mt-3 border-2 border-dashed border-border dark:border-white/[0.08] rounded-xl p-5
+            flex flex-col items-center justify-center gap-2 bg-black/5 dark:bg-white/[0.02]
+            hover:border-indigo-500/30 hover:bg-indigo-500/[0.03] transition-all cursor-pointer group relative">
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              onChange={handleUploadImage} 
+              disabled={isUploading}
+            />
+            {isUploading ? (
+              <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+            ) : (
+              <UploadCloud className="w-5 h-5 text-muted-foreground/30 group-hover:text-indigo-500 transition-colors" />
+            )}
             <p className="text-xs font-semibold text-muted-foreground/60 group-hover:text-muted-foreground">
-              Arrastar imagem · colar link (Ctrl+V)
+              {isUploading ? 'Enviando...' : 'Clique para anexar imagem'}
             </p>
-          </div>
+          </label>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-white/[0.06] shrink-0 bg-white/[0.01]">
+      <div className="p-4 border-t border-border shrink-0 bg-black/5 dark:bg-white/[0.01]">
         <button 
           onClick={() => {
             saveLeadAudit(lead.id, rounded, notes, checked);

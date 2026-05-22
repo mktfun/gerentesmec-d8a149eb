@@ -44,7 +44,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
       {/* Orbs de fundo (Apple Liquid Glass vibe) */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/20 blur-[120px] rounded-full pointer-events-none" />
@@ -55,19 +55,19 @@ export const Login = () => {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md"
       >
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] relative z-10">
+        <div className="bg-card backdrop-blur-xl border border-border p-8 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] relative z-10">
           
           <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6 ring-1 ring-white/10">
+            <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6 ring-1 ring-border">
               <Wrench className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-black text-white text-center tracking-tight">GerentesMec</h1>
-            <p className="text-slate-400 mt-2 text-sm text-center">Acesse a central de monitoramento da rede</p>
+            <h1 className="text-3xl font-black text-foreground text-center tracking-tight">GerentesMec</h1>
+            <p className="text-muted-foreground mt-2 text-sm text-center">Acesse a central de monitoramento da rede</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-300 ml-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-foreground/80 ml-1">
                 E-mail
               </label>
               <input 
@@ -76,12 +76,12 @@ export const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="nome@oficina.com.br"
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                className="w-full bg-muted border border-border rounded-xl px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-300 ml-1">
+              <label className="text-xs font-bold uppercase tracking-wider text-foreground/80 ml-1">
                 Senha
               </label>
               <input 
@@ -90,7 +90,7 @@ export const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-slate-600 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                className="w-full bg-muted border border-border rounded-xl px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
               />
             </div>
 

@@ -81,22 +81,22 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="relative w-full max-w-2xl h-full bg-[#09090b]/80 backdrop-blur-3xl border-l border-white/10 shadow-2xl flex flex-col"
+            className="relative w-full max-w-2xl h-full bg-card/80 backdrop-blur-3xl border-l border-border shadow-2xl flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
+            <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
                   <Cpu className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-white flex items-center gap-2">
-                    Advanced AI Engine <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 text-[10px] uppercase tracking-widest font-bold">DANGER ZONE</span>
+                  <h2 className="text-lg font-black text-foreground flex items-center gap-2">
+                    Advanced AI Engine <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-500 dark:text-rose-400 text-[10px] uppercase tracking-widest font-bold">DANGER ZONE</span>
                   </h2>
                   <p className="text-xs text-muted-foreground">Cost-Efficient Autonomous Routing & Scoring</p>
                 </div>
               </div>
-              <button onClick={onClose} className="p-2 rounded-full hover:bg-white/5 text-muted-foreground hover:text-white transition-colors">
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -121,16 +121,16 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                   <Activity className="w-3.5 h-3.5" /> Automação de Cérebro
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-4">
+                  <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-bold text-white">Auto-Scoring</p>
+                      <p className="text-sm font-bold text-foreground">Auto-Scoring</p>
                       <p className="text-xs text-muted-foreground">Avalia cordialidade e preenche checklists automático.</p>
                     </div>
                     <Switch checked={autoScoring} onCheckedChange={setAutoScoring} />
                   </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-4">
+                  <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-bold text-white">Auto-Pipeline</p>
+                      <p className="text-sm font-bold text-foreground">Auto-Pipeline</p>
                       <p className="text-xs text-muted-foreground">Move cards no funil com base no contexto da conversa.</p>
                     </div>
                     <Switch checked={autoPipeline} onCheckedChange={setAutoPipeline} />
@@ -143,16 +143,16 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                   <Eye className="w-3.5 h-3.5" /> Processamento Multimodal
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-4">
+                  <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-bold text-white">Computer Vision</p>
+                      <p className="text-sm font-bold text-foreground">Computer Vision</p>
                       <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Analisa fotos de orçamentos e veículos (custo extra de tokens).</p>
                     </div>
                     <Switch checked={visionEnabled} onCheckedChange={setVisionEnabled} />
                   </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-4">
+                  <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-bold text-white">Audio Analysis</p>
+                      <p className="text-sm font-bold text-foreground">Audio Analysis</p>
                       <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Transcreve e avalia o tom de voz dos áudios enviados.</p>
                     </div>
                     <Switch checked={audioEnabled} onCheckedChange={setAudioEnabled} />
@@ -166,21 +166,21 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                 </h3>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-white">System Prompt Master</label>
+                  <label className="text-sm font-bold text-foreground">System Prompt Master</label>
                   <p className="text-xs text-muted-foreground">O comportamento fundamental da IA. Este prompt instrui como o LLM deve se comportar ao ler um histórico de mensagens.</p>
                   <textarea 
                     value={systemPrompt} onChange={e => setSystemPrompt(e.target.value)}
                     placeholder="Você é um gerente de qualidade sênior avaliando conversas..."
-                    className="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-indigo-300 focus:border-indigo-500 outline-none resize-none"
+                    className="w-full h-32 bg-muted border border-border rounded-xl p-4 text-xs font-mono text-indigo-500 dark:text-indigo-300 focus:border-indigo-500 outline-none resize-none"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-white">JSON de Critérios de Avaliação (Checklist Dinâmico)</label>
-                  <p className="text-xs text-muted-foreground">Defina os pesos de cada etapa para a função <code className="bg-white/10 px-1 rounded">save_lead_audit</code>.</p>
+                  <label className="text-sm font-bold text-foreground">JSON de Critérios de Avaliação (Checklist Dinâmico)</label>
+                  <p className="text-xs text-muted-foreground">Defina os pesos de cada etapa para a função <code className="bg-black/10 dark:bg-white/10 px-1 rounded">save_lead_audit</code>.</p>
                   <textarea 
                     value={criteria} onChange={e => setCriteria(e.target.value)}
-                    className="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-emerald-300 focus:border-emerald-500 outline-none resize-none"
+                    className="w-full h-32 bg-muted border border-border rounded-xl p-4 text-xs font-mono text-emerald-500 dark:text-emerald-300 focus:border-emerald-500 outline-none resize-none"
                   />
                 </div>
               </div>
@@ -188,7 +188,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-white/10 bg-black/20 backdrop-blur-xl shrink-0 flex items-center justify-between">
+            <div className="p-6 border-t border-border bg-black/5 dark:bg-black/20 backdrop-blur-xl shrink-0 flex items-center justify-between">
               <p className="text-xs text-muted-foreground max-w-[60%]">
                 <AlertTriangle className="w-3 h-3 inline mr-1 text-amber-500" />
                 Alterações aqui impactam o roteamento de LLMs. Certifique-se de salvar antes de fechar.
