@@ -17,7 +17,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { lead_id, message_content, message_id, media_url, media_type } = await req.json();
+    const payload = await req.json();
+    console.log("[AI-EVALUATOR] Iniciando avaliação para payload:", JSON.stringify(payload));
+    const { message_content, lead_id, message_id, media_url, media_type } = payload;
 
     if (!lead_id || !message_content) {
       return new Response(JSON.stringify({ error: 'Missing lead_id or message_content' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
@@ -102,6 +104,7 @@ serve(async (req) => {
     // Preparar payload de mensagem
     let userMessageContent: any = prompt;
     
+    console.log("[AI-EVALUATOR] Chamando LLM (Gemini)...");
     // Se for OpenAI e tiver imagem, usar formato array vision
     const isImage = media_url && media_type?.startsWith('image');
     if (apiKey.startsWith("sk-") && isImage) {
@@ -202,8 +205,16 @@ serve(async (req) => {
     if (aiSettings.features?.auto_pipeline && mockOutput.funnel_stage) {
       updatePayload.funnel_stage = mockOutput.funnel_stage;
     }
+    
+    console.log("[AI-EVALUATOR] Resultado final da LLM parseado:", JSON.stringify(mockOutput));
+    console.log("[AI-EVALUATOR] Salvando no banco de dados (leads). Payload:", JSON.stringify(updatePayload));
 
-    await supabaseClient.from('leads').update(updatePayload).eq('id', lead_id);
+    const { error: updateError } = await supabaseClient.from('leads').update(updatePayload).eq('id', lead_id);
+    if (updateError) {
+      console.error("[AI-EVALUATOR] ERRO CRÍTICO no banco de dados [leads]:", updateError);
+      throw new Error("Failed to update lead: " + updateError.message);
+    }
+    console.log("[AI-EVALUATOR] Update na tabela 'leads' com sucesso!");
 
     // 6. Atualiza a Memoization (Lead Memories)
     await supabaseClient.from('lead_memories').upsert({
