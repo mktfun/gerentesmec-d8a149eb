@@ -26,6 +26,7 @@ const Relatorios = () => {
   const [selectedUnit, setSelectedUnit] = useState<string>('all');
   const [scoreOrder, setScoreOrder] = useState<string>('none');
   const [slaOrder, setSlaOrder] = useState<string>('none');
+  const [expandedManager, setExpandedManager] = useState<string | null>(null);
 
   // Audit Modal
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -135,12 +136,12 @@ const Relatorios = () => {
   const hasData = currentLeads.length > 0;
   const auditedLeads = currentLeads.filter(l => l.score !== null);
 
-  // Performance por Etapa
   const managerPerformanceMap: Record<string, {
     managerName: string;
     unitName: string;
     e1: number[]; e2: number[]; e3: number[]; e4: number[];
     scores: number[];
+    items: Record<string, number[]>;
     totalLeads: number;
   }> = {};
 
@@ -152,7 +153,11 @@ const Relatorios = () => {
       managerPerformanceMap[managerId] = {
         managerName: manager?.name || 'Sem Gerente',
         unitName: unit?.name || 'Sem Unidade',
-        e1: [], e2: [], e3: [], e4: [], scores: [], totalLeads: 0
+        e1: [], e2: [], e3: [], e4: [], scores: [], totalLeads: 0,
+        items: {
+          '1a': [], '1b': [], '2a': [], '2b': [], '2c': [],
+          '3a': [], '3b': [], '3c': [], '4a': [], '4b': []
+        }
       };
     }
     const mp = managerPerformanceMap[managerId];
@@ -160,6 +165,12 @@ const Relatorios = () => {
     
     const checklist = lead.audit_checklist as Record<string, boolean> | null;
     if (checklist) {
+      Object.keys(checklist).forEach(key => {
+        if (mp.items[key]) {
+          mp.items[key].push(checklist[key] ? 1 : 0);
+        }
+      });
+      
       // E1: Cordialidade (1a, 1b)
       let e1Val = ((checklist['1a'] ? 1 : 0) + (checklist['1b'] ? 1 : 0)) / 2 * 100;
       mp.e1.push(e1Val);
@@ -183,15 +194,23 @@ const Relatorios = () => {
 
   const customAvg = (nums: number[]) => (nums.length > 0) ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
 
-  const managerPerformance = Object.values(managerPerformanceMap).map(mp => ({
-    managerName: mp.managerName,
-    unitName: mp.unitName,
-    e1: round(customAvg(mp.e1)),
-    e2: round(customAvg(mp.e2)),
-    e3: round(customAvg(mp.e3)),
-    e4: round(customAvg(mp.e4)),
-    score: round(customAvg(mp.scores))
-  })).sort((a, b) => (b.score || 0) - (a.score || 0));
+  const managerPerformance = Object.values(managerPerformanceMap).map(mp => {
+    const itemAvgs: Record<string, number | null> = {};
+    Object.keys(mp.items).forEach(key => {
+      itemAvgs[key] = round((customAvg(mp.items[key]) || 0) * 100);
+    });
+    
+    return {
+      managerName: mp.managerName,
+      unitName: mp.unitName,
+      e1: round(customAvg(mp.e1)),
+      e2: round(customAvg(mp.e2)),
+      e3: round(customAvg(mp.e3)),
+      e4: round(customAvg(mp.e4)),
+      score: round(customAvg(mp.scores)),
+      itemAvgs
+    };
+  }).sort((a, b) => (b.score || 0) - (a.score || 0));
 
   const ScoreBadge = ({ score }: { score: number | null }) => {
     if (score === null) return <span className="text-white/20">—</span>;
@@ -369,15 +388,94 @@ const Relatorios = () => {
             <tbody className="divide-y divide-border">
               {managerPerformance.length > 0 ? (
                 managerPerformance.map((mp, idx) => (
-                  <tr key={idx} className="hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors">
-                    <td className="px-8 py-4 font-bold text-foreground">{mp.managerName}</td>
-                    <td className="px-8 py-4 text-muted-foreground font-semibold">{mp.unitName}</td>
-                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e1} /></td>
-                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e2} /></td>
-                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e3} /></td>
-                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e4} /></td>
-                    <td className="px-8 py-4 text-center"><ScoreBadge score={mp.score} /></td>
-                  </tr>
+                  <React.Fragment key={idx}>
+                    <tr 
+                      onClick={() => setExpandedManager(expandedManager === mp.managerName ? null : mp.managerName)}
+                      className="hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                    >
+                      <td className="px-8 py-4 font-bold text-foreground flex items-center gap-2">
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground/50 transition-transform ${expandedManager === mp.managerName ? 'rotate-180' : ''}`} />
+                        {mp.managerName}
+                      </td>
+                      <td className="px-8 py-4 text-muted-foreground font-semibold">{mp.unitName}</td>
+                      <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e1} /></td>
+                      <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e2} /></td>
+                      <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e3} /></td>
+                      <td className="px-8 py-4 text-center"><ScoreBadge score={mp.e4} /></td>
+                      <td className="px-8 py-4 text-center"><ScoreBadge score={mp.score} /></td>
+                    </tr>
+                    
+                    {/* Linha Expandida: Detalhamento dos Itens */}
+                    {expandedManager === mp.managerName && (
+                      <tr className="bg-black/[0.02] dark:bg-white/[0.02] border-b border-border shadow-inner">
+                        <td colSpan={7} className="px-8 py-6">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            
+                            {/* E1 */}
+                            <div className="space-y-3">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E1. Cordialidade</h4>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">1a. Cordial e respeitoso</span>
+                                <span className="font-bold">{mp.itemAvgs['1a']}%</span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">1b. Registrou no WhatsApp</span>
+                                <span className="font-bold">{mp.itemAvgs['1b']}%</span>
+                              </div>
+                            </div>
+
+                            {/* E2 */}
+                            <div className="space-y-3">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E2. Orçamento+Vídeo</h4>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">2a. Enviou link/valor claro</span>
+                                <span className="font-bold">{mp.itemAvgs['2a']}%</span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">2b. Enviou evidência visual</span>
+                                <span className="font-bold">{mp.itemAvgs['2b']}%</span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">2c. Explicou consequências</span>
+                                <span className="font-bold">{mp.itemAvgs['2c']}%</span>
+                              </div>
+                            </div>
+
+                            {/* E3 */}
+                            <div className="space-y-3">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E3. Upsell Mecânico</h4>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">3a. Ofereceu melhoria (Upsell)</span>
+                                <span className="font-bold">{mp.itemAvgs['3a']}%</span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">3b. Enviou evidência visual extra</span>
+                                <span className="font-bold">{mp.itemAvgs['3b']}%</span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">3c. Explicou necessidade extra</span>
+                                <span className="font-bold">{mp.itemAvgs['3c']}%</span>
+                              </div>
+                            </div>
+
+                            {/* E4 */}
+                            <div className="space-y-3">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E4. Encerramento</h4>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">4a. Enviou agradecimento</span>
+                                <span className="font-bold">{mp.itemAvgs['4a']}%</span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-foreground/70">4b. Pediu Google Reviews</span>
+                                <span className="font-bold">{mp.itemAvgs['4b']}%</span>
+                              </div>
+                            </div>
+                            
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               ) : (
                 <tr>
