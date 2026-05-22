@@ -163,119 +163,103 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       {/* RIGHT COLUMN: AUDIT DOSSIER */}
       <div className="w-full lg:w-[420px] xl:w-[460px] shrink-0 flex flex-col h-full bg-card">
 
-        {/* Header */}
-      <div className="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
-        <div>
-          <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-            Dossiê: {lead.customer_name}
-            {/* @ts-ignore */}
-            {lead.is_cross_unit && (
-              <span className="bg-amber-500/10 text-amber-500 text-[9px] px-1.5 py-0.5 rounded font-bold border border-amber-500/20 uppercase tracking-wider" title="Este contato também aparece em outra unidade">Cross-Unit</span>
-            )}
-          </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">{lead.customer_phone}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {lead.chatwoot_conversation_id && (() => {
-            const baseUrl = integrationSettings?.chatwoot_url || 'https://app.chatwoot.com';
-            const secureBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
-            return (
-              <a 
-                href={`${secureBaseUrl}/app/accounts/${integrationSettings?.chatwoot_account_id || 1}/conversations/${lead.chatwoot_conversation_id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors focus-visible:outline-indigo-500"
-                title="Abrir Conversa"
-              >
-                <ExternalLink className="w-4 h-4 text-muted-foreground" />
-              </a>
-            );
-          })()}
-          <button onClick={onClose}
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10]
-              flex items-center justify-center transition-colors focus-visible:outline-indigo-500">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-      </div>
-
-      {/* Score ring */}
-      <div className="px-6 py-5 border-b border-border flex items-center gap-5 shrink-0">
-        <div className="relative w-[88px] h-[88px] shrink-0">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="38" stroke="rgba(255,255,255,0.06)" strokeWidth="7" fill="none" />
-            <motion.circle
-              cx="50" cy="50" r="38"
-              stroke={scoreColor}
-              strokeWidth="7"
-              fill="none"
-              strokeLinecap="round"
-              initial={{ strokeDasharray: `0 ${circumference}` }}
-              animate={{ strokeDasharray: `${(rounded / 100) * circumference} ${circumference}` }}
-              transition={{ duration: 0.9, ease: 'easeOut' }}
-              style={{ filter: `drop-shadow(0 0 8px ${scoreColor}60)` }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <motion.span
-              key={rounded}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-xl font-black text-foreground leading-none"
-            >{rounded}</motion.span>
-            <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Score</span>
-          </div>
-        </div>
-        <div>
-          <p className="text-xs font-bold text-foreground">Qualidade do Atendimento</p>
-          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-            Marque cada sub-item para calcular a nota proporcional.
-          </p>
-        </div>
-      </div>
-
-      {/* Inline Ticket & Vehicle Inputs */}
-      <div className="px-6 py-4 border-b border-border bg-black/5 dark:bg-white/[0.01] shrink-0 flex flex-col gap-4">
-        <div>
-          <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-            Orçamento Estimado (R$)
-          </label>
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-emerald-500" />
-            <input
-              type="number"
-              value={ticketValueStr}
-              onChange={(e) => setTicketValueStr(e.target.value)}
-              onBlur={handleTicketBlur}
-              placeholder="Ex: 1500"
-              className="flex-1 bg-transparent border-b border-black/10 dark:border-white/[0.1] focus:border-emerald-500
-                text-lg font-black text-emerald-500 dark:text-emerald-400 placeholder:text-muted-foreground/30 
-                focus:outline-none transition-colors py-1"
-            />
-          </div>
-        </div>
-        
-        <div>
-          <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-            Veículo do Cliente
-          </label>
-          <div className="flex items-center gap-2">
-            <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 15v2c0 .6.4 1 1 1h2m14 0a2 2 0 00-4 0m4 0a2 2 0 01-4 0m-10 0a2 2 0 00-4 0m4 0a2 2 0 01-4 0" />
+        {/* Header — score ring inline com título */}
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 gap-3">
+          {/* Score ring compacto */}
+          <div className="relative w-[56px] h-[56px] shrink-0">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" stroke="rgba(255,255,255,0.06)" strokeWidth="9" fill="none" />
+              <motion.circle
+                cx="50" cy="50" r="38"
+                stroke={scoreColor}
+                strokeWidth="9"
+                fill="none"
+                strokeLinecap="round"
+                initial={{ strokeDasharray: `0 ${circumference}` }}
+                animate={{ strokeDasharray: `${(rounded / 100) * circumference} ${circumference}` }}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
+                style={{ filter: `drop-shadow(0 0 6px ${scoreColor}70)` }}
+              />
             </svg>
-            <input
-              type="text"
-              value={vehicleStr}
-              onChange={(e) => setVehicleStr(e.target.value)}
-              onBlur={handleVehicleBlur}
-              placeholder="Ex: Honda Civic 2020"
-              className="flex-1 bg-transparent border-b border-black/10 dark:border-white/[0.1] focus:border-indigo-500
-                text-sm font-semibold text-foreground placeholder:text-muted-foreground/30 
-                focus:outline-none transition-colors py-1"
-            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <motion.span key={rounded} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                className="text-sm font-black text-foreground leading-none">{rounded}</motion.span>
+              <span className="text-[7px] text-muted-foreground font-bold uppercase tracking-wider">pts</span>
+            </div>
+          </div>
+
+          {/* Nome + telefone */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-black text-foreground truncate flex items-center gap-1.5">
+              {lead.customer_name}
+              {/* @ts-ignore */}
+              {lead.is_cross_unit && (
+                <span className="bg-amber-500/10 text-amber-500 text-[8px] px-1 py-0.5 rounded font-bold border border-amber-500/20 uppercase tracking-wider shrink-0">Cross</span>
+              )}
+            </h3>
+            <p className="text-[11px] text-muted-foreground truncate">{lead.customer_phone}</p>
+          </div>
+
+          {/* Ações */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {lead.chatwoot_conversation_id && (() => {
+              const baseUrl = integrationSettings?.chatwoot_url || 'https://app.chatwoot.com';
+              const secureBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
+              return (
+                <a
+                  href={`${secureBaseUrl}/app/accounts/${integrationSettings?.chatwoot_account_id || 1}/conversations/${lead.chatwoot_conversation_id}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors"
+                  title="Abrir no Chatwoot"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                </a>
+              );
+            })()}
+            <button onClick={onClose}
+              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors">
+              <X className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
           </div>
         </div>
-      </div>
+
+        {/* Ticket + Veículo — 2 colunas compactas numa única linha */}
+        <div className="px-4 py-2.5 border-b border-border shrink-0 grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Orçamento (R$)</label>
+            <div className="flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <input
+                type="number"
+                value={ticketValueStr}
+                onChange={(e) => setTicketValueStr(e.target.value)}
+                onBlur={handleTicketBlur}
+                placeholder="1500"
+                className="w-full bg-transparent border-b border-black/10 dark:border-white/[0.1] focus:border-emerald-500
+                  text-sm font-black text-emerald-500 dark:text-emerald-400 placeholder:text-muted-foreground/30
+                  focus:outline-none transition-colors py-0.5"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Veículo</label>
+            <div className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 002 15v2c0 .6.4 1 1 1h2m14 0a2 2 0 00-4 0m4 0a2 2 0 01-4 0m-10 0a2 2 0 00-4 0m4 0a2 2 0 01-4 0" />
+              </svg>
+              <input
+                type="text"
+                value={vehicleStr}
+                onChange={(e) => setVehicleStr(e.target.value)}
+                onBlur={handleVehicleBlur}
+                placeholder="Ex: Civic 2020"
+                className="w-full bg-transparent border-b border-black/10 dark:border-white/[0.1] focus:border-indigo-500
+                  text-sm font-semibold text-foreground placeholder:text-muted-foreground/30
+                  focus:outline-none transition-colors py-0.5"
+              />
+            </div>
+          </div>
+        </div>
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
