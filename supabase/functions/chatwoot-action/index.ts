@@ -39,10 +39,24 @@ serve(async (req) => {
       : `https://${settings.chatwoot_url.replace(/\/$/, '')}`;
 
     if (action === 'add_labels') {
+      // 1. Fetch existing labels so we don't overwrite them
+      const getRes = await fetch(`${baseUrl}/api/v1/accounts/${settings.chatwoot_account_id}/conversations/${conversation_id}/labels`, {
+        method: 'GET',
+        headers: { 'api_access_token': settings.chatwoot_token },
+      });
+      let existingLabels: string[] = [];
+      if (getRes.ok) {
+        const getLabelData = await getRes.json();
+        existingLabels = getLabelData.payload || [];
+      }
+
+      // 2. Merge with new labels (deduplicate)
+      const mergedLabels = Array.from(new Set([...existingLabels, ...(labels || [])]));
+
       const response = await fetch(`${baseUrl}/api/v1/accounts/${settings.chatwoot_account_id}/conversations/${conversation_id}/labels`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'api_access_token': settings.chatwoot_token },
-        body: JSON.stringify({ labels: labels || [] })
+        body: JSON.stringify({ labels: mergedLabels })
       });
 
       if (!response.ok) {

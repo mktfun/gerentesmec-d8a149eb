@@ -200,9 +200,15 @@ serve(async (req) => {
     // 5. Check if Lead already exists
     const { data: existingLead } = await supabase
       .from('leads')
-      .select('id, last_client_message_at, total_response_time_minutes, response_count')
+      .select('id, last_client_message_at, total_response_time_minutes, response_count, audit_checklist')
       .eq('chatwoot_conversation_id', conversationId)
       .maybeSingle()
+
+    // 5.a If the lead was deleted by the operator (soft-delete), ignore this payload entirely.
+    if (existingLead && (existingLead.audit_checklist as any)?.is_deleted) {
+      console.log('[webhook] Lead is soft-deleted, ignoring payload for conversationId:', conversationId);
+      return new Response(JSON.stringify({ message: 'Lead deleted, payload ignored' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
+    }
 
     const now = new Date().toISOString()
     const nowTime = new Date().getTime();
