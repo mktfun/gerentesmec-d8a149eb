@@ -8,6 +8,13 @@ const TvDashboard: React.FC = () => {
   const { leads, units, setIsTvMode, businessHours } = useAppData();
   const [page, setPage] = useState(0);
   const [intervalTime, setIntervalTime] = useState(15000); // 15s default
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+
+  // Clock Timer
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const ITEMS_PER_PAGE = 3;
   const totalPages = Math.ceil(units.length / ITEMS_PER_PAGE);
@@ -31,9 +38,9 @@ const TvDashboard: React.FC = () => {
     setIsTvMode(false);
   };
 
-  type DateFilter = 'today' | 'yesterday' | '7d' | 'month';
+  type DateFilter = 'all' | 'today' | 'yesterday' | '7d' | 'month';
   const [dateFilter, setDateFilter] = useState<DateFilter>(() => {
-    return (localStorage.getItem('tv_date_filter') as DateFilter) || 'today';
+    return (localStorage.getItem('tv_date_filter') as DateFilter) || 'all';
   });
 
   useEffect(() => {
@@ -48,7 +55,8 @@ const TvDashboard: React.FC = () => {
       case 'yesterday': return startOfDay.getTime() - 86400000;
       case '7d': return startOfDay.getTime() - (86400000 * 7);
       case 'month': return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-      default: return startOfDay.getTime();
+      case 'all': return 0;
+      default: return 0;
     }
   };
 
@@ -123,7 +131,7 @@ const TvDashboard: React.FC = () => {
           <div>
             <h1 className="text-xl font-black tracking-tight text-foreground">COMANDO CENTRAL</h1>
             <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-              Live Feed • {new Date().toLocaleTimeString('pt-BR')}
+              Live Feed • {currentTime.toLocaleTimeString('pt-BR')}
             </p>
           </div>
         </div>
@@ -132,7 +140,7 @@ const TvDashboard: React.FC = () => {
           {/* Date Filter */}
           <div className="flex items-center bg-black/5 dark:bg-white/5 rounded-full p-1 border border-border">
             <Calendar className="w-4 h-4 text-muted-foreground ml-3 mr-1" />
-            {(['today', 'yesterday', '7d', 'month'] as const).map(f => (
+            {(['all', 'today', 'yesterday', '7d', 'month'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setDateFilter(f)}
@@ -140,7 +148,7 @@ const TvDashboard: React.FC = () => {
                   dateFilter === f ? 'bg-indigo-500/20 text-indigo-400' : 'text-white/40 hover:text-white/80'
                 }`}
               >
-                {f === 'today' ? 'Hoje' : f === 'yesterday' ? 'Ontem' : f === '7d' ? '7 Dias' : 'Mês'}
+                {f === 'all' ? 'Tudo' : f === 'today' ? 'Hoje' : f === 'yesterday' ? 'Ontem' : f === '7d' ? '7 Dias' : 'Mês'}
               </button>
             ))}
           </div>
