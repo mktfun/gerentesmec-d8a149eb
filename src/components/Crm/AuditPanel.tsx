@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink } from 'lucide-react';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -52,6 +52,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   const [notes, setNotes] = useState('');
   const [ticketValueStr, setTicketValueStr] = useState('');
   const [vehicleStr, setVehicleStr] = useState('');
+  const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
 
   useEffect(() => {
     const checklist = (lead as any).audit_checklist;
@@ -156,7 +157,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
 
       {/* LEFT COLUMN: CHAT HISTORY */}
       <div className="flex-1 border-b lg:border-b-0 lg:border-r border-border overflow-hidden min-w-[320px]">
-        <ChatHistoryView lead={lead} messages={realMessages} isLoading={loadingChat} />
+        <ChatHistoryView lead={lead} messages={realMessages} isLoading={loadingChat} highlightMessageId={highlightMessageId} />
       </div>
 
       {/* RIGHT COLUMN: AUDIT DOSSIER */}
@@ -360,11 +361,25 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                             data-[state=checked]:border-indigo-500"
                         />
                         <label htmlFor={item.id}
-                          className={`text-xs leading-relaxed cursor-pointer transition-colors ${
+                          className={`text-xs leading-relaxed cursor-pointer transition-colors flex-1 ${
                             checked[item.id] ? 'text-foreground font-medium' : 'text-muted-foreground'
                           }`}>
                           {item.text}
                         </label>
+                        {checked[item.id] && lead.audit_checklist_messages?.[item.id] && (
+                          <button
+                            title="Ver evidência no chat"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setHighlightMessageId(lead.audit_checklist_messages![item.id]);
+                              // Reset highlight after a while to allow clicking again
+                              setTimeout(() => setHighlightMessageId(null), 3000);
+                            }}
+                            className="p-1.5 rounded-full bg-emerald-500/10 text-emerald-500/60 hover:text-emerald-500 hover:bg-emerald-500/20 transition-colors"
+                          >
+                            <Target className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

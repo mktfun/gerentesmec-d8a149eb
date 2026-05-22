@@ -36,19 +36,25 @@ interface Props {
   lead: Lead;
   messages: ChatMessage[];
   isLoading?: boolean;
+  highlightMessageId?: string | null;
 }
 
-const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
+const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlightMessageId }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const [expandedAudit, setExpandedAudit] = React.useState<string | null>(null);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom or to highlighted message
   useEffect(() => {
-    if (scrollRef.current) {
+    if (highlightMessageId && messageRefs.current[highlightMessageId]) {
+      // Scroll smoothly to the specific highlighted message
+      messageRefs.current[highlightMessageId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (scrollRef.current && !highlightMessageId) {
+      // Normal auto-scroll to bottom
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, expandedAudit]);
+  }, [messages, expandedAudit, highlightMessageId]);
 
   return (
     <div className="flex flex-col h-full bg-background dark:bg-[#0a0a10] relative overflow-hidden">
@@ -214,11 +220,21 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                 <React.Fragment key={msg.id}>
                   {dividerEl}
                   <motion.div
+                    ref={(el) => (messageRefs.current[msg.id] = el)}
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
-                    className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'}`}
+                    className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'} ${highlightMessageId === msg.id ? 'relative z-20' : ''}`}
                   >
+                    {/* Highlight Glow Effect */}
+                    {highlightMessageId === msg.id && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: [0, 1, 0.5, 0], scale: [0.9, 1.05, 1.1, 1.2] }}
+                        transition={{ duration: 2, ease: "easeOut" }}
+                        className={`absolute inset-0 -m-4 rounded-3xl z-[-1] pointer-events-none blur-xl ${isUser ? 'bg-indigo-500/30' : 'bg-emerald-500/30'}`} 
+                      />
+                    )}
                     {/* Avatar for Contact/Bot */}
                     {!isUser && (
                       <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center mb-1
@@ -269,7 +285,10 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading }) => {
                         ${isUser 
                           ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
                           : 'bg-black/5 dark:bg-white/[0.04] border border-border text-foreground/80 rounded-2xl rounded-bl-sm'
-                      }`}>
+                        }
+                        ${highlightMessageId === msg.id ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-background shadow-[0_0_30px_rgba(16,185,129,0.3)]' : ''}
+                        transition-all duration-500
+                      `}>
                         <div className="pb-3 pr-2">
                           {msg.content || (msg.media_url ? 'Mídia anexada' : '')}
                         </div>

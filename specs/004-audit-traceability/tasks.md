@@ -1,0 +1,5 @@
+- [ ] 1. Adicionar `audit_checklist_messages` na tabela `leads` no Supabase (se necessário rodar SQL).
+- [ ] 2. Modificar `ai-autonomous-evaluator/index.ts` para capturar os checks que viraram `true` na mensagem atual e gravar no campo `audit_checklist_messages`.
+- [ ] 3. Atualizar o frontend: Tipagem de `Lead` (`AppDataContext.tsx`) para incluir `audit_checklist_messages: Record<string, string>`.
+- [ ] 4. Atualizar `ChatHistoryView.tsx` para aceitar `highlightMessageId` e fazer o scroll + highlight visual da mensagem alvo.
+- [ ] 5. Atualizar `AuditPanel.tsx` e injetar a prop para `ChatHistoryView`. Adicionar os ícones nos checkboxes e acionar o state de destaque ao clicar.

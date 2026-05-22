@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/utils/businessHours';
 
-export type Lead = Database['public']['Tables']['leads']['Row'];
+export type Lead = Database['public']['Tables']['leads']['Row'] & {
+  audit_checklist_messages?: Record<string, string>;
+};
 export type Manager = Database['public']['Tables']['managers']['Row'];
 export type Unit = Database['public']['Tables']['units']['Row'];
 export type AiSettings = Database['public']['Tables']['ai_settings']['Row'] & {

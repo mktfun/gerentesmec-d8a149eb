@@ -145,13 +145,28 @@ serve(async (req) => {
 
     const mockOutput = JSON.parse(llmOutputText);
 
-    // 5. Atualiza o DB (Score, Funil, Ticket, Dossiê, Veículo, Checklist)
+    // 5. Rastreabilidade de Auditoria: descobrir quais checks viraram true agora
+    const { data: leadData } = await supabaseClient.from('leads').select('audit_checklist, audit_checklist_messages').eq('id', lead_id).single();
+    const currentChecklist = leadData?.audit_checklist || {};
+    const newMessagesMap = leadData?.audit_checklist_messages || {};
+
+    if (mockOutput.audit_checklist) {
+      for (const key of Object.keys(mockOutput.audit_checklist)) {
+        if (mockOutput.audit_checklist[key] === true && !currentChecklist[key]) {
+            // Este item do checklist ficou VERDE por conta desta mensagem!
+            newMessagesMap[key] = message_id;
+        }
+      }
+    }
+
+    // 6. Atualiza o DB (Score, Funil, Ticket, Dossiê, Veículo, Checklist e Traceability)
     const updatePayload: any = {
       score: mockOutput.score,
       ticket_value: mockOutput.ticket_value,
       customer_vehicle: mockOutput.customer_vehicle,
       closing_summary: mockOutput.closing_summary,
-      audit_checklist: mockOutput.audit_checklist
+      audit_checklist: mockOutput.audit_checklist,
+      audit_checklist_messages: newMessagesMap
     };
     if (aiSettings.features?.auto_pipeline && mockOutput.funnel_stage) {
       updatePayload.funnel_stage = mockOutput.funnel_stage;
