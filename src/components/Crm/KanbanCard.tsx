@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Clock, AlertCircle, DollarSign, GripVertical, FileText, Trash2 } from 'lucide-react';
 import { useAppData, Lead, FunnelStage } from '@/context/AppDataContext';
+import { isLeadDanger } from '@/utils/metrics';
 
 interface Props {
   lead: Lead;
@@ -25,7 +26,7 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
   let manager = managers.find(m => m.id === lead.manager_id);
   if (!manager) manager = managers.find(m => m.unit_id === lead.unit_id);
   const unit = units.find(u => u.id === lead.unit_id);
-  const isDanger = lead.sla_status === 'danger';
+  const isDanger = isLeadDanger(lead, undefined, 20);
 
   const getElapsed = () => {
     const ms = new Date().getTime() - new Date(lead.last_message_at).getTime();

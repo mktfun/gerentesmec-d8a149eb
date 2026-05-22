@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, CheckCircle2, AlertTriangle, Globe } from 'lucide-react';
 import { Unit, Lead } from '@/context/AppDataContext';
+import { isLeadDanger } from '@/utils/metrics';
 
 interface Props {
   units: Unit[];
@@ -31,7 +32,7 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
     const today0 = new Date();
     today0.setHours(0,0,0,0);
     const todayLeads = unitLeads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime());
-    const dangerCount = todayLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length;
+    const dangerCount = todayLeads.filter(l => isLeadDanger(l, undefined, 20)).length;
 
     // Score
     const scored = unitLeads.filter(l => l.score !== null);

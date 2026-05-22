@@ -4,6 +4,7 @@ import { Activity, ShieldCheck, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import KanbanBoard from '@/components/Vault/KanbanBoard';
 import { useAppData } from '@/context/AppDataContext';
+import { isLeadDanger } from '@/utils/metrics';
 
 export interface CycleMock {
   id: string;
@@ -31,7 +32,7 @@ const Vault = () => {
       status: lead.funnel_stage === 'lead_new' ? 'waiting' : lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost' ? 'closed' : 'in_progress',
       wait_time_minutes: lead.wait_time_minutes,
       steps_completed: lead.score !== null ? 4 : 0,
-      is_sla_breached: lead.sla_status === 'danger'
+      is_sla_breached: isLeadDanger(lead, undefined, 20),
     };
   });
 

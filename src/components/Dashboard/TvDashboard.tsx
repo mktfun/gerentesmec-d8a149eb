@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle, Calendar } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
-import { calculateTmr } from '@/utils/metrics';
+import { calculateTmr, isLeadDanger } from '@/utils/metrics';
 
 const TvDashboard: React.FC = () => {
   const { leads, units, setIsTvMode, businessHours } = useAppData();
@@ -98,7 +98,7 @@ const TvDashboard: React.FC = () => {
     }
 
     const tmrFallback = calculateTmr(periodLeads, businessHours);
-    const dangerCount = periodLeads.filter(l => calculateTmr([l], businessHours) > 20 || l.sla_status === 'danger').length;
+    const dangerCount = periodLeads.filter(l => isLeadDanger(l, businessHours, 20)).length;
 
     return {
       score,

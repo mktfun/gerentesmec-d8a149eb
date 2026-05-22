@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2 } from 'lucide-react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
+import { isLeadDanger } from '@/utils/metrics';
 import { DropResult } from '@hello-pangea/dnd';
 import AuditPanel from '@/components/Crm/AuditPanel';
 import KanbanView from '@/components/Crm/KanbanView';
@@ -47,10 +48,10 @@ const Crm = () => {
       })
     : filteredLeads;
 
-  const displayLeads = searchedLeads.filter(l => slaFilter ? l.sla_status === 'danger' : true);
+  const displayLeads = searchedLeads.filter(l => slaFilter ? isLeadDanger(l, undefined, 20) : true);
 
-  const danger  = displayLeads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
-  const active  = displayLeads.filter(l => l.sla_status !== 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
+  const danger  = displayLeads.filter(l => isLeadDanger(l, undefined, 20));
+  const active  = displayLeads.filter(l => !isLeadDanger(l, undefined, 20) && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
   const closed  = displayLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
 
   const isAllSelected = displayLeads.length > 0 && selectedForDeletion.length === displayLeads.length;
@@ -79,7 +80,7 @@ const Crm = () => {
   const LeadListCard = ({ lead, i }: { lead: Lead; i: number }) => {
     const manager = managers.find(m => m.id === lead.manager_id) || managers.find(m => m.unit_id === lead.unit_id);
     const unit    = units.find(u => u.id === lead.unit_id);
-    const isDanger  = lead.sla_status === 'danger';
+    const isDanger  = isLeadDanger(lead, undefined, 20);
     const isSelected = selectedLead?.id === lead.id;
     const isChecked = selectedForDeletion.includes(lead.id);
 
@@ -228,11 +229,11 @@ const Crm = () => {
           >
             <AlertTriangle className={`w-3.5 h-3.5 ${slaFilter ? 'text-rose-500' : 'text-muted-foreground/50'}`} />
             Apenas Urgentes
-            {leads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length > 0 && (
+            {leads.filter(l => isLeadDanger(l, undefined, 20)).length > 0 && (
               <span className={`ml-1 px-1.5 py-0.5 rounded-md text-[9px] ${
                 slaFilter ? 'bg-rose-500 text-white' : 'bg-rose-500/20 text-rose-500'
               }`}>
-                {leads.filter(l => l.sla_status === 'danger' && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost').length}
+                {leads.filter(l => isLeadDanger(l, undefined, 20)).length}
               </span>
             )}
           </button>

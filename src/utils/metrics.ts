@@ -57,6 +57,47 @@ export const calculateTmr = (
   return Math.round(totalWait / leadsList.length);
 };
 
+export const isLeadDanger = (
+  l: Lead,
+  businessHours?: BusinessHoursConfig | null,
+  slaMinutes = 20
+) => {
+  if (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') return false;
+
+  const now = new Date();
+  // @ts-ignore
+  const snoozedUntil = l.chatwoot_snoozed_until;
+  if (snoozedUntil && new Date(snoozedUntil).getTime() > now.getTime()) return false;
+
+  // @ts-ignore
+  const cTime = l.last_client_message_at ? new Date(l.last_client_message_at).getTime() : 0;
+  // @ts-ignore
+  const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
+  
+  if (aTime >= cTime && cTime > 0) {
+    return false; // Agent replied, no danger
+  }
+
+  let wait = 0;
+  // @ts-ignore
+  const waitingSince: string | null = l.chatwoot_waiting_since;
+
+  if (waitingSince) {
+    const from = new Date(waitingSince);
+    wait = businessHours
+      ? getWorkMinutes(from, now, businessHours)
+      : Math.round((now.getTime() - from.getTime()) / 60000);
+  } else if (cTime > aTime) {
+    const from = new Date(cTime);
+    wait = businessHours
+      ? getWorkMinutes(from, now, businessHours)
+      : Math.round((now.getTime() - cTime) / 60000);
+  }
+
+  // Se o tempo dinâmico ultrapassou a SLA, ou se o banco diz que é danger E ele não foi respondido (aTime >= cTime tratado acima)
+  return wait > slaMinutes || l.sla_status === 'danger';
+};
+
 /**
  * Retorna os leads em status de perigo (aguardando > SLA).
  * Com businessHours configurado, o SLA só conta tempo de expediente.
@@ -66,38 +107,5 @@ export const calculateDangerLeads = (
   businessHours?: BusinessHoursConfig | null,
   slaMinutes = 20
 ) => {
-  const now = new Date();
-
-  return leadsList.filter(l => {
-    if (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') return false;
-
-    // @ts-ignore
-    const snoozedUntil = l.chatwoot_snoozed_until;
-    if (snoozedUntil && new Date(snoozedUntil).getTime() > now.getTime()) return false;
-
-    let wait = 0;
-
-    // @ts-ignore
-    const waitingSince: string | null = l.chatwoot_waiting_since;
-
-    if (waitingSince) {
-      const from = new Date(waitingSince);
-      wait = businessHours
-        ? getWorkMinutes(from, now, businessHours)
-        : Math.round((now.getTime() - from.getTime()) / 60000);
-    } else if (l.last_client_message_at) {
-      // @ts-ignore
-      const cTime = new Date(l.last_client_message_at).getTime();
-      // @ts-ignore
-      const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
-      if (cTime > aTime) {
-        const from = new Date(cTime);
-        wait = businessHours
-          ? getWorkMinutes(from, now, businessHours)
-          : Math.round((now.getTime() - cTime) / 60000);
-      }
-    }
-
-    return l.sla_status === 'danger' || wait > slaMinutes;
-  });
+  return leadsList.filter(l => isLeadDanger(l, businessHours, slaMinutes));
 };
