@@ -67,12 +67,12 @@ serve(async (req) => {
       
       Você é um auditor de qualidade de vendas mecânicas automotivas.
       Analise a conversa e preencha os itens da auditoria. Se a informação já foi passada antes (segundo o resumo), mantenha como true.
-      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO:
-      1. Seja flexível: Se o gerente está explicando defeitos ("tá ruim", "contaminado"), marque que ele justificou serviços (3c e 2c).
-      2. Se ele sugeriu trocar algo extra ("posso substituir", "revisão completa"), marque upsell (3a).
-      3. Atualização de Etapa: Se a conversa já envolve envio de vídeo, diagnóstico ou negociação de peças/serviços, mude o "funnel_stage" imediatamente para "negotiation".
-      4. Vá pontuando aos poucos: Não espere a conversa acabar. O objetivo é ver os checks ficando verdes em tempo real.
-      ${(media_url && media_type?.startsWith('video')) || text.includes('[ANEXO ENVIADO: video]') ? '\n[SISTEMA]: O gerente anexou um VÍDEO nesta mensagem ou histórico. Assuma que o vídeo contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de vídeo (ex: 2b, 3b).' : ''}
+      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO (Foque na INTENÇÃO, não nas palavras exatas):
+      1. Os gerentes usam linguagem informal, gírias, ou enviam áudios transcritos. Não procure frases perfeitas. Se a INTENÇÃO da mensagem for explicar um defeito (mesmo de forma informal), marque que ele justificou serviços (itens 2c e 3c).
+      2. Se a INTENÇÃO for oferecer qualquer serviço ou peça adicional que melhore o carro, considere como upsell (item 3a).
+      3. Atualização de Etapa: Assim que identificar que o gerente está diagnosticando um problema, mostrando evidências (vídeo/foto) ou oferecendo soluções, mude o "funnel_stage" para "negotiation".
+      4. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente, à medida que a conversa avança em tempo real.
+      ${(media_url && media_type?.startsWith('video')) || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]') ? '\n[SISTEMA]: O gerente anexou um VÍDEO ou ÁUDIO. Assuma que a mídia contém a explicação do defeito mecânico de forma clara. Dê o checklist como cumprido para os itens de envio de evidência (ex: 2b, 3b) e considere que ele está justificando o serviço.' : ''}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
