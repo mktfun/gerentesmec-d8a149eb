@@ -102,9 +102,10 @@ const Relatorios = () => {
     unitName: string;
     e1: number[]; e2: number[]; e3: number[]; e4: number[];
     scores: number[];
+    totalLeads: number;
   }> = {};
 
-  auditedLeads.forEach(lead => {
+  currentLeads.forEach(lead => {
     const managerId = lead.manager_id || 'sem_gerente';
     if (!managerPerformanceMap[managerId]) {
       const manager = managers.find(m => m.id === lead.manager_id);
@@ -112,10 +113,11 @@ const Relatorios = () => {
       managerPerformanceMap[managerId] = {
         managerName: manager?.name || 'Sem Gerente',
         unitName: unit?.name || 'Sem Unidade',
-        e1: [], e2: [], e3: [], e4: [], scores: []
+        e1: [], e2: [], e3: [], e4: [], scores: [], totalLeads: 0
       };
     }
     const mp = managerPerformanceMap[managerId];
+    mp.totalLeads += 1;
     if (lead.score !== null) mp.scores.push(Number(lead.score));
     const es = (lead as any).etapa_scores || {};
     if (es.e1 !== undefined) mp.e1.push(Number(es.e1));
@@ -124,14 +126,16 @@ const Relatorios = () => {
     if (es.e4 !== undefined) mp.e4.push(Number(es.e4));
   });
 
+  const customAvg = (nums: number[], total: number) => total > 0 ? nums.reduce((a, b) => a + b, 0) / total : null;
+
   const managerPerformance = Object.values(managerPerformanceMap).map(mp => ({
     managerName: mp.managerName,
     unitName: mp.unitName,
-    e1: round(avg(mp.e1)),
-    e2: round(avg(mp.e2)),
-    e3: round(avg(mp.e3)),
-    e4: round(avg(mp.e4)),
-    score: round(avg(mp.scores))
+    e1: round(customAvg(mp.e1, mp.totalLeads)),
+    e2: round(customAvg(mp.e2, mp.totalLeads)),
+    e3: round(customAvg(mp.e3, mp.totalLeads)),
+    e4: round(customAvg(mp.e4, mp.totalLeads)),
+    score: round(customAvg(mp.scores, mp.totalLeads))
   })).sort((a, b) => (b.score || 0) - (a.score || 0));
 
   const ScoreBadge = ({ score }: { score: number | null }) => {

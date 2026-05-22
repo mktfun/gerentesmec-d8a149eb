@@ -58,9 +58,10 @@ const Gerentes = () => {
           const unitManagers = managers.filter(m => m.unit_id === unit.id);
           
           // Calculate average score for the unit
-          const unitLeads = leads.filter(l => l.unit_id === unit.id && l.score !== null);
-          const unitScore = unitLeads.length > 0
-            ? Math.round(unitLeads.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeads.length)
+          const unitLeadsTotal = leads.filter(l => l.unit_id === unit.id);
+          const unitLeadsScored = unitLeadsTotal.filter(l => l.score !== null);
+          const unitScore = unitLeadsTotal.length > 0
+            ? Math.round(unitLeadsScored.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeadsTotal.length)
             : null;
             
           const scoreColor = unitScore === null ? 'text-muted-foreground/30' : unitScore >= 80 ? 'text-emerald-500 dark:text-emerald-400' : unitScore >= 65 ? 'text-indigo-500 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400';
@@ -114,9 +115,10 @@ const Gerentes = () => {
                     <span className="text-xs text-muted-foreground">Sem gerentes</span>
                   </div>
                 ) : unitManagers.map((manager, mIdx) => {
-                  const managerLeads = leads.filter(l => l.manager_id === manager.id && l.score !== null);
-                  const mScore = managerLeads.length > 0 
-                    ? Math.round(managerLeads.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeads.length)
+                  const managerLeadsTotal = leads.filter(l => l.manager_id === manager.id);
+                  const managerLeadsScored = managerLeadsTotal.filter(l => l.score !== null);
+                  const mScore = managerLeadsTotal.length > 0 
+                    ? Math.round(managerLeadsScored.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeadsTotal.length)
                     : null;
                   const trend = mScore !== null && mScore >= 70;
                   return (
