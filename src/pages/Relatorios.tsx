@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
 import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
-import AuditPanel from '@/components/Crm/AuditPanel';
+import ReadOnlyAuditPanel from '@/components/Crm/ReadOnlyAuditPanel';
 import { AnimatePresence } from 'framer-motion';
 
 import { fadeUp } from '@/utils/motion';
@@ -629,7 +629,7 @@ const Relatorios = () => {
               onClick={() => setSelectedLeadId(null)}
             />
             <div className="flex-1 w-full h-full bg-background overflow-hidden relative flex flex-col">
-              <AuditPanel 
+              <ReadOnlyAuditPanel 
                 lead={selectedLead} 
                 onClose={() => setSelectedLeadId(null)} 
               />
