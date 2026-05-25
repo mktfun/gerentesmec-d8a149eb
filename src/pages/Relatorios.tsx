@@ -31,7 +31,6 @@ const Relatorios = () => {
 
   // Audit Modal
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
-  const [highlightMsgId, setHighlightMsgId] = useState<string | null>(null);
   const selectedLead = leads.find(l => l.id === selectedLeadId);
   const [modalMessages, setModalMessages] = useState<any[]>([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -546,92 +545,25 @@ const Relatorios = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 100 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 right-0 z-50 w-full md:w-[700px] shadow-2xl flex border-l border-border bg-background"
+            className="fixed inset-y-0 right-0 z-50 w-full md:w-[600px] shadow-2xl flex border-l border-border"
           >
             {/* Backdrop */}
             <div 
               className="absolute -left-[100vw] inset-y-0 w-[100vw] bg-black/40 backdrop-blur-sm -z-10 cursor-pointer"
               onClick={() => setSelectedLeadId(null)}
             />
-            <div className="flex-1 w-full h-full overflow-hidden relative flex flex-col md:flex-row">
-              {/* Painel Compacto de Gatilhos */}
-              <div className="w-full md:w-[250px] shrink-0 border-b md:border-b-0 md:border-r border-border bg-black/5 dark:bg-white/[0.02] p-6 overflow-y-auto custom-scrollbar">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-black text-foreground">Dossiê IA</h3>
-                  {selectedLead.score && (
-                    <span className={`inline-flex items-center justify-center font-bold px-2 py-1 rounded text-xs border ${
-                      selectedLead.score >= 75 ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                      selectedLead.score >= 50 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                      'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                    }`}>
-                      {Math.round(selectedLead.score)}%
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Gatilhos Registrados</h4>
-                    <div className="space-y-2">
-                      {Object.keys((selectedLead as any).audit_checklist_messages || {}).length > 0 ? (
-                        Object.entries((selectedLead as any).audit_checklist_messages || {}).map(([key, msgId]) => {
-                          const labels: Record<string, string> = {
-                            '1a': 'Cordialidade', '1b': 'Resumo Acordo',
-                            '2a': 'Orçamento', '2b': 'Vídeo Defeito', '2c': 'Consequências',
-                            '3a': 'Upsell', '3b': 'Vídeo Upsell', '3c': 'Justif. Upsell',
-                            '4a': 'Agradecimento', '4b': 'Avaliação Google'
-                          };
-                          return (
-                            <div key={key} className="flex items-center justify-between bg-background border border-border p-2.5 rounded-xl shadow-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                <span className="text-xs font-semibold text-foreground/80">{labels[key] || `Item ${key}`}</span>
-                              </div>
-                              <button
-                                onClick={() => {
-                                  setHighlightMsgId(msgId as string);
-                                  setTimeout(() => setHighlightMsgId(null), 3000);
-                                }}
-                                className="p-1.5 rounded-full bg-indigo-500/10 text-indigo-500/60 hover:text-indigo-500 hover:bg-indigo-500/20 transition-colors"
-                                title="Ver mensagem no chat"
-                              >
-                                <Target className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <p className="text-xs text-muted-foreground/60 italic">Nenhum gatilho automático registrado.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {selectedLead.closing_summary && (
-                    <div className="pt-4 border-t border-border">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Resumo da Auditoria</h4>
-                      <p className="text-xs text-foreground/80 leading-relaxed whitespace-pre-wrap">
-                        {selectedLead.closing_summary}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Chat View */}
-              <div className="flex-1 min-w-0 relative h-full flex flex-col">
-                <button 
-                  onClick={() => setSelectedLeadId(null)}
-                  className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 dark:bg-white/10 hover:bg-black/30 dark:hover:bg-white/20 text-white transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <ChatHistoryView 
-                  lead={selectedLead} 
-                  messages={modalMessages}
-                  isLoading={isLoadingMessages} 
-                  highlightMessageId={highlightMsgId}
-                />
-              </div>
+            <div className="flex-1 w-full h-full bg-background overflow-hidden relative flex flex-col">
+              <button 
+                onClick={() => setSelectedLeadId(null)}
+                className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 dark:bg-white/10 hover:bg-black/30 dark:hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <ChatHistoryView 
+                lead={selectedLead} 
+                messages={modalMessages}
+                isLoading={isLoadingMessages} 
+              />
             </div>
           </motion.div>
         )}

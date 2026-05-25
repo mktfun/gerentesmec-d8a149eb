@@ -113,7 +113,7 @@ serve(async (req) => {
         "score": (número de 0 a 100, baseado no preenchimento do checklist: 4 blocos de 25 pontos cada),
         "funnel_stage": (sugestão de nova etapa do funil: lead_new, quote, negotiation, closed_won, closed_lost. Só mude se houver clareza),
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
-        "closing_summary": (Texto claro com o parecer atual da auditoria. O que falta o vendedor fazer?),
+        "closing_summary": (Resumo descritivo da conversa até o momento, informando o que o cliente quer, o que o gerente já fez, e especificamente quais itens do checklist (1a a 4b) foram pontuados ou confirmados até agora. Este texto será exibido no Dossiê do CRM como um log de eventos da IA.),
         "ticket_value": (número decimal correspondente ao orçamento final negociado, extraído do texto. Ex: 2600. Se houver 'R$ 2.600,00', retorne 2600. Se não houver clareza, retorne null),
         "customer_vehicle": (string extraída do texto correspondente ao modelo do veículo ou placa. Ex: 'SVH4B83' ou 'Honda Civic'. Se não houver, retorne null)
       }
