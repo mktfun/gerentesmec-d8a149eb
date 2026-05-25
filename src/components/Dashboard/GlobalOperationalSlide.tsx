@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Unit, Manager, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { Clock, AlertTriangle, Layers, TrendingUp } from 'lucide-react';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis } from 'recharts';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis, LabelList } from 'recharts';
 import { parseISO, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -138,7 +138,9 @@ export const GlobalOperationalSlide: React.FC<GlobalOperationalSlideProps> = ({
                       fillOpacity={1} 
                       fill="url(#scoreColorGlobal)" 
                       animationDuration={1500}
-                    />
+                    >
+                      <LabelList dataKey="score" position="top" fill="rgba(255,255,255,0.8)" fontSize={12} fontWeight="bold" offset={10} />
+                    </Area>
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (

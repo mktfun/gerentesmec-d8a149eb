@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Unit, Manager, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { Clock, AlertTriangle, Phone } from 'lucide-react';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis } from 'recharts';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis, LabelList } from 'recharts';
 import { parseISO, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -128,7 +128,9 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
                       fillOpacity={1} 
                       fill="url(#scoreColor)" 
                       animationDuration={1500}
-                    />
+                    >
+                      <LabelList dataKey="score" position="top" fill="rgba(255,255,255,0.8)" fontSize={12} fontWeight="bold" offset={10} />
+                    </Area>
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
@@ -180,7 +182,10 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
                     <div className="w-16 h-16 rounded-full border border-emerald-500/20 flex items-center justify-center mb-4">
                       <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                     </div>
-                    <span className="text-sm font-bold tracking-widest uppercase">Fila ZERADA</span>
+                    <span className="text-sm font-bold tracking-widest uppercase">Sem Atrasos</span>
+                    {activeLeads.length > 0 && (
+                      <span className="text-xs font-bold text-emerald-500/50 mt-2">{activeLeads.length} leads no prazo</span>
+                    )}
                  </div>
                )}
                
