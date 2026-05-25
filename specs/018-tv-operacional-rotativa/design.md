@@ -11,22 +11,21 @@ A interface deve transmitir a sensação de um "Painel de Comando Executivo de E
 
 1. **`TvOperacionalCarousel.tsx` (Page/Component)**
    - O contêiner principal.
-   - Puxa o contexto de dados `useAppData()`.
-   - Organiza os gerentes por `unit_id`.
+   - Faz o fetch do `daily_score_snapshots` (últimos 14 dias) na montagem do componente.
+   - Organiza a lista de "Slides" (Sendo Slide 1 a N as unidades, e o último slide a visão Geral).
    - Possui o loop temporal (ex: `setInterval` de 15s) que incrementa o índice da página.
-   - Controla a transição das views.
+   - Controla a transição das views com `framer-motion`.
 
 2. **`UnitOperationalSlide.tsx` (Subcomponente de Visualização)**
-   - Recebe como props a `Unit` atual e a lista de seus `Managers` (com os `Leads` filtrados deles).
-   - Renderiza no topo: O nome da Unidade Gigante e Elegante, total de fila da loja e TMR da Loja.
-   - Renderiza no corpo: Um Grid responsivo (ex: 3 colunas) de `ManagerOperationalCard.tsx`.
+   - Recebe a `Unit` atual, seu `Manager` (único), os `Leads` da unidade, e o histórico diário de scores dessa unidade (extraído do JSONB do snapshot).
+   - Renderiza no topo: O nome da Unidade Gigante e Elegante e o TMR atual.
+   - **Esquerda/Centro:** Um gráfico de linha ou barra suave e brilhante mostrando a nota dos últimos dias.
+   - **Direita (Lista de Alertas):** Uma lista scrolável (ou limitada aos Top 5) de leads com SLA estourado, exibindo "Nome | Telefone (formatado) | Tempo de Espera".
 
-3. **`ManagerOperationalCard.tsx`**
-   - Recebe um `Manager` e seus `Leads`.
-   - Exibe foto (se houver) ou Iniciais elegantes.
-   - Exibe o TMR atual dele em destaque (Fonte enorme).
-   - Mostra o indicador de `danger` (SLA estourado) através de uma borda sutil `ring-1 ring-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.1)]`.
-   - Exibe 3 badges minimalistas abaixo: Fila (`lead_new`), Em Negociação (`negotiation`), Orçamentos (`quote`).
+3. **`GlobalOperationalSlide.tsx` (Última tela do loop)**
+   - Renderiza a Visão Geral da Empresa.
+   - **Esquerda/Centro:** Gráfico Histórico do `global_score` dos últimos dias.
+   - **Direita:** Ranking minimalista das lojas com mais leads em atraso (ou as piores em TMR no momento atual).
 
 ## Modelagem de Banco de Dados (Supabase)
-- Nenhuma alteração no esquema de banco de dados é necessária, pois utilizaremos os mesmos dados já injetados no contexto (`units`, `managers`, `leads`). A métrica de TMR será calculada on-the-fly pelo `calculateTmr` ajustado na branch anterior.
+- Nenhuma alteração no esquema é necessária. Utilizaremos a tabela `daily_score_snapshots` (que já salva o breakdown diário por unidade) junto com os dados injetados via `AppDataContext`. Apenas faremos uma query simples no mount do carrossel.

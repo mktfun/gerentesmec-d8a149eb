@@ -1,28 +1,35 @@
-# Requisitos: TV Operacional Rotativa
+# Requisitos: TV Operacional Rotativa (Foco em Unidade e Empresa)
 
 ## Descrição
-Criar uma visão de TV Operacional (`/tv/operacional-rotativa` ou substituir a atual) que funcione no formato de carrossel temporizado (similar ao `/tv/executivo`), mas com dados estritamente operacionais. O objetivo é dar "zoom" em uma unidade por vez, exibindo seus gerentes, tempos de fila e métricas de forma limpa, não poluída e altamente premium.
+Criar uma visão de TV Operacional (`/tv/operacional-rotativa`) que rotaciona os slides exibindo o raio-x completo de **uma unidade por vez**, e ao final do loop exibe uma visão **Geral da Empresa**. O design deve ser extremamente refinado (estética Daniel / SDD 2026), com gráficos de histórico diário e listas elegantes de alertas reais.
 
 ## User Stories
-- **Como** operador da oficina, **eu quero** ver uma TV que rotacione automaticamente entre as unidades, **para que** eu tenha uma visão detalhada do operacional de cada filial sem precisar rolar a tela ou olhar uma grade poluída.
-- **Como** gestor, **eu quero** ver os gerentes da unidade atual na tela, com foco no TMR (Tempo Médio de Resposta) atual de `lead_new` e na quantidade de leads por etapa, **para que** eu saiba exatamente quem está gargalando o fluxo.
+- **Como** operador/dono, **eu quero** ver a TV passar unidade por unidade, **para que** eu veja o histórico de pontuação dela (gráfico), o TMR atual e a lista de leads estourados (nome e número), sem precisar poluir a tela com dados de outras filiais.
+- **Como** gestor, **eu quero** que após passar por todas as unidades, a TV mostre um painel Geral da Empresa, **para que** eu tenha o panorama do dia e saiba o que precisa da minha atenção máxima (alertas globais).
 
 ## Critérios de Aceite
-1. **Carrossel Automático:** A tela deve transicionar suavemente a cada X segundos (configurável: 15s, 30s, 60s).
-2. **Visão por Unidade:** Cada slide deve exibir apenas 1 Unidade (ou no máximo 2, se houver espaço sem poluição), garantindo respiro visual e tipografia grande.
-3. **Métricas Claras:** O cabeçalho da unidade deve mostrar o TMR Geral da Loja e Clientes em Espera.
-4. **Cards de Gerentes:** Abaixo do cabeçalho, um grid limpo com os gerentes daquela unidade, mostrando seu TMR individual, Leads Novos em Espera, Leads em Negociação e Orçamento.
-5. **Estética SDD:** Uso de vidro fosco (glassmorphism), cores sutis (texto principal branco/cinza, avisos em vermelho/rose elegante), bordas de 1px reflexivas, sem uso de cores gritantes ou formato "video game".
-6. **Componente Reutilizável:** Deve utilizar ou estender a estrutura de paginação existente no `TvDashboard`.
+1. **Loop do Carrossel:** A tela deve exibir `Unidade 1 -> Unidade 2 -> ... -> Unidade N -> Visão Geral Empresa`, repetindo.
+2. **Slide da Unidade:**
+   - Gráfico de linha/barra do histórico de Score por dia daquela unidade (usando `daily_score_snapshots`).
+   - TMR atual da unidade (já filtrado pelo gerente único da loja).
+   - Lista minimalista e elegante de **Leads em Alerta** contendo Nome, Telefone e tempo de atraso/etapa.
+3. **Slide Visão Geral Empresa:**
+   - Gráfico histórico do Score Global.
+   - TMR Médio Global e total de leads ativos.
+   - Lista consolidada das "lojas em alerta" ou piores gargalos.
+4. **Estética SDD:**
+   - Visual premium dark mode, sem cores carnavalescas.
+   - Uso de cards glassmorphism sutis.
+   - Listas de leads não devem poluir a tela: devem mostrar os Top 5 ou Top 7 mais críticos e omitir o resto para manter o respiro visual.
 
 ## BDD Scenarios
 
-### Cenário: Rotação Automática do Operacional
-- **Given (Dado):** que existem 5 unidades cadastradas com gerentes.
-- **When (Quando):** o usuário acessar a Rota de TV Operacional Rotativa.
-- **Then (Então):** o sistema exibirá os dados operacionais da Unidade 1, aguardará 15 segundos, fará uma transição de fade suave e exibirá os dados da Unidade 2, repetindo o ciclo.
+### Cenário: Renderização do Histórico e Alertas da Unidade
+- **Given (Dado):** que a TV está exibindo o slide da filial "Carijós".
+- **When (Quando):** a página carrega os dados.
+- **Then (Então):** deve renderizar um mini-gráfico com as notas dos últimos 7-14 dias extraídas da coluna `unit_breakdown`, além de renderizar uma lista (nome e telefone formatado) dos leads que estão com SLA estourado (Danger).
 
-### Cenário: Exibição de Alertas dentro da Unidade
-- **Given (Dado):** que a Unidade sendo exibida na tela possui um gerente (João) com TMR acima do SLA (20 minutos).
-- **When (Quando):** o slide da unidade aparecer.
-- **Then (Então):** o card do João deve possuir um glow/alerta sutil em tons de Rose/Red nas bordas, indicando estado crítico, enquanto os outros gerentes permanecem com a estética neutra premium.
+### Cenário: Transição para a Visão Global
+- **Given (Dado):** que a TV terminou de exibir a última unidade da lista.
+- **When (Quando):** o timer de 15 segundos estourar.
+- **Then (Então):** a TV deve transicionar para o Slide Geral, exibindo a média de TMR de toda a empresa e o gráfico de score `global_score` dos últimos dias.
