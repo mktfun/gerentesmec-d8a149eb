@@ -84,9 +84,9 @@ serve(async (req) => {
       CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
       - 'closed_won' (Ganho): USE APENAS SE o cliente pagou OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado") APÓS o gerente já ter enviado o link do orçamento/checklist. Um "sim" antes de receber o orçamento NÃO aprova o serviço.
       - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer.
-      - 'negotiation' (Em Negociação): O gerente passou o valor/orçamento e eles estão conversando sobre formas de pagamento, ou tirando dúvidas.
+      - 'negotiation' (Em Negociação): O gerente INICIOU o atendimento com o cliente (qualquer resposta do gerente faz o lead vir pra cá obrigatoriamente), ou já passou o orçamento e estão conversando.
       - 'quote' (Em Orçamento): O gerente acabou de mandar o orçamento/checklist mas o cliente ainda não respondeu aprovando.
-      - 'lead_new' (Novo Lead): Estão apenas diagnosticando o problema ou agendando visita. Não há orçamento final passado ainda.
+      - 'lead_new' (Novo Lead): O cliente mandou a 1ª mensagem e o gerente AINDA NÃO RESPONDEU. SE O GERENTE ENVIOU MENSAGEM AGORA, É PROIBIDO MANTER EM 'lead_new'. Mude IMEDIATAMENTE para 'negotiation' ou 'quote'.
 
       [EXEMPLO DE ATENDIMENTO 100% - LOJA CARIJÓS (PADRÃO OURO)]
       Gerente: "Bom dia Sr. João! Segue o link do nosso checklist detalhado com as fotos do vazamento e o orçamento final: [LINK]. Aproveito para recomendar a troca preventiva da correia, enviei um vídeo rápido de 40 seg mostrando o desgaste acima."
