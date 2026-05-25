@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
 import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
-import ChatHistoryView from '@/components/Crm/ChatHistoryView';
+import AuditPanel from '@/components/Crm/AuditPanel';
 import { AnimatePresence } from 'framer-motion';
 
 import { fadeUp } from '@/utils/motion';
@@ -42,21 +42,6 @@ const Relatorios = () => {
   // Audit Modal
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const selectedLead = leads.find(l => l.id === selectedLeadId);
-  const [modalMessages, setModalMessages] = useState<any[]>([]);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
-
-  useEffect(() => {
-    if (selectedLeadId) {
-      setIsLoadingMessages(true);
-      supabase.from('chat_messages').select('*').eq('lead_id', selectedLeadId).order('created_at', { ascending: true })
-        .then(({ data }) => {
-          if (data) setModalMessages(data);
-          setIsLoadingMessages(false);
-        });
-    } else {
-      setModalMessages([]);
-    }
-  }, [selectedLeadId]);
 
   const periodStart = dateRange.from.getTime();
   const periodEnd = dateRange.to.getTime();
@@ -636,7 +621,7 @@ const Relatorios = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 100 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 right-0 z-50 w-full md:w-[600px] shadow-2xl flex border-l border-border"
+            className="fixed inset-y-0 right-0 z-50 w-full md:w-[85vw] lg:w-[1200px] shadow-2xl flex border-l border-border"
           >
             {/* Backdrop */}
             <div 
@@ -644,16 +629,9 @@ const Relatorios = () => {
               onClick={() => setSelectedLeadId(null)}
             />
             <div className="flex-1 w-full h-full bg-background overflow-hidden relative flex flex-col">
-              <button 
-                onClick={() => setSelectedLeadId(null)}
-                className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-black/20 dark:bg-white/10 hover:bg-black/30 dark:hover:bg-white/20 text-white transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <ChatHistoryView 
+              <AuditPanel 
                 lead={selectedLead} 
-                messages={modalMessages}
-                isLoading={isLoadingMessages} 
+                onClose={() => setSelectedLeadId(null)} 
               />
             </div>
           </motion.div>
