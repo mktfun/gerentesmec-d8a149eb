@@ -173,10 +173,9 @@ const Relatorios = () => {
     const isTrue = (val: any) => val === true || val === 'true';
 
     if (checklist) {
-      Object.keys(checklist).forEach(key => {
-        if (mp.items[key]) {
-          mp.items[key].push(isTrue(checklist[key]) ? 1 : 0);
-        }
+      const allKeys = ['1a', '1b', '2a', '2b', '2c', '3a', '3b', '3c', '4a', '4b'];
+      allKeys.forEach(key => {
+        mp.items[key].push(isTrue(checklist[key]) ? 1 : 0);
       });
       
       // E1: Cordialidade (1a, 1b)
