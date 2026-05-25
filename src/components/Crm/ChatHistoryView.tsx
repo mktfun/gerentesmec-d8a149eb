@@ -5,6 +5,7 @@ import { Lead } from '@/context/AppDataContext';
 
 export interface ChatMessage {
   id: string;
+  chatwoot_message_id?: string;
   content: string;
   sender_type: 'contact' | 'user' | 'bot' | 'system';
   created_at: string;
@@ -234,18 +235,26 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                 '4a': 'Agradeceu', '4b': 'Pediu Google'
               };
 
+              // Helper para saber se esta mensagem deve ser destacada
+              const isHighlighted = highlightMessageId === msg.id || highlightMessageId === msg.chatwoot_message_id;
+
               return (
                 <div key={msg.id} className="w-full">
                   {dividerEl}
                   <motion.div
-                    ref={(el) => (messageRefs.current[msg.id] = el)}
+                    ref={(el) => {
+                      messageRefs.current[msg.id] = el;
+                      if (msg.chatwoot_message_id) {
+                        messageRefs.current[msg.chatwoot_message_id] = el;
+                      }
+                    }}
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
-                    className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'} ${highlightMessageId === msg.id ? 'relative z-20' : ''}`}
+                    className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'} ${isHighlighted ? 'relative z-20' : ''}`}
                   >
                     {/* Highlight Glow Effect */}
-                    {highlightMessageId === msg.id && (
+                    {isHighlighted && (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: [0, 1, 0.5, 0], scale: [0.9, 1.05, 1.1, 1.2] }}
@@ -300,7 +309,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
 
                       {/* Bubble */}
                       <motion.div 
-                        animate={highlightMessageId === msg.id ? {
+                        animate={isHighlighted ? {
                           boxShadow: ['0 0 0 0 rgba(99,102,241,0)', '0 0 24px 4px rgba(99,102,241,0.4)', '0 0 0 0 rgba(99,102,241,0)']
                         } : {}}
                         transition={{ duration: 1.5, repeat: 1 }}
@@ -309,7 +318,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                           ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
                           : 'bg-black/5 dark:bg-white/[0.04] border border-border text-foreground/80 rounded-2xl rounded-bl-sm'
                         }
-                        ${highlightMessageId === msg.id ? 'ring-2 ring-indigo-400/60 shadow-[0_0_24px_rgba(99,102,241,0.25)]' : ''}
+                        ${isHighlighted ? 'ring-2 ring-indigo-400/60 shadow-[0_0_24px_rgba(99,102,241,0.25)]' : ''}
                         transition-all duration-500
                       `}>
                         <div className="pb-3 pr-2">
