@@ -96,10 +96,14 @@ const DashboardLayout: React.FC = () => {
             <BookOpen className="w-4 h-4" />
             Como Funciona
           </NavLink>
-          <button onClick={enterTvMode} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent transition-colors" title="Abrir Modo TV (tela cheia)">
+          <a href="/tv/operacional" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent transition-colors">
             <Tv className="w-4 h-4" />
-            Modo TV
-          </button>
+            TV Operacional
+          </a>
+          <a href="/tv/executivo" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent transition-colors">
+            <Tv className="w-4 h-4" />
+            TV Executiva
+          </a>
           <button onClick={toggle} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent">
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {isDark ? 'Modo Claro' : 'Modo Escuro'}

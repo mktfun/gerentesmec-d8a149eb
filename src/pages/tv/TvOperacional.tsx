@@ -17,7 +17,7 @@ const TvOperacional = () => {
   const tmr = calculateTmr(leads, businessHours);
   const dangerLeads = calculateDangerLeads(leads, businessHours);
   
-  const activeLeads = leads.filter(l => l.funnel_stage === 'lead_new' || l.funnel_stage === 'in_progress');
+  const activeLeads = leads.filter(l => l.funnel_stage === 'lead_new' || l.funnel_stage === 'negotiation' || l.funnel_stage === 'quote');
   const criticalCount = dangerLeads.length;
 
   return (
@@ -57,11 +57,11 @@ const TvOperacional = () => {
               <span className="text-xl font-bold uppercase tracking-widest">TMR Geral</span>
             </div>
             <div>
-              <div className="text-[8rem] font-black leading-none tracking-tighter text-white">
+              <div className="text-7xl md:text-8xl lg:text-9xl font-black leading-none tracking-tighter text-white">
                 {tmr}
-                <span className="text-4xl text-white/30 ml-2">m</span>
+                <span className="text-3xl md:text-5xl text-white/50 ml-2">m</span>
               </div>
-              <p className="text-2xl text-white/50 font-medium mt-4">
+              <p className="text-xl md:text-2xl text-white/60 font-medium mt-4">
                 Meta: &lt; 15m
               </p>
             </div>
@@ -78,10 +78,10 @@ const TvOperacional = () => {
               <span className="text-xl font-bold uppercase tracking-widest">SLAs Críticos</span>
             </div>
             <div>
-              <div className={`text-[8rem] font-black leading-none tracking-tighter ${criticalCount > 0 ? 'text-rose-500 drop-shadow-[0_0_40px_rgba(244,63,94,0.4)]' : 'text-emerald-500'}`}>
+              <div className={`text-7xl md:text-8xl lg:text-9xl font-black leading-none tracking-tighter ${criticalCount > 0 ? 'text-rose-500 drop-shadow-[0_0_40px_rgba(244,63,94,0.4)]' : 'text-emerald-500'}`}>
                 {criticalCount}
               </div>
-              <p className={`text-2xl font-medium mt-4 ${criticalCount > 0 ? 'text-rose-400/80' : 'text-emerald-400/80'}`}>
+              <p className={`text-xl md:text-2xl font-medium mt-4 ${criticalCount > 0 ? 'text-rose-400/80' : 'text-emerald-400/80'}`}>
                 {criticalCount > 0 ? 'Atenção Imediata Necessária' : 'Operação Saudável'}
               </p>
             </div>
@@ -128,8 +128,8 @@ const TvOperacional = () => {
                         </div>
                         <div>
                           <h3 className="text-2xl font-bold text-white mb-1">{lead.name}</h3>
-                          <p className="text-sm font-medium text-white/50 uppercase tracking-widest">
-                            {lead.funnel_stage === 'lead_new' ? 'Novo Lead' : 'Em Atendimento'}
+                          <p className="text-sm font-medium text-white/60 uppercase tracking-widest">
+                            {lead.funnel_stage === 'lead_new' ? 'Novo Lead' : lead.funnel_stage === 'quote' ? 'Orçamento' : 'Em Negociação'}
                           </p>
                         </div>
                       </div>

@@ -66,8 +66,8 @@ const TvExecutivo = () => {
             <span className="text-xl font-bold uppercase tracking-widest">Score Global</span>
           </div>
 
-          <div className="relative flex items-center justify-center scale-150 mt-10">
-            <svg className="w-64 h-64 transform -rotate-90">
+          <div className="relative flex items-center justify-center mt-8 w-64 h-64 md:w-80 md:h-80 lg:w-[360px] lg:h-[360px]">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 256 256">
               <circle cx="128" cy="128" r="116" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
               <motion.circle
                 cx="128" cy="128" r="116" stroke={scoreColor} strokeWidth="12" fill="transparent"
@@ -80,8 +80,8 @@ const TvExecutivo = () => {
               />
             </svg>
             <div className="absolute flex flex-col items-center justify-center">
-              <span className="text-[5rem] font-black tracking-tighter" style={{ color: scoreColor }}>{roundedGlobal}</span>
-              <span className="text-lg uppercase font-bold text-white/40 mt-1">Pontos</span>
+              <span className="text-[4rem] md:text-[5rem] lg:text-[6rem] font-black tracking-tighter" style={{ color: scoreColor }}>{roundedGlobal}</span>
+              <span className="text-sm md:text-lg uppercase font-bold text-white/40 mt-1">Pontos</span>
             </div>
           </div>
           
@@ -103,7 +103,7 @@ const TvExecutivo = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2 }}
-              className={`p-8 rounded-[2rem] flex items-center justify-between border backdrop-blur-xl ${
+              className={`p-6 lg:p-8 rounded-[2rem] flex items-center justify-between border backdrop-blur-xl ${
                 index === 0 
                   ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_40px_rgba(245,158,11,0.15)]' 
                   : index === 1
