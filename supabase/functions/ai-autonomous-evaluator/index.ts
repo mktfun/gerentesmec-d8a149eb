@@ -19,7 +19,7 @@ serve(async (req) => {
 
     const payload = await req.json();
     console.log("[AI-EVALUATOR] Iniciando avaliação para payload:", JSON.stringify(payload));
-    const { message_content, lead_id, message_id, media_url, media_type } = payload;
+    const { message_content, lead_id, message_id, media_url, media_type, sender_type } = payload;
 
     if (!lead_id || !message_content) {
       return new Response(JSON.stringify({ error: 'Missing lead_id or message_content' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
@@ -64,7 +64,14 @@ serve(async (req) => {
       HISTÓRICO DA NEGOCIAÇÃO ATÉ AGORA (Resumido):
       ${compressedHistory || "Nenhum histórico prévio."}
       
-      NOVA MENSAGEM DO CLIENTE/GERENTE:
+      ${sender_type === 'contact' 
+        ? `⚠️ ATENÇÃO: Esta mensagem foi enviada pelo CLIENTE (contact), NÃO pelo gerente.
+          REGRA DE OURO: Você NÃO DEVE pontuar NENHUM item de auditoria (1a a 4b). 
+          Todos os itens do checklist no JSON de saída DEVEM manter o valor atual do histórico (como true ou false). Nunca altere um item de false para true baseado em ação do cliente.
+          Você pode APENAS atualizar funnel_stage, customer_vehicle, ticket_value e new_compressed_history.` 
+        : `✅ Esta mensagem foi enviada pelo GERENTE. Avalie todos os critérios de auditoria (1a a 4b) normalmente baseando-se nesta ação do gerente.`}
+      
+      NOVA MENSAGEM:
       "${text}"
       
       Você é um auditor de qualidade de vendas mecânicas automotivas.
@@ -81,13 +88,13 @@ serve(async (req) => {
       - 'quote' (Em Orçamento): O gerente acabou de mandar o orçamento mas o cliente ainda não respondeu (ou respondeu apenas algo genérico como "Vou analisar").
       - 'lead_new' (Novo Lead): Estão apenas diagnosticando o problema ou agendando visita. Não há orçamento final passado ainda.
 
-      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST (Seja Rigoroso):
+      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST (Seja Rigoroso - APLICÁVEL APENAS A MENSAGENS DO GERENTE):
       1. Foco na Intenção Real: Os gerentes usam linguagem informal. Se a INTENÇÃO da mensagem for explicar um defeito (mesmo com gírias), marque que ele justificou serviços.
       2. Orçamento (2a): Só marque true se o gerente de fato passar o valor total ou enviar um PDF/link claro do orçamento.
       3. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional para melhorar o carro além do que o cliente pediu inicialmente, marque como true.
       4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina (mandando link ou texto claro).
       5. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente. Nunca reverta um 'true' para 'false' se já foi cumprido no histórico.
-      ${(media_url || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]')) ? '\n[SISTEMA]: O gerente anexou um vídeo, imagem ou áudio. SE o arquivo pôde ser carregado pelo sistema, você o receberá nesta requisição e deve ouvir/assistir o conteúdo REAL da mídia para julgar se ele de fato explicou o defeito (2c, 3c) ou enviou evidência clara (2b, 3b). NÃO confie apenas no fato de que "tem áudio/vídeo", ouça o que ele fala.' : ''}
+      ${(media_url || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]')) ? `\n[SISTEMA]: Uma mídia foi anexada. SE foi enviada pelo gerente, avalie de fato explicou o defeito (2c, 3c) ou enviou evidência clara (2b, 3b).` : ''}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
@@ -208,7 +215,7 @@ serve(async (req) => {
     const newMessagesMap = leadData?.audit_checklist_messages || {};
 
     const mergedChecklist = { ...currentChecklist };
-    if (mockOutput.audit_checklist) {
+    if (mockOutput.audit_checklist && sender_type !== 'contact') {
       for (const key of Object.keys(mockOutput.audit_checklist)) {
         const val = mockOutput.audit_checklist[key];
         if (val === true || val === "true") {

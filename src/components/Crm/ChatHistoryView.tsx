@@ -250,7 +250,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: [0, 1, 0.5, 0], scale: [0.9, 1.05, 1.1, 1.2] }}
                         transition={{ duration: 2, ease: "easeOut" }}
-                        className={`absolute inset-0 -m-4 rounded-3xl z-[-1] pointer-events-none blur-xl ${isUser ? 'bg-indigo-500/30' : 'bg-emerald-500/30'}`} 
+                        className={`absolute inset-0 -m-4 rounded-3xl z-[-1] pointer-events-none blur-xl bg-indigo-500/30`} 
                       />
                     )}
                     {/* Avatar for Contact/Bot */}
@@ -299,12 +299,17 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                       )}
 
                       {/* Bubble */}
-                      <div className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md relative
+                      <motion.div 
+                        animate={highlightMessageId === msg.id ? {
+                          boxShadow: ['0 0 0 0 rgba(99,102,241,0)', '0 0 24px 4px rgba(99,102,241,0.4)', '0 0 0 0 rgba(99,102,241,0)']
+                        } : {}}
+                        transition={{ duration: 1.5, repeat: 1 }}
+                        className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md relative
                         ${isUser 
                           ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
                           : 'bg-black/5 dark:bg-white/[0.04] border border-border text-foreground/80 rounded-2xl rounded-bl-sm'
                         }
-                        ${highlightMessageId === msg.id ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-background shadow-[0_0_30px_rgba(16,185,129,0.3)]' : ''}
+                        ${highlightMessageId === msg.id ? 'ring-2 ring-indigo-400/60 shadow-[0_0_24px_rgba(99,102,241,0.25)]' : ''}
                         transition-all duration-500
                       `}>
                         <div className="pb-3 pr-2">
@@ -313,7 +318,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         <div className={`absolute bottom-1.5 right-3 text-[9px] font-bold ${isUser ? 'text-indigo-200' : 'text-muted-foreground/50'}`}>
                           {timeStr}
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
                     
                     {/* Renderiza as tags de Gatilho de Score abaixo do balão se houver */}

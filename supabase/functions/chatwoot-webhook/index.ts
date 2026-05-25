@@ -345,7 +345,8 @@ serve(async (req) => {
                 message_content: content || `[MEDIA ENVIADA: ${mediaType}]`,
                 message_id: messageId,
                 media_url: mediaUrl,
-                media_type: mediaType
+                media_type: mediaType,
+                sender_type: senderType
              })
           }).catch(err => console.error('Error invoking AI Evaluator:', err));
         }
