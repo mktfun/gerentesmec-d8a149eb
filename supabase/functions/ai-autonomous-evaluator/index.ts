@@ -38,6 +38,39 @@ serve(async (req) => {
       return new Response(JSON.stringify({ status: 'ai_automation_disabled' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
     }
 
+    // EXTRAÇÃO E RASPAGEM DE LINKS
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urls = text.match(urlRegex) || [];
+    let scrapedContent = '';
+
+    if (urls.length > 0) {
+      console.log(`[AI-EVALUATOR] Encontradas ${urls.length} URLs no chat. Iniciando scraping...`);
+      const fetchPromises = urls.map(async (url) => {
+        try {
+          const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
+          if (!res.ok) return null;
+          const html = await res.text();
+          // Remove scripts and styles
+          const clean1 = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ');
+          const clean2 = clean1.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ');
+          // Remove remaining HTML tags
+          const textContent = clean2.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          return `[CONTEÚDO DO LINK ${url}]: ${textContent.substring(0, 3000)}...`;
+        } catch (e) {
+          console.error(`[AI-EVALUATOR] Erro ao raspar ${url}:`, e);
+          return null;
+        }
+      });
+      const results = await Promise.allSettled(fetchPromises);
+      const validContents = results
+        .filter(r => r.status === 'fulfilled' && r.value !== null)
+        .map(r => (r as PromiseFulfilledResult<string>).value);
+      
+      if (validContents.length > 0) {
+        scrapedContent = `\n\nCONTEÚDO RASPADO DOS LINKS ENVIADOS NESTA MENSAGEM (USE PARA AVALIAR QUALIDADE DOS ORÇAMENTOS/CHECKLISTS):\n` + validContents.join('\n\n');
+      }
+    }
+
     // 2. Semantic Caching (Simulação da lógica RAG)
     // Em produção, você usaria OpenAI Embeddings ou Gemini Embeddings aqui:
     // const embedding = await generateEmbedding(text);
@@ -100,12 +133,14 @@ serve(async (req) => {
       3. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional além do pedido, marque como true.
       4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina no Google.
       5. AVALIAÇÃO MULTIMODAL DE VÍDEO/ÁUDIO: Se houver anexo, VOCÊ DEVE TRANSCRVER E ANALISAR O CONTEÚDO. Um vídeo curto (< 2 min) não significa automaticamente que é ruim, mas você deve ser rígido: ele explicou TUDO certinho? Explicou o problema e justificou POR QUE o cliente tem que pagar aquilo? Se a explicação for rasa, silenciosa ou insuficiente, PONTUE ZERO (false) nas etapas 2c e 3c de explicação, não dê a nota máxima!
-      6. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio do mecânico para provar que você o avaliou e justificar sua nota.
-      7. INSTRUÇÕES DE INSIGHT (MENSAGEM INLINE):
+      6. AVALIAÇÃO DE LINKS: Se houver um conteúdo raspado dos links abaixo, ANALISE O TEXTO. Se o gerente enviou um link de checklist/orçamento, mas o conteúdo dele é pobre, não possui justificativa descrita ou as fotos necessárias não parecem estar detalhadas, VOCÊ DEVE ZERAR os itens correspondentes (como o 2d) e adicionar ao insight "Orçamento/Checklist sem descrições técnicas no link".
+      7. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio ou no CONTEÚDO DO LINK para provar que você o avaliou e justificar sua nota.
+      8. INSTRUÇÕES DE INSIGHT (MENSAGEM INLINE):
          No JSON de saída, você deve preencher o campo "message_insight" com uma frase curta, direta e natural, como se fosse um auditor sênior justificando sua ação *naquele momento*.
          Exemplo 1: "Auditoria: Movi para Em Negociação pois o vídeo do orçamento foi enviado."
-         Exemplo 2: "Auditoria: Pontuou 3c pois justificou perfeitamente a troca da correia."
+         Exemplo 2: "Auditoria: Zerei o item 2d pois o link do checklist não possui fotos ou justificativas."
          Se a mensagem não alterar nada de importante no funil ou no score, retorne null. Não use a palavra 'IA' nem emojis brilhantes. Fale de forma técnica e minimalista.
+      ${scrapedContent}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
@@ -115,6 +150,8 @@ serve(async (req) => {
           "2a": true ou false,
           "2b": true ou false,
           "2c": true ou false,
+          "2d": true ou false,
+          "2e": true ou false,
           "3a": true ou false,
           "3b": true ou false,
           "3c": true ou false,
@@ -243,7 +280,7 @@ serve(async (req) => {
     // 5.2 Calcular o Score Determinístico (Idêntico ao AuditPanel)
     const auditStepsConfig = [
       { id: 'step1', weight: 25, items: ['1a', '1b'] },
-      { id: 'step2', weight: 25, items: ['2a', '2b', '2c'] },
+      { id: 'step2', weight: 25, items: ['2a', '2b', '2c', '2d', '2e'] },
       { id: 'step3', weight: 25, items: ['3a', '3b', '3c'] },
       { id: 'step4', weight: 25, items: ['4a', '4b'] },
     ];

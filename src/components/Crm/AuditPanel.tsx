@@ -9,40 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ChatHistoryView, { ChatMessage } from './ChatHistoryView';
 import { supabase } from '@/integrations/supabase/client';
 
-const auditStepsConfig = [
-  {
-    id: 'step1', title: '1. Cordialidade e Registro', weight: 25,
-    items: [
-      { id: '1a', text: 'Atendimento foi cordial e respeitoso?' },
-      { id: '1b', text: 'Registrou no WhatsApp o que foi acordado presencialmente/por telefone?' },
-    ],
-  },
-  {
-    id: 'step2', title: '2. Orçamento + Vídeo + Efeitos', weight: 25,
-    items: [
-      { id: '2a', text: 'Enviou o link do orçamento?' },
-      { id: '2b', text: 'Enviou vídeo mostrando o defeito?' },
-      { id: '2c', text: 'Explicou os efeitos e consequências de não fazer o reparo?' },
-    ],
-  },
-  {
-    id: 'step3', title: '3. Checklist Mecânico (Up-sell)', weight: 25,
-    items: [
-      { id: '3a', text: 'Enviou o checklist complementar do mecânico?' },
-      { id: '3b', text: 'Enviou vídeo do que mais precisa ser feito?' },
-      { id: '3c', text: 'Explicou o texto justificando os serviços extras?' },
-    ],
-  },
-  {
-    id: 'step4', title: '4. Encerramento + Review', weight: 25,
-    items: [
-      { id: '4a', text: 'Enviou mensagem de agradecimento padrão?' },
-      { id: '4b', text: 'Pediu avaliação no Google de forma explícita?' },
-    ],
-  },
-];
-
 import { useAppData } from '@/context/AppDataContext';
+import { auditStepsConfig } from '@/utils/scoreUtils';
 
 interface Props { lead: Lead; onClose: () => void; }
 
@@ -59,7 +27,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     if (checklist && Object.keys(checklist).length > 0) {
       setChecked(checklist as Record<string, boolean>);
     } else if (lead.score !== null) {
-      setChecked({ '1a': true, '1b': true, '2a': true, '2b': true, '2c': true, '3a': true, '3b': true, '4a': true, '4b': true });
+      setChecked({ '1a': true, '1b': true, '2a': true, '2b': true, '2c': true, '2d': true, '2e': true, '3a': true, '3b': true, '4a': true, '4b': true });
     } else {
       setChecked({});
     }
