@@ -101,6 +101,9 @@ serve(async (req) => {
       4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina no Google.
       5. AVALIAÇÃO MULTIMODAL DE VÍDEO/ÁUDIO: Se houver anexo, VOCÊ DEVE TRANSCRVER E ANALISAR O CONTEÚDO. Um vídeo curto (< 2 min) não significa automaticamente que é ruim, mas você deve ser rígido: ele explicou TUDO certinho? Explicou o problema e justificou POR QUE o cliente tem que pagar aquilo? Se a explicação for rasa, silenciosa ou insuficiente, PONTUE ZERO (false) nas etapas 2c e 3c de explicação, não dê a nota máxima!
       6. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio do mecânico para provar que você o avaliou e justificar sua nota.
+      7. JUSTIFICATIVAS DE AUDITORIA: Dentro do "closing_summary", além do resumo geral, você DEVE OBRIGATORIAMENTE incluir no final:
+         [MOTIVO DA ETAPA]: Explique por que escolheu a etapa atual do funil.
+         [MOTIVO DO SCORE]: Explique por que marcou true ou false nos itens e justificando a nota atual.
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
@@ -119,7 +122,7 @@ serve(async (req) => {
         "score": (número de 0 a 100),
         "funnel_stage": (sugestão de nova etapa),
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
-        "closing_summary": (Resumo descritivo narrando a evolução. OBRIGATÓRIO incluir "[ANÁLISE DE MÍDIA]:" descrevendo a transcrição da mídia e se foi profunda o suficiente, caso haja anexo do mecânico),
+        "closing_summary": (Resumo descritivo narrando a evolução. OBRIGATÓRIO incluir [ANÁLISE DE MÍDIA], [MOTIVO DA ETAPA] e [MOTIVO DO SCORE] explicando detalhadamente seus critérios),
         "ticket_value": (número decimal ou null),
         "customer_vehicle": (string ou null)
       }
