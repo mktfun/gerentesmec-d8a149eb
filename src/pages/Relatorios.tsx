@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
@@ -15,6 +15,10 @@ import { fadeUp } from '@/utils/motion';
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 
 const Relatorios = () => {
+  // Paginação
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
   const { leads, units, managers, businessHours } = useAppData();
   const now = new Date();
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -119,7 +123,23 @@ const Relatorios = () => {
   };
 
   const hasData = currentLeads.length > 0;
-  const auditedLeads = currentLeads.filter(l => l.score !== null);
+  
+  const filteredLeads = leads.filter(l => {
+    const lDate = startOfDay(new Date(l.created_at));
+    const isWithinDate = lDate >= startOfDay(dateRange.from) && lDate <= startOfDay(dateRange.to);
+    const isUnitMatch = selectedUnit === 'all' || l.unit_id === selectedUnit;
+    return isWithinDate && isUnitMatch;
+  });
+
+  const auditedLeads = filteredLeads.filter(l => l.score !== null).sort((a, b) => {
+    if (scoreOrder === 'desc') return (b.score || 0) - (a.score || 0);
+    if (scoreOrder === 'asc') return (a.score || 0) - (b.score || 0);
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
+  // Estado derivado da Paginação
+  const totalPages = Math.ceil(auditedLeads.length / ITEMS_PER_PAGE);
+  const paginatedLeads = auditedLeads.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const managerPerformanceMap: Record<string, {
     managerName: string;
@@ -149,28 +169,30 @@ const Relatorios = () => {
     const mp = managerPerformanceMap[managerId];
     mp.totalLeads += 1;
     
-    const checklist = lead.audit_checklist as Record<string, boolean> | null;
+    const checklist = lead.audit_checklist as Record<string, any> | null;
+    const isTrue = (val: any) => val === true || val === 'true';
+
     if (checklist) {
       Object.keys(checklist).forEach(key => {
         if (mp.items[key]) {
-          mp.items[key].push(checklist[key] ? 1 : 0);
+          mp.items[key].push(isTrue(checklist[key]) ? 1 : 0);
         }
       });
       
       // E1: Cordialidade (1a, 1b)
-      let e1Val = ((checklist['1a'] ? 1 : 0) + (checklist['1b'] ? 1 : 0)) / 2 * 100;
+      let e1Val = ((isTrue(checklist['1a']) ? 1 : 0) + (isTrue(checklist['1b']) ? 1 : 0)) / 2 * 100;
       mp.e1.push(e1Val);
 
       // E2: Orçamento + Vídeo (2a, 2b, 2c)
-      let e2Val = ((checklist['2a'] ? 1 : 0) + (checklist['2b'] ? 1 : 0) + (checklist['2c'] ? 1 : 0)) / 3 * 100;
+      let e2Val = ((isTrue(checklist['2a']) ? 1 : 0) + (isTrue(checklist['2b']) ? 1 : 0) + (isTrue(checklist['2c']) ? 1 : 0)) / 3 * 100;
       mp.e2.push(e2Val);
 
       // E3: Upsell Mecânico (3a, 3b, 3c)
-      let e3Val = ((checklist['3a'] ? 1 : 0) + (checklist['3b'] ? 1 : 0) + (checklist['3c'] ? 1 : 0)) / 3 * 100;
+      let e3Val = ((isTrue(checklist['3a']) ? 1 : 0) + (isTrue(checklist['3b']) ? 1 : 0) + (isTrue(checklist['3c']) ? 1 : 0)) / 3 * 100;
       mp.e3.push(e3Val);
 
       // E4: Encerramento (4a, 4b)
-      let e4Val = ((checklist['4a'] ? 1 : 0) + (checklist['4b'] ? 1 : 0)) / 2 * 100;
+      let e4Val = ((isTrue(checklist['4a']) ? 1 : 0) + (isTrue(checklist['4b']) ? 1 : 0)) / 2 * 100;
       mp.e4.push(e4Val);
     }
     // Sempre acumula lead.score (se auditado) para o Score Geral
@@ -266,6 +288,7 @@ const Relatorios = () => {
               onChange={(d) => {
                 setIsUpdating(true);
                 setDateRange(d);
+                setCurrentPage(1); // Reseta paginação ao mudar filtro
                 setTimeout(() => setIsUpdating(false), 300);
               }} 
             />
@@ -497,8 +520,8 @@ const Relatorios = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {auditedLeads.length > 0 ? (
-                auditedLeads.map((lead) => (
+              {paginatedLeads.length > 0 ? (
+                paginatedLeads.map((lead) => (
                   <tr 
                     key={lead.id} 
                     onClick={() => setSelectedLeadId(lead.id)}
@@ -534,6 +557,32 @@ const Relatorios = () => {
             </tbody>
           </table>
         </div>
+        
+        {/* Controles de Paginação */}
+        {totalPages > 1 && (
+          <div className="px-8 py-4 border-t border-border flex items-center justify-between bg-black/[0.01] dark:bg-white/[0.01]">
+            <p className="text-xs text-muted-foreground font-medium">
+              Mostrando <span className="text-foreground font-bold">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="text-foreground font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, auditedLeads.length)}</span> de <span className="text-foreground font-bold">{auditedLeads.length}</span> auditorias
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-card border border-border text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-xs font-bold text-foreground mx-2">Página {currentPage} de {totalPages}</span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-card border border-border text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Global Audit Panel Overlay */}
