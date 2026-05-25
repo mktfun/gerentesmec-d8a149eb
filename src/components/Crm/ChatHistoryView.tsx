@@ -329,7 +329,6 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                           {timeStr}
                         </div>
                       </motion.div>
-                    </div>
                     
                     {/* Renderiza as tags de Gatilho de Score abaixo do balão se houver */}
                     {triggeredItems.length > 0 && (
@@ -360,6 +359,8 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         </span>
                       </div>
                     )}
+                    
+                    </div>
                     
                   </motion.div>
                 </div>
