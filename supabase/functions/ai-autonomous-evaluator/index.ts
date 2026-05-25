@@ -101,9 +101,11 @@ serve(async (req) => {
       4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina no Google.
       5. AVALIAÇÃO MULTIMODAL DE VÍDEO/ÁUDIO: Se houver anexo, VOCÊ DEVE TRANSCRVER E ANALISAR O CONTEÚDO. Um vídeo curto (< 2 min) não significa automaticamente que é ruim, mas você deve ser rígido: ele explicou TUDO certinho? Explicou o problema e justificou POR QUE o cliente tem que pagar aquilo? Se a explicação for rasa, silenciosa ou insuficiente, PONTUE ZERO (false) nas etapas 2c e 3c de explicação, não dê a nota máxima!
       6. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio do mecânico para provar que você o avaliou e justificar sua nota.
-      7. JUSTIFICATIVAS DE AUDITORIA: Dentro do "closing_summary", além do resumo geral, você DEVE OBRIGATORIAMENTE incluir no final:
-         [MOTIVO DA ETAPA]: Explique por que escolheu a etapa atual do funil.
-         [MOTIVO DO SCORE]: Explique por que marcou true ou false nos itens e justificando a nota atual.
+      7. INSTRUÇÕES DE INSIGHT (MENSAGEM INLINE):
+         No JSON de saída, você deve preencher o campo "message_insight" com uma frase curta, direta e natural, como se fosse um auditor sênior justificando sua ação *naquele momento*.
+         Exemplo 1: "Auditoria: Movi para Em Negociação pois o vídeo do orçamento foi enviado."
+         Exemplo 2: "Auditoria: Pontuou 3c pois justificou perfeitamente a troca da correia."
+         Se a mensagem não alterar nada de importante no funil ou no score, retorne null. Não use a palavra 'IA' nem emojis brilhantes. Fale de forma técnica e minimalista.
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
@@ -122,7 +124,8 @@ serve(async (req) => {
         "score": (número de 0 a 100),
         "funnel_stage": (sugestão de nova etapa),
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
-        "closing_summary": (Resumo descritivo narrando a evolução. OBRIGATÓRIO incluir [ANÁLISE DE MÍDIA], [MOTIVO DA ETAPA] e [MOTIVO DO SCORE] explicando detalhadamente seus critérios),
+        "closing_summary": (Resumo descritivo narrando a evolução e histórico geral),
+        "message_insight": (String curta com a nota do auditor ou null. Regras na instrução 7),
         "ticket_value": (número decimal ou null),
         "customer_vehicle": (string ou null)
       }
@@ -287,6 +290,16 @@ serve(async (req) => {
       compressed_history: mockOutput.new_compressed_history,
       last_processed_message_id: message_id
     });
+
+    // 7. Salvar o AI Insight inline na mensagem, se existir
+    if (mockOutput.message_insight && message_id) {
+      const { error: msgErr } = await supabaseClient
+        .from('chat_messages')
+        .update({ ai_insight: mockOutput.message_insight })
+        .eq('chatwoot_message_id', message_id);
+      
+      if (msgErr) console.error("[AI-EVALUATOR] Erro ao salvar message_insight:", msgErr);
+    }
 
     return new Response(JSON.stringify({ status: 'success', evaluated: updatePayload }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -11,6 +11,7 @@ export interface ChatMessage {
   created_at: string;
   media_url?: string;
   media_type?: string;
+  ai_insight?: string;
 }
 
 const formatDividerDate = (dateStr: string) => {
@@ -344,6 +345,19 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                             Gatilho: Item {item} ({itemLabels[item] || 'Score'})
                           </motion.div>
                         ))}
+                      </div>
+                    )}
+                    
+                    {/* Renderiza AI Insight (Auditoria Inline - Minimalista) */}
+                    {msg.ai_insight && (
+                      <div className={`mt-1.5 px-3 py-2 rounded-xl max-w-[85%] bg-black/5 dark:bg-white/5 border border-border/50 flex flex-col gap-1 ${isUser ? 'self-end items-end text-right' : 'self-start items-start text-left'}`}>
+                        <div className="flex items-center gap-1.5 opacity-60">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span className="text-[9px] uppercase tracking-widest font-bold">Nota de Auditoria</span>
+                        </div>
+                        <span className="text-[11px] leading-relaxed font-medium text-muted-foreground/80">
+                          {msg.ai_insight}
+                        </span>
                       </div>
                     )}
                     

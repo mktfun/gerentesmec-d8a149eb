@@ -145,7 +145,11 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     const channel = supabase.channel(`chat_messages_${lead.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `lead_id=eq.${lead.id}` }, (payload) => {
         setRealMessages(prev => [...prev, payload.new as ChatMessage]);
-      }).subscribe();
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages', filter: `lead_id=eq.${lead.id}` }, (payload) => {
+        setRealMessages(prev => prev.map(msg => msg.id === payload.new.id ? payload.new as ChatMessage : msg));
+      })
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
