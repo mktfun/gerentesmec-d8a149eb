@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, AlertTriangle, Zap, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Clock, AlertTriangle, Users, Layers } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 
 const TvOperacional = () => {
   const { leads, businessHours, managers } = useAppData();
   
-  // Update UI every minute for real-time counters
   const [, setTick] = useState(0);
   useEffect(() => {
     const i = setInterval(() => setTick(t => t + 1), 60000);
@@ -19,192 +18,161 @@ const TvOperacional = () => {
   
   const activeLeads = leads.filter(l => l.funnel_stage === 'lead_new' || l.funnel_stage === 'negotiation' || l.funnel_stage === 'quote');
   const criticalCount = dangerLeads.length;
+  const waitingLeads = activeLeads.filter(l => l.funnel_stage === 'lead_new').length;
+  const inProgressLeads = activeLeads.filter(l => l.funnel_stage === 'negotiation' || l.funnel_stage === 'quote').length;
 
-  // Filas
-  const waitQueue = activeLeads.filter(l => l.funnel_stage === 'lead_new').sort((a, b) => {
-    const aTime = new Date(a.last_message_at || a.created_at).getTime();
-    const bTime = new Date(b.last_message_at || b.created_at).getTime();
-    return aTime - bTime; // oldest first
-  });
-
-  const inProgressLeads = activeLeads.filter(l => l.funnel_stage === 'negotiation' || l.funnel_stage === 'quote');
-  
-  // Status por unidade
   const unitStats = managers.map(m => {
-    const mLeads = inProgressLeads.filter(l => l.manager_id === m.id);
+    const mLeads = activeLeads.filter(l => l.manager_id === m.id);
+    const mDanger = dangerLeads.filter(l => l.manager_id === m.id).length;
+    const mTmr = calculateTmr(mLeads, businessHours);
+    
     return {
       manager: m,
+      leadNew: mLeads.filter(l => l.funnel_stage === 'lead_new').length,
       negotiation: mLeads.filter(l => l.funnel_stage === 'negotiation').length,
       quote: mLeads.filter(l => l.funnel_stage === 'quote').length,
-      total: mLeads.length
+      danger: mDanger,
+      tmr: mTmr
     };
-  }).filter(u => u.total > 0).sort((a, b) => b.total - a.total);
+  }).filter(u => u.leadNew > 0 || u.negotiation > 0 || u.quote > 0).sort((a, b) => b.danger - a.danger || b.leadNew - a.leadNew);
 
   return (
-    <div className="w-full min-h-screen bg-[#050505] text-white flex flex-col p-8 md:p-12 font-sans overflow-hidden relative">
+    <div className="w-full min-h-screen bg-[#050505] text-white flex flex-col font-sans overflow-hidden relative">
       
       {/* Background Liquid Glass Effects */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full blur-[100px] pointer-events-none transition-colors duration-1000 ${criticalCount > 0 ? 'bg-rose-600/20' : 'bg-emerald-600/10'}`} />
 
-      {/* Header */}
-      <header className="flex items-center justify-between z-10 mb-16">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-xl">
-            <Target className="w-8 h-8 text-indigo-400" />
+      {/* Header Compacto (Macro View) */}
+      <header className="h-24 px-8 border-b border-white/10 bg-white/5 backdrop-blur-xl flex items-center justify-between z-10 shrink-0">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+              <Layers className="w-6 h-6 text-indigo-400" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black tracking-tight leading-tight">Radar Operacional</h1>
+              <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Live Sync</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-white/90">Operação em Tempo Real</h1>
-            <p className="text-lg text-white/40 font-medium uppercase tracking-widest">Painel Gerencial</p>
+          
+          <div className="w-px h-8 bg-white/10 mx-2" />
+
+          {/* Macro KPIs */}
+          <div className="flex items-center gap-8">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 text-white/50 mb-1">
+                <Clock className="w-4 h-4" />
+                <span className="text-[10px] uppercase font-bold tracking-widest">TMR Global</span>
+              </div>
+              <div className="text-2xl font-black">{tmr}<span className="text-sm text-white/50 ml-1">m</span></div>
+            </div>
+            
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 text-white/50 mb-1">
+                <Users className="w-4 h-4" />
+                <span className="text-[10px] uppercase font-bold tracking-widest">Aguardando</span>
+              </div>
+              <div className="text-2xl font-black text-amber-400">{waitingLeads}</div>
+            </div>
+
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 text-white/50 mb-1">
+                <Layers className="w-4 h-4" />
+                <span className="text-[10px] uppercase font-bold tracking-widest">Em Box</span>
+              </div>
+              <div className="text-2xl font-black">{inProgressLeads}</div>
+            </div>
+
+            <div className={`flex flex-col pl-6 border-l border-white/10 ${criticalCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle className={`w-4 h-4 ${criticalCount > 0 ? 'animate-pulse' : ''}`} />
+                <span className="text-[10px] uppercase font-bold tracking-widest">SLAs Violados</span>
+              </div>
+              <div className="text-3xl font-black">{criticalCount}</div>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-          <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-sm font-bold uppercase tracking-widest text-white/60">Live Sync</span>
+
+        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-full">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Online</span>
         </div>
       </header>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 z-10 flex-1">
-        
-        {/* Left Column: Fila de Espera (Novo Lead) */}
-        <div className="lg:col-span-4 bg-white/[0.02] border border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col">
-          <div className="flex items-center gap-4 text-white/80 mb-8">
-            <Zap className="w-6 h-6 text-indigo-400" />
-            <span className="text-lg font-bold uppercase tracking-widest">Fila de Espera ({waitQueue.length})</span>
-          </div>
+      {/* Corpo (Grid de Gerentes) */}
+      <div className="flex-1 p-8 overflow-y-auto custom-scrollbar z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {unitStats.map((stat, idx) => (
+            <motion.div
+              key={stat.manager.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className={`rounded-[2rem] bg-white/[0.02] border p-6 flex flex-col transition-all duration-500 ${
+                stat.danger > 0 
+                  ? 'border-rose-500/50 shadow-[0_0_30px_rgba(244,63,94,0.15)] bg-rose-500/5' 
+                  : 'border-white/10'
+              }`}
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-white leading-none mb-1">{stat.manager.name}</h3>
+                  <div className="text-xs font-bold uppercase tracking-widest text-white/40">
+                    Ativos: {stat.leadNew + stat.negotiation + stat.quote}
+                  </div>
+                </div>
+                
+                <div className={`flex flex-col items-end ${stat.tmr > 15 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                  <div className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest mb-1">
+                    <Clock className="w-3 h-3" /> TMR
+                  </div>
+                  <div className="text-3xl font-black leading-none">{stat.tmr}<span className="text-sm ml-0.5 opacity-50">m</span></div>
+                </div>
+              </div>
 
-          <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar flex flex-col gap-4">
-            <AnimatePresence>
-              {waitQueue.map((lead, idx) => {
-                const manager = managers.find(m => m.id === lead.manager_id);
-                const isCritical = dangerLeads.some(d => d.id === lead.id);
+              {/* Contadores Internos */}
+              <div className="grid grid-cols-3 gap-2 mt-auto">
+                <div className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center ${
+                  stat.leadNew > 0 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' : 'bg-black/20 border-white/5 text-white/30'
+                }`}>
+                  <div className="text-2xl font-black mb-1">{stat.leadNew}</div>
+                  <div className="text-[9px] font-bold uppercase tracking-widest">Espera</div>
+                </div>
+                
+                <div className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center ${
+                  stat.negotiation > 0 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-black/20 border-white/5 text-white/30'
+                }`}>
+                  <div className="text-2xl font-black mb-1">{stat.negotiation}</div>
+                  <div className="text-[9px] font-bold uppercase tracking-widest">Negoc.</div>
+                </div>
 
-                return (
-                  <motion.div
-                    key={lead.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className={`p-5 rounded-2xl flex flex-col gap-3 border ${
-                      isCritical 
-                        ? 'bg-rose-500/5 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.15)]' 
-                        : 'bg-white/5 border-white/5'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                          isCritical ? 'bg-rose-500/20 text-rose-400' : 'bg-white/10 text-white/70'
-                        }`}>
-                          {manager ? manager.name.substring(0, 2).toUpperCase() : '??'}
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-white">{lead.name}</h3>
-                          <p className="text-xs font-medium text-white/50">{manager?.name || 'Sem Responsável'}</p>
-                        </div>
-                      </div>
-                      {isCritical && (
-                        <div className="text-[10px] uppercase font-bold text-rose-400 bg-rose-500/10 px-2 py-1 rounded">Atrasado</div>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-              {waitQueue.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-white/30 text-center p-6">
-                  <p className="text-lg font-medium">Nenhum cliente aguardando na etapa inicial.</p>
+                <div className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center ${
+                  stat.quote > 0 ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-black/20 border-white/5 text-white/30'
+                }`}>
+                  <div className="text-2xl font-black mb-1">{stat.quote}</div>
+                  <div className="text-[9px] font-bold uppercase tracking-widest">Orçam.</div>
+                </div>
+              </div>
+
+              {/* Alerta de Atraso */}
+              {stat.danger > 0 && (
+                <div className="mt-4 px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-rose-400">{stat.danger} Atrasados</span>
                 </div>
               )}
-            </AnimatePresence>
-          </div>
+            </motion.div>
+          ))}
+
+          {unitStats.length === 0 && (
+            <div className="col-span-full h-64 flex flex-col items-center justify-center text-white/30">
+              <p className="text-2xl font-bold">Nenhum atendimento ativo no momento.</p>
+            </div>
+          )}
         </div>
-
-        {/* Middle Column: Big Metrics */}
-        <div className="lg:col-span-4 flex flex-col gap-8">
-          
-          {/* TMR Box */}
-          <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl flex flex-col justify-center items-center text-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center gap-3 text-indigo-400 mb-6">
-              <Clock className="w-6 h-6" />
-              <span className="text-sm font-bold uppercase tracking-widest">TMR Geral</span>
-            </div>
-            <div>
-              <div className="text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white">
-                {tmr}
-                <span className="text-3xl lg:text-4xl text-white/50 ml-2">m</span>
-              </div>
-              <p className="text-lg text-white/60 font-medium mt-4">
-                Meta: &lt; 15m
-              </p>
-            </div>
-          </div>
-
-          {/* Critical Count Box */}
-          <div className={`flex-1 border rounded-[2rem] p-8 backdrop-blur-2xl flex flex-col justify-center items-center text-center transition-all duration-1000 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${
-            criticalCount > 0 
-              ? 'bg-rose-500/10 border-rose-500/30' 
-              : 'bg-white/[0.02] border-white/10'
-          }`}>
-            <div className={`flex items-center gap-3 mb-6 ${criticalCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-              <AlertTriangle className={`w-6 h-6 ${criticalCount > 0 ? 'animate-pulse' : ''}`} />
-              <span className="text-sm font-bold uppercase tracking-widest">SLAs Críticos</span>
-            </div>
-            <div>
-              <div className={`text-7xl lg:text-8xl font-black leading-none tracking-tighter ${criticalCount > 0 ? 'text-rose-500 drop-shadow-[0_0_40px_rgba(244,63,94,0.4)]' : 'text-emerald-500'}`}>
-                {criticalCount}
-              </div>
-              <p className={`text-lg font-medium mt-4 ${criticalCount > 0 ? 'text-rose-400/80' : 'text-emerald-400/80'}`}>
-                {criticalCount > 0 ? 'Atenção Imediata' : 'Saudável'}
-              </p>
-            </div>
-          </div>
-          
-        </div>
-
-        {/* Right Column: Status de Atendimentos */}
-        <div className="lg:col-span-4 bg-white/[0.02] border border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col">
-          <div className="flex items-center gap-4 text-white/80 mb-8">
-            <Target className="w-6 h-6 text-amber-400" />
-            <span className="text-lg font-bold uppercase tracking-widest">Em Atendimento ({inProgressLeads.length})</span>
-          </div>
-
-          <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar flex flex-col gap-4">
-            <AnimatePresence>
-              {unitStats.map((stat, idx) => (
-                <motion.div
-                  key={stat.manager.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="p-5 rounded-2xl bg-white/5 border border-white/5"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-white">{stat.manager.name}</h3>
-                    <span className="text-2xl font-black text-amber-400">{stat.total}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-black/20 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-white/90">{stat.negotiation}</div>
-                      <div className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Negociando</div>
-                    </div>
-                    <div className="bg-black/20 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-indigo-400">{stat.quote}</div>
-                      <div className="text-[10px] uppercase font-bold text-indigo-400/60 tracking-wider">Orçamentos</div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-              {unitStats.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-white/30 text-center p-6">
-                  <p className="text-lg font-medium">Nenhum lead em andamento no momento.</p>
-                </div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
       </div>
+
     </div>
   );
 };
