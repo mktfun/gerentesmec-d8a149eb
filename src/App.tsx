@@ -17,7 +17,7 @@ import Config from "./pages/Config";
 import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
 import TvOperacional from "./pages/tv/TvOperacional";
-import TvExecutivo from "./pages/tv/TvExecutivo";
+import TvDashboard from "./components/Dashboard/TvDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,7 +50,7 @@ const App = () => (
                   {/* Rotas de TV (sem sidebar, edge-to-edge) */}
                   <Route element={<TvLayout />}>
                     <Route path="/tv/operacional" element={<TvOperacional />} />
-                    <Route path="/tv/executivo" element={<TvExecutivo />} />
+                    <Route path="/tv/executivo" element={<TvDashboard />} />
                   </Route>
                 </Route>
               </Routes>

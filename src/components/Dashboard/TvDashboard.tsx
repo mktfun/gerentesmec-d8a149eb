@@ -18,7 +18,8 @@ const TvDashboard: React.FC = () => {
   }, []);
 
   const ITEMS_PER_PAGE = 3;
-  const totalPages = Math.ceil(units.length / ITEMS_PER_PAGE);
+  // +1 because page 0 is the Macro View
+  const totalPages = 1 + Math.ceil(units.length / ITEMS_PER_PAGE);
 
   // Pagination Timer
   useEffect(() => {
@@ -29,8 +30,7 @@ const TvDashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, [totalPages, intervalTime]);
 
-
-  const visibleUnits = units.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const visibleUnits = page === 0 ? [] : units.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const toggleTvMode = () => {
     if (document.fullscreenElement) {
@@ -186,9 +186,88 @@ const TvDashboard: React.FC = () => {
             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, x: -100, filter: 'blur(10px)' }}
             transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-            className="grid grid-cols-3 gap-8 h-full"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 h-full"
           >
-            {visibleUnits.map((unit, i) => {
+            {page === 0 ? (
+              <div className="col-span-3 flex items-center justify-center h-full gap-16 px-12">
+                {/* Macro View: Global Score */}
+                {(() => {
+                  const globalScore = avgScore(leads);
+                  const roundedGlobal = globalScore !== null ? Math.round(globalScore) : 0;
+                  const scoreColor = roundedGlobal >= 75 ? '#34d399' : roundedGlobal >= 50 ? '#818cf8' : '#f87171';
+                  
+                  return (
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl">
+                      <div className="flex items-center gap-4 text-white/50 mb-12">
+                        <Target className="w-8 h-8" />
+                        <span className="text-3xl font-bold uppercase tracking-widest">Score Nacional</span>
+                      </div>
+                      <div className="relative w-80 h-80 lg:w-[400px] lg:h-[400px] flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 256 256">
+                          <circle cx="128" cy="128" r="116" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
+                          <motion.circle
+                            cx="128" cy="128" r="116" stroke={scoreColor} strokeWidth="12" fill="transparent"
+                            strokeDasharray={2 * Math.PI * 116}
+                            initial={{ strokeDashoffset: 2 * Math.PI * 116 }}
+                            animate={{ strokeDashoffset: (2 * Math.PI * 116) * (1 - roundedGlobal / 100) }}
+                            transition={{ duration: 2, ease: "easeOut" }}
+                            className="drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center">
+                          <span className="text-[6rem] lg:text-[8rem] font-black tracking-tighter" style={{ color: scoreColor }}>{roundedGlobal}</span>
+                          <span className="text-xl uppercase font-bold text-white/40 mt-2">Pontos</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Macro View: Ranking Top 3 */}
+                <div className="flex-1 flex flex-col gap-6">
+                  <div className="flex items-center gap-4 text-amber-400 mb-6 pl-4">
+                    <TrendingUp className="w-10 h-10" />
+                    <span className="text-3xl font-black uppercase tracking-widest">Top Performance</span>
+                  </div>
+                  {(() => {
+                    const managerScores = units.map(m => {
+                      const mLeads = leads.filter(l => l.unit_id === m.id);
+                      const mScore = avgScore(mLeads);
+                      return {
+                        id: m.id,
+                        name: m.name,
+                        score: mScore !== null ? Math.round(mScore) : 0,
+                        count: mLeads.filter(l => l.score !== null).length
+                      };
+                    }).filter(m => m.count > 0).sort((a, b) => b.score - a.score);
+                    
+                    const top3 = managerScores.slice(0, 3);
+                    
+                    if (top3.length === 0) return <div className="text-white/30 text-2xl p-10">Sem auditorias suficientes</div>;
+
+                    return top3.map((manager, index) => (
+                      <motion.div key={manager.id} className={`p-8 lg:p-10 rounded-[2rem] flex items-center justify-between border backdrop-blur-xl ${
+                        index === 0 ? 'bg-amber-500/10 border-amber-500/30' : index === 1 ? 'bg-slate-300/10 border-slate-300/20' : 'bg-amber-700/10 border-amber-700/20'
+                      }`}>
+                        <div className="flex items-center gap-6">
+                          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-black text-3xl ${
+                            index === 0 ? 'bg-amber-500/20 text-amber-400' : index === 1 ? 'bg-slate-300/20 text-slate-300' : 'bg-amber-700/20 text-amber-600'
+                          }`}>#{index + 1}</div>
+                          <div>
+                            <h3 className="text-4xl font-bold text-white mb-2">{manager.name}</h3>
+                            <p className="text-xl font-medium text-white/50 uppercase tracking-widest">{manager.count} Auditorias</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-6xl font-black leading-none ${index === 0 ? 'text-amber-400' : 'text-white'}`}>{manager.score}</div>
+                        </div>
+                      </motion.div>
+                    ));
+                  })()}
+                </div>
+              </div>
+            ) : visibleUnits.map((unit, i) => {
               const { score, diff, tmrFallback, dangerCount } = getUnitMetrics(unit.id);
               const displayTmr = tmrFallback > 0 ? `${tmrFallback}m` : '—';
               const displayScore = score ?? 0;

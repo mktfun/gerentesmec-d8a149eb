@@ -20,6 +20,26 @@ const TvOperacional = () => {
   const activeLeads = leads.filter(l => l.funnel_stage === 'lead_new' || l.funnel_stage === 'negotiation' || l.funnel_stage === 'quote');
   const criticalCount = dangerLeads.length;
 
+  // Filas
+  const waitQueue = activeLeads.filter(l => l.funnel_stage === 'lead_new').sort((a, b) => {
+    const aTime = new Date(a.last_message_at || a.created_at).getTime();
+    const bTime = new Date(b.last_message_at || b.created_at).getTime();
+    return aTime - bTime; // oldest first
+  });
+
+  const inProgressLeads = activeLeads.filter(l => l.funnel_stage === 'negotiation' || l.funnel_stage === 'quote');
+  
+  // Status por unidade
+  const unitStats = managers.map(m => {
+    const mLeads = inProgressLeads.filter(l => l.manager_id === m.id);
+    return {
+      manager: m,
+      negotiation: mLeads.filter(l => l.funnel_stage === 'negotiation').length,
+      quote: mLeads.filter(l => l.funnel_stage === 'quote').length,
+      total: mLeads.length
+    };
+  }).filter(u => u.total > 0).sort((a, b) => b.total - a.total);
+
   return (
     <div className="w-full min-h-screen bg-[#050505] text-white flex flex-col p-8 md:p-12 font-sans overflow-hidden relative">
       
@@ -47,109 +67,140 @@ const TvOperacional = () => {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 z-10 flex-1">
         
-        {/* Left Column: Big Metrics */}
-        <div className="lg:col-span-5 flex flex-col gap-8">
+        {/* Left Column: Fila de Espera (Novo Lead) */}
+        <div className="lg:col-span-4 bg-white/[0.02] border border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col">
+          <div className="flex items-center gap-4 text-white/80 mb-8">
+            <Zap className="w-6 h-6 text-indigo-400" />
+            <span className="text-lg font-bold uppercase tracking-widest">Fila de Espera ({waitQueue.length})</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar flex flex-col gap-4">
+            <AnimatePresence>
+              {waitQueue.map((lead, idx) => {
+                const manager = managers.find(m => m.id === lead.manager_id);
+                const isCritical = dangerLeads.some(d => d.id === lead.id);
+
+                return (
+                  <motion.div
+                    key={lead.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={`p-5 rounded-2xl flex flex-col gap-3 border ${
+                      isCritical 
+                        ? 'bg-rose-500/5 border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.15)]' 
+                        : 'bg-white/5 border-white/5'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                          isCritical ? 'bg-rose-500/20 text-rose-400' : 'bg-white/10 text-white/70'
+                        }`}>
+                          {manager ? manager.name.substring(0, 2).toUpperCase() : '??'}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-white">{lead.name}</h3>
+                          <p className="text-xs font-medium text-white/50">{manager?.name || 'Sem Responsável'}</p>
+                        </div>
+                      </div>
+                      {isCritical && (
+                        <div className="text-[10px] uppercase font-bold text-rose-400 bg-rose-500/10 px-2 py-1 rounded">Atrasado</div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+              {waitQueue.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-white/30 text-center p-6">
+                  <p className="text-lg font-medium">Nenhum cliente aguardando na etapa inicial.</p>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Middle Column: Big Metrics */}
+        <div className="lg:col-span-4 flex flex-col gap-8">
           
           {/* TMR Box */}
-          <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-[2rem] p-10 backdrop-blur-2xl flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center gap-4 text-indigo-400 mb-8">
-              <Clock className="w-8 h-8" />
-              <span className="text-xl font-bold uppercase tracking-widest">TMR Geral</span>
+          <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl flex flex-col justify-center items-center text-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center gap-3 text-indigo-400 mb-6">
+              <Clock className="w-6 h-6" />
+              <span className="text-sm font-bold uppercase tracking-widest">TMR Geral</span>
             </div>
             <div>
-              <div className="text-7xl md:text-8xl lg:text-9xl font-black leading-none tracking-tighter text-white">
+              <div className="text-7xl lg:text-8xl font-black leading-none tracking-tighter text-white">
                 {tmr}
-                <span className="text-3xl md:text-5xl text-white/50 ml-2">m</span>
+                <span className="text-3xl lg:text-4xl text-white/50 ml-2">m</span>
               </div>
-              <p className="text-xl md:text-2xl text-white/60 font-medium mt-4">
+              <p className="text-lg text-white/60 font-medium mt-4">
                 Meta: &lt; 15m
               </p>
             </div>
           </div>
 
           {/* Critical Count Box */}
-          <div className={`flex-1 border rounded-[2rem] p-10 backdrop-blur-2xl flex flex-col justify-between transition-all duration-1000 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${
+          <div className={`flex-1 border rounded-[2rem] p-8 backdrop-blur-2xl flex flex-col justify-center items-center text-center transition-all duration-1000 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${
             criticalCount > 0 
               ? 'bg-rose-500/10 border-rose-500/30' 
               : 'bg-white/[0.02] border-white/10'
           }`}>
-            <div className={`flex items-center gap-4 mb-8 ${criticalCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-              <AlertTriangle className={`w-8 h-8 ${criticalCount > 0 ? 'animate-pulse' : ''}`} />
-              <span className="text-xl font-bold uppercase tracking-widest">SLAs Críticos</span>
+            <div className={`flex items-center gap-3 mb-6 ${criticalCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+              <AlertTriangle className={`w-6 h-6 ${criticalCount > 0 ? 'animate-pulse' : ''}`} />
+              <span className="text-sm font-bold uppercase tracking-widest">SLAs Críticos</span>
             </div>
             <div>
-              <div className={`text-7xl md:text-8xl lg:text-9xl font-black leading-none tracking-tighter ${criticalCount > 0 ? 'text-rose-500 drop-shadow-[0_0_40px_rgba(244,63,94,0.4)]' : 'text-emerald-500'}`}>
+              <div className={`text-7xl lg:text-8xl font-black leading-none tracking-tighter ${criticalCount > 0 ? 'text-rose-500 drop-shadow-[0_0_40px_rgba(244,63,94,0.4)]' : 'text-emerald-500'}`}>
                 {criticalCount}
               </div>
-              <p className={`text-xl md:text-2xl font-medium mt-4 ${criticalCount > 0 ? 'text-rose-400/80' : 'text-emerald-400/80'}`}>
-                {criticalCount > 0 ? 'Atenção Imediata Necessária' : 'Operação Saudável'}
+              <p className={`text-lg font-medium mt-4 ${criticalCount > 0 ? 'text-rose-400/80' : 'text-emerald-400/80'}`}>
+                {criticalCount > 0 ? 'Atenção Imediata' : 'Saudável'}
               </p>
             </div>
           </div>
           
         </div>
 
-        {/* Right Column: Live Feed */}
-        <div className="lg:col-span-7 bg-white/[0.02] border border-white/10 rounded-[2rem] p-10 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col">
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-4 text-white/80">
-              <Zap className="w-8 h-8 text-amber-400" />
-              <span className="text-xl font-bold uppercase tracking-widest">Atendimentos Ativos ({activeLeads.length})</span>
-            </div>
+        {/* Right Column: Status de Atendimentos */}
+        <div className="lg:col-span-4 bg-white/[0.02] border border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col">
+          <div className="flex items-center gap-4 text-white/80 mb-8">
+            <Target className="w-6 h-6 text-amber-400" />
+            <span className="text-lg font-bold uppercase tracking-widest">Em Atendimento ({inProgressLeads.length})</span>
           </div>
 
-          <div className="flex-1 overflow-hidden relative">
-            <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
-            
-            <div className="flex flex-col gap-4 overflow-y-auto h-full pr-4 pb-12 custom-scrollbar">
-              <AnimatePresence>
-                {activeLeads.slice(0, 10).map((lead, idx) => {
-                  const manager = managers.find(m => m.id === lead.manager_id);
-                  const isCritical = dangerLeads.some(d => d.id === lead.id);
-
-                  return (
-                    <motion.div
-                      key={lead.id}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                      className={`p-6 rounded-2xl flex items-center justify-between border ${
-                        isCritical 
-                          ? 'bg-rose-500/10 border-rose-500/20' 
-                          : 'bg-white/5 border-white/5'
-                      }`}
-                    >
-                      <div className="flex items-center gap-6">
-                        <div className={`w-14 h-14 rounded-full flex items-center justify-center font-black text-xl ${
-                          isCritical ? 'bg-rose-500/20 text-rose-400' : 'bg-white/10 text-white/70'
-                        }`}>
-                          {manager ? manager.name.substring(0, 2).toUpperCase() : '??'}
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-white mb-1">{lead.name}</h3>
-                          <p className="text-sm font-medium text-white/60 uppercase tracking-widest">
-                            {lead.funnel_stage === 'lead_new' ? 'Novo Lead' : lead.funnel_stage === 'quote' ? 'Orçamento' : 'Em Negociação'}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {isCritical && (
-                        <div className="px-4 py-2 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-400 font-bold animate-pulse">
-                          Atrasado
-                        </div>
-                      )}
-                    </motion.div>
-                  );
-                })}
-                {activeLeads.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center text-white/30">
-                    <Target className="w-16 h-16 mb-4 opacity-50" />
-                    <p className="text-xl font-medium">Nenhum atendimento ativo no momento</p>
+          <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar flex flex-col gap-4">
+            <AnimatePresence>
+              {unitStats.map((stat, idx) => (
+                <motion.div
+                  key={stat.manager.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="p-5 rounded-2xl bg-white/5 border border-white/5"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-white">{stat.manager.name}</h3>
+                    <span className="text-2xl font-black text-amber-400">{stat.total}</span>
                   </div>
-                )}
-              </AnimatePresence>
-            </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-black/20 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-white/90">{stat.negotiation}</div>
+                      <div className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Negociando</div>
+                    </div>
+                    <div className="bg-black/20 rounded-lg p-3 text-center">
+                      <div className="text-2xl font-bold text-indigo-400">{stat.quote}</div>
+                      <div className="text-[10px] uppercase font-bold text-indigo-400/60 tracking-wider">Orçamentos</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+              {unitStats.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-white/30 text-center p-6">
+                  <p className="text-lg font-medium">Nenhum lead em andamento no momento.</p>
+                </div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
