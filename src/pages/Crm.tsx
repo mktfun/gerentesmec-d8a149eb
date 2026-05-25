@@ -9,14 +9,19 @@ import AuditPanel from '@/components/Crm/AuditPanel';
 import KanbanView from '@/components/Crm/KanbanView';
 import LeadModalForm from '@/components/Crm/LeadModalForm';
 import UnitSwitcher from '@/components/Crm/UnitSwitcher';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 type ViewMode = 'list' | 'kanban';
 
 const Crm = () => {
   const { leads, moveLeadStage, managers, units, deleteLeads } = useAppData();
+  const { user } = useAuth();
+  
+  const isUnitManager = user?.user_metadata?.role === 'unit_manager';
+  const userUnitId = user?.user_metadata?.unit_id;
   
   const [view, setView] = useState<ViewMode>('kanban');
-  const [unitFilter, setUnitFilter] = useState('all');
+  const [unitFilter, setUnitFilter] = useState(isUnitManager && userUnitId ? userUnitId : 'all');
   const [slaFilter, setSlaFilter] = useState(false);
   // Armazena apenas o ID — deriva o lead ao vivo do array (evita flash quando Realtime atualiza)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -165,7 +170,7 @@ const Crm = () => {
       <div className="px-5 py-3 border-b border-border bg-background flex items-center gap-3 shrink-0">
         {/* Esquerda: Unit Switcher + View Toggle */}
         <div className="flex items-center gap-2 shrink-0">
-          <UnitSwitcher units={units} leads={leads} selectedUnitId={unitFilter} onSelect={setUnitFilter} />
+          <UnitSwitcher units={units} leads={leads} selectedUnitId={unitFilter} onSelect={setUnitFilter} disabled={isUnitManager} />
           <div className="h-6 w-px bg-border mx-1" />
           <div className="flex items-center gap-1 p-1 bg-muted rounded-xl">
             <button onClick={() => setView('list')}

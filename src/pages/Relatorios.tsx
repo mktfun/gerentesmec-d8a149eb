@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
@@ -20,6 +21,11 @@ const Relatorios = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const { leads, units, managers, businessHours } = useAppData();
+  const { user } = useAuth();
+  
+  const isUnitManager = user?.user_metadata?.role === 'unit_manager';
+  const userUnitId = user?.user_metadata?.unit_id;
+
   const now = new Date();
   const [dateRange, setDateRange] = useState<DateRange>({
     from: startOfDay(new Date(now.getTime() - 29 * 86400000)),
@@ -28,7 +34,7 @@ const Relatorios = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Novos Filtros
-  const [selectedUnit, setSelectedUnit] = useState<string>('all');
+  const [selectedUnit, setSelectedUnit] = useState<string>(isUnitManager && userUnitId ? userUnitId : 'all');
   const [scoreOrder, setScoreOrder] = useState<string>('none');
   const [slaOrder, setSlaOrder] = useState<string>('none');
   const [expandedManager, setExpandedManager] = useState<string | null>(null);
@@ -357,6 +363,20 @@ const Relatorios = () => {
             <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500">
               {metrics.score !== null ? <>{metrics.score}<span className="text-3xl text-muted-foreground/60">%</span></> : <span className="text-muted-foreground/30">—</span>}
             </h2>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Unidade:</span>
+              <select
+                className="bg-transparent border border-border/50 rounded-md text-sm px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                value={selectedUnit}
+                onChange={e => setSelectedUnit(e.target.value)}
+                disabled={isUnitManager}
+              >
+                {!isUnitManager && <option value="all">Todas as Lojas</option>}
+                {units.map(u => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            </div>
             {metrics.scoreChange !== null ? (
               <div className="flex items-center gap-2">
                 <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md ${metrics.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>

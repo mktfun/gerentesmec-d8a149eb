@@ -82,40 +82,46 @@ serve(async (req) => {
       2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANEXO ENVIADO: image]" como evidência cabal de envio de mídia.
       
       CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
-      - 'closed_won' (Ganho): USE APENAS SE o cliente pagou (enviou comprovante) OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado", "Manda brasa", "Vou levar o carro amanhã para fazer"). Um simples "Ok", "Beleza" ou "Obrigado" NÃO é aprovação. Na dúvida, não feche.
-      - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer (ex: "Tá caro, deixa pra lá", "Vou fazer em outro lugar") ou se o gerente encerrou o atendimento negativamente.
-      - 'negotiation' (Em Negociação): O gerente passou o valor/orçamento e eles estão conversando sobre formas de pagamento, parcelamento, prazos, ou o cliente está tirando dúvidas.
-      - 'quote' (Em Orçamento): O gerente acabou de mandar o orçamento mas o cliente ainda não respondeu (ou respondeu apenas algo genérico como "Vou analisar").
+      - 'closed_won' (Ganho): USE APENAS SE o cliente pagou OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado") APÓS o gerente já ter enviado o link do orçamento/checklist. Um "sim" antes de receber o orçamento NÃO aprova o serviço.
+      - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer.
+      - 'negotiation' (Em Negociação): O gerente passou o valor/orçamento e eles estão conversando sobre formas de pagamento, ou tirando dúvidas.
+      - 'quote' (Em Orçamento): O gerente acabou de mandar o orçamento/checklist mas o cliente ainda não respondeu aprovando.
       - 'lead_new' (Novo Lead): Estão apenas diagnosticando o problema ou agendando visita. Não há orçamento final passado ainda.
 
-      INTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST (Seja Rigoroso - APLICÁVEL APENAS A MENSAGENS DO GERENTE):
-      1. Foco na Intenção Real: Os gerentes usam linguagem informal. Se a INTENÇÃO da mensagem for explicar um defeito (mesmo com gírias), marque que ele justificou serviços.
-      2. Orçamento (2a): Só marque true se o gerente de fato passar o valor total ou enviar um PDF/link claro do orçamento.
-      3. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional para melhorar o carro além do que o cliente pediu inicialmente, marque como true.
-      4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina (mandando link ou texto claro).
-      5. Vá pontuando aos poucos: O objetivo é marcar os checks como 'true' gradativamente. Nunca reverta um 'true' para 'false' se já foi cumprido no histórico.
-      ${(media_url || text.includes('[ANEXO ENVIADO: video]') || text.includes('[ANEXO ENVIADO: audio]')) ? `\n[SISTEMA]: Uma mídia foi anexada. SE foi enviada pelo gerente, avalie de fato explicou o defeito (2c, 3c) ou enviou evidência clara (2b, 3b).` : ''}
+      [EXEMPLO DE ATENDIMENTO 100% - LOJA CARIJÓS (PADRÃO OURO)]
+      Gerente: "Bom dia Sr. João! Segue o link do nosso checklist detalhado com as fotos do vazamento e o orçamento final: [LINK]. Aproveito para recomendar a troca preventiva da correia, enviei um vídeo rápido de 40 seg mostrando o desgaste acima."
+      Cliente: "Assustador! Pode aprovar tudo."
+      Gerente: "Maravilha. Serviço finalizado. Muito obrigado pela confiança! Pode nos deixar uma avaliação no Google? [LINK]"
+      [FIM DO EXEMPLO]
+
+      INSTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST (Seja Rigoroso - APLICÁVEL APENAS A MENSAGENS DO GERENTE):
+      1. Foco na Intenção Real: Os gerentes usam linguagem informal. Se a INTENÇÃO da mensagem for explicar um defeito, marque que ele justificou.
+      2. Orçamento (2a): Só marque true se o gerente de fato passar o valor total ou enviar um PDF/link claro do orçamento/checklist.
+      3. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional além do pedido, marque como true.
+      4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina no Google.
+      5. AVALIAÇÃO MULTIMODAL DE VÍDEO/ÁUDIO: Se houver anexo, VOCÊ DEVE TRANSCRVER E ANALISAR O CONTEÚDO. Um vídeo curto (< 2 min) não significa automaticamente que é ruim, mas você deve ser rígido: ele explicou TUDO certinho? Explicou o problema e justificou POR QUE o cliente tem que pagar aquilo? Se a explicação for rasa, silenciosa ou insuficiente, PONTUE ZERO (false) nas etapas 2c e 3c de explicação, não dê a nota máxima!
+      6. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio do mecânico para provar que você o avaliou e justificar sua nota.
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
         "audit_checklist": {
-          "1a": true ou false, // Atendimento foi cordial e respeitoso?
-          "1b": true ou false, // Registrou no WhatsApp o que foi acordado?
-          "2a": true ou false, // Enviou o link do orçamento?
-          "2b": true ou false, // Enviou vídeo mostrando o defeito?
-          "2c": true ou false, // Explicou os efeitos de não fazer o reparo?
-          "3a": true ou false, // Enviou o checklist complementar?
-          "3b": true ou false, // Enviou vídeo do que mais precisa ser feito?
-          "3c": true ou false, // Explicou o texto justificando serviços extras?
-          "4a": true ou false, // Enviou mensagem de agradecimento padrão?
-          "4b": true ou false  // Pediu avaliação no Google?
+          "1a": true ou false,
+          "1b": true ou false,
+          "2a": true ou false,
+          "2b": true ou false,
+          "2c": true ou false,
+          "3a": true ou false,
+          "3b": true ou false,
+          "3c": true ou false,
+          "4a": true ou false,
+          "4b": true ou false
         },
-        "score": (número de 0 a 100, baseado no preenchimento do checklist: 4 blocos de 25 pontos cada),
-        "funnel_stage": (sugestão de nova etapa do funil: lead_new, quote, negotiation, closed_won, closed_lost. Só mude se houver clareza),
+        "score": (número de 0 a 100),
+        "funnel_stage": (sugestão de nova etapa),
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
-        "closing_summary": (Resumo descritivo da conversa até o momento, informando o que o cliente quer, o que o gerente já fez, e especificamente quais itens do checklist (1a a 4b) foram pontuados ou confirmados até agora. Este texto será exibido no Dossiê do CRM como um log de eventos da IA.),
-        "ticket_value": (número decimal correspondente ao orçamento final negociado, extraído do texto. Ex: 2600. Se houver 'R$ 2.600,00', retorne 2600. Se não houver clareza, retorne null),
-        "customer_vehicle": (string extraída do texto correspondente ao modelo do veículo ou placa. Ex: 'SVH4B83' ou 'Honda Civic'. Se não houver, retorne null)
+        "closing_summary": (Resumo descritivo narrando a evolução. OBRIGATÓRIO incluir "[ANÁLISE DE MÍDIA]:" descrevendo a transcrição da mídia e se foi profunda o suficiente, caso haja anexo do mecânico),
+        "ticket_value": (número decimal ou null),
+        "customer_vehicle": (string ou null)
       }
     `;
 

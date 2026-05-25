@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAppData } from '@/context/AppDataContext';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { calculateDangerLeads } from '@/utils/metrics';
 
 const navItems = [
@@ -19,6 +20,9 @@ const navItems = [
 const DashboardLayout: React.FC = () => {
   const { isDark, toggle } = useTheme();
   const { isTvMode, setIsTvMode, leads, businessHours } = useAppData();
+  const { user } = useAuth();
+  
+  const isUnitManager = user?.user_metadata?.role === 'unit_manager';
 
   const dangerCount = React.useMemo(() => {
     return leads ? calculateDangerLeads(leads, businessHours).length : 0;
@@ -52,10 +56,12 @@ const DashboardLayout: React.FC = () => {
           <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30">
             Menu
           </p>
-          {navItems.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
+          {navItems.map(({ to, label, icon: Icon, end }) => {
+            if (isUnitManager && (to === '/config' || to === '/gerentes')) return null;
+            return (
+              <NavLink
+                key={to}
+                to={to}
               end={end}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
@@ -74,7 +80,8 @@ const DashboardLayout: React.FC = () => {
                 </span>
               )}
             </NavLink>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Footer actions */}
@@ -109,7 +116,9 @@ const DashboardLayout: React.FC = () => {
           <header className="h-16 sticky top-0 z-10 flex items-center justify-between px-8
             bg-background/80 backdrop-blur-xl border-b border-border">
           <div>
-            <h2 className="text-xl font-black text-foreground">Olá, Administrador 👋</h2>
+            <h2 className="text-xl font-black text-foreground">
+              Olá, {isUnitManager ? (user?.user_metadata?.name || 'Gerente') : 'Administrador'} 👋
+            </h2>
             <p className="text-xs text-muted-foreground">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>

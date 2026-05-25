@@ -9,9 +9,10 @@ interface Props {
   leads: Lead[];
   selectedUnitId: string | 'all';
   onSelect: (id: string | 'all') => void;
+  disabled?: boolean;
 }
 
-const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect }) => {
+const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect, disabled }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -56,8 +57,9 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
       
       {/* Trigger Button */}
       <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="group relative flex items-center gap-3 px-5 py-3 bg-card hover:bg-accent border border-border backdrop-blur-xl rounded-2xl transition-all outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`group relative flex items-center gap-3 px-5 py-3 bg-card border border-border backdrop-blur-xl rounded-2xl transition-all outline-none shadow-[0_4px_20px_rgba(0,0,0,0.2)] ${disabled ? 'opacity-80 cursor-default' : 'hover:bg-accent focus-visible:ring-2 focus-visible:ring-indigo-500'}`}
       >
         <div className="flex items-center gap-2">
           {selectedUnit.id === 'all' ? (
@@ -73,7 +75,7 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect 
           {selectedScore !== null ? `${selectedScore}%` : '—'}
         </div>
 
-        <ChevronDown className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        {!disabled && <ChevronDown className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />}
       </button>
 
       {/* Dropdown Menu */}
