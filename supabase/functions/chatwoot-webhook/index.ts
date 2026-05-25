@@ -106,7 +106,7 @@ serve(async (req) => {
 
     // 1. Validate event types we care about
     const event = payload.event
-    if (event !== 'conversation_created' && event !== 'message_created') {
+    if (event !== 'conversation_created' && event !== 'message_created' && event !== 'conversation_updated') {
       return new Response(JSON.stringify({ message: "Event ignored" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
@@ -121,12 +121,24 @@ serve(async (req) => {
     // Filter out conversations with specific labels
     const conversation = payload.conversation || payload;
     const labels: string[] = conversation.labels || [];
-    const ignoredLabels: string[] = settings?.ignored_labels || ['fornecedor', 'dono', 'ignorar', 'ignore', 'equipe', 'grupo', 'rh', 'socios'];
+    const ignoredLabels: string[] = settings?.ignored_labels || ['fornecedor', 'dono', 'ignorar', 'ignore', 'ignorado', 'ignorada', 'equipe', 'grupo', 'rh', 'socios'];
     const hasIgnoredLabel = labels.some(label => ignoredLabels.some(ig => label.toLowerCase() === ig.toLowerCase()));
     
+    // Pegar o ID da conversa para possível exclusão
+    const targetConvId = conversation?.id || payload.id;
+
     if (hasIgnoredLabel) {
       console.log('Ignored due to label filter:', labels);
-      return new Response(JSON.stringify({ message: "Ignored by label filter" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
+      // HARD DELETE: Se a conversa ganhou etiqueta de ignorado, apagamos do sistema para "sumir no esquecimento"
+      if (targetConvId) {
+        await supabase.from('leads').delete().eq('chatwoot_conversation_id', targetConvId);
+      }
+      return new Response(JSON.stringify({ message: "Ignored by label filter and deleted if existed" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
+    }
+
+    if (event === 'conversation_updated') {
+      // Se for apenas update e não caiu no filtro de ignorado, não precisamos reprocessar mensagens.
+      return new Response(JSON.stringify({ message: "Conversation updated ignored (no ignored label)" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
     // 2. Extract Data
