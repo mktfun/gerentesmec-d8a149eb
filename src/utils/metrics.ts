@@ -16,50 +16,49 @@ export const calculateTmr = (
 ) => {
   if (!leadsList.length) return 0;
 
-  // Novo Cálculo: Histórico real da conversa baseado em sum(total_response_time) / sum(response_count)
-  let totalMins = 0;
-  let totalCount = 0;
-
-  leadsList.forEach(l => {
-    const leadTotal = (l as any).total_response_time_minutes;
-    const leadCount = (l as any).response_count;
+  const now = new Date();
+  
+  // Apenas leads na 1ª etapa (lead_new)
+  const newLeads = leadsList.filter(l => l.funnel_stage === 'lead_new');
+  if (!newLeads.length) return 0;
+  
+  // Apenas leads que estão EFETIVAMENTE esperando (última mensagem do cliente > última mensagem do agente)
+  const waitingLeads = newLeads.filter(l => {
+    // @ts-ignore
+    const cTime = l.last_client_message_at ? new Date(l.last_client_message_at).getTime() : 0;
+    // @ts-ignore
+    const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
     
-    if (leadTotal && leadCount) {
-      // Hotfix: Se a média por resposta deste lead for > 24h úteis (1440 min),
-      // provavelmente é dado legado de antes de implementarmos o bloqueio de fds.
-      // Ignorar para não distorcer a média da equipe.
-      if (leadTotal / leadCount > 1440) return;
-
-      totalMins += leadTotal;
-      totalCount += leadCount;
-    }
+    // Se aTime >= cTime, o gerente já respondeu, então não está esperando.
+    // Se cTime for 0, o cliente nem mandou mensagem, então não conta.
+    return cTime > aTime && cTime > 0;
   });
 
-  if (totalCount === 0) {
-    // Fallback para o cálculo atual se não houver dados históricos
-    const now = new Date();
-    const newLeads = leadsList.filter(l => l.funnel_stage === 'lead_new');
-    if (!newLeads.length) return 0;
-    
-    const currentWait = newLeads.reduce((acc, l) => {
-      let wait = 0;
-      // @ts-ignore
-      const cTime = l.last_client_message_at ? new Date(l.last_client_message_at).getTime() : 0;
-      // @ts-ignore
-      const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
-      
-      if (cTime > aTime) {
-        const from = new Date(cTime);
-        wait = businessHours
-          ? getWorkMinutes(from, now, businessHours)
-          : Math.round((now.getTime() - cTime) / 60000);
-      }
-      return acc + (wait > 0 ? wait : 0);
-    }, 0);
-    return Math.round(currentWait / newLeads.length);
-  }
+  if (!waitingLeads.length) return 0;
 
-  return Math.round(totalMins / totalCount);
+  const currentWait = waitingLeads.reduce((acc, l) => {
+    let wait = 0;
+    // @ts-ignore
+    const cTime = l.last_client_message_at ? new Date(l.last_client_message_at).getTime() : 0;
+    // @ts-ignore
+    const waitingSince = l.chatwoot_waiting_since;
+
+    if (waitingSince) {
+      const from = new Date(waitingSince);
+      wait = businessHours
+        ? getWorkMinutes(from, now, businessHours)
+        : Math.round((now.getTime() - from.getTime()) / 60000);
+    } else if (cTime > 0) {
+      const from = new Date(cTime);
+      wait = businessHours
+        ? getWorkMinutes(from, now, businessHours)
+        : Math.round((now.getTime() - cTime) / 60000);
+    }
+    
+    return acc + (wait > 0 ? wait : 0);
+  }, 0);
+
+  return Math.round(currentWait / waitingLeads.length);
 };
 
 export const isLeadDanger = (
