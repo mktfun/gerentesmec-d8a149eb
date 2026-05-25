@@ -200,7 +200,7 @@ serve(async (req) => {
     // 5. Check if Lead already exists
     const { data: existingLead } = await supabase
       .from('leads')
-      .select('id, last_client_message_at, total_response_time_minutes, response_count, audit_checklist')
+      .select('id, last_client_message_at, total_response_time_minutes, response_count, audit_checklist, funnel_stage')
       .eq('chatwoot_conversation_id', conversationId)
       .maybeSingle()
 
@@ -227,8 +227,8 @@ serve(async (req) => {
         updateData.last_agent_message_at = now;
         
         // CALCULO DO TMR HISTÓRICO
-        // Se o cliente mandou mensagem antes e agora o agente respondeu
-        if (existingLead.last_client_message_at) {
+        // Apenas soma o TMR se o lead estiver no estágio 'lead_new'
+        if (existingLead.last_client_message_at && existingLead.funnel_stage === 'lead_new') {
           const clientTime = new Date(existingLead.last_client_message_at).getTime();
           // Só contabilizamos se o agente demorou mais que 0 (ou seja, está respondendo a uma mensagem recente do cliente)
           // Mas como não temos o 'last_agent_message_at' do DB aqui, vamos assumir que cada resposta conta, 

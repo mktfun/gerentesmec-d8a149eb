@@ -38,7 +38,10 @@ export const calculateTmr = (
   if (totalCount === 0) {
     // Fallback para o cálculo atual se não houver dados históricos
     const now = new Date();
-    const currentWait = leadsList.reduce((acc, l) => {
+    const newLeads = leadsList.filter(l => l.funnel_stage === 'lead_new');
+    if (!newLeads.length) return 0;
+    
+    const currentWait = newLeads.reduce((acc, l) => {
       let wait = 0;
       // @ts-ignore
       const cTime = l.last_client_message_at ? new Date(l.last_client_message_at).getTime() : 0;
@@ -53,7 +56,7 @@ export const calculateTmr = (
       }
       return acc + (wait > 0 ? wait : 0);
     }, 0);
-    return Math.round(currentWait / leadsList.length);
+    return Math.round(currentWait / newLeads.length);
   }
 
   return Math.round(totalMins / totalCount);
@@ -64,7 +67,7 @@ export const isLeadDanger = (
   businessHours?: BusinessHoursConfig | null,
   slaMinutes = 20
 ) => {
-  if (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost') return false;
+  if (l.funnel_stage !== 'lead_new') return false;
 
   const now = new Date();
   // @ts-ignore
