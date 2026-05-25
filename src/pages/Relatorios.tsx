@@ -235,6 +235,51 @@ const Relatorios = () => {
     );
   };
 
+  const VisualMetricRow = ({ label, value }: { label: string, value: number | null }) => {
+    if (value === null) {
+      return (
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-foreground/70">{label}</span>
+            <span className="text-muted-foreground/30 font-medium">—</span>
+          </div>
+          <div className="w-full h-1.5 rounded-full bg-black/5 dark:bg-white/5" />
+        </div>
+      );
+    }
+
+    const isExcellent = value >= 75;
+    const isWarning = value >= 50 && value < 75;
+    
+    const colorClasses = isExcellent 
+      ? 'text-emerald-500 dark:text-emerald-400' 
+      : isWarning 
+        ? 'text-amber-500 dark:text-amber-400' 
+        : 'text-rose-500 dark:text-rose-400';
+
+    const bgClasses = isExcellent 
+      ? 'bg-emerald-500 dark:bg-emerald-400' 
+      : isWarning 
+        ? 'bg-amber-500 dark:bg-amber-400' 
+        : 'bg-rose-500 dark:bg-rose-400';
+
+    return (
+      <div className="flex flex-col gap-1.5 group">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-foreground/80 font-medium group-hover:text-foreground transition-colors">{label}</span>
+          <span className={`font-black ${colorClasses}`}>{value}%</span>
+        </div>
+        <div className="w-full h-1.5 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${value}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className={`h-full rounded-full ${bgClasses} shadow-[0_0_8px_rgba(var(--${isExcellent ? 'emerald' : isWarning ? 'amber' : 'rose'})-500,0.5)]`}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="p-8 pb-20">
@@ -419,66 +464,44 @@ const Relatorios = () => {
                     {/* Linha Expandida: Detalhamento dos Itens */}
                     {expandedManager === mp.managerName && (
                       <tr className="bg-black/[0.02] dark:bg-white/[0.02] border-b border-border shadow-inner">
-                        <td colSpan={7} className="px-8 py-6">
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <td colSpan={7} className="px-8 py-8">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
                             
                             {/* E1 */}
-                            <div className="space-y-3">
-                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E1. Cordialidade</h4>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">1a. Cordial e respeitoso</span>
-                                <span className="font-bold">{mp.itemAvgs['1a']}%</span>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">1b. Registrou no WhatsApp</span>
-                                <span className="font-bold">{mp.itemAvgs['1b']}%</span>
+                            <div className="space-y-4">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E1. Cordialidade</h4>
+                              <div className="flex flex-col gap-4">
+                                <VisualMetricRow label="1a. Cordial e respeitoso" value={mp.itemAvgs['1a']} />
+                                <VisualMetricRow label="1b. Registrou no WhatsApp" value={mp.itemAvgs['1b']} />
                               </div>
                             </div>
 
                             {/* E2 */}
-                            <div className="space-y-3">
-                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E2. Orçamento+Vídeo</h4>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">2a. Enviou link/valor claro</span>
-                                <span className="font-bold">{mp.itemAvgs['2a']}%</span>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">2b. Enviou evidência visual</span>
-                                <span className="font-bold">{mp.itemAvgs['2b']}%</span>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">2c. Explicou consequências</span>
-                                <span className="font-bold">{mp.itemAvgs['2c']}%</span>
+                            <div className="space-y-4">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E2. Orçamento+Vídeo</h4>
+                              <div className="flex flex-col gap-4">
+                                <VisualMetricRow label="2a. Enviou link/valor claro" value={mp.itemAvgs['2a']} />
+                                <VisualMetricRow label="2b. Enviou evidência visual" value={mp.itemAvgs['2b']} />
+                                <VisualMetricRow label="2c. Explicou consequências" value={mp.itemAvgs['2c']} />
                               </div>
                             </div>
 
                             {/* E3 */}
-                            <div className="space-y-3">
-                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E3. Upsell Mecânico</h4>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">3a. Ofereceu melhoria (Upsell)</span>
-                                <span className="font-bold">{mp.itemAvgs['3a']}%</span>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">3b. Enviou evidência visual extra</span>
-                                <span className="font-bold">{mp.itemAvgs['3b']}%</span>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">3c. Explicou necessidade extra</span>
-                                <span className="font-bold">{mp.itemAvgs['3c']}%</span>
+                            <div className="space-y-4">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E3. Upsell Mecânico</h4>
+                              <div className="flex flex-col gap-4">
+                                <VisualMetricRow label="3a. Ofereceu melhoria (Upsell)" value={mp.itemAvgs['3a']} />
+                                <VisualMetricRow label="3b. Enviou evidência extra" value={mp.itemAvgs['3b']} />
+                                <VisualMetricRow label="3c. Explicou necessidade extra" value={mp.itemAvgs['3c']} />
                               </div>
                             </div>
 
                             {/* E4 */}
-                            <div className="space-y-3">
-                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">E4. Encerramento</h4>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">4a. Enviou agradecimento</span>
-                                <span className="font-bold">{mp.itemAvgs['4a']}%</span>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-foreground/70">4b. Pediu Google Reviews</span>
-                                <span className="font-bold">{mp.itemAvgs['4b']}%</span>
+                            <div className="space-y-4">
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E4. Encerramento</h4>
+                              <div className="flex flex-col gap-4">
+                                <VisualMetricRow label="4a. Enviou agradecimento" value={mp.itemAvgs['4a']} />
+                                <VisualMetricRow label="4b. Pediu Google Reviews" value={mp.itemAvgs['4b']} />
                               </div>
                             </div>
                             
