@@ -4,11 +4,11 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import KanbanCard from './KanbanCard';
 
 const COLUMNS: { id: FunnelStage; label: string; color: string; dot: string }[] = [
-  { id: 'lead_new',    label: 'Novo Lead',     color: 'text-indigo-600 dark:text-indigo-400',   dot: 'bg-indigo-500' },
-  { id: 'quote',       label: 'Em Orçamento',  color: 'text-amber-600 dark:text-amber-400',     dot: 'bg-amber-500' },
-  { id: 'negotiation', label: 'Em Negociação', color: 'text-orange-600 dark:text-orange-400',   dot: 'bg-orange-500' },
-  { id: 'closed_won',  label: 'Ganho',         color: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
-  { id: 'closed_lost', label: 'Perdido',       color: 'text-rose-600 dark:text-rose-400',       dot: 'bg-rose-500' },
+  { id: 'lead_new',    label: 'Novo Lead',         color: 'text-indigo-600 dark:text-indigo-400',   dot: 'bg-indigo-500' },
+  { id: 'negotiation', label: 'Em Atendimento',    color: 'text-orange-600 dark:text-orange-400',   dot: 'bg-orange-500' },
+  { id: 'quote',       label: 'Orçamento Enviado', color: 'text-amber-600 dark:text-amber-400',     dot: 'bg-amber-500' },
+  { id: 'closed_won',  label: 'Ganho',             color: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  { id: 'closed_lost', label: 'Perdido',           color: 'text-rose-600 dark:text-rose-400',       dot: 'bg-rose-500' },
 ];
 
 interface Props {
