@@ -128,14 +128,15 @@ serve(async (req) => {
       [FIM DO EXEMPLO]
 
       INSTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST (Seja Rigoroso - APLICÁVEL APENAS A MENSAGENS DO GERENTE):
-      1. Foco na Intenção Real: Os gerentes usam linguagem informal. Se a INTENÇÃO da mensagem for explicar um defeito, marque que ele justificou.
-      2. Orçamento (2a): Só marque true se o gerente de fato passar o valor total ou enviar um PDF/link claro do orçamento/checklist.
-      3. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional além do pedido, marque como true.
-      4. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina no Google.
-      5. AVALIAÇÃO MULTIMODAL DE VÍDEO/ÁUDIO: Se houver anexo, VOCÊ DEVE TRANSCRVER E ANALISAR O CONTEÚDO. Um vídeo curto (< 2 min) não significa automaticamente que é ruim, mas você deve ser rígido: ele explicou TUDO certinho? Explicou o problema e justificou POR QUE o cliente tem que pagar aquilo? Se a explicação for rasa, silenciosa ou insuficiente, PONTUE ZERO (false) nas etapas 2c e 3c de explicação, não dê a nota máxima!
-      6. AVALIAÇÃO DE LINKS: Se houver um conteúdo raspado dos links abaixo, ANALISE O TEXTO. Se o gerente enviou um link de checklist/orçamento, mas o conteúdo dele é pobre, não possui justificativa descrita ou as fotos necessárias não parecem estar detalhadas, VOCÊ DEVE ZERAR os itens correspondentes (como o 2d) e adicionar ao insight "Orçamento/Checklist sem descrições técnicas no link".
-      7. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio ou no CONTEÚDO DO LINK para provar que você o avaliou e justificar sua nota.
-      8. INSTRUÇÕES DE INSIGHT (MENSAGEM INLINE):
+      1. AVALIAÇÃO FINAL PARA 1a e 1b: Os dois primeiros itens (1a e 1b) representam a qualidade contínua da conversa. Você SÓ PODE avaliá-los e marcá-los como true NO MOMENTO EM QUE FINALIZAR O ATENDIMENTO (quando o funnel_stage for para 'closed_won' ou 'closed_lost'). Durante o atendimento (em negotiation/quote), MANTENHA-OS COMO false. No final, avalie se o gerente manteve a cordialidade/investigação a conversa inteira e dê os pontos.
+      2. Foco na Intenção Real: Os gerentes usam linguagem informal. Se a INTENÇÃO da mensagem for explicar um defeito, marque que ele justificou.
+      3. Orçamento (2a): Só marque true se o gerente de fato passar o valor total ou enviar um PDF/link claro do orçamento/checklist.
+      4. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional além do pedido, marque como true.
+      5. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina no Google.
+      6. AVALIAÇÃO MULTIMODAL DE VÍDEO/ÁUDIO: Se houver anexo, VOCÊ DEVE TRANSCRVER E ANALISAR O CONTEÚDO. Um vídeo curto (< 2 min) não significa automaticamente que é ruim, mas você deve ser rígido: ele explicou TUDO certinho? Explicou o problema e justificou POR QUE o cliente tem que pagar aquilo? Se a explicação for rasa, silenciosa ou insuficiente, PONTUE ZERO (false) nas etapas 2c e 3c de explicação, não dê a nota máxima!
+      7. AVALIAÇÃO DE LINKS: Se houver um conteúdo raspado dos links abaixo, ANALISE O TEXTO. Se o gerente enviou um link de checklist/orçamento, mas o conteúdo dele é pobre, não possui justificativa descrita ou as fotos necessárias não parecem estar detalhadas, VOCÊ DEVE ZERAR os itens correspondentes (como o 2d) e adicionar ao insight "Orçamento/Checklist sem descrições técnicas no link".
+      8. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio ou no CONTEÚDO DO LINK para provar que você o avaliou e justificar sua nota.
+      9. INSTRUÇÕES DE INSIGHT (MENSAGEM INLINE):
          No JSON de saída, você deve preencher o campo "message_insight" com uma frase curta, direta e natural, como se fosse um auditor sênior justificando sua ação *naquele momento*.
          Exemplo 1: "Auditoria: Movi para Em Negociação pois o vídeo do orçamento foi enviado."
          Exemplo 2: "Auditoria: Zerei o item 2d pois o link do checklist não possui fotos ou justificativas."
