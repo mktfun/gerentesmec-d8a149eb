@@ -410,6 +410,39 @@ export type Database = {
         }
         Relationships: []
       }
+      llm_usage_logs: {
+        Row: {
+          id: string
+          created_at: string
+          provider: string
+          model: string
+          status: string
+          error_message: string | null
+          latency_ms: number | null
+          tokens_used: number | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          provider: string
+          model: string
+          status: string
+          error_message?: string | null
+          latency_ms?: number | null
+          tokens_used?: number | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          provider?: string
+          model?: string
+          status?: string
+          error_message?: string | null
+          latency_ms?: number | null
+          tokens_used?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
