@@ -32,8 +32,12 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
 }) => {
   const [logs, setLogs] = useState<UsageLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filterProvider, setFilterProvider] = useState<string>('ALL');
+  const [filterProvider, setFilterProvider] = useState<string>(activeProvider || 'ALL');
   const [selectedError, setSelectedError] = useState<string | null>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const logsPerPage = 10;
 
   const fetchLogs = async () => {
     setIsLoading(true);
@@ -61,11 +65,32 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  // Sync active provider prop as default filter
+  useEffect(() => {
+    if (activeProvider) {
+      setFilterProvider(activeProvider);
+    }
+  }, [activeProvider]);
+
+  // Reset pagination to first page when filtering changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterProvider]);
+
   // Filtered logs
   const filteredLogs = useMemo(() => {
     if (filterProvider === 'ALL') return logs;
     return logs.filter(log => log.provider.toLowerCase() === filterProvider.toLowerCase());
   }, [logs, filterProvider]);
+
+  // Paginated logs for table
+  const paginatedLogs = useMemo(() => {
+    const indexOfLastLog = currentPage * logsPerPage;
+    const indexOfFirstLog = indexOfLastLog - logsPerPage;
+    return filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
+  }, [filteredLogs, currentPage]);
+
+  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
 
   // Compute stats
   const stats = useMemo(() => {
@@ -300,7 +325,9 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
           <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <Terminal className="w-4 h-4" /> Histórico de Telemetria de LLM
           </h4>
-          <span className="text-[10px] text-muted-foreground uppercase font-semibold">Exibindo os últimos 200 logs</span>
+          <span className="text-[10px] text-muted-foreground uppercase font-semibold">
+            {filteredLogs.length} logs encontrados
+          </span>
         </div>
 
         {filteredLogs.length === 0 ? (
@@ -310,66 +337,93 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
             <p className="text-[10px] text-muted-foreground/60 mt-1">Os logs de telemetria surgem à medida que o gerente envia e recebe mensagens.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  <th className="pb-3 pl-2">Data / Hora</th>
-                  <th className="pb-3">Provedor</th>
-                  <th className="pb-3">Modelo</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3">Tempo</th>
-                  <th className="pb-3">Tokens</th>
-                  <th className="pb-3 pr-2">Ação</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/40 text-xs">
-                {filteredLogs.map((log) => {
-                  const isError = log.status === 'error';
-                  const logBranding = getProviderBranding(log.provider);
-                  return (
-                    <tr key={log.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="py-3.5 pl-2 font-mono text-muted-foreground/80">
-                        {new Date(log.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })}
-                      </td>
-                      <td className="py-3.5">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${logBranding.text} ${logBranding.bg} border ${logBranding.border}`}>
-                          {log.provider}
-                        </span>
-                      </td>
-                      <td className="py-3.5 font-mono text-foreground/80">{log.model}</td>
-                      <td className="py-3.5">
-                        {isError ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-rose-500 bg-rose-500/10 border border-rose-500/20 flex items-center gap-1 w-fit">
-                            <ShieldAlert className="w-3 h-3" /> ERRO
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <th className="pb-3 pl-2">Data / Hora</th>
+                    <th className="pb-3">Provedor</th>
+                    <th className="pb-3">Modelo</th>
+                    <th className="pb-3">Status</th>
+                    <th className="pb-3">Tempo</th>
+                    <th className="pb-3">Tokens</th>
+                    <th className="pb-3 pr-2">Ação</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40 text-xs">
+                  {paginatedLogs.map((log) => {
+                    const isError = log.status === 'error';
+                    const logBranding = getProviderBranding(log.provider);
+                    return (
+                      <tr key={log.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="py-3.5 pl-2 font-mono text-muted-foreground/80">
+                          {new Date(log.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })}
+                        </td>
+                        <td className="py-3.5">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${logBranding.text} ${logBranding.bg} border ${logBranding.border}`}>
+                            {log.provider}
                           </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1 w-fit">
-                            <CheckCircle2 className="w-3 h-3" /> SUCESSO
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3.5 font-mono font-bold">
-                        {log.latency_ms ? `${log.latency_ms} ms` : '-'}
-                      </td>
-                      <td className="py-3.5 font-mono text-muted-foreground">
-                        {log.tokens_used ? log.tokens_used.toLocaleString() : '-'}
-                      </td>
-                      <td className="py-3.5 pr-2">
-                        {isError && log.error_message && (
-                          <button 
-                            onClick={() => setSelectedError(log.error_message)}
-                            className="px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1"
-                          >
-                            Ver Erro <ArrowUpRight className="w-3 h-3" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td className="py-3.5 font-mono text-foreground/80">{log.model}</td>
+                        <td className="py-3.5">
+                          {isError ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-rose-500 bg-rose-500/10 border border-rose-500/20 flex items-center gap-1 w-fit">
+                              <ShieldAlert className="w-3 h-3" /> ERRO
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1 w-fit">
+                              <CheckCircle2 className="w-3 h-3" /> SUCESSO
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3.5 font-mono font-bold">
+                          {log.latency_ms ? `${log.latency_ms} ms` : '-'}
+                        </td>
+                        <td className="py-3.5 font-mono text-muted-foreground">
+                          {log.tokens_used ? log.tokens_used.toLocaleString() : '-'}
+                        </td>
+                        <td className="py-3.5 pr-2">
+                          {isError && log.error_message && (
+                            <button 
+                              onClick={() => setSelectedError(log.error_message)}
+                              className="px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1"
+                            >
+                              Ver Erro <ArrowUpRight className="w-3 h-3" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-border/40 pt-4 text-xs font-semibold text-muted-foreground">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-xl bg-muted border border-border hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-xs font-bold text-foreground"
+                >
+                  Anterior
+                </button>
+                
+                <span>
+                  Página <strong className="text-foreground">{currentPage}</strong> de <strong className="text-foreground">{totalPages}</strong>
+                </span>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-xl bg-muted border border-border hover:bg-muted/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-xs font-bold text-foreground"
+                >
+                  Próxima
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

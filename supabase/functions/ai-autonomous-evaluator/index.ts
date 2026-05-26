@@ -292,6 +292,9 @@ serve(async (req) => {
           })
         });
         const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || `Vertex AI Error (${res.status}): ${JSON.stringify(data)}`);
+        }
         if (data.error) throw new Error(data.error.message);
         llmOutputText = data.candidates[0].content.parts[0].text;
         tokensUsed = data.usageMetadata?.totalTokenCount || null;
@@ -320,6 +323,9 @@ serve(async (req) => {
           })
         });
         const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || `Google AI Error (${res.status}): ${JSON.stringify(data)}`);
+        }
         if (data.error) throw new Error(data.error.message);
         llmOutputText = data.candidates[0].content.parts[0].text;
         tokensUsed = data.usageMetadata?.totalTokenCount || null;
@@ -346,11 +352,14 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             model: finalModel,
-            response_format: { type: "json_object" },
+            ...(provider !== 'NVIDIA NIM' ? { response_format: { type: "json_object" } } : {}),
             messages: [{ role: 'user', content: userMessageContent }]
           })
         });
         const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || data.detail || `LLM API Error (${res.status}): ${JSON.stringify(data)}`);
+        }
         if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
         llmOutputText = data.choices[0].message.content;
         tokensUsed = data.usage?.total_tokens || null;
