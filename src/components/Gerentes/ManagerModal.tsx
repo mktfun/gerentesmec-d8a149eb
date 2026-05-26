@@ -107,7 +107,7 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
       if (data?.error) throw new Error(data.error);
 
       setAccessSuccess(true);
-      if (action === 'revoke') setIsEditingAccess(false);
+      if (action === 'revoke' || action === 'update') setIsEditingAccess(false);
     } catch (err: any) {
       setAccessError(err.message || 'Erro ao processar acesso.');
     } finally {

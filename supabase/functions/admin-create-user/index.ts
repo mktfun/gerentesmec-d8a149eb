@@ -68,6 +68,7 @@ serve(async (req) => {
       if (email) {
         if (!email.includes('@')) email = `${email.trim()}@gerentes.com`
         updates.email = email
+        updates.email_confirm = true
       }
       if (password) updates.password = password
 
