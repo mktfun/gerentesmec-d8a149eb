@@ -41,17 +41,21 @@ const availableModels: Record<string, string[]> = {
     'deepseek/deepseek-chat', 'deepseek/deepseek-r1',
     // Qwen
     'qwen/qwen-2.5-72b-instruct',
+    // GLM (Zhipu AI)
+    'zhipuai/glm-4-plus',
     // Free models
     'google/gemma-3-27b-it:free', 'meta-llama/llama-3.1-8b-instruct:free', 'mistralai/mistral-7b-instruct:free',
   ],
   'NVIDIA NIM': [
-    'nvidia/llama-3.1-nemotron-51b-instruct',
-    'meta/llama-3.3-70b-instruct',
-    'meta/llama-3.1-70b-instruct',
-    'meta/llama-3.1-8b-instruct',
     'meta/llama-3.1-405b-instruct',
+    'meta/llama-3.1-70b-instruct',
+    'meta/llama-3.3-70b-instruct',
+    'meta/llama-3.2-90b-vision-instruct',
+    'meta/llama-3.2-11b-vision-instruct',
+    'nvidia/llama-3.1-nemotron-70b-instruct',
+    'nvidia/nemotron-4-340b-instruct',
     'mistralai/mistral-large-2-instruct',
-    'nvidia/nemotron-4-340b-instruct'
+    'google/gemma-2-27b-it'
   ],
   'Google Vertex AI': [
     'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'
