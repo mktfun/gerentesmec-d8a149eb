@@ -86,7 +86,8 @@ export const AiRouterConfig: React.FC = () => {
   React.useEffect(() => {
     if (aiSettings) {
       const p = availableModels[aiSettings.provider] ? aiSettings.provider : 'Google';
-      const m = availableModels[p].includes(aiSettings.model) ? aiSettings.model : availableModels[p][0];
+      let m = availableModels[p]?.includes(aiSettings.model) ? aiSettings.model : (availableModels[p] || [])[0];
+      if (p === 'NVIDIA NIM') m = 'nvidia-auto-ensemble';
       setProvider(p);
       setModel(m);
       if (aiSettings.api_key) setApiKey(aiSettings.api_key);
@@ -229,7 +230,11 @@ export const AiRouterConfig: React.FC = () => {
               </label>
               <select value={provider} onChange={(e) => {
                 setProvider(e.target.value);
-                setModel(availableModels[e.target.value][0]);
+                if (e.target.value === 'NVIDIA NIM') {
+                  setModel('nvidia-auto-ensemble');
+                } else {
+                  setModel((availableModels[e.target.value] || [])[0]);
+                }
                 setTestStatus('idle');
                 setTestLog([]);
               }} className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-medium text-foreground focus:outline-none focus:border-primary/50 transition-colors appearance-none">
@@ -243,15 +248,22 @@ export const AiRouterConfig: React.FC = () => {
               <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
                 Modelo
               </label>
-              <select value={model} onChange={(e) => {
-                setModel(e.target.value);
-                setTestStatus('idle');
-                setTestLog([]);
-              }} className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-medium text-foreground focus:outline-none focus:border-primary/50 transition-colors appearance-none">
-                {(availableModels[provider] || []).map(m => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
+              {provider === 'NVIDIA NIM' ? (
+                <div className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-sm font-bold text-primary flex items-center justify-between">
+                  <span>Auto-Ensemble (Smart Routing)</span>
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                </div>
+              ) : (
+                <select value={model} onChange={(e) => {
+                  setModel(e.target.value);
+                  setTestStatus('idle');
+                  setTestLog([]);
+                }} className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-medium text-foreground focus:outline-none focus:border-primary/50 transition-colors appearance-none">
+                  {(availableModels[provider] || []).map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 

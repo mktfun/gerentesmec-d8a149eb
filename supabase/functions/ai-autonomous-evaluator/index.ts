@@ -349,28 +349,41 @@ serve(async (req) => {
         tokensUsed = data.usageMetadata?.totalTokenCount || null;
       } else {
         // OpenAI / OpenRouter / NVIDIA NIM / Anthropic via OpenRouter etc
-        finalModel = aiSettings.model || 'gpt-4o';
-        
         // --- Smart Routing (Ensemble de Modelos) ---
-        if (mediaBase64) {
-          if (actualMime.startsWith('image/')) {
-            if (provider === 'NVIDIA NIM' && !finalModel.includes('vision') && !finalModel.includes('omni')) {
-              // Roteamento automático para modelo de Visão da NVIDIA se houver imagem
-              finalModel = 'meta/llama-3.2-90b-vision-instruct';
-              console.log(`[AI-EVALUATOR] Smart Routing NVIDIA: Imagem detectada. Alternando para o modelo ${finalModel}.`);
-            }
+        if (provider === 'NVIDIA NIM') {
+          // Quando o usuário seleciona NVIDIA NIM, forçamos o uso do melhor modelo (Ensemble automático)
+          if (mediaBase64 && actualMime.startsWith('image/')) {
+            finalModel = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+            console.log(`[AI-EVALUATOR] NVIDIA Auto-Ensemble: Imagem detectada. Usando ${finalModel}.`);
             userMessageContent = [
               { type: "text", text: prompt },
               { type: "image_url", image_url: { url: `data:${actualMime};base64,${mediaBase64}` } }
             ];
+          } else if (mediaBase64 && actualMime.startsWith('audio/')) {
+            console.log(`[AI-EVALUATOR] NVIDIA Auto-Ensemble: Áudio ignorado (não suportado na API de chat atual).`);
+            finalModel = 'deepseek-ai/deepseek-v4-pro'; // Fallback para texto da transcrição (se houvesse) ou só texto
+            userMessageContent = prompt;
           } else {
-            // Se for áudio/documento, OpenAI e NVIDIA NIM não suportam via 'image_url' no formato Chat Completions padrão.
-            // Ignoramos a mídia para não dar erro 400. Google Gemini trata áudio nativamente na sua própria branch.
-            console.log(`[AI-EVALUATOR] Smart Routing: Mídia tipo ${actualMime} ignorada pois a API não suporta na chave image_url.`);
+            finalModel = 'deepseek-ai/deepseek-v4-pro'; // Melhor modelo lógico para texto
+            console.log(`[AI-EVALUATOR] NVIDIA Auto-Ensemble: Apenas texto detectado. Usando ${finalModel}.`);
             userMessageContent = prompt;
           }
         } else {
-          userMessageContent = prompt;
+          // Outros provedores
+          finalModel = aiSettings.model || 'gpt-4o';
+          if (mediaBase64) {
+            if (actualMime.startsWith('image/')) {
+              userMessageContent = [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: `data:${actualMime};base64,${mediaBase64}` } }
+              ];
+            } else {
+              console.log(`[AI-EVALUATOR] Smart Routing: Mídia tipo ${actualMime} ignorada pois a API não suporta na chave image_url.`);
+              userMessageContent = prompt;
+            }
+          } else {
+            userMessageContent = prompt;
+          }
         }
         
         let apiUrl = aiSettings.api_url || 'https://api.openai.com/v1/chat/completions';
