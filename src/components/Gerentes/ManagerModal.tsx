@@ -84,6 +84,17 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
   const [accessSuccess, setAccessSuccess] = useState(false);
   const [isEditingAccess, setIsEditingAccess] = useState(false);
 
+  // Reset access state whenever a different manager is opened
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setAccessError('');
+    setAccessSuccess(false);
+    setIsEditingAccess(false);
+    setLoadingAccess(false);
+  }, [manager?.id]);
+
+
   const handleAccessAction = async (action: 'create' | 'update' | 'revoke') => {
     if ((action === 'create' || action === 'update') && (!email && !password)) return;
     if (!manager) return;
