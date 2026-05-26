@@ -354,7 +354,7 @@ serve(async (req) => {
         // --- Smart Routing (Ensemble de Modelos) ---
         if (mediaBase64) {
           if (actualMime.startsWith('image/')) {
-            if (provider === 'NVIDIA NIM' && !finalModel.includes('vision')) {
+            if (provider === 'NVIDIA NIM' && !finalModel.includes('vision') && !finalModel.includes('omni')) {
               // Roteamento automático para modelo de Visão da NVIDIA se houver imagem
               finalModel = 'meta/llama-3.2-90b-vision-instruct';
               console.log(`[AI-EVALUATOR] Smart Routing NVIDIA: Imagem detectada. Alternando para o modelo ${finalModel}.`);

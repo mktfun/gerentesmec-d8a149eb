@@ -47,6 +47,10 @@ const availableModels: Record<string, string[]> = {
     'google/gemma-3-27b-it:free', 'meta-llama/llama-3.1-8b-instruct:free', 'mistralai/mistral-7b-instruct:free',
   ],
   'NVIDIA NIM': [
+    'z-ai/glm-5.1',
+    'deepseek-ai/deepseek-v4-pro',
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning',
+    'google/gemma-4-31b-it',
     'meta/llama-3.1-405b-instruct',
     'meta/llama-3.1-70b-instruct',
     'meta/llama-3.3-70b-instruct',
