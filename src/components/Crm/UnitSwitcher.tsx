@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, CheckCircle2, AlertTriangle, Globe } from 'lucide-react';
 import { Unit, Lead } from '@/context/AppDataContext';
 import { isLeadDanger } from '@/utils/metrics';
+import { avgScore } from '@/utils/scoreUtils';
 
 interface Props {
   units: Unit[];
@@ -36,11 +37,8 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect,
     const dangerCount = todayLeads.filter(l => isLeadDanger(l, undefined, 20)).length;
 
     // Score
-    const scored = unitLeads.filter(l => l.score !== null);
-    const score = (unitLeads.length > 0 && scored.length > 0)
-      ? Math.round((scored.reduce((a, l) => a + Number(l.score), 0) / unitLeads.length) * 10) / 10
-      : null;
-
+    const score = avgScore(unitLeads);
+    
     return { dangerCount, score };
   };
 

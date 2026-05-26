@@ -39,8 +39,8 @@ serve(async (req) => {
 
     const totalLeads = todayLeads?.length ?? 0;
     const scoredLeads = todayLeads?.filter(l => l.score !== null) ?? [];
-    const globalScore = totalLeads > 0 && scoredLeads.length > 0
-      ? Math.round(scoredLeads.reduce((sum, l) => sum + Number(l.score), 0) / totalLeads * 10) / 10
+    const globalScore = scoredLeads.length > 0
+      ? Math.round(scoredLeads.reduce((sum, l) => sum + Number(l.score), 0) / scoredLeads.length * 10) / 10
       : null;
 
     // Score por unidade
@@ -48,8 +48,8 @@ serve(async (req) => {
     const unitSnapshots = (units || []).map(u => {
       const uLeads = todayLeads?.filter(l => l.unit_id === u.id) ?? [];
       const uScored = uLeads.filter(l => l.score !== null);
-      const uScore = uLeads.length > 0 && uScored.length > 0
-        ? Math.round(uScored.reduce((sum, l) => sum + Number(l.score), 0) / uLeads.length * 10) / 10
+      const uScore = uScored.length > 0
+        ? Math.round(uScored.reduce((sum, l) => sum + Number(l.score), 0) / uScored.length * 10) / 10
         : null;
       return { unit_id: u.id, unit_name: u.name, score: uScore, total_leads: uLeads.length };
     });

@@ -7,6 +7,7 @@ import { InboxMappingPanel } from '@/components/Config/InboxMappingPanel';
 import { AdvancedAiPanel } from '@/components/Config/AdvancedAiPanel';
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
+import { avgScoreInt } from '@/utils/scoreUtils';
 
 import { fadeUp } from '@/utils/motion';
 
@@ -522,10 +523,8 @@ const Config = () => {
           <div className="space-y-3">
             {units.map((unit, i) => {
               const manager = managers.find(m => m.unit_id === unit.id);
-              const unitLeads = leads.filter(l => l.unit_id === unit.id && l.score !== null);
-              const unitScore = unitLeads.length > 0
-                ? Math.round(unitLeads.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeads.length)
-                : 0;
+              const unitLeads = leads.filter(l => l.unit_id === unit.id);
+              const unitScore = avgScoreInt(unitLeads) || 0;
               return (
                 <motion.div key={unit.id}
                   initial={{ opacity: 0, y: 10 }}

@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown, Users, Plus, Edit2, Trash2 } from 'lucide-rea
 import { useAppData, Manager, Unit } from '@/context/AppDataContext';
 import ManagerModal from '@/components/Gerentes/ManagerModal';
 import ManagerModalForm from '@/components/Gerentes/ManagerModalForm';
+import { avgScoreInt } from '@/utils/scoreUtils';
 
 import { fadeUp } from '@/utils/motion';
 
@@ -59,10 +60,7 @@ const Gerentes = () => {
           
           // Calculate average score for the unit
           const unitLeadsTotal = leads.filter(l => l.unit_id === unit.id);
-          const unitLeadsScored = unitLeadsTotal.filter(l => l.score !== null);
-          const unitScore = (unitLeadsTotal.length > 0 && unitLeadsScored.length > 0)
-            ? Math.round(unitLeadsScored.reduce((acc, l) => acc + (l.score || 0), 0) / unitLeadsTotal.length)
-            : null;
+          const unitScore = avgScoreInt(unitLeadsTotal);
             
           const scoreColor = unitScore === null ? 'text-muted-foreground/30' : unitScore >= 80 ? 'text-emerald-500 dark:text-emerald-400' : unitScore >= 65 ? 'text-indigo-500 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400';
           const barColor   = unitScore === null ? 'bg-black/10 dark:bg-white/10' : unitScore >= 80 ? 'bg-emerald-500 dark:bg-emerald-400' : unitScore >= 65 ? 'bg-indigo-500 dark:bg-indigo-400' : 'bg-rose-500 dark:bg-rose-400';
@@ -116,10 +114,7 @@ const Gerentes = () => {
                   </div>
                 ) : unitManagers.map((manager, mIdx) => {
                   const managerLeadsTotal = leads.filter(l => l.manager_id === manager.id);
-                  const managerLeadsScored = managerLeadsTotal.filter(l => l.score !== null);
-                  const mScore = (managerLeadsTotal.length > 0 && managerLeadsScored.length > 0)
-                    ? Math.round(managerLeadsScored.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeadsTotal.length)
-                    : null;
+                  const mScore = avgScoreInt(managerLeadsTotal);
                   const trend = mScore !== null && mScore >= 70;
                   return (
                     <motion.div
