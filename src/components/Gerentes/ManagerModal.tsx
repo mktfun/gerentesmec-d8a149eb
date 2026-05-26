@@ -5,6 +5,8 @@ import { useAppData, Manager } from '@/context/AppDataContext';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts';
+import { supabase } from '@/integrations/supabase/client';
+import { Key, Mail, Lock, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
 const mockHistory = [
   { week: 'S1', score: 65 }, { week: 'S2', score: 72 },
@@ -25,6 +27,37 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
   const avgScore = managerLeads.length > 0 
     ? Math.round(managerLeads.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeads.length)
     : 0;
+
+  // Access Generation State
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loadingAccess, setLoadingAccess] = useState(false);
+  const [accessError, setAccessError] = useState('');
+  const [accessSuccess, setAccessSuccess] = useState(false);
+
+  const handleCreateAccess = async () => {
+    if (!email || !password || !manager) return;
+    setLoadingAccess(true);
+    setAccessError('');
+    setAccessSuccess(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: { email, password, manager_id: manager.id }
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      setAccessSuccess(true);
+      // Wait a bit, then refresh the manager object or rely on AppDataContext realtime subscription
+      // to reflect auth_user_id
+    } catch (err: any) {
+      setAccessError(err.message || 'Erro ao gerar acesso.');
+    } finally {
+      setLoadingAccess(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -62,6 +95,68 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                   flex items-center justify-center transition-colors">
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
+            </div>
+
+            {/* Access Control highlight */}
+            <div className="px-6 py-5 border-b border-border bg-black/5 dark:bg-white/[0.02]">
+              <div className="flex items-center gap-2 mb-4">
+                <Key className="w-4 h-4 text-amber-500" />
+                <p className="label-caps text-amber-500/80 mb-0">Acesso ao Sistema</p>
+              </div>
+
+              {manager.auth_user_id ? (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Acesso Ativo</p>
+                    <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">Este gerente possui login no sistema.</p>
+                  </div>
+                </div>
+              ) : accessSuccess ? (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Acesso Criado com Sucesso!</p>
+                    <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">O gerente já pode logar.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground mb-3">Gere as credenciais para este gerente visualizar apenas a própria loja.</p>
+                  
+                  {accessError && (
+                    <div className="flex items-start gap-2 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <p className="text-[10px] leading-relaxed">{accessError}</p>
+                    </div>
+                  )}
+
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
+                    <input 
+                      type="email" placeholder="E-mail de acesso" 
+                      value={email} onChange={e => setEmail(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:border-amber-500/50"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
+                    <input 
+                      type="text" placeholder="Senha provisória" 
+                      value={password} onChange={e => setPassword(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:border-amber-500/50"
+                    />
+                  </div>
+                  <button 
+                    onClick={handleCreateAccess}
+                    disabled={loadingAccess || !email || !password}
+                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500 text-amber-950 text-xs font-bold hover:bg-amber-400 transition-colors disabled:opacity-50"
+                  >
+                    {loadingAccess ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-3.5 h-3.5" />}
+                    {loadingAccess ? 'Gerando...' : 'Gerar Acesso'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Score highlight */}
