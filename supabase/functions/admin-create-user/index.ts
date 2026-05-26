@@ -21,14 +21,9 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) throw new Error('Missing Auth Header')
     
-    // Create a regular client using the user's token to check their identity
-    const userClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
-
-    const { data: { user }, error: userError } = await userClient.auth.getUser()
+    // Verify token using the service role client
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
     if (userError || !user) throw new Error('Unauthorized')
 
     // Check if user is admin
@@ -42,9 +37,14 @@ serve(async (req) => {
       throw new Error('Forbidden: Only admins can create users')
     }
 
-    const { email, password, manager_id } = await req.json()
+    let { email, password, manager_id } = await req.json()
     if (!email || !password || !manager_id) {
       throw new Error('Missing required fields')
+    }
+
+    // Permitir username (converte para email fictício para agradar o Supabase Auth)
+    if (!email.includes('@')) {
+      email = `${email.trim()}@gerentes.com`
     }
 
     // 1. Create the user in Auth

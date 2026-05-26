@@ -182,7 +182,7 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                   <div className="relative">
                     <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
                     <input 
-                      type="email" placeholder="E-mail de acesso" 
+                      type="text" placeholder="Usuário ou E-mail" 
                       value={email} onChange={e => setEmail(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:border-amber-500/50"
                     />
