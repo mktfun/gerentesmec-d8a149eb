@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getGoogleAccessToken } from "./googleAuth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -90,8 +91,9 @@ serve(async (req) => {
     }
 
     // 4. LLM Routing e Chamada
+    const provider = aiSettings.provider || 'openai';
     const apiKey = aiSettings.api_key;
-    if (!apiKey) throw new Error("API Key não configurada");
+    if (provider !== 'Google Vertex AI' && !apiKey) throw new Error("API Key não configurada");
 
     const prompt = `
       ${aiSettings.system_prompt}
@@ -210,19 +212,87 @@ serve(async (req) => {
       }
     }
 
-    if (apiKey.startsWith("sk-")) {
-      // OpenAI / OpenRouter
+    if (provider === 'Google Vertex AI') {
+      const gcpCreds = aiSettings.gcp_credentials;
+      const gcpProject = aiSettings.gcp_project_id;
+      const gcpRegion = aiSettings.gcp_region || 'us-central1';
+      
+      if (!gcpCreds || !gcpProject) throw new Error("Vertex AI: Credenciais ou Project ID faltando na configuração.");
+      
+      const accessToken = await getGoogleAccessToken(gcpCreds);
+      
+      let parts: any[] = [{ text: prompt }];
       if (mediaBase64) {
-        // Formato compátivel com visao/audio em APIs padrão OpenAI (suportado pelo OpenRouter)
+        parts.push({
+          inlineData: {
+            mimeType: actualMime,
+            data: mediaBase64
+          }
+        });
+      } else if (media_url) {
+        parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
+      }
+
+      const requestModel = aiSettings.model || 'gemini-1.5-flash';
+      const vertexUrl = `https://${gcpRegion}-aiplatform.googleapis.com/v1/projects/${gcpProject}/locations/${gcpRegion}/publishers/google/models/${requestModel}:generateContent`;
+      
+      const res = await fetch(vertexUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: parts }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      llmOutputText = data.candidates[0].content.parts[0].text;
+      
+    } else if (provider === 'Google' || provider === 'Gemini Studio' || (apiKey && !apiKey.startsWith("sk-") && !apiKey.startsWith("nvapi-") && !provider.includes('OpenRouter') && !provider.includes('Anthropic'))) {
+      // Gemini (Direct Google API via AI Studio)
+      let parts: any[] = [{ text: prompt }];
+      if (mediaBase64) {
+        parts.push({
+          inlineData: {
+            mimeType: actualMime,
+            data: mediaBase64
+          }
+        });
+      } else if (media_url) {
+        parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
+      }
+      
+      const requestModel = aiSettings.model?.includes('gemini') ? aiSettings.model : 'gemini-1.5-flash';
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${requestModel}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: parts }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      llmOutputText = data.candidates[0].content.parts[0].text;
+    } else {
+      // OpenAI / OpenRouter / NVIDIA NIM / Anthropic via OpenRouter etc
+      if (mediaBase64) {
         userMessageContent = [
           { type: "text", text: prompt },
           { type: "image_url", image_url: { url: `data:${actualMime};base64,${mediaBase64}` } }
         ];
       }
       
-      const requestModel = aiSettings.model?.includes('gpt') || aiSettings.model?.includes('flash') || aiSettings.model?.includes('claude') || aiSettings.model?.includes('gemini') ? aiSettings.model : 'gpt-4o';
+      const requestModel = aiSettings.model || 'gpt-4o';
       
-      const res = await fetch(aiSettings.api_url || 'https://api.openai.com/v1/chat/completions', {
+      let apiUrl = aiSettings.api_url || 'https://api.openai.com/v1/chat/completions';
+      if (provider === 'OpenRouter') apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
+      if (provider === 'NVIDIA NIM') apiUrl = 'https://integrate.api.nvidia.com/v1/chat/completions';
+      
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -237,32 +307,6 @@ serve(async (req) => {
       const data = await res.json();
       if (data.error) throw new Error(data.error.message);
       llmOutputText = data.choices[0].message.content;
-    } else {
-      // Gemini (Direct Google API)
-      let parts: any[] = [{ text: prompt }];
-      if (mediaBase64) {
-        parts.push({
-          inlineData: {
-            mimeType: actualMime,
-            data: mediaBase64
-          }
-        });
-      } else if (media_url) {
-        parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
-      }
-      
-      const model = aiSettings.model?.includes('gemini') ? aiSettings.model : 'gemini-1.5-flash';
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: parts }],
-          generationConfig: { responseMimeType: "application/json" }
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      llmOutputText = data.candidates[0].content.parts[0].text;
     }
 
     console.log("=== LLM OUTPUT ===");

@@ -43,6 +43,13 @@ const availableModels: Record<string, string[]> = {
     // Free models
     'google/gemma-3-27b-it:free', 'meta-llama/llama-3.1-8b-instruct:free', 'mistralai/mistral-7b-instruct:free',
   ],
+  'NVIDIA NIM': [
+    'meta/llama-3.1-405b-instruct', 'meta/llama-3.1-70b-instruct', 'meta/llama-3.1-8b-instruct',
+    'mistralai/mistral-large-2-instruct', 'nvidia/nemotron-4-340b-instruct'
+  ],
+  'Google Vertex AI': [
+    'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'
+  ],
 };
 
 export const AiRouterConfig: React.FC = () => {
@@ -51,6 +58,12 @@ export const AiRouterConfig: React.FC = () => {
   const [provider, setProvider] = useState('Google');
   const [model, setModel] = useState(availableModels['Google'][0]);
   const [apiKey, setApiKey] = useState('');
+  
+  // GCP Fields
+  const [gcpProjectId, setGcpProjectId] = useState('');
+  const [gcpRegion, setGcpRegion] = useState('us-central1');
+  const [gcpCredentials, setGcpCredentials] = useState('');
+  
   const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [testLog, setTestLog] = useState<{ step: string; status: 'ok' | 'fail' | 'warn' }[]>([]);
   const [recommendation, setRecommendation] = useState<{ model: string; reason: string } | null>(null);
@@ -62,11 +75,15 @@ export const AiRouterConfig: React.FC = () => {
       setProvider(p);
       setModel(m);
       if (aiSettings.api_key) setApiKey(aiSettings.api_key);
+      if (aiSettings.gcp_project_id) setGcpProjectId(aiSettings.gcp_project_id);
+      if (aiSettings.gcp_region) setGcpRegion(aiSettings.gcp_region);
+      if (aiSettings.gcp_credentials) setGcpCredentials(typeof aiSettings.gcp_credentials === 'string' ? aiSettings.gcp_credentials : JSON.stringify(aiSettings.gcp_credentials, null, 2));
     }
   }, [aiSettings]);
 
   const handleTest = async () => {
-    if (!apiKey) return;
+    if (provider === 'Google Vertex AI' && (!gcpCredentials || !gcpProjectId)) return;
+    if (provider !== 'Google Vertex AI' && !apiKey) return;
     
     setTestStatus('testing');
     setTestLog([]);
@@ -114,10 +131,18 @@ export const AiRouterConfig: React.FC = () => {
         setRecommendation({ model: 'gemini-2.0-flash', reason: 'Embora o 1.5 Flash suporte análise de vídeo, o 2.0 Flash possui maior estabilidade e precisão para esse volume de dados. Recomendamos o upgrade.' });
       }
       // Save even with warning, as it works partially
-      await updateAiSettings({ provider, model, api_key: apiKey });
+      await updateAiSettings({ 
+        provider, model, api_key: apiKey, 
+        gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
+        gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null
+      });
     } else {
       setTestStatus('success');
-      await updateAiSettings({ provider, model, api_key: apiKey });
+      await updateAiSettings({ 
+        provider, model, api_key: apiKey, 
+        gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
+        gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null
+      });
       
       // Even if success, recommend elite alternative if on mini
       if (model === 'gpt-4o-mini') {
@@ -133,7 +158,11 @@ export const AiRouterConfig: React.FC = () => {
     setTestStatus('idle');
     setTestLog([]);
     setRecommendation(null);
-    await updateAiSettings({ provider, model: recommendedModel, api_key: apiKey });
+    await updateAiSettings({ 
+      provider, model: recommendedModel, api_key: apiKey,
+      gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
+      gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null
+    });
   };
 
   return (
@@ -171,35 +200,97 @@ export const AiRouterConfig: React.FC = () => {
         </div>
       </div>
 
-      <div>
-        <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-          Chave da API (API Key)
-        </label>
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-            <input
-              type="password"
-              value={apiKey}
-              onChange={e => {
-                setApiKey(e.target.value);
-                if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
-              }}
-              placeholder="sk-..."
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 transition-colors"
-            />
+      {provider === 'Google Vertex AI' ? (
+        <div className="space-y-4 border-t border-border pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                GCP Project ID
+              </label>
+              <input
+                type="text"
+                value={gcpProjectId}
+                onChange={e => {
+                  setGcpProjectId(e.target.value);
+                  if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+                }}
+                placeholder="Ex: meu-projeto-123"
+                className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                GCP Region
+              </label>
+              <input
+                type="text"
+                value={gcpRegion}
+                onChange={e => {
+                  setGcpRegion(e.target.value);
+                  if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+                }}
+                placeholder="Ex: us-central1"
+                className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
           </div>
-          <button 
-            onClick={handleTest} 
-            disabled={!apiKey || testStatus === 'testing'}
-            className="shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {testStatus === 'testing' ? (
-              <><RefreshCw className="w-4 h-4 animate-spin" /> Diagnosticando...</>
-            ) : 'Diagnóstico Inteligente'}
-          </button>
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+              Service Account JSON
+            </label>
+            <div className="flex items-start gap-2">
+              <textarea
+                value={gcpCredentials}
+                onChange={e => {
+                  setGcpCredentials(e.target.value);
+                  if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+                }}
+                placeholder='{ "type": "service_account", ... }'
+                className="w-full h-24 px-3 py-2.5 rounded-xl bg-muted border border-border text-xs font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 transition-colors resize-none"
+              />
+              <button 
+                onClick={handleTest} 
+                disabled={!gcpCredentials || !gcpProjectId || testStatus === 'testing'}
+                className="shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {testStatus === 'testing' ? (
+                  <><RefreshCw className="w-4 h-4 animate-spin" /> Diagnosticando...</>
+                ) : 'Diagnóstico Inteligente'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div>
+          <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            Chave da API (API Key)
+          </label>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              <input
+                type="password"
+                value={apiKey}
+                onChange={e => {
+                  setApiKey(e.target.value);
+                  if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+                }}
+                placeholder={provider === 'NVIDIA NIM' ? "nvapi-..." : "sk-..."}
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+            <button 
+              onClick={handleTest} 
+              disabled={!apiKey || testStatus === 'testing'}
+              className="shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {testStatus === 'testing' ? (
+                <><RefreshCw className="w-4 h-4 animate-spin" /> Diagnosticando...</>
+              ) : 'Diagnóstico Inteligente'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Test Logs & Feedback */}
       <AnimatePresence>
