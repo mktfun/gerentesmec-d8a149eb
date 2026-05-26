@@ -8,10 +8,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { Key, Mail, Lock, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 
-const mockHistory = [
-  { week: 'S1', score: 65 }, { week: 'S2', score: 72 },
-  { week: 'S3', score: 68 }, { week: 'S4', score: 80 },
-];
+import { format, subDays, isAfter } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface Props {
   manager: Manager | null;
@@ -27,6 +25,56 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
   const avgScore = managerLeads.length > 0 
     ? Math.round(managerLeads.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeads.length)
     : 0;
+
+  // History Chart logic (last 4 weeks roughly)
+  const chartData = React.useMemo(() => {
+    if (!managerLeads.length) return [];
+    
+    // Group by week (last 4 weeks)
+    const now = new Date();
+    const weeks = [
+      { label: 'S1', start: subDays(now, 28), end: subDays(now, 21), leads: [] as any[] },
+      { label: 'S2', start: subDays(now, 21), end: subDays(now, 14), leads: [] as any[] },
+      { label: 'S3', start: subDays(now, 14), end: subDays(now, 7), leads: [] as any[] },
+      { label: 'S4', start: subDays(now, 7), end: now, leads: [] as any[] },
+    ];
+
+    managerLeads.forEach(lead => {
+      const d = new Date(lead.created_at);
+      const targetWeek = weeks.find(w => isAfter(d, w.start) && !isAfter(d, w.end));
+      if (targetWeek) targetWeek.leads.push(lead);
+    });
+
+    return weeks.map(w => {
+      const avg = w.leads.length > 0 
+        ? Math.round(w.leads.reduce((sum, l) => sum + (l.score || 0), 0) / w.leads.length)
+        : null;
+      return { week: w.label, score: avg };
+    });
+  }, [managerLeads]);
+
+  // Replace nulls with previous values or 0 for a continuous line
+  const displayChartData = chartData.map((d, i, arr) => {
+    if (d.score !== null) return d;
+    // Find previous valid score
+    let prevValid = 0;
+    for (let j = i - 1; j >= 0; j--) {
+      if (arr[j].score !== null) { prevValid = arr[j].score as number; break; }
+    }
+    return { ...d, score: prevValid };
+  });
+
+  // Recent Audits
+  const recentAudits = React.useMemo(() => {
+    return [...managerLeads]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5)
+      .map(l => ({
+        date: format(new Date(l.created_at), "d 'de' MMM, HH:mm", { locale: ptBR }),
+        client: l.name || 'Sem Nome',
+        score: l.score || 0
+      }));
+  }, [managerLeads]);
 
   // Access Generation State
   const [email, setEmail] = useState('');
@@ -181,10 +229,10 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                 <p className="text-xs font-bold text-foreground/70 uppercase tracking-wider">Evolução (4 semanas)</p>
               </div>
               <ResponsiveContainer width="100%" height={120}>
-                <LineChart data={mockHistory} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
+                <LineChart data={displayChartData} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
                   <XAxis dataKey="week" axisLine={false} tickLine={false}
                     tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} />
-                  <YAxis axisLine={false} tickLine={false} domain={[50, 100]}
+                  <YAxis axisLine={false} tickLine={false} domain={[0, 100]}
                     tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} />
                   <Tooltip
                     contentStyle={{ background: '#1a1a28', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10 }}
@@ -204,11 +252,9 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
             <div className="flex-1 px-6 py-5 overflow-y-auto">
               <p className="label-caps text-muted-foreground mb-3">Últimas Auditorias</p>
               <div className="space-y-2">
-                {[
-                  { date: 'Hoje, 14:22', client: 'Paulo (BMW)', score: 75 },
-                  { date: 'Hoje, 11:04', client: 'Juliana (Corolla)', score: 100 },
-                  { date: 'Ontem, 16:30', client: 'Rafael (Gol)', score: 50 },
-                ].map((audit, i) => (
+                {recentAudits.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic mt-2">Nenhuma auditoria recente.</p>
+                ) : recentAudits.map((audit, i) => (
                   <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl
                     bg-black/5 dark:bg-white/[0.03] border border-border hover:bg-black/10 dark:hover:bg-white/[0.06] transition-colors">
                     <div className="flex-1 min-w-0">
