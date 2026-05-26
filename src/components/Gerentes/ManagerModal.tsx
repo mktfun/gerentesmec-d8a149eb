@@ -77,7 +77,9 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
   }, [managerLeads]);
 
   // Calculate KPI (Difference between current week and 4 weeks ago)
-  const kpiDiff = displayChartData[3].score - displayChartData[0].score;
+  const kpiDiff = displayChartData.length === 4 
+    ? displayChartData[3].score - displayChartData[0].score 
+    : 0;
   const isKpiPositive = kpiDiff >= 0;
 
   // Access Generation State
