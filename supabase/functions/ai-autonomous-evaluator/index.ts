@@ -137,10 +137,10 @@ serve(async (req) => {
       7. AVALIAÇÃO DE LINKS: Se houver um conteúdo raspado dos links abaixo, ANALISE O TEXTO. Se o gerente enviou um link de checklist/orçamento, mas o conteúdo dele é pobre, não possui justificativa descrita ou as fotos necessárias não parecem estar detalhadas, VOCÊ DEVE ZERAR os itens correspondentes (como o 2d) e adicionar ao insight "Orçamento/Checklist sem descrições técnicas no link".
       8. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio ou no CONTEÚDO DO LINK para provar que você o avaliou e justificar sua nota.
       9. INSTRUÇÕES DE INSIGHT (MENSAGEM INLINE):
-         No JSON de saída, você deve preencher o campo "message_insight" com uma frase curta, direta e natural, como se fosse um auditor sênior justificando sua ação *naquele momento*.
-         Exemplo 1: "Auditoria: Movi para Em Negociação pois o vídeo do orçamento foi enviado."
-         Exemplo 2: "Auditoria: Zerei o item 2d pois o link do checklist não possui fotos ou justificativas."
-         Se a mensagem não alterar nada de importante no funil ou no score, retorne null. Não use a palavra 'IA' nem emojis brilhantes. Fale de forma técnica e minimalista.
+         No JSON de saída, você deve preencher o campo "message_insight" apenas quando tomar uma decisão drástica ou houver uma mudança visível no fluxo (ex: alterar funnel_stage, zerar uma nota, validar um anexo).
+         Exemplo 1: "Movi para Em Negociação pois o vídeo do orçamento foi enviado."
+         Exemplo 2: "Zerei o item 2d pois o link do checklist não possui fotos."
+         REGRA DE OURO: Se for apenas uma troca de mensagens comum (ex: bom dia, tirando dúvida simples, enviando áudio sem alterar score), você DEVE retornar o valor primitivo \`null\` (sem aspas) no JSON. NÃO invente insights se nada mudou. Fale de forma técnica e minimalista.
       ${scrapedContent}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
@@ -163,7 +163,7 @@ serve(async (req) => {
         "funnel_stage": (sugestão de nova etapa),
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
         "closing_summary": (Resumo descritivo narrando a evolução e histórico geral),
-        "message_insight": (String curta com a nota do auditor ou null. Regras na instrução 7),
+        "message_insight": (String curta justificando uma ação crítica ou null se foi uma mensagem comum. Ver regra 9),
         "ticket_value": (número decimal ou null),
         "customer_vehicle": (string ou null)
       }
