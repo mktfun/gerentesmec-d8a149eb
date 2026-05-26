@@ -71,10 +71,14 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
       .slice(0, 5)
       .map(l => ({
         date: format(new Date(l.created_at), "d 'de' MMM, HH:mm", { locale: ptBR }),
-        client: l.name || 'Sem Nome',
+        client: l.name || l.customer_name || 'Cliente',
         score: l.score || 0
       }));
   }, [managerLeads]);
+
+  // Calculate KPI (Difference between current week and 4 weeks ago)
+  const kpiDiff = displayChartData[3].score - displayChartData[0].score;
+  const isKpiPositive = kpiDiff >= 0;
 
   // Access Generation State
   const [email, setEmail] = useState('');
@@ -269,11 +273,22 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                 <span className={`text-5xl font-black ${
                   avgScore >= 80 ? 'text-emerald-500 dark:text-emerald-400' : avgScore >= 60 ? 'text-indigo-500 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400'
                 }`}>{avgScore}%</span>
-                <span className="flex items-center gap-1 text-xs font-bold text-emerald-500 dark:text-emerald-400
-                  bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 px-2 py-0.5 rounded-full mb-1.5">
-                  <TrendingUp className="w-3 h-3" />
-                  +8% no mês
-                </span>
+                
+                {kpiDiff !== 0 && (
+                  <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full mb-1.5 ${
+                    isKpiPositive 
+                      ? 'text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20' 
+                      : 'text-rose-500 dark:text-rose-400 bg-rose-500/10 dark:bg-rose-400/10 border border-rose-500/20'
+                  }`}>
+                    {isKpiPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {isKpiPositive ? '+' : ''}{kpiDiff}% no mês
+                  </span>
+                )}
+                {kpiDiff === 0 && avgScore > 0 && (
+                   <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full mb-1.5 text-indigo-400 bg-indigo-500/10 border border-indigo-500/20">
+                     Estável no mês
+                   </span>
+                )}
               </div>
             </div>
 
