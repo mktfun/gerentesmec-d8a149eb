@@ -37,37 +37,71 @@ serve(async (req) => {
       throw new Error('Forbidden: Only admins can create users')
     }
 
-    let { email, password, manager_id } = await req.json()
-    if (!email || !password || !manager_id) {
-      throw new Error('Missing required fields')
+    let { action, email, password, manager_id, auth_user_id } = await req.json()
+    if (!action) action = 'create'
+
+    if (action === 'create') {
+      if (!email || !password || !manager_id) throw new Error('Missing required fields for create')
+      
+      if (!email.includes('@')) email = `${email.trim()}@gerentes.com`
+
+      const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
+        email, password, email_confirm: true,
+      })
+      if (createError) throw createError
+
+      const { error: updateError } = await supabaseClient
+        .from('managers')
+        .update({ auth_user_id: newUser.user.id })
+        .eq('id', manager_id)
+      if (updateError) throw updateError
+
+      return new Response(JSON.stringify({ success: true, user: newUser.user }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    } 
+    
+    if (action === 'update') {
+      if (!auth_user_id) throw new Error('Missing auth_user_id for update')
+      const updates: any = {}
+      if (email) {
+        if (!email.includes('@')) email = `${email.trim()}@gerentes.com`
+        updates.email = email
+      }
+      if (password) updates.password = password
+
+      const { data: updatedUser, error: updateError } = await supabaseClient.auth.admin.updateUserById(auth_user_id, updates)
+      if (updateError) throw updateError
+
+      return new Response(JSON.stringify({ success: true, user: updatedUser.user }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
     }
 
-    // Permitir username (converte para email fictício para agradar o Supabase Auth)
-    if (!email.includes('@')) {
-      email = `${email.trim()}@gerentes.com`
+    if (action === 'revoke') {
+      if (!auth_user_id || !manager_id) throw new Error('Missing fields for revoke')
+      
+      // Delete user from auth
+      const { error: deleteError } = await supabaseClient.auth.admin.deleteUser(auth_user_id)
+      if (deleteError) throw deleteError
+
+      // Remove link from manager
+      const { error: updateError } = await supabaseClient
+        .from('managers')
+        .update({ auth_user_id: null })
+        .eq('id', manager_id)
+      if (updateError) throw updateError
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
     }
 
-    // 1. Create the user in Auth
-    const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    })
+    throw new Error('Invalid action')
 
-    if (createError) throw createError
-
-    // 2. Link the user to the manager
-    const { error: updateError } = await supabaseClient
-      .from('managers')
-      .update({ auth_user_id: newUser.user.id })
-      .eq('id', manager_id)
-
-    if (updateError) throw updateError
-
-    return new Response(JSON.stringify({ success: true, user: newUser.user }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

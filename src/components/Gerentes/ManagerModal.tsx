@@ -82,26 +82,34 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
   const [loadingAccess, setLoadingAccess] = useState(false);
   const [accessError, setAccessError] = useState('');
   const [accessSuccess, setAccessSuccess] = useState(false);
+  const [isEditingAccess, setIsEditingAccess] = useState(false);
 
-  const handleCreateAccess = async () => {
-    if (!email || !password || !manager) return;
+  const handleAccessAction = async (action: 'create' | 'update' | 'revoke') => {
+    if ((action === 'create' || action === 'update') && (!email && !password)) return;
+    if (!manager) return;
+
     setLoadingAccess(true);
     setAccessError('');
     setAccessSuccess(false);
 
     try {
       const { data, error } = await supabase.functions.invoke('admin-create-user', {
-        body: { email, password, manager_id: manager.id }
+        body: { 
+          action, 
+          email, 
+          password, 
+          manager_id: manager.id, 
+          auth_user_id: manager.auth_user_id 
+        }
       });
 
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
 
       setAccessSuccess(true);
-      // Wait a bit, then refresh the manager object or rely on AppDataContext realtime subscription
-      // to reflect auth_user_id
+      if (action === 'revoke') setIsEditingAccess(false);
     } catch (err: any) {
-      setAccessError(err.message || 'Erro ao gerar acesso.');
+      setAccessError(err.message || 'Erro ao processar acesso.');
     } finally {
       setLoadingAccess(false);
     }
@@ -152,25 +160,35 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                 <p className="label-caps text-amber-500/80 mb-0">Acesso ao Sistema</p>
               </div>
 
-              {manager.auth_user_id ? (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Acesso Ativo</p>
-                    <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">Este gerente possui login no sistema.</p>
+              {manager.auth_user_id && !isEditingAccess ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Acesso Ativo</p>
+                      <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">Este gerente possui login no sistema.</p>
+                    </div>
                   </div>
+                  <button 
+                    onClick={() => setIsEditingAccess(true)}
+                    className="w-full py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-foreground/80 hover:bg-white/10 transition-colors"
+                  >
+                    Alterar Credenciais
+                  </button>
                 </div>
-              ) : accessSuccess ? (
+              ) : accessSuccess && !isEditingAccess ? (
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
                   <div>
-                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Acesso Criado com Sucesso!</p>
-                    <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">O gerente já pode logar.</p>
+                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Acesso Criado/Atualizado!</p>
+                    <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">Tudo pronto.</p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground mb-3">Gere as credenciais para este gerente visualizar apenas a própria loja.</p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    {manager.auth_user_id ? 'Digite os novos dados para alterar o login atual.' : 'Gere as credenciais para este gerente visualizar apenas a própria loja.'}
+                  </p>
                   
                   {accessError && (
                     <div className="flex items-start gap-2 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500">
@@ -182,7 +200,7 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                   <div className="relative">
                     <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
                     <input 
-                      type="text" placeholder="Usuário ou E-mail" 
+                      type="text" placeholder={manager.auth_user_id ? "Novo Usuário ou E-mail (opcional)" : "Usuário ou E-mail"} 
                       value={email} onChange={e => setEmail(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:border-amber-500/50"
                     />
@@ -190,19 +208,45 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                   <div className="relative">
                     <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
                     <input 
-                      type="text" placeholder="Senha provisória" 
+                      type="text" placeholder={manager.auth_user_id ? "Nova Senha (opcional)" : "Senha provisória"} 
                       value={password} onChange={e => setPassword(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 bg-background border border-border rounded-lg text-xs focus:outline-none focus:border-amber-500/50"
                     />
                   </div>
-                  <button 
-                    onClick={handleCreateAccess}
-                    disabled={loadingAccess || !email || !password}
-                    className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500 text-amber-950 text-xs font-bold hover:bg-amber-400 transition-colors disabled:opacity-50"
-                  >
-                    {loadingAccess ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-3.5 h-3.5" />}
-                    {loadingAccess ? 'Gerando...' : 'Gerar Acesso'}
-                  </button>
+                  
+                  {manager.auth_user_id ? (
+                    <div className="flex items-center gap-2 pt-2">
+                      <button 
+                        onClick={() => setIsEditingAccess(false)}
+                        className="flex-1 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-foreground/80 hover:bg-white/10 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        onClick={() => handleAccessAction('revoke')}
+                        disabled={loadingAccess}
+                        className="flex-1 py-2 rounded-lg bg-rose-500/20 text-rose-500 text-xs font-bold hover:bg-rose-500/30 transition-colors disabled:opacity-50"
+                      >
+                        {loadingAccess ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : 'Revogar Acesso'}
+                      </button>
+                      <button 
+                        onClick={() => handleAccessAction('update')}
+                        disabled={loadingAccess || (!email && !password)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500 text-amber-950 text-xs font-bold hover:bg-amber-400 transition-colors disabled:opacity-50"
+                      >
+                        {loadingAccess ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => handleAccessAction('create')}
+                      disabled={loadingAccess || !email || !password}
+                      className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-amber-500 text-amber-950 text-xs font-bold hover:bg-amber-400 transition-colors disabled:opacity-50"
+                    >
+                      {loadingAccess ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-3.5 h-3.5" />}
+                      {loadingAccess ? 'Gerando...' : 'Gerar Acesso'}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
