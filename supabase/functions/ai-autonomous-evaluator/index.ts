@@ -425,8 +425,8 @@ serve(async (req) => {
               parsedError = null;
             }
             
-            // Se for erro de rate limit (429) ou erro de servidor (5xx) e ainda tivermos modelos de fallback...
-            if ((res.status === 429 || res.status >= 500) && i < modelsToTry.length - 1) {
+            // Se houver qualquer erro (rate limit 429, modelo não encontrado 404, servidor 5xx) e ainda tivermos modelos de fallback...
+            if (i < modelsToTry.length - 1) {
               console.log(`[AI-EVALUATOR] Fallback Acionado! ${finalModel} falhou (${res.status}). Indo para o próximo modelo.`);
               continue; // Vai para a próxima iteração do loop
             }
