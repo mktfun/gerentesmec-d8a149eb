@@ -97,18 +97,7 @@ const DashboardLayout: React.FC = () => {
             <BookOpen className="w-4 h-4" />
             Como Funciona
           </NavLink>
-          <a href="/tv/operacional" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent transition-colors">
-            <Tv className="w-4 h-4" />
-            TV Operacional
-          </a>
-          <a href="/tv/executivo" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent transition-colors">
-            <Tv className="w-4 h-4" />
-            TV Executiva
-          </a>
-          <button onClick={toggle} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent">
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            {isDark ? 'Modo Claro' : 'Modo Escuro'}
-          </button>
+
           <button onClick={async () => await supabase.auth.signOut()} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/10 transition-colors">
             <LogOut className="w-4 h-4" />
             Sair do Sistema
@@ -133,6 +122,18 @@ const DashboardLayout: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <a href="/tv/operacional" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+              <Tv className="w-3.5 h-3.5" />
+              TV Operacional
+            </a>
+            <a href="/tv/executivo" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+              <Tv className="w-3.5 h-3.5" />
+              TV Executiva
+            </a>
+            <button onClick={toggle} className="w-8 h-8 mr-2 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <div className="h-6 w-px bg-border mr-2" />
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full
               bg-emerald-500/10 border border-emerald-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot" />
