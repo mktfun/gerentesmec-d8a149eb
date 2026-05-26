@@ -80,11 +80,11 @@ const ReadOnlyAuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         <div className="px-6 py-5 border-b border-border flex items-center justify-between shrink-0 bg-black/5 dark:bg-white/[0.02]">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 border border-border shrink-0">
-              <span className="text-sm font-black text-foreground">{lead.name.substring(0, 2).toUpperCase()}</span>
+              <span className="text-sm font-black text-foreground">{String(lead.name || lead.customer_name || '??').substring(0, 2).toUpperCase()}</span>
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground truncate max-w-[200px]">{lead.name}</p>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{lead.phone}</p>
+              <p className="text-sm font-bold text-foreground truncate max-w-[200px]">{lead.name || lead.customer_name || 'Cliente Sem Nome'}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{lead.phone || lead.customer_phone}</p>
             </div>
           </div>
           <button 
