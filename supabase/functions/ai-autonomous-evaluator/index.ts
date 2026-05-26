@@ -83,18 +83,17 @@ serve(async (req) => {
     const urls = text.match(urlRegex) || [];
     let scrapedContent = '';
 
-    if (urls.length > 0) {
-      console.log(`[AI-EVALUATOR] Encontradas ${urls.length} URLs no chat. Iniciando scraping avançado via Jina Reader...`);
+    if (urls.length > 0 && sender_type !== 'contact') {
+      console.log(`[AI-EVALUATOR] Encontradas ${urls.length} URLs no chat enviadas pelo Gerente. Iniciando scraping avançado via Jina Reader...`);
       const fetchPromises = urls.map(async (url) => {
         try {
           // Utilizar Jina Reader para lidar com SPAs e transformar em Markdown puro
           const jinaUrl = `https://r.jina.ai/${url}`;
           const res = await fetch(jinaUrl, { 
             headers: {
-              // 'Authorization': 'Bearer jina_XXX' // Caso precise de chave futuramente, por enquanto a free-tier nativa serve
               'X-Return-Format': 'markdown'
             },
-            signal: AbortSignal.timeout(5000) 
+            signal: AbortSignal.timeout(12000) // Timeout aumentado para 12s para suportar sistemas de orçamento pesados
           });
           if (!res.ok) return null;
           
@@ -112,8 +111,10 @@ serve(async (req) => {
         .map(r => (r as PromiseFulfilledResult<string>).value);
       
       if (validContents.length > 0) {
-        scrapedContent = `\n\nCONTEÚDO RASPADO DOS LINKS ENVIADOS NESTA MENSAGEM (USE PARA AVALIAR QUALIDADE DOS ORÇAMENTOS/CHECKLISTS):\n` + validContents.join('\n\n');
+        scrapedContent = `\n\nCONTEÚDO RASPADO DOS LINKS ENVIADOS NESTA MENSAGEM (USE PARA AVALIAR QUALIDADE DOS ORÇAMENTOS/CHECKLISTS E SALVAR EM MEMÓRIA):\n` + validContents.join('\n\n');
       }
+    } else if (urls.length > 0 && sender_type === 'contact') {
+      console.log(`[AI-EVALUATOR] Links encontrados na mensagem do Cliente. Scraping ignorado para economizar tokens/tempo.`);
     }
 
     // 2. Semantic Caching (Simulação da lógica RAG)
