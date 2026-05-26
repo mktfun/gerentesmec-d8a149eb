@@ -141,60 +141,90 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
             </div>
           </div>
 
-          {/* Critical Leads List */}
-          <div className="rounded-[2rem] bg-white/[0.02] border border-rose-500/20 shadow-[0_0_30px_rgba(244,63,94,0.05)] p-8 flex flex-col relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 rounded-full blur-[80px] pointer-events-none" />
-             
-             <div className="flex items-center gap-3 mb-8 z-10">
-               <div className="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center">
-                 <AlertTriangle className="w-5 h-5 text-rose-400" />
+          <div className="flex flex-col gap-8">
+            {/* Critical Leads List - Compact */}
+            <div className="rounded-[2rem] bg-white/[0.02] border border-rose-500/20 shadow-[0_0_30px_rgba(244,63,94,0.05)] p-8 flex flex-col relative overflow-hidden shrink-0">
+               <div className="absolute top-0 right-0 w-48 h-48 bg-rose-500/10 rounded-full blur-[60px] pointer-events-none" />
+               
+               <div className="flex items-center gap-3 mb-6 z-10">
+                 <div className="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center shrink-0">
+                   <AlertTriangle className="w-5 h-5 text-rose-400" />
+                 </div>
+                 <div>
+                   <h3 className="text-sm font-bold tracking-widest uppercase text-white leading-tight">Ação Imediata</h3>
+                   <p className="text-[10px] text-rose-400 font-medium">Leads com SLA estourado</p>
+                 </div>
                </div>
-               <div>
-                 <h3 className="text-lg font-bold tracking-widest uppercase text-white">Ação Imediata</h3>
-                 <p className="text-xs text-rose-400 font-medium">Leads com SLA estourado</p>
-               </div>
-             </div>
 
-             <div className="flex flex-col gap-3 z-10 flex-1">
-               {criticalLeads.length > 0 ? (
-                 criticalLeads.map((lead, idx) => (
+               <div className="flex flex-col gap-2 z-10">
+                 {criticalLeads.length > 0 ? (
                    <motion.div 
-                     key={lead.id}
                      initial={{ opacity: 0, x: 20 }}
                      animate={{ opacity: 1, x: 0 }}
-                     transition={{ delay: 0.5 + idx * 0.1 }}
-                     className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group hover:bg-white/10 transition-colors"
+                     className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between"
                    >
-                     <div className="flex flex-col">
-                       <span className="font-bold text-white mb-1">{lead.customer_name}</span>
-                       <span className="text-xs text-white/50 flex items-center gap-1">
-                         <Phone className="w-3 h-3" /> {lead.customer_phone || 'Sem contato'}
+                     <div className="flex flex-col min-w-0 pr-4">
+                       <span className="font-bold text-white mb-1 truncate">{criticalLeads[0].customer_name}</span>
+                       <span className="text-xs text-rose-200 flex items-center gap-1 truncate">
+                         <Phone className="w-3 h-3 shrink-0" /> {criticalLeads[0].customer_phone || 'Sem contato'}
                        </span>
                      </div>
-                     <div className="flex flex-col items-end">
+                     <div className="flex flex-col items-end shrink-0">
                        <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider">Atraso</span>
-                       <span className="font-black text-white">{lead.wait_time_minutes}m</span>
+                       <span className="text-xl font-black text-rose-400">{criticalLeads[0].wait_time_minutes}m</span>
                      </div>
                    </motion.div>
-                 ))
-               ) : (
-                 <div className="flex-1 flex flex-col items-center justify-center text-emerald-400/50">
-                    <div className="w-16 h-16 rounded-full border border-emerald-500/20 flex items-center justify-center mb-4">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                    </div>
-                    <span className="text-sm font-bold tracking-widest uppercase">Sem Atrasos</span>
-                    {activeLeads.length > 0 && (
-                      <span className="text-xs font-bold text-emerald-500/50 mt-2">{activeLeads.length} leads no prazo</span>
-                    )}
-                 </div>
-               )}
+                 ) : (
+                   <div className="flex flex-col items-center justify-center text-emerald-400/50 py-4">
+                      <div className="w-12 h-12 rounded-full border border-emerald-500/20 flex items-center justify-center mb-2">
+                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                      </div>
+                      <span className="text-[10px] font-bold tracking-widest uppercase">Sem Atrasos</span>
+                   </div>
+                 )}
+                 
+                 {dangerLeads.length > 1 && (
+                   <div className="text-center mt-2">
+                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/5 border border-rose-500/10 text-[10px] font-bold text-rose-400 uppercase tracking-widest">
+                       + {dangerLeads.length - 1} leads em alerta
+                     </span>
+                   </div>
+                 )}
+               </div>
+            </div>
+
+            {/* Funnel Distribution */}
+            <div className="flex-1 rounded-[2rem] bg-white/[0.02] border border-white/10 p-8 flex flex-col relative overflow-hidden">
+               <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none" />
+               <h3 className="text-sm font-bold tracking-widest uppercase text-white/70 mb-6 z-10">Funil em Andamento</h3>
                
-               {dangerLeads.length > 7 && (
-                 <div className="text-center text-xs font-bold text-white/30 uppercase tracking-widest pt-4">
-                   + {dangerLeads.length - 7} leads ocultos
-                 </div>
-               )}
-             </div>
+               <div className="flex flex-col gap-4 flex-1 justify-center z-10">
+                 {[
+                   { id: 'lead_new', label: 'Novos / Fila', color: 'bg-indigo-500', text: 'text-indigo-400' },
+                   { id: 'negotiation', label: 'Em Negociação', color: 'bg-amber-500', text: 'text-amber-400' },
+                   { id: 'quote', label: 'Orçamento Enviado', color: 'bg-emerald-500', text: 'text-emerald-400' },
+                 ].map(stage => {
+                   const count = unitLeads.filter(l => l.funnel_stage === stage.id).length;
+                   const pct = activeLeads.length > 0 ? (count / activeLeads.length) * 100 : 0;
+                   return (
+                     <div key={stage.id} className="flex flex-col gap-2">
+                       <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider">
+                         <span className="text-white/70">{stage.label}</span>
+                         <span className={stage.text}>{count}</span>
+                       </div>
+                       <div className="w-full h-2 rounded-full bg-black/20 overflow-hidden">
+                         <motion.div 
+                           initial={{ width: 0 }}
+                           animate={{ width: `${pct}%` }}
+                           transition={{ duration: 1, ease: "easeOut" }}
+                           className={`h-full rounded-full ${stage.color}`}
+                         />
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+            </div>
           </div>
         </div>
       </div>
