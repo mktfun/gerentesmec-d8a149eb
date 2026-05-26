@@ -60,3 +60,90 @@ export const auditStepsConfig = [
     ],
   },
 ];
+
+/**
+ * Maps an audit checklist item ID to a human-readable quality feedback message.
+ * Used by the Manager View to display quality alerts in the conversation timeline.
+ * IMPORTANT: No mention of "IA" or "Inteligência Artificial" - these are "Análise de Qualidade".
+ */
+export const qualityFeedbackMap: Record<string, { label: string; type: 'pass' | 'fail'; detail: string }> = {
+  '1a': {
+    label: 'Cordialidade no Atendimento',
+    type: 'pass',
+    detail: 'O atendimento foi conduzido de forma cordial e respeitosa com o cliente.',
+  },
+  '1b': {
+    label: 'Registro do Combinado',
+    type: 'pass',
+    detail: 'O que foi acordado presencialmente ou por telefone foi registrado no WhatsApp.',
+  },
+  '2a': {
+    label: 'Link do Orçamento Enviado',
+    type: 'pass',
+    detail: 'O link do orçamento foi encaminhado ao cliente nesta conversa.',
+  },
+  '2b': {
+    label: 'Vídeo do Defeito Enviado',
+    type: 'pass',
+    detail: 'Um vídeo mostrando o defeito do veículo foi enviado ao cliente.',
+  },
+  '2c': {
+    label: 'Consequências Explicadas',
+    type: 'pass',
+    detail: 'Os efeitos e consequências de não realizar o reparo foram explicados.',
+  },
+  '2d': {
+    label: 'Checklist do Veículo Enviado',
+    type: 'pass',
+    detail: 'O link do checklist do veículo com fotos e defeitos foi enviado.',
+  },
+  '2e': {
+    label: 'Aprovação do Cliente Obtida',
+    type: 'pass',
+    detail: 'O cliente confirmou e aprovou o orçamento/checklist enviado.',
+  },
+  '3a': {
+    label: 'Checklist Mecânico Enviado',
+    type: 'pass',
+    detail: 'O checklist complementar de serviços adicionais foi encaminhado.',
+  },
+  '3b': {
+    label: 'Vídeo de Up-sell Enviado',
+    type: 'pass',
+    detail: 'Foi enviado um vídeo explicando o que mais precisa ser feito no veículo.',
+  },
+  '3c': {
+    label: 'Justificativa dos Serviços Extras',
+    type: 'pass',
+    detail: 'Os serviços adicionais foram justificados com texto explicativo ao cliente.',
+  },
+  '4a': {
+    label: 'Mensagem de Agradecimento Enviada',
+    type: 'pass',
+    detail: 'A mensagem padrão de agradecimento foi enviada ao encerrar o atendimento.',
+  },
+  '4b': {
+    label: 'Avaliação no Google Solicitada',
+    type: 'pass',
+    detail: 'O cliente foi convidado de forma explícita a deixar uma avaliação no Google.',
+  },
+};
+
+/**
+ * Returns the list of checklist items NOT completed for a lead,
+ * formatted as quality failure alerts for the manager.
+ */
+export const getMissingQualityItems = (auditChecklist: Record<string, boolean>) => {
+  return auditStepsConfig.flatMap(step =>
+    step.items
+      .filter(item => !auditChecklist[item.id])
+      .map(item => ({
+        id: item.id,
+        label: qualityFeedbackMap[item.id]?.label ?? item.text,
+        detail: `Este ponto não foi cumprido durante o atendimento: "${item.text}"`,
+        type: 'fail' as const,
+        stepTitle: step.title,
+      }))
+  );
+};
+
