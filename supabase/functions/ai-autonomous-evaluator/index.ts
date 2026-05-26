@@ -446,10 +446,10 @@ serve(async (req) => {
 
     // 5.2 Calcular o Score Determinístico (Idêntico ao AuditPanel)
     const auditStepsConfig = [
-      { id: 'step1', weight: 25, items: ['1a', '1b'] },
-      { id: 'step2', weight: 25, items: ['2a', '2b', '2c', '2d', '2e'] },
-      { id: 'step3', weight: 25, items: ['3a', '3b', '3c'] },
-      { id: 'step4', weight: 25, items: ['4a', '4b'] },
+      { id: 'step1', weight: 40, items: ['1a', '1b', '2d', '2b'] },
+      { id: 'step2', weight: 30, items: ['2a', '2c', '2e'] },
+      { id: 'step3', weight: 20, items: ['3a', '3b', '3c'] },
+      { id: 'step4', weight: 10, items: ['4a', '4b'] },
     ];
     let calculatedScore = 0;
     auditStepsConfig.forEach(step => {
