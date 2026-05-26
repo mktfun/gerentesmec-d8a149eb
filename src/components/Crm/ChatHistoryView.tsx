@@ -354,18 +354,18 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
               return (
                 <div key={msg.id} className="w-full">
                   {dividerEl}
-                  <motion.div
-                    ref={(el) => {
-                      messageRefs.current[msg.id] = el;
-                      if (msg.chatwoot_message_id) {
-                        messageRefs.current[msg.chatwoot_message_id] = el;
-                      }
-                    }}
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.05 }}
-                    className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'} ${isHighlighted ? 'relative z-20' : ''}`}
-                  >
+                    <motion.div
+                      ref={(el) => {
+                        messageRefs.current[msg.id] = el;
+                        if (msg.chatwoot_message_id) {
+                          messageRefs.current[msg.chatwoot_message_id] = el;
+                        }
+                      }}
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 260, damping: 20, delay: idx * 0.05 }}
+                      className={`flex items-end gap-2 group w-full ${isUser ? 'justify-end' : 'justify-start'} ${isHighlighted ? 'relative z-20' : ''}`}
+                    >
                     {/* Highlight Glow Effect */}
                     {isHighlighted && (
                       <motion.div 
