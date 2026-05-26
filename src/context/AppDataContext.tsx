@@ -6,7 +6,9 @@ import { BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/utils/businessHou
 export type Lead = Database['public']['Tables']['leads']['Row'] & {
   audit_checklist_messages?: Record<string, string>;
 };
-export type Manager = Database['public']['Tables']['managers']['Row'];
+export type Manager = Database['public']['Tables']['managers']['Row'] & {
+  auth_user_id?: string | null;
+};
 export type Unit = Database['public']['Tables']['units']['Row'];
 export type AiSettings = Database['public']['Tables']['ai_settings']['Row'] & {
   system_prompt?: string;
