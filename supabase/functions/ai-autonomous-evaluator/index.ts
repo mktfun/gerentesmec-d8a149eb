@@ -291,10 +291,19 @@ serve(async (req) => {
             generationConfig: { responseMimeType: "application/json" }
           })
         });
-        const data = await res.json();
+        
         if (!res.ok) {
-          throw new Error(data.error?.message || `Vertex AI Error (${res.status}): ${JSON.stringify(data)}`);
+          const errorText = await res.text();
+          let parsedError;
+          try {
+            parsedError = JSON.parse(errorText);
+          } catch (_) {
+            parsedError = null;
+          }
+          throw new Error(parsedError?.error?.message || `Vertex AI Error (${res.status}): ${errorText}`);
         }
+        
+        const data = await res.json();
         if (data.error) throw new Error(data.error.message);
         llmOutputText = data.candidates[0].content.parts[0].text;
         tokensUsed = data.usageMetadata?.totalTokenCount || null;
@@ -322,10 +331,19 @@ serve(async (req) => {
             generationConfig: { responseMimeType: "application/json" }
           })
         });
-        const data = await res.json();
+        
         if (!res.ok) {
-          throw new Error(data.error?.message || `Google AI Error (${res.status}): ${JSON.stringify(data)}`);
+          const errorText = await res.text();
+          let parsedError;
+          try {
+            parsedError = JSON.parse(errorText);
+          } catch (_) {
+            parsedError = null;
+          }
+          throw new Error(parsedError?.error?.message || `Google AI Error (${res.status}): ${errorText}`);
         }
+        
+        const data = await res.json();
         if (data.error) throw new Error(data.error.message);
         llmOutputText = data.candidates[0].content.parts[0].text;
         tokensUsed = data.usageMetadata?.totalTokenCount || null;
@@ -356,10 +374,20 @@ serve(async (req) => {
             messages: [{ role: 'user', content: userMessageContent }]
           })
         });
-        const data = await res.json();
+        
         if (!res.ok) {
-          throw new Error(data.error?.message || data.detail || `LLM API Error (${res.status}): ${JSON.stringify(data)}`);
+          const errorText = await res.text();
+          let parsedError;
+          try {
+            parsedError = JSON.parse(errorText);
+          } catch (_) {
+            parsedError = null;
+          }
+          const errMsg = parsedError?.error?.message || parsedError?.detail || `LLM API Error (${res.status}): ${errorText}`;
+          throw new Error(errMsg);
         }
+        
+        const data = await res.json();
         if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
         llmOutputText = data.choices[0].message.content;
         tokensUsed = data.usage?.total_tokens || null;

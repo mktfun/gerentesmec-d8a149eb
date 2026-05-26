@@ -45,8 +45,13 @@ const availableModels: Record<string, string[]> = {
     'google/gemma-3-27b-it:free', 'meta-llama/llama-3.1-8b-instruct:free', 'mistralai/mistral-7b-instruct:free',
   ],
   'NVIDIA NIM': [
-    'meta/llama-3.1-405b-instruct', 'meta/llama-3.1-70b-instruct', 'meta/llama-3.1-8b-instruct',
-    'mistralai/mistral-large-2-instruct', 'nvidia/nemotron-4-340b-instruct'
+    'nvidia/llama-3.1-nemotron-51b-instruct',
+    'meta/llama-3.3-70b-instruct',
+    'meta/llama-3.1-70b-instruct',
+    'meta/llama-3.1-8b-instruct',
+    'meta/llama-3.1-405b-instruct',
+    'mistralai/mistral-large-2-instruct',
+    'nvidia/nemotron-4-340b-instruct'
   ],
   'Google Vertex AI': [
     'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'
@@ -418,7 +423,7 @@ export const AiRouterConfig: React.FC = () => {
           </AnimatePresence>
         </div>
       ) : (
-        <ProviderMonitoring activeProvider={provider} activeModel={model} />
+        <ProviderMonitoring activeProvider={aiSettings?.provider || 'Google'} activeModel={aiSettings?.model || ''} />
       )}
     </div>
   );
