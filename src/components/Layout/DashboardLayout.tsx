@@ -2,12 +2,13 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen
+  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen, LogOut
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAppData } from '@/context/AppDataContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { calculateDangerLeads } from '@/utils/metrics';
+import { supabase } from '@/integrations/supabase/client';
 
 const navItems = [
   { to: '/',         label: 'Dashboard',      icon: LayoutDashboard, end: true },
@@ -107,6 +108,10 @@ const DashboardLayout: React.FC = () => {
           <button onClick={toggle} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent">
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {isDark ? 'Modo Claro' : 'Modo Escuro'}
+          </button>
+          <button onClick={async () => await supabase.auth.signOut()} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/10 transition-colors">
+            <LogOut className="w-4 h-4" />
+            Sair do Sistema
           </button>
         </div>
       </aside>
