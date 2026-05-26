@@ -48,20 +48,19 @@ function buildTimeline(messages: ChatMessage[], checklist: Record<string, boolea
   const timeline: TimelineItem[] = [];
   const injectedIds = new Set<string>();
 
-  // Prepare quality events per step, in order (fails first then passes)
+  // Only inject PASSING items inline — fails are shown only in the side index drawer
   const qualityByStep: Record<string, InlineEvent[]> = {};
   auditStepsConfig.forEach(step => {
     const events: InlineEvent[] = [];
     step.items.forEach(item => {
       const pass = !!checklist[item.id];
+      if (!pass) return; // ← skip failed items from timeline
       events.push({
         kind: 'event',
         id: `quality-${item.id}`,
-        eventType: pass ? 'quality_pass' : 'quality_fail',
+        eventType: 'quality_pass',
         label: qualityFeedbackMap[item.id]?.label ?? item.text,
-        detail: pass
-          ? qualityFeedbackMap[item.id]?.detail ?? ''
-          : `Este ponto não foi cumprido: "${item.text}"`,
+        detail: qualityFeedbackMap[item.id]?.detail ?? '',
       });
     });
     qualityByStep[step.id] = events;
