@@ -390,35 +390,64 @@ serve(async (req) => {
         if (provider === 'OpenRouter') apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
         if (provider === 'NVIDIA NIM') apiUrl = 'https://integrate.api.nvidia.com/v1/chat/completions';
         
-        const res = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: finalModel,
-            ...(provider !== 'NVIDIA NIM' ? { response_format: { type: "json_object" } } : {}),
-            messages: [{ role: 'user', content: userMessageContent }]
-          })
-        });
-        
-        if (!res.ok) {
-          const errorText = await res.text();
-          let parsedError;
-          try {
-            parsedError = JSON.parse(errorText);
-          } catch (_) {
-            parsedError = null;
+        let modelsToTry = [finalModel];
+        if (provider === 'NVIDIA NIM') {
+          if (finalModel === 'deepseek-ai/deepseek-v4-pro') {
+            modelsToTry = ['deepseek-ai/deepseek-v4-pro', 'meta/llama-3.1-405b-instruct', 'meta/llama-3.3-70b-instruct'];
+          } else if (finalModel === 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning') {
+            modelsToTry = ['nvidia/nemotron-3-nano-omni-30b-a3b-reasoning', 'meta/llama-3.2-90b-vision-instruct'];
           }
-          const errMsg = parsedError?.error?.message || parsedError?.detail || `LLM API Error (${res.status}): ${errorText}`;
-          throw new Error(errMsg);
         }
         
-        const data = await res.json();
-        if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-        llmOutputText = data.choices[0].message.content;
-        tokensUsed = data.usage?.total_tokens || null;
+        for (let i = 0; i < modelsToTry.length; i++) {
+          finalModel = modelsToTry[i];
+          console.log(`[AI-EVALUATOR] Tentando modelo: ${finalModel} (Tentativa ${i+1}/${modelsToTry.length})`);
+          
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              model: finalModel,
+              ...(provider !== 'NVIDIA NIM' ? { response_format: { type: "json_object" } } : {}),
+              messages: [{ role: 'user', content: userMessageContent }]
+            })
+          });
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            let parsedError;
+            try {
+              parsedError = JSON.parse(errorText);
+            } catch (_) {
+              parsedError = null;
+            }
+            
+            // Se for erro de rate limit (429) ou erro de servidor (5xx) e ainda tivermos modelos de fallback...
+            if ((res.status === 429 || res.status >= 500) && i < modelsToTry.length - 1) {
+              console.log(`[AI-EVALUATOR] Fallback Acionado! ${finalModel} falhou (${res.status}). Indo para o próximo modelo.`);
+              continue; // Vai para a próxima iteração do loop
+            }
+            
+            const errMsg = parsedError?.error?.message || parsedError?.detail || `LLM API Error (${res.status}): ${errorText}`;
+            throw new Error(errMsg);
+          }
+          
+          const data = await res.json();
+          if (data.error) {
+            if (i < modelsToTry.length - 1) {
+              console.log(`[AI-EVALUATOR] Fallback Acionado (Erro no corpo)! ${finalModel} falhou. Indo para o próximo modelo.`);
+              continue;
+            }
+            throw new Error(data.error.message || JSON.stringify(data.error));
+          }
+          
+          llmOutputText = data.choices[0].message.content;
+          tokensUsed = data.usage?.total_tokens || null;
+          break; // Sucesso absoluto! Sai do loop.
+        }
       }
 
       const latencyMs = Math.round(performance.now() - startTime);
