@@ -25,8 +25,10 @@ export const Login = () => {
     setIsLoading(true);
 
     try {
+      const loginEmail = email.includes('@') ? email.trim() : `${email.trim()}@gerentes.com`;
+      
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: loginEmail,
         password,
       });
 
@@ -68,14 +70,14 @@ export const Login = () => {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-foreground/80 ml-1">
-                E-mail
+                E-mail ou Usuário
               </label>
               <input 
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="nome@oficina.com.br"
+                placeholder="nome@oficina.com.br ou apenas o nome"
                 className="w-full bg-muted border border-border rounded-xl px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
               />
             </div>
