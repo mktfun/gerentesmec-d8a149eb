@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Database } from '@/integrations/supabase/types';
 import { BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/utils/businessHours';
 
@@ -64,6 +65,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [integrationSettings, setIntegrationSettings] = useState<IntegrationSettings | null>(null);
   const [chatwootInsights, setChatwootInsights] = useState<ChatwootInsights | null>(null);
   const [isTvMode, setIsTvMode] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchInitialData();
@@ -111,12 +113,27 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   const fetchInitialData = async () => {
-    const leadsRes = await (supabase as any).from('leads').select('*').order('created_at', { ascending: false });
     const managersRes = await (supabase as any).from('managers').select('*').order('name');
-    const unitsRes = await (supabase as any).from('units').select('*').order('name');
+    const allManagers = managersRes.data as Manager[] || [];
+    
+    // Determine if current user is a unit manager
+    const currentManager = allManagers.find(m => m.auth_user_id === user?.id);
+    const isUnitManager = user?.user_metadata?.role === 'unit_manager' || !!currentManager;
+
+    let leadsRes;
+    let unitsRes;
+
+    if (isUnitManager && currentManager) {
+      leadsRes = await (supabase as any).from('leads').select('*').eq('manager_id', currentManager.id).order('created_at', { ascending: false });
+      unitsRes = await (supabase as any).from('units').select('*').eq('id', currentManager.unit_id).order('name');
+    } else {
+      leadsRes = await (supabase as any).from('leads').select('*').order('created_at', { ascending: false });
+      unitsRes = await (supabase as any).from('units').select('*').order('name');
+    }
+
     const aiRes = await (supabase as any).from('ai_settings').select('*').maybeSingle();
     const intRes = await (supabase as any).from('integration_settings').select('*').maybeSingle();
     const insightsRes = await (supabase as any).from('chatwoot_insights').select('*').eq('type', 'account').maybeSingle();
@@ -125,7 +142,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const validLeads = (leadsRes.data as Lead[]).filter(l => !(l.audit_checklist as any)?.is_deleted);
       setLeads(validLeads);
     }
-    if (managersRes.data) setManagers(managersRes.data as Manager[]);
+    setManagers(allManagers);
     if (unitsRes.data) setUnits(unitsRes.data as Unit[]);
     if (aiRes.data) setAiSettings(aiRes.data as AiSettings);
     if (intRes.data) setIntegrationSettings(intRes.data as IntegrationSettings);

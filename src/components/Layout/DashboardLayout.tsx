@@ -20,10 +20,10 @@ const navItems = [
 
 const DashboardLayout: React.FC = () => {
   const { isDark, toggle } = useTheme();
-  const { isTvMode, setIsTvMode, leads, businessHours } = useAppData();
   const { user } = useAuth();
+  const { isTvMode, setIsTvMode, leads, businessHours, managers } = useAppData();
   
-  const isUnitManager = user?.user_metadata?.role === 'unit_manager';
+  const isUnitManager = user?.user_metadata?.role === 'unit_manager' || managers.some(m => m.auth_user_id === user?.id);
 
   const dangerCount = React.useMemo(() => {
     return leads ? calculateDangerLeads(leads, businessHours).length : 0;
