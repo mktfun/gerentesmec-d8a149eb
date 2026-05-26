@@ -154,6 +154,12 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
 
   const timeline = buildTimeline(messages, checklist);
 
+  // Lock body scroll while inspector is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   const scrollToEvent = useCallback((eventId: string) => {
     setShowIndex(false);
     setTimeout(() => {
@@ -168,7 +174,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 60 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-50 flex flex-col"
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
       style={{ background: 'hsl(var(--background))' }}
     >
       {/* ── Header ─────────────────────────────────────────────── */}

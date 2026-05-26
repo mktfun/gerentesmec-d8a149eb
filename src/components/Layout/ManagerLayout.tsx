@@ -14,7 +14,7 @@ const ManagerLayout: React.FC = () => {
   const initials = displayName.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
       {/* Compact Header */}
       <header className="h-14 sticky top-0 z-20 flex items-center justify-between px-4 border-b border-border bg-background/90 backdrop-blur-xl shrink-0">
         {/* Logo */}
@@ -45,8 +45,8 @@ const ManagerLayout: React.FC = () => {
         </div>
       </header>
 
-      {/* Page content: max-width centered for a focused mobile/tablet experience */}
-      <main className="flex-1 w-full max-w-2xl mx-auto">
+      {/* Page content: max-width centered, scroll managed per-page */}
+      <main className="flex-1 w-full max-w-2xl mx-auto overflow-x-hidden">
         <Outlet />
       </main>
     </div>
