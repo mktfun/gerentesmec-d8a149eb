@@ -10,7 +10,7 @@ create table public.units (
 
 -- Managers Table
 create table public.managers (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     name text not null,
     unit_id text references public.units(id) on delete cascade,
     avatar text,
@@ -37,7 +37,7 @@ create table public.leads (
 
 -- AI Settings Table (Single Row)
 create table public.ai_settings (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     provider text not null default 'openai',
     model text not null default 'gpt-4o',
     api_key text, -- In a real prod environment, this should ideally be encrypted or handled via Vault, but for MVP we store it here
@@ -46,7 +46,7 @@ create table public.ai_settings (
 );
 
 -- Create a single initial row for settings
-insert into public.ai_settings (id) values (uuid_generate_v4());
+insert into public.ai_settings (id) values (gen_random_uuid());
 
 -- Seed initial units
 insert into public.units (id, name) values

@@ -1,6 +1,6 @@
 -- Integration Settings Table
 create table public.integration_settings (
-    id uuid default uuid_generate_v4() primary key,
+    id uuid default gen_random_uuid() primary key,
     chatwoot_url text,
     chatwoot_token text,
     chatwoot_webhook_secret text,
@@ -8,7 +8,7 @@ create table public.integration_settings (
 );
 
 -- Insert a single initial row
-insert into public.integration_settings (id) values (uuid_generate_v4());
+insert into public.integration_settings (id) values (gen_random_uuid());
 
 -- Add RLS
 alter table public.integration_settings enable row level security;

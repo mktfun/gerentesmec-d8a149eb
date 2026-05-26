@@ -44,20 +44,25 @@ serve(async (req) => {
     let scrapedContent = '';
 
     if (urls.length > 0) {
-      console.log(`[AI-EVALUATOR] Encontradas ${urls.length} URLs no chat. Iniciando scraping...`);
+      console.log(`[AI-EVALUATOR] Encontradas ${urls.length} URLs no chat. Iniciando scraping avançado via Jina Reader...`);
       const fetchPromises = urls.map(async (url) => {
         try {
-          const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
+          // Utilizar Jina Reader para lidar com SPAs e transformar em Markdown puro
+          const jinaUrl = `https://r.jina.ai/${url}`;
+          const res = await fetch(jinaUrl, { 
+            headers: {
+              // 'Authorization': 'Bearer jina_XXX' // Caso precise de chave futuramente, por enquanto a free-tier nativa serve
+              'X-Return-Format': 'markdown'
+            },
+            signal: AbortSignal.timeout(5000) 
+          });
           if (!res.ok) return null;
-          const html = await res.text();
-          // Remove scripts and styles
-          const clean1 = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ');
-          const clean2 = clean1.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ');
-          // Remove remaining HTML tags
-          const textContent = clean2.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-          return `[CONTEÚDO DO LINK ${url}]: ${textContent.substring(0, 3000)}...`;
+          
+          const markdownContent = await res.text();
+          // Limita o conteúdo a 4000 caracteres para não estourar o contexto da API
+          return `[CONTEÚDO DO LINK ${url}]:\n${markdownContent.substring(0, 4000)}\n[FIM DO LINK]`;
         } catch (e) {
-          console.error(`[AI-EVALUATOR] Erro ao raspar ${url}:`, e);
+          console.error(`[AI-EVALUATOR] Erro ao raspar via Jina Reader ${url}:`, e);
           return null;
         }
       });
@@ -141,6 +146,12 @@ serve(async (req) => {
          Exemplo 1: "Movi para Em Negociação pois o vídeo do orçamento foi enviado."
          Exemplo 2: "Zerei o item 2d pois o link do checklist não possui fotos."
          REGRA DE OURO: Se for apenas uma troca de mensagens comum (ex: bom dia, tirando dúvida simples, enviando áudio sem alterar score), você DEVE retornar o valor primitivo \`null\` (sem aspas) no JSON. NÃO invente insights se nada mudou. Fale de forma técnica e minimalista.
+      
+      [SISTEMA DE BLINDAGEM DE MEMÓRIA (MANDATÓRIO)]
+      Sempre que você receber na variável \`scrapedContent\` o conteúdo lido de um link (Checklist, Orçamento em PDF, Sistema Web, etc):
+      Você É OBRIGADO a extrair as informações cruciais (quais peças foram sugeridas, defeitos listados, preço total ou unitário) e SALVÁ-LAS em texto corrido dentro do campo \`new_compressed_history\`.
+      Se você apenas avaliar e NÃO GUARDAR na memória comprimida o conteúdo do link, a IA sofrerá de amnésia no próximo turno.
+      Exemplo do que adicionar na memória: "O link do orçamento contém: Pastilha freio (200), Discos (150). Total 350. Aguardando cliente."
       ${scrapedContent}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
