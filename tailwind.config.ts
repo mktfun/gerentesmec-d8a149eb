@@ -21,6 +21,7 @@ export default {
 		extend: {
 			fontFamily: {
 				'sf': ['SF Pro Display', 'system-ui', '-apple-system', 'sans-serif'],
+				'instrument': ['"Instrument Sans"', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
