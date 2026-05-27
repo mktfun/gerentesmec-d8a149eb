@@ -23,7 +23,7 @@ const TvOperacional = () => {
     return hasLeads || hasManager;
   });
 
-  const totalSlides = activeUnits.length + 1; // Units + Global Slide
+  const totalSlides = activeUnits.length * 2; // Alterna: Unidade -> Global -> Unidade -> Global
 
   // Fetch historical data when daysFilter changes
   useEffect(() => {
@@ -128,18 +128,18 @@ const TvOperacional = () => {
       {/* Main Content Area */}
       <div className="flex-1 relative w-full h-full">
         <AnimatePresence mode="wait">
-          {currentIndex < activeUnits.length ? (
+          {currentIndex % 2 === 0 && currentIndex / 2 < activeUnits.length ? (
             <UnitOperationalSlide 
-              key={`unit-${activeUnits[currentIndex].id}`}
-              unit={activeUnits[currentIndex]}
-              managers={managers.filter(m => m.unit_id === activeUnits[currentIndex].id)}
+              key={`unit-${activeUnits[currentIndex / 2].id}`}
+              unit={activeUnits[currentIndex / 2]}
+              managers={managers.filter(m => m.unit_id === activeUnits[currentIndex / 2].id)}
               leads={leads}
               dailyScores={dailyScores}
               businessHours={businessHours}
             />
           ) : (
             <GlobalOperationalSlide 
-              key="global-slide"
+              key={`global-slide-${currentIndex}`}
               units={activeUnits}
               managers={managers}
               leads={leads}

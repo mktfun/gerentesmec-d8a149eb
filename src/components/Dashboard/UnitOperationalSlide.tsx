@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Unit, Manager, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
-import { Clock, AlertTriangle, Phone } from 'lucide-react';
+import { avgScoreInt } from '@/utils/scoreUtils';
+import { Clock, AlertTriangle, Phone, Target } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis, LabelList } from 'recharts';
 import { parseISO, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -31,6 +32,8 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
   const activeLeads = unitLeads.filter(l => ['lead_new', 'negotiation', 'quote'].includes(l.funnel_stage));
   const waitingLeads = activeLeads.filter(l => l.funnel_stage === 'lead_new').length;
   const tmr = calculateTmr(unitLeads, businessHours);
+  
+  const todayScore = avgScoreInt(unitLeads);
 
   // Formatar histórico para o gráfico (Top 14 dias)
   const chartData = dailyScores.map(ds => {
@@ -41,6 +44,13 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
       score: breakdown?.score || 0
     };
   }).reverse();
+  
+  // Inclui o dia de hoje no gráfico
+  chartData.push({
+    date: new Date().toISOString(),
+    displayDate: "Hoje",
+    score: todayScore
+  });
 
   // Top 7 critical leads for the list
   const criticalLeads = dangerLeads.slice(0, 7);
@@ -57,30 +67,48 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
       <div className="w-full max-w-7xl">
         {/* Unit Header */}
         <div className="flex items-end justify-between mb-12">
-          <div>
+          {/* Col 1: Unit Info */}
+          <div className="flex-1">
             <h2 className="text-sm font-bold text-white/50 uppercase tracking-[0.3em] mb-2">Unidade Operacional</h2>
-            <h1 className="text-6xl font-black tracking-tight text-white">{unit.name}</h1>
+            <h1 className="text-6xl font-black tracking-tight text-white truncate max-w-xl">{unit.name}</h1>
             {manager && (
-              <p className="text-xl text-white/40 font-medium mt-2">Resp: {manager.name}</p>
+              <p className="text-xl text-white/40 font-medium mt-2 truncate max-w-xl">Resp: {manager.name}</p>
             )}
           </div>
+          
+          {/* Col 2: Score Central (Novo) */}
+          <div className="flex-1 flex justify-center">
+             <div className="flex flex-col items-center justify-center p-6 bg-white/[0.03] border border-white/10 rounded-[2rem] backdrop-blur-md relative overflow-hidden">
+                <div className="absolute inset-0 bg-indigo-500/10 blur-2xl rounded-full" />
+                <div className="flex items-center gap-2 text-indigo-400 mb-2 z-10">
+                   <Target className="w-4 h-4" />
+                   <span className="text-xs uppercase font-bold tracking-widest">Score Live</span>
+                </div>
+                <div className="text-6xl font-black tracking-tighter text-white z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                   {todayScore}
+                </div>
+             </div>
+          </div>
 
-          <div className={`flex items-center gap-6 p-6 rounded-3xl bg-white/5 border backdrop-blur-md ${dangerLeads.length > 0 ? 'border-rose-500/30' : 'border-white/10'}`}>
-            <div className="flex flex-col">
-              <span className="text-xs uppercase font-bold tracking-widest text-white/50 mb-1">TMR</span>
-              <div className="text-4xl font-black text-white">{tmr}<span className="text-xl opacity-50 ml-1">m</span></div>
-            </div>
-            <div className="w-px h-12 bg-white/10" />
-            <div className="flex flex-col">
-              <span className="text-xs uppercase font-bold tracking-widest text-white/50 mb-1">Fila</span>
-              <div className="text-4xl font-black text-white">{waitingLeads}</div>
-            </div>
-            <div className="w-px h-12 bg-white/10" />
-            <div className="flex flex-col text-rose-400">
-              <span className="text-xs uppercase font-bold tracking-widest mb-1 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> Atraso
-              </span>
-              <div className="text-4xl font-black">{dangerLeads.length}</div>
+          {/* Col 3: Stats */}
+          <div className="flex-1 flex justify-end">
+            <div className={`flex items-center gap-6 p-6 rounded-3xl bg-white/5 border backdrop-blur-md ${dangerLeads.length > 0 ? 'border-rose-500/30 shadow-[0_0_20px_rgba(244,63,94,0.1)]' : 'border-white/10'}`}>
+              <div className="flex flex-col">
+                <span className="text-xs uppercase font-bold tracking-widest text-white/50 mb-1">TMR</span>
+                <div className="text-4xl font-black text-white">{tmr}<span className="text-xl opacity-50 ml-1">m</span></div>
+              </div>
+              <div className="w-px h-12 bg-white/10" />
+              <div className="flex flex-col">
+                <span className="text-xs uppercase font-bold tracking-widest text-white/50 mb-1">Fila</span>
+                <div className="text-4xl font-black text-white">{waitingLeads}</div>
+              </div>
+              <div className="w-px h-12 bg-white/10" />
+              <div className="flex flex-col text-rose-400">
+                <span className="text-xs uppercase font-bold tracking-widest mb-1 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> Atraso
+                </span>
+                <div className="text-4xl font-black drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]">{dangerLeads.length}</div>
+              </div>
             </div>
           </div>
         </div>

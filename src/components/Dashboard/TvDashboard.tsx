@@ -3,13 +3,34 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle, Calendar } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, isLeadDanger } from '@/utils/metrics';
-import { avgScore } from '@/utils/scoreUtils';
+import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
+import { supabase } from '@/integrations/supabase/client';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis, LabelList } from 'recharts';
+import { parseISO, format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const TvDashboard: React.FC = () => {
   const { leads, units, setIsTvMode, businessHours } = useAppData();
   const [page, setPage] = useState(0);
   const [intervalTime, setIntervalTime] = useState(15000); // 15s default
   const [currentTime, setCurrentTime] = useState(() => new Date());
+
+  const [dailyScores, setDailyScores] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const { data, error } = await supabase
+        .from('daily_score_snapshots')
+        .select('*')
+        .order('snapshot_date', { ascending: false })
+        .limit(14);
+      
+      if (!error && data) {
+        setDailyScores(data);
+      }
+    };
+    fetchHistory();
+  }, []);
 
   // Clock Timer
   useEffect(() => {
@@ -203,7 +224,7 @@ const TvDashboard: React.FC = () => {
                         <span className="text-3xl font-bold uppercase tracking-widest">Score Geral</span>
                       </div>
                       <div className="relative w-80 h-80 lg:w-[400px] lg:h-[400px] flex items-center justify-center">
-                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 256 256">
+                        <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 256 256">
                           <circle cx="128" cy="128" r="116" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
                           <motion.circle
                             cx="128" cy="128" r="116" stroke={scoreColor} strokeWidth="12" fill="transparent"
@@ -223,6 +244,78 @@ const TvDashboard: React.FC = () => {
                     </div>
                   );
                 })()}
+
+                {/* Macro View: Global Evolution Chart */}
+                <div className="flex-1 flex flex-col p-8 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl">
+                  <div className="flex items-center gap-4 text-white/50 mb-6">
+                    <TrendingUp className="w-6 h-6" />
+                    <span className="text-xl font-bold uppercase tracking-widest">Evolução Global</span>
+                  </div>
+                  <div className="flex-1 min-h-[300px]">
+                    {(() => {
+                      const todayScore = avgScoreInt(leads);
+                      const chartData = dailyScores.map(ds => {
+                        const totalScore = ds.unit_breakdown?.reduce((acc: number, ub: any) => acc + ub.score, 0) || 0;
+                        const avgSc = ds.unit_breakdown?.length ? Math.round(totalScore / ds.unit_breakdown.length) : 0;
+                        return {
+                          date: ds.snapshot_date,
+                          displayDate: format(parseISO(ds.snapshot_date), "dd/MM", { locale: ptBR }),
+                          score: avgSc
+                        };
+                      }).reverse();
+
+                      chartData.push({
+                        date: new Date().toISOString(),
+                        displayDate: "Hoje",
+                        score: todayScore || 0
+                      });
+
+                      return chartData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="globalScoreColor" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#34d399" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
+                              </linearGradient>
+                            </defs>
+                            <XAxis 
+                              dataKey="displayDate" 
+                              stroke="rgba(255,255,255,0.2)" 
+                              tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 'bold' }} 
+                              axisLine={false}
+                              tickLine={false}
+                            />
+                            <YAxis 
+                              stroke="rgba(255,255,255,0.2)" 
+                              tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }} 
+                              axisLine={false}
+                              tickLine={false}
+                              domain={[0, 100]}
+                            />
+                            <Tooltip 
+                              contentStyle={{ backgroundColor: '#000', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                              itemStyle={{ color: '#34d399', fontWeight: 'bold' }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="score" 
+                              stroke="#34d399" 
+                              strokeWidth={3}
+                              fillOpacity={1} 
+                              fill="url(#globalScoreColor)" 
+                              animationDuration={1500}
+                            >
+                              <LabelList dataKey="score" position="top" fill="rgba(255,255,255,0.8)" fontSize={12} fontWeight="bold" offset={10} />
+                            </Area>
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white/30 font-medium">Sem dados históricos</div>
+                      );
+                    })()}
+                  </div>
+                </div>
 
                 {/* Macro View: Ranking Top 3 */}
                 <div className="flex-1 flex flex-col gap-6">
