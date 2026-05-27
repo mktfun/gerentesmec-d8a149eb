@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getMissingQualityItems, qualityFeedbackMap, auditStepsConfig } from '@/utils/scoreUtils';
 import { format, differenceInMinutes } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useTheme } from '@/context/ThemeContext';
 
 interface Props { lead: Lead; onClose: () => void; }
 
@@ -38,9 +39,6 @@ const STEP_WINDOWS: Record<string, [number, number]> = {
 };
 
 const DELAY_THRESHOLD = 30; // minutes
-
-const getScoreColor = (s: number | null) =>
-  s === null ? '#6366f1' : s >= 75 ? '#34d399' : s >= 50 ? '#818cf8' : '#f87171';
 
 // ─── Build timeline ────────────────────────────────────────────────────────
 function buildTimeline(messages: ChatMessage[], checklist: Record<string, boolean>): TimelineItem[] {
@@ -122,11 +120,22 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [showIndex, setShowIndex] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  
+  const { isDark } = useTheme();
 
   const score = lead.score as number | null;
-  const scoreColor = getScoreColor(score);
   const customerName = lead.name || lead.customer_name || 'Cliente';
   const checklist = (lead.audit_checklist as Record<string, boolean>) ?? {};
+
+  let scoreBg = isDark ? 'bg-white/5' : 'bg-black/5';
+  let scoreText = isDark ? 'text-white' : 'text-black';
+  let scoreBorder = isDark ? 'border-white/10' : 'border-black/10';
+  
+  if (score !== null) {
+    if (score >= 75) { scoreBg = isDark ? 'bg-emerald-500/20' : 'bg-emerald-100'; scoreText = isDark ? 'text-emerald-400' : 'text-emerald-600'; scoreBorder = isDark ? 'border-emerald-500/30' : 'border-emerald-200'; }
+    else if (score >= 50) { scoreBg = isDark ? 'bg-indigo-500/20' : 'bg-indigo-100'; scoreText = isDark ? 'text-indigo-400' : 'text-indigo-600'; scoreBorder = isDark ? 'border-indigo-500/30' : 'border-indigo-200'; }
+    else { scoreBg = isDark ? 'bg-rose-500/20' : 'bg-rose-100'; scoreText = isDark ? 'text-rose-400' : 'text-rose-600'; scoreBorder = isDark ? 'border-rose-500/30' : 'border-rose-200'; }
+  }
 
   // All quality items for the index panel
   const allQualityItems = auditStepsConfig.flatMap(step =>
@@ -174,61 +183,47 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 60 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
-      style={{ background: 'hsl(var(--background))' }}
+      className={`fixed inset-0 z-50 flex flex-col overflow-hidden font-instrument ${isDark ? 'bg-[#212529] text-white' : 'bg-[#f5f6f7] text-[#212529]'}`}
     >
       {/* ── Header ─────────────────────────────────────────────── */}
-      <div
-        className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-white/5"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          backdropFilter: 'blur(20px)',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.05)',
-        }}
-      >
+      <div className={`shrink-0 flex items-center gap-3 px-4 py-4 border-b ${isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-white border-black/5 shadow-sm'}`}>
         <button
           onClick={onClose}
-          className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors focus-visible:outline-primary"
+          className={`w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}
           aria-label="Fechar"
         >
-          <X className="w-4 h-4" />
+          <X className="w-6 h-6" />
         </button>
 
         {/* Avatar */}
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shrink-0"
-          style={{ background: scoreColor + '20', color: scoreColor, border: `1.5px solid ${scoreColor}40` }}
-        >
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-sm shrink-0 border ${scoreBg} ${scoreText} ${scoreBorder}`}>
           {customerName.substring(0, 2).toUpperCase()}
         </div>
 
         {/* Name + phone */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-foreground truncate">{customerName}</p>
-          <p className="text-[10px] text-muted-foreground truncate">{lead.phone || lead.customer_phone || ''}</p>
+          <p className="text-base font-black truncate leading-tight">{customerName}</p>
+          <p className={`text-xs mt-0.5 truncate ${isDark ? 'opacity-60' : 'opacity-60'}`}>{lead.phone || lead.customer_phone || ''}</p>
         </div>
 
         {/* Score badge */}
         {score !== null && (
-          <div
-            className="shrink-0 flex flex-col items-center justify-center w-12 h-12 rounded-2xl border"
-            style={{ borderColor: scoreColor + '40', background: scoreColor + '12' }}
-          >
-            <span className="text-lg font-black leading-none" style={{ color: scoreColor }}>{score}</span>
-            <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: scoreColor + 'aa' }}>Score</span>
+          <div className={`shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl border ${scoreBg} ${scoreBorder}`}>
+            <span className={`text-xl font-black leading-none ${scoreText}`}>{score}</span>
+            <span className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${scoreText} opacity-80`}>Score</span>
           </div>
         )}
 
         {/* Index toggle */}
         <button
           onClick={() => setShowIndex(v => !v)}
-          className="relative w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors focus-visible:outline-primary"
+          className={`relative w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}
           aria-label="Índice de Qualidade"
         >
-          <List className="w-4 h-4" />
+          <List className="w-6 h-6" />
           {/* mini badge with fail count */}
           {allQualityItems.filter(i => !i.pass).length > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-[9px] font-black text-white flex items-center justify-center">
+            <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-500 text-[10px] font-black text-white flex items-center justify-center border-2 border-white dark:border-[#1a1a1a]">
               {allQualityItems.filter(i => !i.pass).length}
             </span>
           )}
@@ -239,17 +234,17 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
       <div className="flex-1 relative overflow-hidden">
 
         {/* Chat timeline */}
-        <div ref={chatRef} className="h-full overflow-y-auto px-3 py-4 space-y-1">
+        <div ref={chatRef} className="h-full overflow-y-auto px-4 py-6 space-y-2">
           {loading && (
             <div className="flex items-center justify-center h-full">
-              <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
             </div>
           )}
 
           {!loading && messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground">
-              <Clock className="w-9 h-9 opacity-20" />
-              <p className="text-sm font-semibold">Nenhuma mensagem nesta conversa.</p>
+            <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40">
+              <Clock className="w-12 h-12 mb-2" />
+              <p className="text-lg font-bold">Nenhuma mensagem registrada.</p>
             </div>
           )}
 
@@ -259,25 +254,29 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
               const ev = item as InlineEvent;
               const isPass = ev.eventType === 'quality_pass';
               const isDelay = ev.eventType === 'response_delay';
-              const color = isPass ? '#34d399' : isDelay ? '#fb923c' : '#f87171';
-              const bg = isPass ? 'rgba(52,211,153,0.08)' : isDelay ? 'rgba(251,146,60,0.08)' : 'rgba(248,113,113,0.08)';
-              const border = isPass ? 'rgba(52,211,153,0.2)' : isDelay ? 'rgba(251,146,60,0.2)' : 'rgba(248,113,113,0.2)';
-              const Icon = isPass ? CheckCircle2 : AlertTriangle;
+              
+              let evBg, evText, Icon;
+              if (isPass) {
+                evBg = isDark ? 'bg-emerald-500/20' : 'bg-emerald-50';
+                evText = isDark ? 'text-emerald-400' : 'text-emerald-600';
+                Icon = CheckCircle2;
+              } else if (isDelay) {
+                evBg = isDark ? 'bg-amber-500/20' : 'bg-amber-50';
+                evText = isDark ? 'text-amber-400' : 'text-amber-600';
+                Icon = AlertTriangle;
+              } else {
+                evBg = isDark ? 'bg-rose-500/20' : 'bg-rose-50';
+                evText = isDark ? 'text-rose-400' : 'text-rose-600';
+                Icon = AlertTriangle;
+              }
 
               return (
-                <div
-                  key={ev.id}
-                  id={ev.id}
-                  className="flex justify-center my-2.5 px-2"
-                >
-                  <div
-                    className="flex items-start gap-2 max-w-[90%] w-full rounded-2xl px-3.5 py-2.5"
-                    style={{ background: bg, border: `1px solid ${border}` }}
-                  >
-                    <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color }} />
+                <div key={ev.id} id={ev.id} className="flex justify-center my-4 px-2">
+                  <div className={`flex items-start gap-3 w-full max-w-sm rounded-3xl p-4 shadow-sm ${evBg}`}>
+                    <Icon className={`w-5 h-5 shrink-0 ${evText}`} />
                     <div>
-                      <p className="text-[11px] font-bold" style={{ color }}>{ev.label}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: color + 'aa' }}>{ev.detail}</p>
+                      <p className={`text-sm font-black ${evText}`}>{ev.label}</p>
+                      <p className={`text-xs mt-1 font-semibold ${evText} opacity-80`}>{ev.detail}</p>
                     </div>
                   </div>
                 </div>
@@ -291,8 +290,10 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
 
             if (isSystem) {
               return (
-                <div key={msg.id} className="flex justify-center my-2">
-                  <span className="text-[10px] text-muted-foreground bg-white/5 rounded-full px-3 py-1">{msg.content}</span>
+                <div key={msg.id} className="flex justify-center my-4">
+                  <span className={`text-xs font-semibold px-4 py-2 rounded-full ${isDark ? 'bg-white/10 text-white/60' : 'bg-black/5 text-black/60'}`}>
+                    {msg.content}
+                  </span>
                 </div>
               );
             }
@@ -306,27 +307,14 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                 className={`flex ${isClient ? 'justify-start' : 'justify-end'}`}
               >
                 <div
-                  className="max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed"
-                  style={
-                    isClient
-                      ? {
-                          background: 'rgba(255,255,255,0.06)',
-                          border: '1px solid rgba(255,255,255,0.08)',
-                          color: 'hsl(var(--foreground))',
-                          borderRadius: '18px 18px 18px 4px',
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-                        }
-                      : {
-                          background: 'rgba(99,102,241,0.25)',
-                          border: '1px solid rgba(99,102,241,0.35)',
-                          color: '#e0e0ff',
-                          borderRadius: '18px 18px 4px 18px',
-                          boxShadow: '0 0 20px rgba(99,102,241,0.15), 0 1px 4px rgba(0,0,0,0.12)',
-                        }
-                  }
+                  className={`max-w-[85%] px-5 py-3.5 text-base leading-relaxed shadow-sm ${
+                    isClient 
+                      ? (isDark ? 'bg-[#1a1a1a] rounded-[1.5rem_1.5rem_1.5rem_0.25rem] border border-white/5' : 'bg-white rounded-[1.5rem_1.5rem_1.5rem_0.25rem] border border-black/5')
+                      : ('bg-indigo-600 text-white rounded-[1.5rem_1.5rem_0.25rem_1.5rem]')
+                  }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                  <p className="text-[9px] mt-1 text-right opacity-50">
+                  <p className={`text-[10px] mt-2 text-right font-bold tracking-wider ${isClient ? (isDark ? 'opacity-40' : 'opacity-40') : 'text-indigo-200'}`}>
                     {format(new Date(msg.created_at), "HH:mm", { locale: ptBR })}
                   </p>
                 </div>
@@ -345,7 +333,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="absolute inset-0 bg-black/60 z-10"
+                className={`absolute inset-0 z-10 ${isDark ? 'bg-black/60' : 'bg-[#212529]/40 backdrop-blur-sm'}`}
                 onClick={() => setShowIndex(false)}
               />
 
@@ -355,68 +343,62 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', stiffness: 280, damping: 30 }}
-                className="absolute inset-y-0 right-0 w-[85%] max-w-sm z-20 flex flex-col"
-                style={{
-                  background: 'rgba(15,15,20,0.95)',
-                  backdropFilter: 'blur(24px)',
-                  borderLeft: '1px solid rgba(255,255,255,0.08)',
-                  boxShadow: '-20px 0 60px rgba(0,0,0,0.4)',
-                }}
+                className={`absolute inset-y-0 right-0 w-[85%] max-w-sm z-20 flex flex-col shadow-2xl ${isDark ? 'bg-[#1a1a1a] border-l border-white/5' : 'bg-white border-l border-black/5'}`}
               >
                 {/* Drawer header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 shrink-0">
+                <div className={`flex items-center justify-between px-6 py-5 border-b shrink-0 ${isDark ? 'border-white/5' : 'border-black/5'}`}>
                   <div>
-                    <p className="text-sm font-black text-foreground">Análise de Qualidade</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {passingCount}/{allQualityItems.length} critérios cumpridos
+                    <p className="text-lg font-black">Vistoria de Qualidade</p>
+                    <p className={`text-xs font-semibold mt-1 ${isDark ? 'opacity-60' : 'opacity-60'}`}>
+                      {passingCount} de {allQualityItems.length} critérios cumpridos
                     </p>
                   </div>
                   <button
                     onClick={() => setShowIndex(false)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:bg-white/5 transition-colors"
+                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 {/* Score mini */}
                 {score !== null && (
-                  <div className="px-5 py-3 border-b border-white/5 shrink-0">
-                    <div
-                      className="w-full py-3 rounded-2xl flex items-center justify-center gap-3"
-                      style={{ background: scoreColor + '12', border: `1px solid ${scoreColor}25` }}
-                    >
-                      <span className="text-3xl font-black" style={{ color: scoreColor }}>{score}</span>
+                  <div className={`px-6 py-5 border-b shrink-0 ${isDark ? 'border-white/5' : 'border-black/5'}`}>
+                    <div className={`w-full py-4 rounded-3xl flex items-center justify-center gap-4 border ${scoreBg} ${scoreBorder}`}>
+                      <span className={`text-4xl font-black ${scoreText}`}>{score}</span>
                       <div>
-                        <p className="text-xs font-bold text-foreground">Score Final</p>
-                        <p className="text-[10px] text-muted-foreground">{customerName}</p>
+                        <p className="text-sm font-bold">Score Final</p>
+                        <p className={`text-xs font-semibold truncate max-w-[120px] mt-0.5 ${isDark ? 'opacity-60' : 'opacity-60'}`}>{customerName}</p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* Items list */}
-                <div className="flex-1 overflow-y-auto py-2">
+                <div className="flex-1 overflow-y-auto py-4">
                   {auditStepsConfig.map(step => (
-                    <div key={step.id} className="mb-1">
-                      <p className="text-[9px] font-black uppercase tracking-[0.15em] text-white/20 px-5 py-2">{step.title}</p>
+                    <div key={step.id} className="mb-4">
+                      <p className={`text-xs font-black uppercase tracking-widest px-6 py-2 ${isDark ? 'opacity-40' : 'opacity-40'}`}>
+                        {step.title}
+                      </p>
                       {step.items.map(item => {
                         const pass = !!checklist[item.id];
-                        const col = pass ? '#34d399' : '#f87171';
+                        let iconColor = pass ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : (isDark ? 'text-rose-400' : 'text-rose-600');
+                        
                         return (
                           <button
                             key={item.id}
                             onClick={() => scrollToEvent(`quality-${item.id}`)}
-                            className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-white/4 transition-colors text-left focus-visible:outline-primary"
+                            className={`w-full flex items-center gap-4 px-6 py-3.5 transition-colors text-left ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'}`}
                           >
                             {pass
-                              ? <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: col }} />
-                              : <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: col }} />
+                              ? <CheckCircle2 className={`w-5 h-5 shrink-0 ${iconColor}`} />
+                              : <AlertTriangle className={`w-5 h-5 shrink-0 ${iconColor}`} />
                             }
-                            <span className="flex-1 text-[12px] font-semibold text-foreground/80 leading-tight">
+                            <span className="flex-1 text-sm font-bold leading-tight">
                               {qualityFeedbackMap[item.id]?.label ?? item.text}
                             </span>
-                            <ChevronRight className="w-3 h-3 text-white/20 shrink-0" />
+                            <ChevronRight className={`w-4 h-4 shrink-0 ${isDark ? 'opacity-20' : 'opacity-20'}`} />
                           </button>
                         );
                       })}

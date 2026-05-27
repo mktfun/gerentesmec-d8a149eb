@@ -148,7 +148,7 @@ const ManagerDashboard: React.FC = () => {
                 onClick={() => setSelectedLead(lead)}
                 className={`w-full py-4 rounded-full font-black text-base transition-transform active:scale-95 ${isDark ? 'bg-white text-black hover:bg-gray-200' : 'bg-[#212529] text-white hover:bg-black'}`}
               >
-                Avaliar Atendimento
+                Vistoriar Atendimento
               </button>
             </motion.div>
           );
