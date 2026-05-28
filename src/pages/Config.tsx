@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw, Copy, Check, AlertTriangle } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
-import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { InboxMappingPanel } from '@/components/Config/InboxMappingPanel';
 import { AdvancedAiPanel } from '@/components/Config/AdvancedAiPanel';
 import { useAppData } from '@/context/AppDataContext';
@@ -470,14 +469,7 @@ const Config = () => {
           </div>
         </motion.section>
 
-        {/* ── AI Router & Diagnóstico ───────────────────────────── */}
-        <motion.section {...fadeUp(0.07)}>
-          <div className="flex items-center gap-2 mb-4">
-            <Cpu className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-bold text-foreground">Inteligência Artificial (Hermes Router)</h2>
-          </div>
-          <AiRouterConfig />
-        </motion.section>
+
 
         {/* ── Unidades e Mapeamento de Canais ──────────────── */}
         <motion.section {...fadeUp(0.1)}>

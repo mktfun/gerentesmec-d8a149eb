@@ -420,6 +420,9 @@ export type Database = {
           error_message: string | null
           latency_ms: number | null
           tokens_used: number | null
+          input_text: string | null
+          output_text: string | null
+          tokens_limit_remaining: number | null
         }
         Insert: {
           id?: string
@@ -430,6 +433,9 @@ export type Database = {
           error_message?: string | null
           latency_ms?: number | null
           tokens_used?: number | null
+          input_text?: string | null
+          output_text?: string | null
+          tokens_limit_remaining?: number | null
         }
         Update: {
           id?: string
@@ -440,6 +446,9 @@ export type Database = {
           error_message?: string | null
           latency_ms?: number | null
           tokens_used?: number | null
+          input_text?: string | null
+          output_text?: string | null
+          tokens_limit_remaining?: number | null
         }
         Relationships: []
       }

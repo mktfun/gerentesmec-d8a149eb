@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Cpu, X, Save, Sparkles, AlertTriangle, Eye, Activity, Database, Check } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { Switch } from '@/components/ui/switch';
+import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 
 interface Props {
   isOpen: boolean;
@@ -114,6 +115,9 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                   </p>
                 </div>
               </div>
+
+              {/* ── AI Router & Diagnóstico ───────────────────────────── */}
+              <AiRouterConfig />
 
               {/* Toggles */}
               <div className="space-y-4">

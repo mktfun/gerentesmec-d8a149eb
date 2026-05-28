@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Activity, CheckCircle2, AlertTriangle, Clock, Database, 
-  RefreshCw, Terminal, ArrowUpRight, Gauge, ShieldAlert 
+  RefreshCw, Terminal, ArrowUpRight, Gauge, ShieldAlert, X
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -24,6 +24,9 @@ interface UsageLog {
   error_message: string | null;
   latency_ms: number | null;
   tokens_used: number | null;
+  input_text: string | null;
+  output_text: string | null;
+  tokens_limit_remaining: number | null;
 }
 
 export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({ 
@@ -34,6 +37,8 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [filterProvider, setFilterProvider] = useState<string>(activeProvider || 'ALL');
   const [selectedError, setSelectedError] = useState<string | null>(null);
+  const [selectedLog, setSelectedLog] = useState<UsageLog | null>(null);
+  const [logTab, setLogTab] = useState<'input'|'output'>('input');
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -384,14 +389,21 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
                           {log.tokens_used ? log.tokens_used.toLocaleString() : '-'}
                         </td>
                         <td className="py-3.5 pr-2">
-                          {isError && log.error_message && (
+                          {isError && log.error_message ? (
                             <button 
                               onClick={() => setSelectedError(log.error_message)}
                               className="px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-[10px] font-bold transition-all flex items-center gap-1"
                             >
                               Ver Erro <ArrowUpRight className="w-3 h-3" />
                             </button>
-                          )}
+                          ) : !isError && (log.input_text || log.output_text) ? (
+                            <button 
+                              onClick={() => { setSelectedLog(log); setLogTab('input'); }}
+                              className="px-2 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold transition-all flex items-center gap-1"
+                            >
+                              Ver Detalhes <ArrowUpRight className="w-3 h-3" />
+                            </button>
+                          ) : null}
                         </td>
                       </tr>
                     );
@@ -467,6 +479,82 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
                 >
                   Fechar Diagnóstico
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {selectedLog && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
+              onClick={() => setSelectedLog(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-4xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              <div className="flex items-center justify-between p-6 border-b border-border shrink-0 bg-black/5 dark:bg-white/5">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getProviderBranding(selectedLog.provider).bg} ${getProviderBranding(selectedLog.provider).border} border`}>
+                    <Terminal className={`w-5 h-5 ${getProviderBranding(selectedLog.provider).text}`} />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-foreground">Log de Execução: {selectedLog.provider}</h4>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-0.5">{selectedLog.model} • {selectedLog.latency_ms}ms</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Tokens Gastos</p>
+                    <p className="text-sm font-black text-emerald-500">{selectedLog.tokens_used?.toLocaleString() || '-'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Quota Restante</p>
+                    <p className="text-sm font-black text-indigo-500">{selectedLog.tokens_limit_remaining?.toLocaleString() || '∞'}</p>
+                  </div>
+                  <div className="w-px h-8 bg-border mx-2" />
+                  <button 
+                    onClick={() => setSelectedLog(null)}
+                    className="p-2 rounded-xl bg-muted border border-border text-muted-foreground hover:text-foreground transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex border-b border-border px-6 pt-4 bg-muted/20 shrink-0">
+                <button
+                  onClick={() => setLogTab('input')}
+                  className={`pb-3 px-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 ${
+                    logTab === 'input' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Input Enviado (Prompt)
+                </button>
+                <button
+                  onClick={() => setLogTab('output')}
+                  className={`pb-3 px-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 ${
+                    logTab === 'output' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Output da IA (Resposta)
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto flex-1 bg-[#0a0a0f]">
+                {logTab === 'input' ? (
+                  <pre className="text-xs font-mono text-indigo-300 whitespace-pre-wrap leading-relaxed">
+                    {selectedLog.input_text || 'Nenhum input registrado.'}
+                  </pre>
+                ) : (
+                  <pre className="text-xs font-mono text-emerald-300 whitespace-pre-wrap leading-relaxed">
+                    {selectedLog.output_text || 'Nenhum output registrado.'}
+                  </pre>
+                )}
               </div>
             </motion.div>
           </div>

@@ -317,7 +317,19 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateAiSettings = async (updates: Partial<AiSettings>) => {
-    if (!aiSettings?.id) return;
+    // Optimistic Update
+    setAiSettings(prev => {
+      if (prev) return { ...prev, ...updates };
+      // Se não havia nada, criamos um mock pra UI responder imediatamente
+      return { id: crypto.randomUUID(), ...updates } as AiSettings;
+    });
+
+    if (!aiSettings?.id) {
+      // Create if doesn't exist
+      const { data, error } = await (supabase as any).from('ai_settings').insert([updates]).select().single();
+      if (!error && data) setAiSettings(data);
+      return;
+    }
     await (supabase as any).from('ai_settings').update(updates).eq('id', aiSettings.id);
   };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cpu, Server, CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Key, BarChart3 } from 'lucide-react';
+import { Cpu, Server, CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Key, BarChart3, Network } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { ProviderMonitoring } from './ProviderMonitoring';
 
@@ -14,12 +14,15 @@ interface ProviderConfig {
 
 const availableModels: Record<string, string[]> = {
   'Google': [
+    'Gemini Free-Tier Ensemble (Auto-Routing)',
+    // Free & Latest
+    'gemini-2.5-flash', 'gemini-2.5-flash-8b', 'gemma-2', 'gemma-3',
     // Gemini 1.5
     'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-8b-latest',
     'gemini-1.5-pro', 'gemini-1.5-pro-latest',
     // Gemini 2.0
     'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash-preview', 'gemini-2.0-pro-exp',
-    // Gemini 2.5
+    // Gemini 2.5 Preview
     'gemini-2.5-flash-preview', 'gemini-2.5-pro-preview',
     // Gemini 3.x (preview/experimental)
     'gemini-3.1-flash', 'gemini-3.1-flash-lite', 'gemini-3.1-pro', 'gemini-3.5-flash',
@@ -253,6 +256,19 @@ export const AiRouterConfig: React.FC = () => {
                   <span>Auto-Ensemble (Smart Routing)</span>
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
                 </div>
+              ) : model === 'Gemini Free-Tier Ensemble (Auto-Routing)' ? (
+                <div className="relative">
+                  <select value={model} onChange={(e) => {
+                    setModel(e.target.value);
+                    setTestStatus('idle');
+                    setTestLog([]);
+                  }} className="w-full px-3 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-sm font-bold text-emerald-500 focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none">
+                    {(availableModels[provider] || []).map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                </div>
               ) : (
                 <select value={model} onChange={(e) => {
                   setModel(e.target.value);
@@ -329,27 +345,71 @@ export const AiRouterConfig: React.FC = () => {
             </div>
           ) : (
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-                Chave da API (API Key)
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center justify-between">
+                <span>API Key</span>
               </label>
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-                  <input
-                    type="password"
-                    value={apiKey}
-                    onChange={e => {
-                      setApiKey(e.target.value);
-                      if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
-                    }}
-                    placeholder={provider === 'NVIDIA NIM' ? "nvapi-..." : "sk-..."}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 transition-colors"
-                  />
-                </div>
+              <div className="relative">
+                <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => {
+                    setApiKey(e.target.value);
+                    if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+                  }}
+                  placeholder={`sk-...`}
+                  className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+              {model === 'Gemini Free-Tier Ensemble (Auto-Routing)' && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 overflow-hidden"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Network className="w-4 h-4 text-emerald-500" />
+                    <h4 className="text-sm font-bold text-emerald-500">Arquitetura de Fallbacks Auto-Gerenciada</h4>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                    O sistema distribuirá as tarefas inteligentemente para respeitar os <strong className="text-foreground">limites gratuitos</strong> da API do Google AI Studio, maximizando performance e zerando custos.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
+                      <span className="font-bold text-foreground">Auditoria Longa (Scoring)</span>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="text-emerald-400">Gemini 3.5 Flash</span> 
+                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">5 RPM</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
+                      <span className="font-bold text-foreground">Ações Curtas (Pipeline)</span>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="text-indigo-400">Gemma 4 31B</span> 
+                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">15 RPM</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
+                      <span className="font-bold text-foreground">Memória Semântica</span>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="text-purple-400">Gemini Embedding 1</span> 
+                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">100 RPM</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
+                      <span className="font-bold text-foreground">Visão e Áudio</span>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="text-amber-400">Gemini 2.5 Flash</span> 
+                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">3-5 RPM</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              <div className="mt-4">
                 <button 
                   onClick={handleTest} 
                   disabled={!apiKey || testStatus === 'testing'}
-                  className="shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="w-full px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {testStatus === 'testing' ? (
                     <><RefreshCw className="w-4 h-4 animate-spin" /> Diagnosticando...</>
