@@ -108,67 +108,74 @@ export const AiRouterConfig: React.FC = () => {
     setTestLog([]);
     setRecommendation(null);
 
-    // Mock testing sequence based on model
-    const steps = [
-      { step: 'Conexão com a API', delay: 400 },
-      { step: 'Transcrição de Áudio (Whisper/Native)', delay: 600 },
-      { step: 'Análise de Imagem/Vídeo (Vision)', delay: 800 },
-      { step: 'Geração de Resumo Final (Contexto Longo)', delay: 500 },
-    ];
-
     const logs: { step: string; status: 'ok' | 'fail' | 'warn' }[] = [];
-    
-    for (const step of steps) {
-      await new Promise(r => setTimeout(r, step.delay));
-      
-      let status: 'ok' | 'fail' | 'warn' = 'ok';
-      
-      // Simulate capabilities based on model
-      if (model.includes('flash') && model.includes('1.5') && step.step.includes('Vídeo')) {
-        status = 'warn'; // 1.5 flash handles video but 2.0 is recommended
-      }
-      if (model.includes('gpt-3.5') && step.step.includes('Imagem')) {
-        status = 'fail'; // gpt-3.5 no vision
-      }
-      
-      logs.push({ step: step.step, status });
+    const addLog = (step: string, status: 'ok' | 'fail' | 'warn') => {
+      logs.push({ step, status });
       setTestLog([...logs]);
-    }
+    };
 
-    // Determine final status
-    const hasFail = logs.some(l => l.status === 'fail');
-    const hasWarn = logs.some(l => l.status === 'warn');
+    try {
+      if (provider === 'Google') {
+        addLog('Iniciando handshake com Google AI Studio', 'ok');
+        
+        const testModel = model === 'Gemini Free-Tier Ensemble (Auto-Routing)' ? 'gemini-1.5-flash' : model;
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${testModel}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: "Responda apenas 'OK'" }] }] })
+        });
+        
+        if (res.ok) {
+          addLog('Autenticação aceita (Chave Válida)', 'ok');
+          addLog('Teste de Geração de Texto: SUCESSO', 'ok');
+          setTestStatus('success');
+        } else {
+          const err = await res.json();
+          addLog(`Falha na API: ${err.error?.message || res.statusText}`, 'fail');
+          setTestStatus('error');
+          setRecommendation({ model: testModel, reason: 'Verifique se a API Key é válida e se você tem acesso a este modelo.' });
+        }
+      } else if (provider === 'OpenAI' || provider === 'OpenRouter') {
+        addLog(`Iniciando handshake com ${provider}`, 'ok');
+        const endpoint = provider === 'OpenRouter' ? 'https://openrouter.ai/api/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [{ role: "user", content: "Responda apenas 'OK'" }]
+          })
+        });
 
-    if (hasFail) {
+        if (res.ok) {
+          addLog('Autenticação aceita (Chave Válida)', 'ok');
+          addLog('Teste de Geração de Texto: SUCESSO', 'ok');
+          setTestStatus('success');
+        } else {
+          addLog(`Falha de Autenticação (${res.status})`, 'fail');
+          setTestStatus('error');
+        }
+      } else {
+        // Fallback genérico / mock para os que não implementamos teste real ainda
+        addLog(`Mock Test: Provedor ${provider} não tem teste de rede nativo na UI`, 'warn');
+        setTestStatus('warning');
+      }
+
+      if (logs.every(l => l.status === 'ok') || logs.some(l => l.status === 'warn')) {
+        await updateAiSettings({ 
+          provider, 
+          model, 
+          api_key: apiKey 
+        });
+        addLog('Configuração salva na base de dados.', 'ok');
+      }
+
+    } catch (e: any) {
+      addLog(`Erro de rede ou CORS: ${e.message}`, 'fail');
       setTestStatus('error');
-      if (provider === 'OpenAI' && model === 'gpt-3.5-turbo') {
-        setRecommendation({ model: 'gpt-4o-mini', reason: 'gpt-3.5-turbo não suporta análise de imagem nativa. Recomendamos gpt-4o-mini ou superior para a funcionalidade completa.' });
-      }
-    } else if (hasWarn) {
-      setTestStatus('warning');
-      if (provider === 'Google' && model === 'gemini-1.5-flash') {
-        setRecommendation({ model: 'gemini-2.0-flash', reason: 'Embora o 1.5 Flash suporte análise de vídeo, o 2.0 Flash possui maior estabilidade e precisão para esse volume de dados. Recomendamos o upgrade.' });
-      }
-      // Save even with warning, as it works partially
-      await updateAiSettings({ 
-        provider, model, api_key: apiKey, 
-        gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
-        gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null
-      });
-    } else {
-      setTestStatus('success');
-      await updateAiSettings({ 
-        provider, model, api_key: apiKey, 
-        gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
-        gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null
-      });
-      
-      // Even if success, recommend elite alternative if on mini
-      if (model === 'gpt-4o-mini') {
-        setRecommendation({ model: 'gpt-4o', reason: 'O gpt-4o-mini atende a todos os requisitos. Para resumos complexos e raciocínio de vendas superior, o gpt-4o é a recomendação de elite.' });
-      } else if (model === 'claude-3-haiku-20240307') {
-        setRecommendation({ model: 'claude-3-5-sonnet-20240620', reason: 'Haiku atende aos requisitos básicos de forma rápida, mas Sonnet 3.5 possui visão muito superior para análise de peças automotivas.' });
-      }
     }
   };
 
