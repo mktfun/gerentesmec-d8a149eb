@@ -328,6 +328,7 @@ serve(async (req) => {
       } else if (provider === 'Google' || provider === 'Gemini Studio' || (apiKey && !apiKey.startsWith("sk-") && !apiKey.startsWith("nvapi-") && !provider.includes('OpenRouter') && !provider.includes('Anthropic'))) {
         // Gemini (Direct Google API via AI Studio)
         let parts: any[] = [{ text: prompt }];
+        userMessageContent = prompt; // FIX: Ensure input_text is populated for Gemini
         if (mediaBase64) {
           parts.push({
             inlineData: {
@@ -497,7 +498,7 @@ serve(async (req) => {
       const loggedModel = aiSettings.model || finalModel;
       
       console.log(`[AI-EVALUATOR] Log de sucesso: Provider=${provider}, Model=${loggedModel} (Real: ${finalModel}), Latency=${latencyMs}ms, Tokens=${tokensUsed}`);
-      await supabaseClient.from('llm_usage_logs').insert({
+      const { error: logSuccessErr } = await supabaseClient.from('llm_usage_logs').insert({
         provider,
         model: loggedModel,
         status: 'success',
@@ -506,13 +507,14 @@ serve(async (req) => {
         input_text: typeof userMessageContent === 'string' ? userMessageContent : JSON.stringify(userMessageContent),
         output_text: llmOutputText
       });
+      if (logSuccessErr) console.error('[AI-EVALUATOR] Failed to insert success log:', logSuccessErr);
 
     } catch (err: any) {
       const latencyMs = Math.round(performance.now() - startTime);
       const loggedModel = aiSettings.model || finalModel;
       console.error(`[AI-EVALUATOR] Log de erro: Provider=${provider}, Model=${loggedModel} (Real: ${finalModel}), Latency=${latencyMs}ms, Error=${err.message}`);
       
-      await supabaseClient.from('llm_usage_logs').insert({
+      const { error: logErrErr } = await supabaseClient.from('llm_usage_logs').insert({
         provider,
         model: loggedModel,
         status: 'error',
@@ -522,6 +524,7 @@ serve(async (req) => {
         input_text: typeof userMessageContent === 'string' ? userMessageContent : JSON.stringify(userMessageContent),
         output_text: null
       });
+      if (logErrErr) console.error('[AI-EVALUATOR] Failed to insert error log:', logErrErr);
 
       throw err;
     }
