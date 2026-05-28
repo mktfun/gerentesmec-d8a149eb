@@ -327,35 +327,55 @@ serve(async (req) => {
         }
         finalModel = (aiSettings.model || '').toLowerCase().includes('gemini') ? aiSettings.model : 'gemini-2.5-flash';
         
-        // Handle Auto-Routing string explicitly
+        let modelsToTry = [finalModel];
+        // Handle Auto-Routing string explicitly and build fallback loop to bypass rate limits
         if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.includes('ensemble')) {
-          finalModel = 'gemini-2.5-flash';
-        }
-        
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: parts }],
-            generationConfig: { responseMimeType: "application/json" }
-          })
-        });
-        
-        if (!res.ok) {
-          const errorText = await res.text();
-          let parsedError;
-          try {
-            parsedError = JSON.parse(errorText);
-          } catch (_) {
-            parsedError = null;
+          if (mediaBase64 && actualMime.startsWith('image/')) {
+            modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+          } else {
+            modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemma-2-27b-it', 'gemini-1.5-pro', 'gemini-1.5-flash'];
           }
-          throw new Error(parsedError?.error?.message || `Google AI Error (${res.status}): ${errorText}`);
         }
         
-        const data = await res.json();
-        if (data.error) throw new Error(data.error.message);
-        llmOutputText = data.candidates[0].content.parts[0].text;
-        tokensUsed = data.usageMetadata?.totalTokenCount || null;
+        for (let i = 0; i < modelsToTry.length; i++) {
+          finalModel = modelsToTry[i];
+          console.log(`[AI-EVALUATOR] Tentando modelo Google: ${finalModel} (Tentativa ${i+1}/${modelsToTry.length})`);
+          
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: parts }],
+              generationConfig: { responseMimeType: "application/json" }
+            })
+          });
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            
+            if (i < modelsToTry.length - 1) {
+              console.log(`[AI-EVALUATOR] Fallback Google Acionado! ${finalModel} falhou (${res.status}). Indo para o próximo modelo. Erro: ${errorText.substring(0, 100)}`);
+              continue;
+            }
+            
+            let parsedError;
+            try { parsedError = JSON.parse(errorText); } catch (_) { parsedError = null; }
+            throw new Error(parsedError?.error?.message || `Google AI Error (${res.status}): ${errorText}`);
+          }
+          
+          const data = await res.json();
+          if (data.error) {
+            if (i < modelsToTry.length - 1) {
+              console.log(`[AI-EVALUATOR] Fallback Google Acionado (Erro de corpo)! ${finalModel} falhou.`);
+              continue;
+            }
+            throw new Error(data.error.message);
+          }
+          
+          llmOutputText = data.candidates[0].content.parts[0].text;
+          tokensUsed = data.usageMetadata?.totalTokenCount || null;
+          break; // Success!
+        }
       } else {
         // OpenAI / OpenRouter / NVIDIA NIM / Anthropic via OpenRouter etc
         // --- Smart Routing (Ensemble de Modelos) ---
