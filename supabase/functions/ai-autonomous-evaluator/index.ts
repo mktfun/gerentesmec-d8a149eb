@@ -51,6 +51,12 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  // Declara variáveis essenciais fora do bloco try para garantir que o bloco catch as acesse sem ReferenceError
+  let aiSettings: any = null;
+  let provider = 'openai';
+  let finalModel = '';
+  let userMessageContent: any = '';
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -73,7 +79,8 @@ serve(async (req) => {
     }
 
     // Obter AiSettings
-    const { data: aiSettings } = await supabaseClient.from('ai_settings').select('*').single();
+    const { data: dbAiSettings } = await supabaseClient.from('ai_settings').select('*').single();
+    aiSettings = dbAiSettings;
     if (!aiSettings || !aiSettings.features?.auto_scoring) {
       return new Response(JSON.stringify({ status: 'ai_automation_disabled' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
     }
@@ -131,7 +138,7 @@ serve(async (req) => {
     }
 
     // 4. LLM Routing e Chamada
-    const provider = aiSettings.provider || 'openai';
+    provider = aiSettings.provider || 'openai';
     const apiKey = aiSettings.api_key;
     if (provider !== 'Google Vertex AI' && !apiKey) throw new Error("API Key não configurada");
 
@@ -223,11 +230,11 @@ serve(async (req) => {
     `;
 
     let llmOutputText = "";
-    let finalModel = aiSettings.model || "";
+    finalModel = aiSettings.model || "";
     let tokensUsed: number | null = null;
     
     // Preparar payload de mensagem
-    let userMessageContent: any = prompt;
+    userMessageContent = prompt;
     
     console.log("[AI-EVALUATOR] Chamando LLM...");
     
