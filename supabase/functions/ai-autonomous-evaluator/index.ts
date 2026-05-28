@@ -340,8 +340,8 @@ serve(async (req) => {
           parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
         }
         
-        // Force gemma-2-27b-it as requested to bypass Gemini quotas
-        finalModel = aiSettings.model && aiSettings.model !== 'gemini-2.5-flash' ? aiSettings.model : 'gemma-2-27b-it';
+        // Force gemma-4-31b-it as requested to bypass Gemini quotas
+        finalModel = aiSettings.model && aiSettings.model !== 'gemini-2.5-flash' ? aiSettings.model : 'gemma-4-31b-it';
         
         // Gemma often returns markdown blocks for JSON, ensure prompt is strict
         if (finalModel.includes('gemma')) {
@@ -354,14 +354,14 @@ serve(async (req) => {
           if (mediaBase64 && actualMime.startsWith('image/')) {
             modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'];
           } else {
-            modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemma-2-27b-it', 'gemini-1.5-pro', 'gemini-1.5-flash'];
+            modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemma-4-31b-it', 'gemini-1.5-pro', 'gemini-1.5-flash'];
           }
         } else {
           // Adiciona fallbacks garantidos para qualquer modelo Google para contornar Rate Limit
-          if (finalModel === 'gemini-2.5-flash') modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemma-2-27b-it'];
-          else if (finalModel === 'gemini-1.5-flash') modelsToTry = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemma-2-27b-it'];
-          else if (finalModel === 'gemma-2-27b-it') modelsToTry = ['gemma-2-27b-it', 'gemini-1.5-flash', 'gemini-2.5-flash'];
-          else modelsToTry = [finalModel, 'gemma-2-27b-it', 'gemini-1.5-flash'];
+          if (finalModel === 'gemini-2.5-flash') modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemma-4-31b-it'];
+          else if (finalModel === 'gemini-1.5-flash') modelsToTry = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemma-4-31b-it'];
+          else if (finalModel === 'gemma-4-31b-it') modelsToTry = ['gemma-4-31b-it', 'gemma-4-26b-it', 'gemini-2.5-flash'];
+          else modelsToTry = [finalModel, 'gemma-4-31b-it', 'gemini-1.5-flash'];
         }
         
         for (let i = 0; i < modelsToTry.length; i++) {
