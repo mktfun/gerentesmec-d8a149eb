@@ -325,7 +325,7 @@ serve(async (req) => {
         } else if (media_url) {
           parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
         }
-        finalModel = aiSettings.model?.toLowerCase().includes('gemini') ? aiSettings.model : 'gemini-2.5-flash';
+        finalModel = (aiSettings.model || '').toLowerCase().includes('gemini') ? aiSettings.model : 'gemini-2.5-flash';
         
         // Handle Auto-Routing string explicitly
         if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.includes('ensemble')) {
