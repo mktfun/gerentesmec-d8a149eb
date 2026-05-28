@@ -3,115 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertTriangle, Clock, List, ChevronRight } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
-import { getMissingQualityItems, qualityFeedbackMap, auditStepsConfig } from '@/utils/scoreUtils';
-import { format, differenceInMinutes } from 'date-fns';
+import { qualityFeedbackMap, auditStepsConfig } from '@/utils/scoreUtils';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useTheme } from '@/context/ThemeContext';
+import { CustomAudioPlayer } from '../Crm/CustomAudioPlayer';
+import { ExpandableMedia } from '../Crm/ExpandableMedia';
 
 interface Props { lead: Lead; onClose: () => void; }
 
 interface ChatMessage {
-  id: string; content: string; sender: string; created_at: string;
-}
-
-// ─── Timeline item types ───────────────────────────────────────────────────
-type InlineEventType = 'quality_pass' | 'quality_fail' | 'response_delay';
-
-interface InlineEvent {
-  kind: 'event';
-  id: string;
-  eventType: InlineEventType;
-  label: string;
-  detail: string;
-}
-
-interface MessageItem { kind: 'message'; data: ChatMessage; }
-
-type TimelineItem = MessageItem | InlineEvent;
-
-// ─── Heuristic positioning ─────────────────────────────────────────────────
-// Each step covers a % window of the conversation length
-const STEP_WINDOWS: Record<string, [number, number]> = {
-  step1: [0.00, 0.20],  // Cordialidade
-  step2: [0.20, 0.65],  // Orçamento + Vídeo
-  step3: [0.65, 0.85],  // Checklist Mecânico
-  step4: [0.85, 1.00],  // Encerramento
-};
-
-const DELAY_THRESHOLD = 30; // minutes
-
-// ─── Build timeline ────────────────────────────────────────────────────────
-function buildTimeline(messages: ChatMessage[], checklist: Record<string, boolean>): TimelineItem[] {
-  const n = messages.length;
-  const timeline: TimelineItem[] = [];
-  const injectedIds = new Set<string>();
-
-  // Only inject PASSING items inline — fails are shown only in the side index drawer
-  const qualityByStep: Record<string, InlineEvent[]> = {};
-  auditStepsConfig.forEach(step => {
-    const events: InlineEvent[] = [];
-    step.items.forEach(item => {
-      const pass = !!checklist[item.id];
-      if (!pass) return; // ← skip failed items from timeline
-      events.push({
-        kind: 'event',
-        id: `quality-${item.id}`,
-        eventType: 'quality_pass',
-        label: qualityFeedbackMap[item.id]?.label ?? item.text,
-        detail: qualityFeedbackMap[item.id]?.detail ?? '',
-      });
-    });
-    qualityByStep[step.id] = events;
-  });
-
-  // Decide injection index for each step
-  const stepInjectionIndex: Record<string, number> = {};
-  auditStepsConfig.forEach(step => {
-    const [lo, hi] = STEP_WINDOWS[step.id];
-    const idx = Math.min(Math.floor(lo * n) + Math.floor((hi - lo) * n * 0.5), n - 1);
-    stepInjectionIndex[step.id] = Math.max(0, idx);
-  });
-
-  // Build map: after which message index to inject step events
-  const injectAfter: Record<number, InlineEvent[]> = {};
-  Object.entries(stepInjectionIndex).forEach(([stepId, idx]) => {
-    if (!injectAfter[idx]) injectAfter[idx] = [];
-    (injectAfter[idx] as InlineEvent[]).push(...(qualityByStep[stepId] ?? []));
-  });
-
-  for (let i = 0; i < n; i++) {
-    const msg = messages[i];
-    timeline.push({ kind: 'message', data: msg });
-
-    // Response delay alert (between different senders)
-    if (i < n - 1) {
-      const next = messages[i + 1];
-      if (msg.sender !== next.sender) {
-        const delay = differenceInMinutes(new Date(next.created_at), new Date(msg.created_at));
-        if (delay >= DELAY_THRESHOLD) {
-          timeline.push({
-            kind: 'event',
-            id: `delay-${i}`,
-            eventType: 'response_delay',
-            label: `Demora de ${delay} min`,
-            detail: `Resposta levou ${delay} minutos. O padrão é até ${DELAY_THRESHOLD} min.`,
-          });
-        }
-      }
-    }
-
-    // Quality events injected after this message index
-    if (injectAfter[i]) {
-      injectAfter[i].forEach(ev => {
-        if (!injectedIds.has(ev.id)) {
-          injectedIds.add(ev.id);
-          timeline.push(ev);
-        }
-      });
-    }
-  }
-
-  return timeline;
+  id: string; 
+  content: string; 
+  sender: string; 
+  created_at: string;
+  media_url?: string;
+  media_type?: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────
@@ -126,6 +33,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const score = lead.score as number | null;
   const customerName = lead.name || lead.customer_name || 'Cliente';
   const checklist = (lead.audit_checklist as Record<string, boolean>) ?? {};
+  const checklistMessages = (lead.audit_checklist_messages as Record<string, string>) ?? {};
 
   let scoreBg = isDark ? 'bg-white/5' : 'bg-black/5';
   let scoreText = isDark ? 'text-white' : 'text-black';
@@ -161,7 +69,23 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
     fetch();
   }, [lead.id]);
 
-  const timeline = buildTimeline(messages, checklist);
+  // Group quality hits by message ID
+  const hitsByMessageId: Record<string, { id: string, label: string, detail: string, pass: boolean }[]> = {};
+  auditStepsConfig.forEach(step => {
+    step.items.forEach(item => {
+      const pass = !!checklist[item.id];
+      const msgId = checklistMessages[item.id];
+      if (pass && msgId) {
+        if (!hitsByMessageId[msgId]) hitsByMessageId[msgId] = [];
+        hitsByMessageId[msgId].push({
+          id: item.id,
+          label: qualityFeedbackMap[item.id]?.label ?? item.text,
+          detail: qualityFeedbackMap[item.id]?.detail ?? '',
+          pass,
+        });
+      }
+    });
+  });
 
   // Lock body scroll while inspector is open
   useEffect(() => {
@@ -248,63 +172,38 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
             </div>
           )}
 
-          {!loading && timeline.map((item, idx) => {
-            // ── Quality / Delay Event ──────────────────────────────────
-            if (item.kind === 'event') {
-              const ev = item as InlineEvent;
-              const isPass = ev.eventType === 'quality_pass';
-              const isDelay = ev.eventType === 'response_delay';
-              
-              let evBg, evText, Icon;
-              if (isPass) {
-                evBg = isDark ? 'bg-emerald-500/20' : 'bg-emerald-50';
-                evText = isDark ? 'text-emerald-400' : 'text-emerald-600';
-                Icon = CheckCircle2;
-              } else if (isDelay) {
-                evBg = isDark ? 'bg-amber-500/20' : 'bg-amber-50';
-                evText = isDark ? 'text-amber-400' : 'text-amber-600';
-                Icon = AlertTriangle;
-              } else {
-                evBg = isDark ? 'bg-rose-500/20' : 'bg-rose-50';
-                evText = isDark ? 'text-rose-400' : 'text-rose-600';
-                Icon = AlertTriangle;
-              }
-
-              return (
-                <div key={ev.id} id={ev.id} className="flex justify-center my-4 px-2">
-                  <div className={`flex items-start gap-3 w-full max-w-sm rounded-3xl p-4 shadow-sm ${evBg}`}>
-                    <Icon className={`w-5 h-5 shrink-0 ${evText}`} />
-                    <div>
-                      <p className={`text-sm font-black ${evText}`}>{ev.label}</p>
-                      <p className={`text-xs mt-1 font-semibold ${evText} opacity-80`}>{ev.detail}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-
-            // ── Chat Message ──────────────────────────────────────────
-            const { data: msg } = item as MessageItem;
+          {!loading && messages.map((msg) => {
             const isClient = msg.sender === 'client' || msg.sender === 'contact' || msg.sender === 'customer';
             const isSystem = msg.sender === 'system' || msg.sender === 'bot';
+            
+            let displayContent = msg.content || '';
+            const isAudio = msg.media_type?.startsWith('audio/');
+            const isImage = msg.media_type?.startsWith('image/');
+            const isVideo = msg.media_type?.startsWith('video/');
+
+            // Clean up the "[ANEXO ENVIADO: audio]" raw string if present
+            displayContent = displayContent.replace(/\[ANEXO ENVIADO:[^\]]+\]/gi, '').trim();
 
             if (isSystem) {
               return (
-                <div key={msg.id} className="flex justify-center my-4">
+                <motion.div layout key={msg.id} className="flex justify-center my-4">
                   <span className={`text-xs font-semibold px-4 py-2 rounded-full ${isDark ? 'bg-white/10 text-white/60' : 'bg-black/5 text-black/60'}`}>
                     {msg.content}
                   </span>
-                </div>
+                </motion.div>
               );
             }
+
+            const msgHits = hitsByMessageId[msg.id];
 
             return (
               <motion.div
                 key={msg.id}
-                initial={{ opacity: 0, y: 4 }}
+                layout
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.005 }}
-                className={`flex ${isClient ? 'justify-start' : 'justify-end'}`}
+                transition={{ type: "spring", bounce: 0.2 }}
+                className={`flex flex-col w-full my-3 ${isClient ? 'items-start' : 'items-end'}`}
               >
                 <div
                   className={`max-w-[85%] px-5 py-3.5 text-base leading-relaxed shadow-sm ${
@@ -313,11 +212,51 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                       : ('bg-indigo-600 text-white rounded-[1.5rem_1.5rem_0.25rem_1.5rem]')
                   }`}
                 >
-                  <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                  <p className={`text-[10px] mt-2 text-right font-bold tracking-wider ${isClient ? (isDark ? 'opacity-40' : 'opacity-40') : 'text-indigo-200'}`}>
+                  {displayContent && <p className="whitespace-pre-wrap break-words font-medium">{displayContent}</p>}
+                  
+                  {isAudio && msg.media_url && (
+                    <div className={`mt-2 ${displayContent ? 'pt-2' : ''}`}>
+                      <CustomAudioPlayer src={msg.media_url} />
+                    </div>
+                  )}
+                  {isImage && msg.media_url && (
+                    <div className={`mt-2 ${displayContent ? 'pt-2' : ''}`}>
+                      <ExpandableMedia src={msg.media_url} type="image" />
+                    </div>
+                  )}
+                  {isVideo && msg.media_url && (
+                    <div className={`mt-2 ${displayContent ? 'pt-2' : ''}`}>
+                      <ExpandableMedia src={msg.media_url} type="video" />
+                    </div>
+                  )}
+
+                  <p className={`text-[10px] mt-2 font-bold tracking-wider ${isClient ? 'text-right' : 'text-right'} ${isClient ? (isDark ? 'opacity-40' : 'opacity-40') : 'text-indigo-200'}`}>
                     {format(new Date(msg.created_at), "HH:mm", { locale: ptBR })}
                   </p>
                 </div>
+                
+                {/* AI Notes (Sub-bubbles) */}
+                {msgHits && msgHits.length > 0 && (
+                  <div className={`flex flex-col gap-1.5 mt-2 max-w-[85%] ${isClient ? 'items-start pl-3' : 'items-end pr-3'}`}>
+                    {msgHits.map(hit => (
+                      <motion.div 
+                        id={`quality-${hit.id}`}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9, y: -10 }} 
+                        animate={{ opacity: 1, scale: 1, y: 0 }} 
+                        transition={{ type: 'spring', bounce: 0.3 }}
+                        key={hit.id} 
+                        className={`flex items-start gap-3 p-3 rounded-2xl shadow-sm border ${isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100'}`}
+                      >
+                        <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                        <div>
+                          <p className={`text-xs font-black leading-tight ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>{hit.label}</p>
+                          <p className={`text-[10px] leading-tight mt-1 font-semibold opacity-80 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>{hit.detail}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             );
           })}
@@ -388,8 +327,12 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                         return (
                           <button
                             key={item.id}
-                            onClick={() => scrollToEvent(`quality-${item.id}`)}
-                            className={`w-full flex items-center gap-4 px-6 py-3.5 transition-colors text-left ${isDark ? 'hover:bg-white/5' : 'hover:bg-black/5'}`}
+                            onClick={() => {
+                              if (pass && checklistMessages[item.id]) {
+                                scrollToEvent(`quality-${item.id}`);
+                              }
+                            }}
+                            className={`w-full flex items-center gap-4 px-6 py-3.5 transition-colors text-left ${pass && checklistMessages[item.id] ? (isDark ? 'hover:bg-white/5 cursor-pointer' : 'hover:bg-black/5 cursor-pointer') : 'cursor-default'}`}
                           >
                             {pass
                               ? <CheckCircle2 className={`w-5 h-5 shrink-0 ${iconColor}`} />
@@ -398,7 +341,9 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                             <span className="flex-1 text-sm font-bold leading-tight">
                               {qualityFeedbackMap[item.id]?.label ?? item.text}
                             </span>
-                            <ChevronRight className={`w-4 h-4 shrink-0 ${isDark ? 'opacity-20' : 'opacity-20'}`} />
+                            {pass && checklistMessages[item.id] && (
+                              <ChevronRight className={`w-4 h-4 shrink-0 ${isDark ? 'opacity-20' : 'opacity-20'}`} />
+                            )}
                           </button>
                         );
                       })}

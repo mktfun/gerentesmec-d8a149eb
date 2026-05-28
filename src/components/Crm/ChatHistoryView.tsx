@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Clock, MessageSquare, Wrench, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
+import { CustomAudioPlayer } from './CustomAudioPlayer';
+import { ExpandableMedia } from './ExpandableMedia';
 
 export interface ChatMessage {
   id: string;
@@ -387,26 +389,20 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                     <div className={`relative max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                       {/* Media Rendering */}
                       {msg.media_url && msg.media_type?.startsWith('image') && (
-                        <div className="mb-2 max-w-[250px] overflow-hidden rounded-xl border border-border shadow-md bg-black/5">
-                          <a href={msg.media_url} target="_blank" rel="noreferrer">
-                            <img src={msg.media_url} alt="Anexo" className="object-cover w-full h-auto max-h-60 transition-transform hover:scale-[1.02] cursor-pointer" loading="lazy" />
-                          </a>
+                        <div className="mb-2 w-full">
+                           <ExpandableMedia src={msg.media_url} type="image" />
                         </div>
                       )}
                       
                       {msg.media_url && msg.media_type?.startsWith('audio') && (
-                        <div className="mb-2 max-w-[280px] w-full overflow-hidden rounded-xl border border-border bg-black/5 dark:bg-white/5 p-2 shadow-sm">
-                          <audio controls preload="metadata" className="h-10 w-full" src={msg.media_url}>
-                            Seu navegador não suporta áudio.
-                          </audio>
+                        <div className="mb-2 w-full">
+                           <CustomAudioPlayer src={msg.media_url} />
                         </div>
                       )}
 
                       {msg.media_url && msg.media_type?.startsWith('video') && (
-                        <div className="mb-2 max-w-[280px] overflow-hidden rounded-xl border border-border shadow-md bg-black/5">
-                          <video controls preload="metadata" className="w-full max-h-60 object-contain bg-black/10" src={msg.media_url}>
-                            Seu navegador não suporta vídeo.
-                          </video>
+                        <div className="mb-2 w-full">
+                           <ExpandableMedia src={msg.media_url} type="video" />
                         </div>
                       )}
 
