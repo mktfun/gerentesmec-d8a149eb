@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [2026-05-28]
 ### Added
+- **010-ai-ensemble-telemetry**: Implementação do loop real de Fallbacks (bypass de Rate Limits) no backend via Supabase Edge Functions para a arquitetura "Gemini Free-Tier Ensemble". Integração da inserção de "Inputs (Prompts)" e "Outputs" completos na Telemetria, visíveis em logs bem-sucedidos.
 - **009-gemini-free-smart-routing**: Implementação de arquitetura de roteamento inteligente (Smart Routing/Auto-Ensemble) no cliente e backend, dividindo tarefas por demanda em múltiplos modelos (Gemma, Flash, TTS, Embeddings) para respeito estrito às cotas gratuitas do Google AI Studio (Free Tier).
 - **008-ai-settings-logs**: Ocultamento de todo o painel de Inteligência Artificial para uma zona de risco "Acesso de Engenharia". Atualização dos modelos base gratuitos na lista de seleção. Adição de modal aprofundado de telemetria ("Ver Detalhes") permitindo ler input real enviado pro LLM e sua saída crua.
 - **007-rich-media-players**: Substituição de tags de mídia HTML5 nativas por componentes ricos e imersivos. Adição do `CustomAudioPlayer` com controles fluidos e do `ExpandableMedia` que possui Lightbox/Cinema Mode com animações Framer Motion, usados no dashboard de vistoria do Gerente e na visualização do Mecânico.

@@ -481,26 +481,33 @@ serve(async (req) => {
 
       const latencyMs = Math.round(performance.now() - startTime);
       
-      console.log(`[AI-EVALUATOR] Log de sucesso: Provider=${provider}, Model=${finalModel}, Latency=${latencyMs}ms, Tokens=${tokensUsed}`);
+      const loggedModel = aiSettings.model || finalModel;
+      
+      console.log(`[AI-EVALUATOR] Log de sucesso: Provider=${provider}, Model=${loggedModel} (Real: ${finalModel}), Latency=${latencyMs}ms, Tokens=${tokensUsed}`);
       await supabaseClient.from('llm_usage_logs').insert({
         provider,
-        model: finalModel,
+        model: loggedModel,
         status: 'success',
         latency_ms: latencyMs,
-        tokens_used: tokensUsed
+        tokens_used: tokensUsed,
+        input_text: typeof userMessageContent === 'string' ? userMessageContent : JSON.stringify(userMessageContent),
+        output_text: llmOutputText
       });
 
     } catch (err: any) {
       const latencyMs = Math.round(performance.now() - startTime);
-      console.error(`[AI-EVALUATOR] Log de erro: Provider=${provider}, Model=${finalModel}, Latency=${latencyMs}ms, Error=${err.message}`);
+      const loggedModel = aiSettings.model || finalModel;
+      console.error(`[AI-EVALUATOR] Log de erro: Provider=${provider}, Model=${loggedModel} (Real: ${finalModel}), Latency=${latencyMs}ms, Error=${err.message}`);
       
       await supabaseClient.from('llm_usage_logs').insert({
         provider,
-        model: finalModel,
+        model: loggedModel,
         status: 'error',
         error_message: err.message || JSON.stringify(err),
         latency_ms: latencyMs,
-        tokens_used: null
+        tokens_used: null,
+        input_text: typeof userMessageContent === 'string' ? userMessageContent : JSON.stringify(userMessageContent),
+        output_text: null
       });
 
       throw err;
