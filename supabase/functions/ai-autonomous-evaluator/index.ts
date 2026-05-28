@@ -339,7 +339,14 @@ serve(async (req) => {
         } else if (media_url) {
           parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
         }
-        finalModel = (aiSettings.model || '').toLowerCase().includes('gemini') ? aiSettings.model : 'gemini-2.5-flash';
+        
+        // Force gemma-2-27b-it as requested to bypass Gemini quotas
+        finalModel = aiSettings.model && aiSettings.model !== 'gemini-2.5-flash' ? aiSettings.model : 'gemma-2-27b-it';
+        
+        // Gemma often returns markdown blocks for JSON, ensure prompt is strict
+        if (finalModel.includes('gemma')) {
+          parts[0].text += `\n\nCRITICAL INSTRUCTION: Return ONLY pure JSON text. Do not wrap in markdown \`\`\`json blocks. Do not add any conversational text.`;
+        }
         
         let modelsToTry = [finalModel];
         // Handle Auto-Routing string explicitly and build fallback loop to bypass rate limits
@@ -351,22 +358,28 @@ serve(async (req) => {
           }
         } else {
           // Adiciona fallbacks garantidos para qualquer modelo Google para contornar Rate Limit
-          if (finalModel === 'gemini-2.5-flash') modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-          else if (finalModel === 'gemini-1.5-flash') modelsToTry = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'];
-          else modelsToTry = [finalModel, 'gemini-2.5-flash', 'gemini-1.5-flash'];
+          if (finalModel === 'gemini-2.5-flash') modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemma-2-27b-it'];
+          else if (finalModel === 'gemini-1.5-flash') modelsToTry = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemma-2-27b-it'];
+          else if (finalModel === 'gemma-2-27b-it') modelsToTry = ['gemma-2-27b-it', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+          else modelsToTry = [finalModel, 'gemma-2-27b-it', 'gemini-1.5-flash'];
         }
         
         for (let i = 0; i < modelsToTry.length; i++) {
           finalModel = modelsToTry[i];
           console.log(`[AI-EVALUATOR] Tentando modelo Google: ${finalModel} (Tentativa ${i+1}/${modelsToTry.length})`);
           
+          const bodyPayload: any = {
+            contents: [{ parts: parts }]
+          };
+          
+          if (finalModel.includes('gemini')) {
+            bodyPayload.generationConfig = { responseMimeType: "application/json" };
+          }
+
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: parts }],
-              generationConfig: { responseMimeType: "application/json" }
-            })
+            body: JSON.stringify(bodyPayload)
           });
           
           if (!res.ok) {
@@ -536,6 +549,11 @@ serve(async (req) => {
 
     console.log("=== LLM OUTPUT ===");
     console.log(llmOutputText);
+
+    // Limpa possível formatação markdown caso o Gemma tenha cuspido ```json
+    if (llmOutputText.startsWith('```')) {
+      llmOutputText = llmOutputText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    }
 
     const mockOutput = JSON.parse(llmOutputText);
 
