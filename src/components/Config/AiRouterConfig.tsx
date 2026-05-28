@@ -118,7 +118,7 @@ export const AiRouterConfig: React.FC = () => {
       if (provider === 'Google') {
         addLog('Iniciando handshake com Google AI Studio', 'ok');
         
-        const testModel = model === 'Gemini Free-Tier Ensemble (Auto-Routing)' ? 'gemini-1.5-flash' : model;
+        const testModel = model === 'Gemini Free-Tier Ensemble (Auto-Routing)' ? 'gemini-2.5-flash' : model;
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${testModel}:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -133,7 +133,7 @@ export const AiRouterConfig: React.FC = () => {
           const err = await res.json();
           addLog(`Falha na API: ${err.error?.message || res.statusText}`, 'fail');
           setTestStatus('error');
-          setRecommendation({ model: testModel, reason: 'Verifique se a API Key é válida e se você tem acesso a este modelo.' });
+          setRecommendation({ model: testModel, reason: 'Verifique se a API Key é válida e se o modelo está correto.' });
         }
       } else if (provider === 'OpenAI' || provider === 'OpenRouter') {
         addLog(`Iniciando handshake com ${provider}`, 'ok');
