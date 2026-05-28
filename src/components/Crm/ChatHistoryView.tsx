@@ -352,6 +352,9 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
 
               // Helper para saber se esta mensagem deve ser destacada
               const isHighlighted = highlightMessageId === msg.id || highlightMessageId === msg.chatwoot_message_id;
+              
+              // Remove the internal media tag for visual rendering
+              const cleanContent = msg.content ? msg.content.replace(/\[ANEXO ENVIADO:[^\]]+\]/gi, '').trim() : '';
 
               return (
                 <div key={msg.id} className="w-full">
@@ -416,27 +419,34 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         </a>
                       )}
 
-                      {/* Bubble */}
-                      <motion.div 
-                        animate={isHighlighted ? {
-                          boxShadow: ['0 0 0 0 rgba(99,102,241,0)', '0 0 24px 4px rgba(99,102,241,0.4)', '0 0 0 0 rgba(99,102,241,0)']
-                        } : {}}
-                        transition={{ duration: 1.5, repeat: 1 }}
-                        className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md relative
-                        ${isUser 
-                          ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
-                          : 'bg-black/5 dark:bg-white/[0.04] border border-border text-foreground/80 rounded-2xl rounded-bl-sm'
-                        }
-                        ${isHighlighted ? 'ring-2 ring-indigo-400/60 shadow-[0_0_24px_rgba(99,102,241,0.25)]' : ''}
-                        transition-all duration-500
-                      `}>
-                        <div className="pb-3 pr-2">
-                          {msg.content || (msg.media_url ? 'Mídia anexada' : '')}
-                        </div>
-                        <div className={`absolute bottom-1.5 right-3 text-[9px] font-bold ${isUser ? 'text-indigo-200' : 'text-muted-foreground/50'}`}>
+                      {/* Bubble (only render if there's text after cleaning, OR no media at all) */}
+                      {(cleanContent || !msg.media_url) ? (
+                        <motion.div 
+                          animate={isHighlighted ? {
+                            boxShadow: ['0 0 0 0 rgba(99,102,241,0)', '0 0 24px 4px rgba(99,102,241,0.4)', '0 0 0 0 rgba(99,102,241,0)']
+                          } : {}}
+                          transition={{ duration: 1.5, repeat: 1 }}
+                          className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md relative
+                          ${isUser 
+                            ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
+                            : 'bg-black/5 dark:bg-white/[0.04] border border-border text-foreground/80 rounded-2xl rounded-bl-sm'
+                          }
+                          ${isHighlighted ? 'ring-2 ring-indigo-400/60 shadow-[0_0_24px_rgba(99,102,241,0.25)]' : ''}
+                          transition-all duration-500
+                        `}>
+                          <div className="pb-3 pr-2">
+                            {cleanContent || (msg.media_url ? '' : 'Mensagem vazia')}
+                          </div>
+                          <div className={`absolute bottom-1.5 right-3 text-[9px] font-bold ${isUser ? 'text-indigo-200' : 'text-muted-foreground/50'}`}>
+                            {timeStr}
+                          </div>
+                        </motion.div>
+                      ) : (
+                        // If only media, just render a small timestamp below the media
+                        <div className={`text-[9px] font-bold mt-0.5 mb-1 ${isUser ? 'text-indigo-400/60 text-right' : 'text-muted-foreground/50 text-left'}`}>
                           {timeStr}
                         </div>
-                      </motion.div>
+                      )}
                     
                     {/* Renderiza AI Insight (Auditoria Inline - Minimalista) */}
                     {msg.ai_insight && (
