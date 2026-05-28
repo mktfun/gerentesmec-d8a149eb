@@ -16,7 +16,7 @@ const availableModels: Record<string, string[]> = {
   'Google': [
     'Gemini Free-Tier Ensemble (Auto-Routing)',
     // Free & Latest
-    'gemini-2.5-flash', 'gemini-2.5-flash-8b', 'gemma-2', 'gemma-3',
+    'gemma-4-31b-it', 'gemma-4-26b-it', 'gemini-2.5-flash', 'gemini-2.5-flash-8b',
     // Gemini 1.5
     'gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash-8b', 'gemini-1.5-flash-8b-latest',
     'gemini-1.5-pro', 'gemini-1.5-pro-latest',
@@ -118,11 +118,17 @@ export const AiRouterConfig: React.FC = () => {
       if (provider === 'Google') {
         addLog('Iniciando handshake com Google AI Studio', 'ok');
         
-        const testModel = model === 'Gemini Free-Tier Ensemble (Auto-Routing)' ? 'gemini-2.5-flash' : model;
+        const testModel = model === 'Gemini Free-Tier Ensemble (Auto-Routing)' ? 'gemma-4-31b-it' : model;
+        
+        let bodyPayload: any = { contents: [{ parts: [{ text: "Responda apenas 'OK'" }] }] };
+        if (testModel.includes('gemini')) {
+          bodyPayload.generationConfig = { responseMimeType: "application/json" };
+        }
+
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${testModel}:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: "Responda apenas 'OK'" }] }] })
+          body: JSON.stringify(bodyPayload)
         });
         
         if (res.ok) {
