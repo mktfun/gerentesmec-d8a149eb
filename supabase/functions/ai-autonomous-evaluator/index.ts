@@ -652,7 +652,6 @@ serve(async (req) => {
     console.error(error);
     // Tenta salvar o erro fatal na tabela de logs para o usuário poder ver no frontend
     try {
-      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
       const sClient = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -666,7 +665,9 @@ serve(async (req) => {
         input_text: null,
         output_text: null
       });
-    } catch (_) { }
+    } catch (e2) { 
+      console.error("Erro ao salvar log fatal:", e2);
+    }
 
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
