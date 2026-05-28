@@ -390,15 +390,15 @@ export const AiRouterConfig: React.FC = () => {
                     <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
                       <span className="font-bold text-foreground">Auditoria Longa (Scoring)</span>
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="text-emerald-400">Gemini 3.5 Flash</span> 
-                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">5 RPM</span>
+                        <span className="text-emerald-400">Gemma 4 31B</span> 
+                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">Ilimitado</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
                       <span className="font-bold text-foreground">Ações Curtas (Pipeline)</span>
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="text-indigo-400">Gemma 4 31B</span> 
-                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">15 RPM</span>
+                        <span className="text-indigo-400">Gemma 4 26B</span> 
+                        <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">Ilimitado</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
