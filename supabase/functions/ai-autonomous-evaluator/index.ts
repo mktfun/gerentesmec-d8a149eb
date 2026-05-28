@@ -85,8 +85,9 @@ serve(async (req) => {
       return new Response(JSON.stringify({ status: 'ai_automation_disabled' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
     }
 
-    // EXTRAÇÃO E RASPAGEM DE LINKS
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    // EXTRAÇÃO E RASPAGEM DE LINKS (Regex aprimorado)
+    // Captura URLs com ou sem protocolo, ex: google.com, www.oficina.com.br/orcamento
+    const urlRegex = /\b(?:https?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi;
     const urls = text.match(urlRegex) || [];
     let scrapedContent = '';
 
@@ -95,7 +96,8 @@ serve(async (req) => {
       const fetchPromises = urls.map(async (url) => {
         try {
           // Utilizar Jina Reader para lidar com SPAs e transformar em Markdown puro
-          const jinaUrl = `https://r.jina.ai/${url}`;
+          let normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
+          const jinaUrl = `https://r.jina.ai/${normalizedUrl}`;
           const res = await fetch(jinaUrl, { 
             headers: {
               'X-Return-Format': 'markdown'
@@ -221,6 +223,10 @@ serve(async (req) => {
         },
         "score": (número de 0 a 100),
         "funnel_stage": (sugestão de nova etapa),
+        "stage_change_reason": (string ou null. OBRIGATÓRIO preencher se mudar para closed_lost ou closed_won. Motivo claro, curto e objetivo da transição),
+        "audit_reasons": {
+           // (Dicionário Opcional) Se você marcou algum item acima como 'false', forneça aqui a justificativa curta. Ex: "2c": "O gerente não explicou o defeito em detalhes."
+        },
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
         "closing_summary": (Resumo descritivo narrando a evolução e histórico geral),
         "message_insight": (String curta justificando uma ação crítica ou null se foi uma mensagem comum. Ver regra 9),
@@ -576,6 +582,14 @@ serve(async (req) => {
 
     if (mockOutput.funnel_stage) {
       updatePayload.funnel_stage = mockOutput.funnel_stage;
+    }
+    
+    if (mockOutput.stage_change_reason) {
+      updatePayload.funnel_stage_reason = mockOutput.stage_change_reason;
+    }
+    
+    if (mockOutput.audit_reasons && Object.keys(mockOutput.audit_reasons).length > 0) {
+      updatePayload.audit_reasons = mockOutput.audit_reasons;
     }
     
     console.log("[AI-EVALUATOR] Resultado final da LLM parseado:", JSON.stringify(mockOutput));

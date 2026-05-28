@@ -236,6 +236,7 @@ export type Database = {
           ai_feedback: string | null
           audit_checklist: Json | null
           audit_checklist_messages: Json | null
+          audit_reasons: Json | null
           chatwoot_contact_id: number | null
           chatwoot_conversation_id: number | null
           closing_summary: string | null
@@ -245,6 +246,7 @@ export type Database = {
           customer_vehicle: string | null
           etapa_scores: Json | null
           funnel_stage: string
+          funnel_stage_reason: string | null
           id: string
           is_cross_unit: boolean | null
           last_agent_message_at: string | null
@@ -272,6 +274,8 @@ export type Database = {
           customer_vehicle?: string | null
           etapa_scores?: Json | null
           funnel_stage?: string
+          funnel_stage_reason?: string | null
+          audit_reasons?: Json | null
           id: string
           is_cross_unit?: boolean | null
           last_agent_message_at?: string | null
@@ -299,6 +303,8 @@ export type Database = {
           customer_vehicle?: string | null
           etapa_scores?: Json | null
           funnel_stage?: string
+          funnel_stage_reason?: string | null
+          audit_reasons?: Json | null
           id?: string
           is_cross_unit?: boolean | null
           last_agent_message_at?: string | null

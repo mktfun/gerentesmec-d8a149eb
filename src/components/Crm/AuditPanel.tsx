@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target, RefreshCw } from 'lucide-react';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target, RefreshCw, AlertCircle } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -366,12 +366,22 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                           className="mt-0.5 border-border dark:border-white/20 data-[state=checked]:bg-indigo-500
                             data-[state=checked]:border-indigo-500"
                         />
-                        <label htmlFor={item.id}
-                          className={`text-xs leading-relaxed cursor-pointer transition-colors flex-1 ${
-                            checked[item.id] ? 'text-foreground font-medium' : 'text-muted-foreground'
-                          }`}>
-                          {item.text}
-                        </label>
+                        <div className="flex-1 flex flex-col">
+                          <label htmlFor={item.id}
+                            className={`text-xs leading-relaxed cursor-pointer transition-colors ${
+                              checked[item.id] ? 'text-foreground font-medium' : 'text-muted-foreground'
+                            }`}>
+                            {item.text}
+                          </label>
+                          {!checked[item.id] && lead.audit_reasons?.[item.id] && (
+                            <div className="mt-1 flex gap-1.5 items-start">
+                              <AlertCircle className="w-3.5 h-3.5 text-rose-500/70 shrink-0 mt-0.5" />
+                              <p className="text-[10px] leading-snug text-rose-500/80 font-medium">
+                                {lead.audit_reasons[item.id] as string}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                         {checked[item.id] && lead.audit_checklist_messages?.[item.id] && (
                           <button
                             title="Ver evidência no chat"

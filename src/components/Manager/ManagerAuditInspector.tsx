@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, AlertTriangle, Clock, List, ChevronRight } from 'lucide-react';
+import { X, CheckCircle2, AlertTriangle, Clock, List, ChevronRight, Sparkles } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 import { qualityFeedbackMap, auditStepsConfig } from '@/utils/scoreUtils';
@@ -155,10 +155,28 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
       </div>
 
       {/* ── Body: chat + index overlay ─────────────────────────── */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden flex flex-col">
+
+        {/* Funnel Stage Reason Banner */}
+        {lead.funnel_stage_reason && (lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost') && (
+          <div className={`shrink-0 w-full px-5 py-3 border-b flex flex-col gap-1 z-10 shadow-sm
+            ${lead.funnel_stage === 'closed_won' 
+              ? (isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100')
+              : (isDark ? 'bg-rose-500/10 border-rose-500/20' : 'bg-rose-50 border-rose-100')}`}>
+            <div className="flex items-center gap-2">
+              <Sparkles className={`w-3.5 h-3.5 ${lead.funnel_stage === 'closed_won' ? 'text-emerald-500' : 'text-rose-500'}`} />
+              <span className={`text-[10px] font-black uppercase tracking-widest ${lead.funnel_stage === 'closed_won' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                Feedback da IA ({lead.funnel_stage === 'closed_won' ? 'Ganho' : 'Perdido'})
+              </span>
+            </div>
+            <p className={`text-xs font-semibold leading-relaxed pl-5 ${isDark ? 'text-white/80' : 'text-black/80'}`}>
+              {lead.funnel_stage_reason}
+            </p>
+          </div>
+        )}
 
         {/* Chat timeline */}
-        <div ref={chatRef} className="h-full overflow-y-auto px-4 py-6 space-y-2">
+        <div ref={chatRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
           {loading && (
             <div className="flex items-center justify-center h-full">
               <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -325,26 +343,35 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                         let iconColor = pass ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : (isDark ? 'text-rose-400' : 'text-rose-600');
                         
                         return (
-                          <button
-                            key={item.id}
-                            onClick={() => {
-                              if (pass && checklistMessages[item.id]) {
-                                scrollToEvent(`quality-${item.id}`);
+                          <div key={item.id} className="w-full flex flex-col items-start px-6 py-3.5 transition-colors border-b border-transparent">
+                            <button
+                              onClick={() => {
+                                if (pass && checklistMessages[item.id]) {
+                                  scrollToEvent(`quality-${item.id}`);
+                                }
+                              }}
+                              className={`w-full flex items-center gap-4 text-left ${pass && checklistMessages[item.id] ? (isDark ? 'hover:bg-white/5 cursor-pointer' : 'hover:bg-black/5 cursor-pointer') : 'cursor-default'}`}
+                            >
+                              {pass
+                                ? <CheckCircle2 className={`w-5 h-5 shrink-0 ${iconColor}`} />
+                                : <AlertTriangle className={`w-5 h-5 shrink-0 ${iconColor}`} />
                               }
-                            }}
-                            className={`w-full flex items-center gap-4 px-6 py-3.5 transition-colors text-left ${pass && checklistMessages[item.id] ? (isDark ? 'hover:bg-white/5 cursor-pointer' : 'hover:bg-black/5 cursor-pointer') : 'cursor-default'}`}
-                          >
-                            {pass
-                              ? <CheckCircle2 className={`w-5 h-5 shrink-0 ${iconColor}`} />
-                              : <AlertTriangle className={`w-5 h-5 shrink-0 ${iconColor}`} />
-                            }
-                            <span className="flex-1 text-sm font-bold leading-tight">
-                              {qualityFeedbackMap[item.id]?.label ?? item.text}
-                            </span>
-                            {pass && checklistMessages[item.id] && (
-                              <ChevronRight className={`w-4 h-4 shrink-0 ${isDark ? 'opacity-20' : 'opacity-20'}`} />
+                              <span className="flex-1 text-sm font-bold leading-tight">
+                                {qualityFeedbackMap[item.id]?.label ?? item.text}
+                              </span>
+                              {pass && checklistMessages[item.id] && (
+                                <ChevronRight className={`w-4 h-4 shrink-0 ${isDark ? 'opacity-20' : 'opacity-20'}`} />
+                              )}
+                            </button>
+                            
+                            {!pass && (lead.audit_reasons as any)?.[item.id] && (
+                              <div className="mt-2 pl-9 pr-2">
+                                <p className={`text-xs leading-relaxed font-semibold px-3 py-2 rounded-xl ${isDark ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-50 text-rose-600'}`}>
+                                  {(lead.audit_reasons as any)[item.id]}
+                                </p>
+                              </div>
                             )}
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
