@@ -343,12 +343,17 @@ serve(async (req) => {
         
         let modelsToTry = [finalModel];
         // Handle Auto-Routing string explicitly and build fallback loop to bypass rate limits
-        if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.includes('ensemble')) {
+        if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.toLowerCase().includes('ensemble')) {
           if (mediaBase64 && actualMime.startsWith('image/')) {
             modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'];
           } else {
             modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemma-2-27b-it', 'gemini-1.5-pro', 'gemini-1.5-flash'];
           }
+        } else {
+          // Adiciona fallbacks garantidos para qualquer modelo Google para contornar Rate Limit
+          if (finalModel === 'gemini-2.5-flash') modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+          else if (finalModel === 'gemini-1.5-flash') modelsToTry = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'];
+          else modelsToTry = [finalModel, 'gemini-2.5-flash', 'gemini-1.5-flash'];
         }
         
         for (let i = 0; i < modelsToTry.length; i++) {
@@ -627,6 +632,24 @@ serve(async (req) => {
     });
   } catch (error: any) {
     console.error(error);
+    // Tenta salvar o erro fatal na tabela de logs para o usuário poder ver no frontend
+    try {
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const sClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+      await sClient.from('llm_usage_logs').insert({
+        provider: 'System Error',
+        model: 'edge-function',
+        status: 'error',
+        error_message: 'FATAL: ' + (error.message || JSON.stringify(error)),
+        latency_ms: 0,
+        input_text: null,
+        output_text: null
+      });
+    } catch (_) { }
+
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
