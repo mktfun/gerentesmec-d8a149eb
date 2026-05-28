@@ -278,7 +278,10 @@ serve(async (req) => {
           parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
         }
 
-        finalModel = aiSettings.model || 'gemini-1.5-flash';
+        finalModel = aiSettings.model || 'gemini-2.5-flash';
+        if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.includes('ensemble')) {
+          finalModel = 'gemini-2.5-flash';
+        }
         const vertexUrl = `https://${gcpRegion}-aiplatform.googleapis.com/v1/projects/${gcpProject}/locations/${gcpRegion}/publishers/google/models/${finalModel}:generateContent`;
         
         const res = await fetch(vertexUrl, {
@@ -322,8 +325,13 @@ serve(async (req) => {
         } else if (media_url) {
           parts[0].text += `\n\n[SISTEMA]: O usuário anexou uma mídia, mas não pôde ser baixada. Assuma que há um anexo.`;
         }
+        finalModel = aiSettings.model?.toLowerCase().includes('gemini') ? aiSettings.model : 'gemini-2.5-flash';
         
-        finalModel = aiSettings.model?.includes('gemini') ? aiSettings.model : 'gemini-1.5-flash';
+        // Handle Auto-Routing string explicitly
+        if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.includes('ensemble')) {
+          finalModel = 'gemini-2.5-flash';
+        }
+        
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

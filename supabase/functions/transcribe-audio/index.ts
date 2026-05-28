@@ -75,7 +75,10 @@ serve(async (req) => {
       // Note: MIME type is guessed, assuming ogg or mp3. We can just use audio/mp3 or let it infer if not strict.
       const mimeType = "audio/mp3"; // Or read from response headers
 
-      const model = aiSettings.model || 'gemini-1.5-flash';
+      let model = aiSettings.model || 'gemini-2.5-flash';
+      if (model === 'Gemini Free-Tier Ensemble (Auto-Routing)' || model.includes('ensemble')) {
+        model = 'gemini-2.5-flash';
+      }
       const body = {
         contents: [{
           parts: [
