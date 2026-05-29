@@ -219,7 +219,32 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
         </div>
 
         {/* Filter / Refresh */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Status toggle */}
+          <div className="inline-flex rounded-xl bg-muted border border-border overflow-hidden text-[10px] font-bold uppercase tracking-widest">
+            {([
+              { v: 'all', label: 'Todos' },
+              { v: 'success', label: '✓ Sucessos' },
+              { v: 'error', label: '✗ Erros' },
+            ] as const).map(opt => (
+              <button
+                key={opt.v}
+                onClick={() => setFilterStatus(opt.v)}
+                className={`px-2.5 py-2 transition-colors ${
+                  filterStatus === opt.v
+                    ? opt.v === 'success'
+                      ? 'bg-emerald-500/20 text-emerald-500'
+                      : opt.v === 'error'
+                      ? 'bg-rose-500/20 text-rose-500'
+                      : 'bg-foreground/10 text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
           <select 
             value={filterProvider} 
             onChange={(e) => setFilterProvider(e.target.value)}
