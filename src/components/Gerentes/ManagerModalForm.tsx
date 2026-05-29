@@ -37,7 +37,7 @@ const ManagerModalForm: React.FC<Props> = ({ manager, isOpen, onClose }) => {
         name,
         unit_id: unitId || null,
         avatar: phone || null
-      });
+      } as any);
     }
     onClose();
   };

@@ -109,7 +109,7 @@ const ManagerDashboard: React.FC = () => {
         {sortedLeads.map((lead, i) => {
           const sc = lead.score as number | null;
           const isDanger = dangerLeads.some(d => d.id === lead.id);
-          const name = lead.name || lead.customer_name || 'Cliente Sem Nome';
+          const name = (lead as any).name || lead.customer_name || 'Cliente Sem Nome';
           const date = format(new Date(lead.created_at), "dd MMM, HH:mm", { locale: ptBR });
           
           let scoreBg = isDark ? 'bg-white/5' : 'bg-black/5';

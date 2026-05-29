@@ -69,7 +69,7 @@ const LeadModalForm: React.FC<Props> = ({ lead, isOpen, onClose }) => {
         score: null,
         sla_status: 'ok',
         closing_summary: null
-      });
+      } as any);
     }
     onClose();
   };

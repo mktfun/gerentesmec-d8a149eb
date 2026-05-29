@@ -100,7 +100,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         .order('created_at', { ascending: true });
       
       if (data && data.length > 0) {
-        setRealMessages(data as ChatMessage[]);
+        setRealMessages(data as unknown as ChatMessage[]);
       } else {
         setRealMessages([]);
       }

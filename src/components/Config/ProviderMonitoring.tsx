@@ -54,7 +54,7 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
         .limit(200);
 
       if (error) throw error;
-      setLogs(data || []);
+      setLogs((data || []) as any);
     } catch (e) {
       console.error('Error fetching logs:', e);
     } finally {
