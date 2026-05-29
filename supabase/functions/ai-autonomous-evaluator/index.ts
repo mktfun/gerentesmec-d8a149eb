@@ -732,6 +732,13 @@ serve(async (req) => {
       console.error("Erro ao salvar log fatal:", e2);
     }
 
+    // Garante que a task na fila reflita o erro fatal (se ainda não foi marcada)
+    await updateTask({
+      status: 'error',
+      error_message: 'FATAL: ' + (error.message || JSON.stringify(error)),
+      completed_at: new Date().toISOString()
+    });
+
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
