@@ -36,6 +36,7 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
   const [logs, setLogs] = useState<UsageLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterProvider, setFilterProvider] = useState<string>(activeProvider || 'ALL');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'error'>('all');
   const [selectedError, setSelectedError] = useState<string | null>(null);
   const [selectedLog, setSelectedLog] = useState<UsageLog | null>(null);
   const [logTab, setLogTab] = useState<'input'|'output'>('input');
@@ -64,10 +65,22 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
 
   useEffect(() => {
     fetchLogs();
-    
-    // Set up auto-refresh interval every 15 seconds
-    const interval = setInterval(fetchLogs, 15000);
-    return () => clearInterval(interval);
+
+    // Realtime subscription: novos logs aparecem instantaneamente.
+    const channel = supabase
+      .channel('llm_usage_logs_stream')
+      .on(
+        'postgres_changes' as any,
+        { event: 'INSERT', schema: 'public', table: 'llm_usage_logs' },
+        (payload: any) => {
+          setLogs((prev) => [payload.new as any, ...prev].slice(0, 200));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Sync active provider prop as default filter
@@ -84,9 +97,15 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
 
   // Filtered logs
   const filteredLogs = useMemo(() => {
-    if (filterProvider === 'ALL') return logs;
-    return logs.filter(log => log.provider.toLowerCase() === filterProvider.toLowerCase());
-  }, [logs, filterProvider]);
+    let list = logs;
+    if (filterProvider !== 'ALL') {
+      list = list.filter(log => log.provider.toLowerCase() === filterProvider.toLowerCase());
+    }
+    if (filterStatus !== 'all') {
+      list = list.filter(log => log.status === filterStatus);
+    }
+    return list;
+  }, [logs, filterProvider, filterStatus]);
 
   // Paginated logs for table
   const paginatedLogs = useMemo(() => {
