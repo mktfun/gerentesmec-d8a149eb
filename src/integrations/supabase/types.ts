@@ -59,6 +59,57 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_task_queue: {
+        Row: {
+          completed_at: string | null
+          content_preview: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          latency_ms: number | null
+          lead_id: string | null
+          message_id: string | null
+          model: string | null
+          provider: string | null
+          sender_type: string | null
+          started_at: string | null
+          status: string
+          tokens_used: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          content_preview?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          latency_ms?: number | null
+          lead_id?: string | null
+          message_id?: string | null
+          model?: string | null
+          provider?: string | null
+          sender_type?: string | null
+          started_at?: string | null
+          status?: string
+          tokens_used?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          content_preview?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          latency_ms?: number | null
+          lead_id?: string | null
+          message_id?: string | null
+          model?: string | null
+          provider?: string | null
+          sender_type?: string | null
+          started_at?: string | null
+          status?: string
+          tokens_used?: number | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           ai_audited: boolean | null
