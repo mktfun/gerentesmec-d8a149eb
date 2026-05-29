@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       ai_settings: {
@@ -56,8 +31,6 @@ export type Database = {
         }
         Insert: {
           api_key?: string | null
-          api_url?: string | null
-          created_at?: string
           embedding_provider?: string | null
           evaluation_criteria?: Json | null
           features?: Json
@@ -89,6 +62,7 @@ export type Database = {
       chat_messages: {
         Row: {
           ai_audited: boolean | null
+          ai_insight: string | null
           ai_summary: string | null
           chatwoot_message_id: number | null
           content: string
@@ -102,6 +76,7 @@ export type Database = {
         }
         Insert: {
           ai_audited?: boolean | null
+          ai_insight?: string | null
           ai_summary?: string | null
           chatwoot_message_id?: number | null
           content: string
@@ -115,6 +90,7 @@ export type Database = {
         }
         Update: {
           ai_audited?: boolean | null
+          ai_insight?: string | null
           ai_summary?: string | null
           chatwoot_message_id?: number | null
           content?: string
@@ -265,6 +241,7 @@ export type Database = {
           ai_feedback?: string | null
           audit_checklist?: Json | null
           audit_checklist_messages?: Json | null
+          audit_reasons?: Json | null
           chatwoot_contact_id?: number | null
           chatwoot_conversation_id?: number | null
           closing_summary?: string | null
@@ -275,7 +252,6 @@ export type Database = {
           etapa_scores?: Json | null
           funnel_stage?: string
           funnel_stage_reason?: string | null
-          audit_reasons?: Json | null
           id: string
           is_cross_unit?: boolean | null
           last_agent_message_at?: string | null
@@ -294,6 +270,7 @@ export type Database = {
           ai_feedback?: string | null
           audit_checklist?: Json | null
           audit_checklist_messages?: Json | null
+          audit_reasons?: Json | null
           chatwoot_contact_id?: number | null
           chatwoot_conversation_id?: number | null
           closing_summary?: string | null
@@ -304,7 +281,6 @@ export type Database = {
           etapa_scores?: Json | null
           funnel_stage?: string
           funnel_stage_reason?: string | null
-          audit_reasons?: Json | null
           id?: string
           is_cross_unit?: boolean | null
           last_agent_message_at?: string | null
@@ -336,8 +312,42 @@ export type Database = {
           },
         ]
       }
+      llm_usage_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          latency_ms: number | null
+          model: string
+          provider: string
+          status: string
+          tokens_used: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          latency_ms?: number | null
+          model: string
+          provider: string
+          status: string
+          tokens_used?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          latency_ms?: number | null
+          model?: string
+          provider?: string
+          status?: string
+          tokens_used?: number | null
+        }
+        Relationships: []
+      }
       managers: {
         Row: {
+          auth_user_id: string | null
           avatar: string | null
           created_at: string
           id: string
@@ -345,6 +355,7 @@ export type Database = {
           unit_id: string | null
         }
         Insert: {
+          auth_user_id?: string | null
           avatar?: string | null
           created_at?: string
           id?: string
@@ -352,6 +363,7 @@ export type Database = {
           unit_id?: string | null
         }
         Update: {
+          auth_user_id?: string | null
           avatar?: string | null
           created_at?: string
           id?: string
@@ -367,6 +379,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_admin: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          is_admin?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_admin?: boolean | null
+        }
+        Relationships: []
       }
       semantic_cache: {
         Row: {
@@ -416,53 +449,12 @@ export type Database = {
         }
         Relationships: []
       }
-      llm_usage_logs: {
-        Row: {
-          id: string
-          created_at: string
-          provider: string
-          model: string
-          status: string
-          error_message: string | null
-          latency_ms: number | null
-          tokens_used: number | null
-          input_text: string | null
-          output_text: string | null
-          tokens_limit_remaining: number | null
-        }
-        Insert: {
-          id?: string
-          created_at?: string
-          provider: string
-          model: string
-          status: string
-          error_message?: string | null
-          latency_ms?: number | null
-          tokens_used?: number | null
-          input_text?: string | null
-          output_text?: string | null
-          tokens_limit_remaining?: number | null
-        }
-        Update: {
-          id?: string
-          created_at?: string
-          provider?: string
-          model?: string
-          status?: string
-          error_message?: string | null
-          latency_ms?: number | null
-          tokens_used?: number | null
-          input_text?: string | null
-          output_text?: string | null
-          tokens_limit_remaining?: number | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      is_admin: { Args: never; Returns: boolean }
       match_messages: {
         Args: {
           match_count: number
@@ -477,6 +469,7 @@ export type Database = {
           similarity: number
         }[]
       }
+      my_unit_id: { Args: never; Returns: string }
       save_lead_audit: {
         Args: {
           p_audit_checklist: Json
@@ -614,9 +607,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
