@@ -93,7 +93,7 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
   // Reset pagination to first page when filtering changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterProvider]);
+  }, [filterProvider, filterStatus]);
 
   // Filtered logs
   const filteredLogs = useMemo(() => {
