@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Cpu, Server, CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Key, BarChart3, Network } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { ProviderMonitoring } from './ProviderMonitoring';
+import { TaskQueuePanel } from './TaskQueuePanel';
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'warning' | 'error';
 
@@ -516,7 +517,10 @@ export const AiRouterConfig: React.FC = () => {
           </AnimatePresence>
         </div>
       ) : (
-        <ProviderMonitoring activeProvider={aiSettings?.provider || 'Google'} activeModel={aiSettings?.model || ''} />
+        <div className="space-y-6">
+          <TaskQueuePanel />
+          <ProviderMonitoring activeProvider={aiSettings?.provider || 'Google'} activeModel={aiSettings?.model || ''} />
+        </div>
       )}
     </div>
   );
