@@ -304,6 +304,14 @@ serve(async (req) => {
 
     const startTime = performance.now();
 
+    // Marca task como 'running' agora que a chamada LLM começa
+    await updateTask({
+      status: 'running',
+      provider,
+      model: aiSettings.model || null,
+      started_at: new Date().toISOString()
+    });
+
     try {
       if (provider === 'Google Vertex AI') {
         const gcpCreds = aiSettings.gcp_credentials;
