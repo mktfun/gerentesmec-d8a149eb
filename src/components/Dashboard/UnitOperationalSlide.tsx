@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Unit, Manager, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
-import { avgScoreInt } from '@/utils/scoreUtils';
+import { avgScoreInt, avgScoreWeighted } from '@/utils/scoreUtils';
 import { Clock, AlertTriangle, Phone, Target } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis, LabelList } from 'recharts';
 import { parseISO, format } from 'date-fns';
@@ -33,7 +33,8 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
   const waitingLeads = activeLeads.filter(l => l.funnel_stage === 'lead_new').length;
   const tmr = calculateTmr(unitLeads, businessHours);
   
-  const todayScore = avgScoreInt(unitLeads);
+  const todayScoreResult = avgScoreWeighted(unitLeads);
+  const todayScore = todayScoreResult.global;
 
   // Formatar histórico para o gráfico (Top 14 dias)
   const chartData = dailyScores.map(ds => {
@@ -49,7 +50,7 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
   chartData.push({
     date: new Date().toISOString(),
     displayDate: "Hoje",
-    score: todayScore
+    score: todayScore || 0
   });
 
   // Top 7 critical leads for the list
@@ -85,7 +86,11 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
                    <span className="text-xs uppercase font-bold tracking-widest">Score Live</span>
                 </div>
                 <div className="text-6xl font-black tracking-tighter text-white z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                   {todayScore}
+                   {todayScore !== null ? todayScore : '—'}
+                </div>
+                <div className="mt-4 z-10 flex flex-col items-center gap-1 text-[10px] font-bold text-white/50 uppercase tracking-widest">
+                   <span>🏆 Ganhos: {todayScoreResult.ganho !== null ? `${todayScoreResult.ganho}%` : '—'}</span>
+                   <span>❌ Perdidos: {todayScoreResult.perdido !== null ? `${todayScoreResult.perdido}%` : '—'}</span>
                 </div>
              </div>
           </div>

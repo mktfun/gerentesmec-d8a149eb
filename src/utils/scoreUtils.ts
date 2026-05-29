@@ -1,5 +1,17 @@
 import { Lead } from '@/context/AppDataContext';
 
+export interface ScoreFilterOptions {
+  onlyGanho?: boolean;
+  onlyPerdido?: boolean;
+  onlyCurrentMonth?: boolean;
+}
+
+export const defaultScoreOptions: ScoreFilterOptions = {
+  onlyGanho: false,
+  onlyPerdido: false,
+  onlyCurrentMonth: true
+};
+
 /**
  * Calcula a média de score de um grupo de leads.
  *
@@ -11,18 +23,66 @@ import { Lead } from '@/context/AppDataContext';
  *   10 leads, 4 auditados com scores [80, 70, 90, 60] → avgScore = 75
  *   (NÃO 30, que seria o erro de dividir por 10)
  */
-export const avgScore = (leads: Lead[]): number | null => {
-  const scored = leads.filter(l => l.score !== null && l.score !== undefined);
+export const avgScore = (leads: Lead[], options: ScoreFilterOptions = defaultScoreOptions): number | null => {
+  const currentMonthStr = new Date().toISOString().substring(0, 7); // 'YYYY-MM'
+
+  const scored = leads.filter(l => {
+    // 1. Tem que ter score preenchido
+    if (l.score === null || l.score === undefined) return false;
+    
+    // 2. Filtro de Ganho
+    if (options.onlyGanho && (l as any).funnel_stage !== 'closed_won') return false;
+
+    // 2.5 Filtro de Perdido
+    if (options.onlyPerdido && (l as any).funnel_stage !== 'closed_lost') return false;
+    
+    // 3. Filtro de Mês Vigente (assumindo que created_at guarda a data)
+    if (options.onlyCurrentMonth && l.created_at) {
+      if (!l.created_at.startsWith(currentMonthStr)) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+
   if (scored.length === 0) return null;
   const sum = scored.reduce((acc, l) => acc + Number(l.score), 0);
   return Math.round((sum / scored.length) * 10) / 10;
 };
 
+export interface WeightedScoreResult {
+  global: number | null;
+  ganho: number | null;
+  perdido: number | null;
+}
+
+/**
+ * Calcula a média ponderada: 60% para Ganhos e 40% para Perdidos.
+ * Garante que se houver apenas um dos lados, o peso daquele lado se torna 100%.
+ */
+export const avgScoreWeighted = (leads: Lead[], options: ScoreFilterOptions = defaultScoreOptions): WeightedScoreResult => {
+  const ganho = avgScore(leads, { ...options, onlyGanho: true, onlyPerdido: false });
+  const perdido = avgScore(leads, { ...options, onlyPerdido: true, onlyGanho: false });
+
+  let global: number | null = null;
+  
+  if (ganho !== null && perdido !== null) {
+    global = Math.round((ganho * 0.6) + (perdido * 0.4));
+  } else if (ganho !== null) {
+    global = Math.round(ganho);
+  } else if (perdido !== null) {
+    global = Math.round(perdido);
+  }
+
+  return { global, ganho: ganho !== null ? Math.round(ganho) : null, perdido: perdido !== null ? Math.round(perdido) : null };
+};
+
 /**
  * Versão inteira (sem decimal) para displays compactos (ranking, cards).
  */
-export const avgScoreInt = (leads: Lead[]): number | null => {
-  const s = avgScore(leads);
+export const avgScoreInt = (leads: Lead[], options: ScoreFilterOptions = defaultScoreOptions): number | null => {
+  const s = avgScore(leads, options);
   return s === null ? null : Math.round(s);
 };
 

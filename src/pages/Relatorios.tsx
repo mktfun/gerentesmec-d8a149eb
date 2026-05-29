@@ -5,7 +5,7 @@ import { useAppData } from '@/context/AppDataContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
-import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
+import { avgScore, avgScoreInt, avgScoreWeighted } from '@/utils/scoreUtils';
 import { DateRangePicker, DateRange } from '@/components/ui/DateRangePicker';
 import ReadOnlyAuditPanel from '@/components/Crm/ReadOnlyAuditPanel';
 import { AnimatePresence } from 'framer-motion';
@@ -38,6 +38,7 @@ const Relatorios = () => {
   const [scoreOrder, setScoreOrder] = useState<string>('none');
   const [slaOrder, setSlaOrder] = useState<string>('none');
   const [expandedManager, setExpandedManager] = useState<string | null>(null);
+  const [scoreView, setScoreView] = useState<'geral' | 'ganho' | 'perdido'>('geral');
 
   // Audit Modal
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -97,8 +98,11 @@ const Relatorios = () => {
   const currentLeadsWithScore = currentLeads.filter(l => l.score !== null);
   const prevLeadsWithScore    = prevLeads.filter(l => l.score !== null);
 
-  const scoreCur  = avgScore(currentLeads);
-  const scorePrev = avgScore(prevLeads);
+  const scoreResultCur = avgScoreWeighted(currentLeads, { onlyCurrentMonth: false });
+  const scoreResultPrev = avgScoreWeighted(prevLeads, { onlyCurrentMonth: false });
+  
+  const scoreCur  = scoreView === 'geral' ? scoreResultCur.global : scoreView === 'ganho' ? scoreResultCur.ganho : scoreResultCur.perdido;
+  const scorePrev = scoreView === 'geral' ? scoreResultPrev.global : scoreView === 'ganho' ? scoreResultPrev.ganho : scoreResultPrev.perdido;
   const tmrCur    = currentLeads.length ? calculateTmr(currentLeads, businessHours) : null;
   const tmrPrev   = prevLeads.length ? calculateTmr(prevLeads, businessHours) : null;
   const slasCur   = calculateDangerLeads(currentLeads, businessHours).length;
@@ -119,7 +123,8 @@ const Relatorios = () => {
     const lDate = startOfDay(new Date(l.created_at));
     const isWithinDate = lDate >= startOfDay(dateRange.from) && lDate <= startOfDay(dateRange.to);
     const isUnitMatch = selectedUnit === 'all' || l.unit_id === selectedUnit;
-    return isWithinDate && isUnitMatch;
+    const isStageMatch = scoreView === 'geral' ? true : scoreView === 'ganho' ? l.funnel_stage === 'closed_won' : l.funnel_stage === 'closed_lost';
+    return isWithinDate && isUnitMatch && isStageMatch;
   });
 
   const auditedLeads = filteredLeads.filter(l => l.score !== null).sort((a, b) => {
@@ -200,6 +205,8 @@ const Relatorios = () => {
 
     // Score Geral = média do lead.score (fonte da IA), apenas auditados
     const mLeads = currentLeads.filter(l => (l.manager_id || 'sem_gerente') === mId);
+    const mScoreResult = avgScoreWeighted(mLeads, { onlyCurrentMonth: false });
+    const mScore = scoreView === 'geral' ? mScoreResult.global : scoreView === 'ganho' ? mScoreResult.ganho : mScoreResult.perdido;
     
     return {
       managerName: mp.managerName,
@@ -208,7 +215,7 @@ const Relatorios = () => {
       e2: round(customAvg(mp.e2)),
       e3: round(customAvg(mp.e3)),
       e4: round(customAvg(mp.e4)),
-      score: avgScoreInt(mLeads),
+      score: mScore,
       itemAvgs
     };
   }).sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -332,6 +339,30 @@ const Relatorios = () => {
               Exportar XLS
             </button>
           </div>
+        </div>
+      </motion.div>
+
+      {/* Tabs / Glass Pill */}
+      <motion.div {...fadeUp(0.05)} className="mb-8 flex items-center justify-center">
+        <div className="flex items-center gap-1 p-1 rounded-full bg-black/5 dark:bg-white/5 border border-border shadow-inner">
+          <button 
+            onClick={() => setScoreView('geral')}
+            className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${scoreView === 'geral' ? 'bg-card shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Geral (Ponderado)
+          </button>
+          <button 
+            onClick={() => setScoreView('ganho')}
+            className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${scoreView === 'ganho' ? 'bg-card shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Apenas Ganhos
+          </button>
+          <button 
+            onClick={() => setScoreView('perdido')}
+            className={`px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${scoreView === 'perdido' ? 'bg-card shadow-md text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Apenas Perdidos
+          </button>
         </div>
       </motion.div>
 

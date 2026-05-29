@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle, Calendar } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, isLeadDanger } from '@/utils/metrics';
-import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
+import { avgScore, avgScoreInt, avgScoreWeighted } from '@/utils/scoreUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis, LabelList } from 'recharts';
 import { parseISO, format } from 'date-fns';
@@ -103,7 +103,8 @@ const TvDashboard: React.FC = () => {
       return t >= startDate && t < endDate;
     });
 
-    const score = avgScore(periodLeads);
+    const scoreResult = avgScoreWeighted(periodLeads);
+    const score = scoreResult.global;
 
     // Trend vs previous identical period
     const periodDuration = dateFilter === 'today' || dateFilter === 'yesterday' ? 86400000 
@@ -129,6 +130,8 @@ const TvDashboard: React.FC = () => {
 
     return {
       score,
+      scoreGanho: scoreResult.ganho,
+      scorePerdido: scoreResult.perdido,
       diff,
       tmrFallback,
       dangerCount,
@@ -213,7 +216,8 @@ const TvDashboard: React.FC = () => {
               <div className="col-span-3 flex items-center justify-center h-full gap-16 px-12">
                 {/* Macro View: Global Score */}
                 {(() => {
-                  const globalScore = avgScore(leads);
+                  const globalScoreResult = avgScoreWeighted(leads);
+                  const globalScore = globalScoreResult.global;
                   const roundedGlobal = globalScore !== null ? Math.round(globalScore) : 0;
                   const scoreColor = roundedGlobal >= 75 ? '#34d399' : roundedGlobal >= 50 ? '#818cf8' : '#f87171';
                   
@@ -240,6 +244,9 @@ const TvDashboard: React.FC = () => {
                           <span className="text-[6rem] lg:text-[8rem] font-black tracking-tighter" style={{ color: scoreColor }}>{roundedGlobal}</span>
                           <span className="text-xl uppercase font-bold text-white/40 mt-2">Pontos</span>
                         </div>
+                      </div>
+                      <div className="mt-8 text-white/50 text-sm lg:text-base font-bold tracking-widest uppercase">
+                        🏆 Ganhos: {globalScoreResult.ganho !== null ? `${globalScoreResult.ganho}%` : '—'} &nbsp;&nbsp;•&nbsp;&nbsp; ❌ Perdidos: {globalScoreResult.perdido !== null ? `${globalScoreResult.perdido}%` : '—'}
                       </div>
                     </div>
                   );
@@ -359,7 +366,7 @@ const TvDashboard: React.FC = () => {
                 </div>
               </div>
             ) : visibleUnits.map((unit, i) => {
-              const { score, diff, tmrFallback, dangerCount } = getUnitMetrics(unit.id);
+              const { score, scoreGanho, scorePerdido, diff, tmrFallback, dangerCount } = getUnitMetrics(unit.id);
               const displayTmr = tmrFallback > 0 ? `${tmrFallback}m` : '—';
               const displayScore = score ?? 0;
               
@@ -410,6 +417,10 @@ const TvDashboard: React.FC = () => {
                         ) : (
                           <div className="text-sm font-semibold text-white/30">Sem comparativo disponível</div>
                         )}
+                      </div>
+
+                      <div className="mt-4 text-muted-foreground/60 text-xs font-bold tracking-widest uppercase">
+                        🏆 Ganhos: {scoreGanho !== null ? `${scoreGanho}%` : '—'} &nbsp;•&nbsp; ❌ Perdidos: {scorePerdido !== null ? `${scorePerdido}%` : '—'}
                       </div>
                     </div>
 

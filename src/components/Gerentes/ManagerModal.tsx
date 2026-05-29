@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, TrendingDown, BarChart2 } from 'lucide-react';
 import { useAppData, Manager } from '@/context/AppDataContext';
+import { avgScoreWeighted } from '@/utils/scoreUtils';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -22,9 +23,8 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
   
   // Calculate average score
   const managerLeads = leads.filter(l => l.manager_id === manager?.id && l.score !== null);
-  const avgScore = managerLeads.length > 0 
-    ? Math.round(managerLeads.reduce((acc, l) => acc + (l.score || 0), 0) / managerLeads.length)
-    : 0;
+  const avgScoreResult = avgScoreWeighted(managerLeads);
+  const avgScore = avgScoreResult.global !== null ? avgScoreResult.global : 0;
 
   // History Chart logic (last 4 weeks roughly)
   const chartData = React.useMemo(() => {
@@ -291,6 +291,10 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                      Estável no mês
                    </span>
                 )}
+              </div>
+              <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-3">
+                <span>🏆 Ganhos: {avgScoreResult.ganho !== null ? `${avgScoreResult.ganho}%` : '—'}</span>
+                <span>❌ Perdidos: {avgScoreResult.perdido !== null ? `${avgScoreResult.perdido}%` : '—'}</span>
               </div>
             </div>
 

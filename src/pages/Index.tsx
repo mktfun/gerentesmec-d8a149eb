@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useAppData, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
-import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
+import { avgScore, avgScoreInt, avgScoreWeighted } from '@/utils/scoreUtils';
 import TvDashboard from '@/components/Dashboard/TvDashboard';
 
 import { fadeUp } from '@/utils/motion';
@@ -40,7 +40,8 @@ const Index = () => {
 
   // Global score (Últimos 30 dias) — usa APENAS leads auditados no denominador
   const leads30Days = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime() - 29 * 86400000);
-  const globalScore = avgScore(leads30Days);
+  const globalScoreResult = avgScoreWeighted(leads30Days);
+  const globalScore = globalScoreResult.global;
 
   // Score series — last 7 days (trailing 30-day average for each day to show true global evolution)
   const scoreHistory = useMemo(() => {
@@ -57,7 +58,7 @@ const Index = () => {
         const t = new Date(l.last_message_at).getTime();
         return t >= windowStart.getTime() && t < next.getTime();
       });
-      const a = avgScore(trailingLeads);
+      const a = avgScoreWeighted(trailingLeads).global;
         
       if (a !== null || trailingLeads.length > 0) validPoints++;
       series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a * 10) / 10 : null });
@@ -88,8 +89,8 @@ const Index = () => {
       return t >= today0.getTime() - 14 * 86400000 && t < today0.getTime() - 7 * 86400000;
     });
     
-    const a = avgScore(lastWeek);
-    const b = avgScore(prevWeek);
+    const a = avgScoreWeighted(lastWeek).global;
+    const b = avgScoreWeighted(prevWeek).global;
     
     if (a === null || b === null) return null;
     return Math.round((a - b) * 10) / 10;
@@ -98,7 +99,7 @@ const Index = () => {
   // Unit scores — usa apenas auditados no denominador
   const unitScores = units.map(u => {
     const uLeadsAll = leads.filter(l => l.unit_id === u.id);
-    return { ...u, score: avgScoreInt(uLeadsAll) };
+    return { ...u, score: avgScoreWeighted(uLeadsAll).global };
   });
 
   // Today metrics
@@ -118,7 +119,7 @@ const Index = () => {
   const managerRanking = managers.map(m => {
     const unit = units.find(u => u.id === m.unit_id);
     const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
-    return { ...m, score: avgScoreInt(mLeadsAll), unitName: unit?.name || 'N/A' };
+    return { ...m, score: avgScoreWeighted(mLeadsAll).global, unitName: unit?.name || 'N/A' };
   }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 
   const todayStr = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date());
@@ -130,16 +131,22 @@ const Index = () => {
       <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-border p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
         <div className="flex-1">
           <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-500/70 dark:text-indigo-300/70 mb-4">Score Global da Rede</p>
-          <div className="flex items-end gap-6 mb-2">
-            <h2 className="text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
-              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
-            </h2>
-            {weekTrend !== null && (
-              <div className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                <TrendingUp className={`w-4 h-4 ${weekTrend < 0 ? 'rotate-180' : ''}`} />
-                {weekTrend >= 0 ? '+' : ''}{weekTrend}% vs semana anterior
-              </div>
-            )}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-end gap-6 mb-2">
+              <h2 className="text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
+                {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
+              </h2>
+              {weekTrend !== null && (
+                <div className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                  <TrendingUp className={`w-4 h-4 ${weekTrend < 0 ? 'rotate-180' : ''}`} />
+                  {weekTrend >= 0 ? '+' : ''}{weekTrend}% vs semana anterior
+                </div>
+              )}
+            </div>
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-4">
+              <span>🏆 Ganhos: {globalScoreResult.ganho !== null ? `${globalScoreResult.ganho}%` : '—'}</span>
+              <span>❌ Perdidos: {globalScoreResult.perdido !== null ? `${globalScoreResult.perdido}%` : '—'}</span>
+            </div>
           </div>
           <p className="text-sm text-slate-400 mt-4">
             {globalScore !== null ? `Média dos últimos 30 dias · Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
