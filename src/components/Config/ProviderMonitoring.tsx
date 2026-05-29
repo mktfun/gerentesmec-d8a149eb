@@ -36,6 +36,7 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
   const [logs, setLogs] = useState<UsageLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterProvider, setFilterProvider] = useState<string>(activeProvider || 'ALL');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'success' | 'error'>('all');
   const [selectedError, setSelectedError] = useState<string | null>(null);
   const [selectedLog, setSelectedLog] = useState<UsageLog | null>(null);
   const [logTab, setLogTab] = useState<'input'|'output'>('input');
@@ -54,7 +55,7 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
         .limit(200);
 
       if (error) throw error;
-      setLogs(data || []);
+      setLogs((data || []) as any);
     } catch (e) {
       console.error('Error fetching logs:', e);
     } finally {
@@ -64,10 +65,22 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
 
   useEffect(() => {
     fetchLogs();
-    
-    // Set up auto-refresh interval every 15 seconds
-    const interval = setInterval(fetchLogs, 15000);
-    return () => clearInterval(interval);
+
+    // Realtime subscription: novos logs aparecem instantaneamente.
+    const channel = supabase
+      .channel('llm_usage_logs_stream')
+      .on(
+        'postgres_changes' as any,
+        { event: 'INSERT', schema: 'public', table: 'llm_usage_logs' },
+        (payload: any) => {
+          setLogs((prev) => [payload.new as any, ...prev].slice(0, 200));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Sync active provider prop as default filter
@@ -80,13 +93,19 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
   // Reset pagination to first page when filtering changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterProvider]);
+  }, [filterProvider, filterStatus]);
 
   // Filtered logs
   const filteredLogs = useMemo(() => {
-    if (filterProvider === 'ALL') return logs;
-    return logs.filter(log => log.provider.toLowerCase() === filterProvider.toLowerCase());
-  }, [logs, filterProvider]);
+    let list = logs;
+    if (filterProvider !== 'ALL') {
+      list = list.filter(log => log.provider.toLowerCase() === filterProvider.toLowerCase());
+    }
+    if (filterStatus !== 'all') {
+      list = list.filter(log => log.status === filterStatus);
+    }
+    return list;
+  }, [logs, filterProvider, filterStatus]);
 
   // Paginated logs for table
   const paginatedLogs = useMemo(() => {
@@ -200,7 +219,32 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
         </div>
 
         {/* Filter / Refresh */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Status toggle */}
+          <div className="inline-flex rounded-xl bg-muted border border-border overflow-hidden text-[10px] font-bold uppercase tracking-widest">
+            {([
+              { v: 'all', label: 'Todos' },
+              { v: 'success', label: '✓ Sucessos' },
+              { v: 'error', label: '✗ Erros' },
+            ] as const).map(opt => (
+              <button
+                key={opt.v}
+                onClick={() => setFilterStatus(opt.v)}
+                className={`px-2.5 py-2 transition-colors ${
+                  filterStatus === opt.v
+                    ? opt.v === 'success'
+                      ? 'bg-emerald-500/20 text-emerald-500'
+                      : opt.v === 'error'
+                      ? 'bg-rose-500/20 text-rose-500'
+                      : 'bg-foreground/10 text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
           <select 
             value={filterProvider} 
             onChange={(e) => setFilterProvider(e.target.value)}

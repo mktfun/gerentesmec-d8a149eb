@@ -31,7 +31,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const { isDark } = useTheme();
 
   const score = lead.score as number | null;
-  const customerName = lead.name || lead.customer_name || 'Cliente';
+  const customerName = (lead as any).name || lead.customer_name || 'Cliente';
   const checklist = (lead.audit_checklist as Record<string, boolean>) ?? {};
   const checklistMessages = (lead.audit_checklist_messages as Record<string, string>) ?? {};
 
@@ -63,7 +63,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
       const { data } = await supabase
         .from('chat_messages').select('*')
         .eq('lead_id', lead.id).order('created_at', { ascending: true });
-      setMessages((data as ChatMessage[]) ?? []);
+      setMessages((data as unknown as ChatMessage[]) ?? []);
       setLoading(false);
     };
     fetch();
@@ -127,7 +127,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
         {/* Name + phone */}
         <div className="flex-1 min-w-0">
           <p className="text-base font-black truncate leading-tight">{customerName}</p>
-          <p className={`text-xs mt-0.5 truncate ${isDark ? 'opacity-60' : 'opacity-60'}`}>{lead.phone || lead.customer_phone || ''}</p>
+          <p className={`text-xs mt-0.5 truncate ${isDark ? 'opacity-60' : 'opacity-60'}`}>{(lead as any).phone || lead.customer_phone || ''}</p>
         </div>
 
         {/* Score badge */}

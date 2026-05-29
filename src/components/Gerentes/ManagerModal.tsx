@@ -71,7 +71,7 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
       .slice(0, 5)
       .map(l => ({
         date: format(new Date(l.created_at), "d 'de' MMM, HH:mm", { locale: ptBR }),
-        client: l.name || l.customer_name || 'Cliente',
+        client: (l as any).name || l.customer_name || 'Cliente',
         score: l.score || 0
       }));
   }, [managerLeads]);

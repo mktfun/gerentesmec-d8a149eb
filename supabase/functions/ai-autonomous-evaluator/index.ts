@@ -56,9 +56,21 @@ serve(async (req) => {
   let provider = 'openai';
   let finalModel = '';
   let userMessageContent: any = '';
+  let taskId: string | null = null;
+  let supabaseClient: any = null;
+
+  // Helper silencioso para atualizar a fila — nunca quebra a função principal
+  const updateTask = async (patch: Record<string, any>) => {
+    if (!taskId || !supabaseClient) return;
+    try {
+      await supabaseClient.from('ai_task_queue').update(patch).eq('id', taskId);
+    } catch (e) {
+      console.error('[AI-EVALUATOR] Falha ao atualizar task na fila:', e);
+    }
+  };
 
   try {
-    const supabaseClient = createClient(
+    supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
@@ -71,10 +83,32 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Missing lead_id or message_content' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
     }
 
+    // Insere task na fila como 'pending' (não bloqueia se falhar)
+    try {
+      const previewText = typeof message_content === 'string'
+        ? message_content.substring(0, 140)
+        : JSON.stringify(message_content).substring(0, 140);
+      const { data: taskRow } = await supabaseClient
+        .from('ai_task_queue')
+        .insert({
+          lead_id: String(lead_id),
+          message_id: message_id ? String(message_id) : null,
+          content_preview: previewText,
+          sender_type: sender_type || null,
+          status: 'pending'
+        })
+        .select('id')
+        .single();
+      if (taskRow) taskId = taskRow.id;
+    } catch (e) {
+      console.error('[AI-EVALUATOR] Falha ao criar task na fila:', e);
+    }
+
     // 1. Pré-processamento Determinístico (Filtro Anti-Gasto)
     const text = message_content.trim();
     if (text.length < 10 && !text.match(/[?]/)) {
       console.log(`[Cost-Efficiency] Mensagem ignorada por ser muito curta e sem pergunta: "${text}"`);
+      await updateTask({ status: 'ignored', completed_at: new Date().toISOString() });
       return new Response(JSON.stringify({ status: 'ignored_by_deterministic_filter' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
     }
 
@@ -82,6 +116,7 @@ serve(async (req) => {
     const { data: dbAiSettings } = await supabaseClient.from('ai_settings').select('*').single();
     aiSettings = dbAiSettings;
     if (!aiSettings || !aiSettings.features?.auto_scoring) {
+      await updateTask({ status: 'ignored', completed_at: new Date().toISOString(), error_message: 'auto_scoring desabilitado' });
       return new Response(JSON.stringify({ status: 'ai_automation_disabled' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
     }
 
@@ -268,6 +303,14 @@ serve(async (req) => {
     }
 
     const startTime = performance.now();
+
+    // Marca task como 'running' agora que a chamada LLM começa
+    await updateTask({
+      status: 'running',
+      provider,
+      model: aiSettings.model || null,
+      started_at: new Date().toISOString()
+    });
 
     try {
       if (provider === 'Google Vertex AI') {
@@ -527,6 +570,16 @@ serve(async (req) => {
       });
       if (logSuccessErr) console.error('[AI-EVALUATOR] Failed to insert success log:', logSuccessErr);
 
+      // Atualiza task na fila como sucesso
+      await updateTask({
+        status: 'success',
+        provider,
+        model: loggedModel,
+        latency_ms: latencyMs,
+        tokens_used: tokensUsed,
+        completed_at: new Date().toISOString()
+      });
+
     } catch (err: any) {
       const latencyMs = Math.round(performance.now() - startTime);
       const loggedModel = aiSettings.model || finalModel;
@@ -543,6 +596,16 @@ serve(async (req) => {
         output_text: null
       });
       if (logErrErr) console.error('[AI-EVALUATOR] Failed to insert error log:', logErrErr);
+
+      // Atualiza task na fila como erro
+      await updateTask({
+        status: 'error',
+        provider,
+        model: loggedModel,
+        latency_ms: latencyMs,
+        error_message: err.message || JSON.stringify(err),
+        completed_at: new Date().toISOString()
+      });
 
       throw err;
     }
@@ -668,6 +731,13 @@ serve(async (req) => {
     } catch (e2) { 
       console.error("Erro ao salvar log fatal:", e2);
     }
+
+    // Garante que a task na fila reflita o erro fatal (se ainda não foi marcada)
+    await updateTask({
+      status: 'error',
+      error_message: 'FATAL: ' + (error.message || JSON.stringify(error)),
+      completed_at: new Date().toISOString()
+    });
 
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

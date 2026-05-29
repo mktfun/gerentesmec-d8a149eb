@@ -60,7 +60,7 @@ const Config = () => {
         setIgnoredLabelsStr(
           Array.isArray(integrationSettings.ignored_labels) 
             ? integrationSettings.ignored_labels.join(', ') 
-            : integrationSettings.ignored_labels
+            : String(integrationSettings.ignored_labels)
         );
       }
       // Sincroniza horário do banco

@@ -147,15 +147,14 @@ const Relatorios = () => {
       const manager = managers.find(m => m.id === lead.manager_id);
       const unit = units.find(u => u.id === lead.unit_id);
       managerPerformanceMap[managerId] = {
-        managerId,
         managerName: manager?.name || 'Sem Gerente',
         unitName: unit?.name || 'Sem Unidade',
-        e1: [], e2: [], e3: [], e4: [], totalLeads: 0,
+        e1: [], e2: [], e3: [], e4: [], scores: [], totalLeads: 0,
         items: {
           '1a': [], '1b': [], '2a': [], '2b': [], '2c': [],
           '3a': [], '3b': [], '3c': [], '4a': [], '4b': []
         }
-      };
+      } as any;
     }
     const mp = managerPerformanceMap[managerId];
     mp.totalLeads += 1;
