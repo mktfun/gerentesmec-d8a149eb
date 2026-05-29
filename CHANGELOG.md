@@ -2,10 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2026-05-29]
-### Added
-- **004-score-metrics-refactoring**: Implementada a arquitetura de Score Ponderado (60/40) em todo o sistema. Alteração das métricas principais nos dashboards (TVs, Relatórios, Kanban) para considerar o peso de 60% para leads ganhos e 40% para perdidos, garantindo justiça ao avaliar os gerentes e maior assertividade analítica.
-
 ## [2026-05-28]
 ### Added
 - **010-ai-ensemble-telemetry**: Implementação do loop real de Fallbacks (bypass de Rate Limits) no backend via Supabase Edge Functions para a arquitetura "Gemini Free-Tier Ensemble". Integração da inserção de "Inputs (Prompts)" e "Outputs" completos na Telemetria, visíveis em logs bem-sucedidos.
