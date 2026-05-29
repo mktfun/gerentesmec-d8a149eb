@@ -570,6 +570,16 @@ serve(async (req) => {
       });
       if (logSuccessErr) console.error('[AI-EVALUATOR] Failed to insert success log:', logSuccessErr);
 
+      // Atualiza task na fila como sucesso
+      await updateTask({
+        status: 'success',
+        provider,
+        model: loggedModel,
+        latency_ms: latencyMs,
+        tokens_used: tokensUsed,
+        completed_at: new Date().toISOString()
+      });
+
     } catch (err: any) {
       const latencyMs = Math.round(performance.now() - startTime);
       const loggedModel = aiSettings.model || finalModel;
@@ -586,6 +596,16 @@ serve(async (req) => {
         output_text: null
       });
       if (logErrErr) console.error('[AI-EVALUATOR] Failed to insert error log:', logErrErr);
+
+      // Atualiza task na fila como erro
+      await updateTask({
+        status: 'error',
+        provider,
+        model: loggedModel,
+        latency_ms: latencyMs,
+        error_message: err.message || JSON.stringify(err),
+        completed_at: new Date().toISOString()
+      });
 
       throw err;
     }
