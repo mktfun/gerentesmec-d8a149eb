@@ -209,7 +209,7 @@ export const AiRouterConfig: React.FC = () => {
           provider, 
           model, 
           api_key: apiKey,
-          api_url: provider === 'Local AI Proxy (CLI Tunnel)' ? apiUrl : undefined
+          ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } as any : {})
         });
         addLog('Configuração salva na base de dados.', 'ok');
       }
