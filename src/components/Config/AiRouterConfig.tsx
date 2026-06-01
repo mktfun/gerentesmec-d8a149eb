@@ -4,6 +4,7 @@ import { Cpu, Server, CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Key, 
 import { useAppData } from '@/context/AppDataContext';
 import { ProviderMonitoring } from './ProviderMonitoring';
 import { TaskQueuePanel } from './TaskQueuePanel';
+import { DailyDigestsPanel } from './DailyDigestsPanel';
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'warning' | 'error';
 
@@ -91,7 +92,8 @@ export const AiRouterConfig: React.FC = () => {
   const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [testLog, setTestLog] = useState<{ step: string; status: 'ok' | 'fail' | 'warn' }[]>([]);
   const [recommendation, setRecommendation] = useState<{ model: string; reason: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'config' | 'telemetry'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'telemetry' | 'digests'>('config');
+  const [offHoursBatching, setOffHoursBatching] = useState(true);
 
   const settingsInitialized = React.useRef(false);
 
@@ -109,6 +111,9 @@ export const AiRouterConfig: React.FC = () => {
       if (aiSettings.gcp_credentials) setGcpCredentials(typeof aiSettings.gcp_credentials === 'string' ? aiSettings.gcp_credentials : JSON.stringify(aiSettings.gcp_credentials, null, 2));
       if (aiSettings.api_url || (aiSettings.features as any)?.api_url) {
         setApiUrl(aiSettings.api_url || (aiSettings.features as any)?.api_url);
+      }
+      if (aiSettings.off_hours_batching !== undefined) {
+        setOffHoursBatching(aiSettings.off_hours_batching ?? true);
       }
     }
   }, [aiSettings]);
@@ -209,6 +214,7 @@ export const AiRouterConfig: React.FC = () => {
           provider, 
           model, 
           api_key: apiKey,
+          off_hours_batching: offHoursBatching,
           ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } : {})
         });
         addLog('Configuração salva na base de dados.', 'ok');
@@ -227,6 +233,7 @@ export const AiRouterConfig: React.FC = () => {
     setRecommendation(null);
     await updateAiSettings({ 
       provider, model: recommendedModel, api_key: apiKey,
+      off_hours_batching: offHoursBatching,
       gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
       gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null,
       ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } : {})
@@ -265,15 +272,27 @@ export const AiRouterConfig: React.FC = () => {
           <BarChart3 className="w-3.5 h-3.5" />
           Métricas & Telemetria
           {activeTab === 'telemetry' && (
-            <motion.div 
-              layoutId="activeRouterTab" 
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" 
-            />
+            <motion.div layoutId="activeTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('digests')}
+          className={`flex items-center gap-2 pb-1.5 text-xs font-black uppercase tracking-widest transition-all relative ${
+            activeTab === 'digests' 
+              ? 'text-indigo-400 font-black' 
+              : 'text-muted-foreground hover:text-foreground font-bold'
+          }`}
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          Resumos Matinais
+          {activeTab === 'digests' && (
+            <motion.div layoutId="activeTabIndicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500" />
           )}
         </button>
       </div>
 
-      {activeTab === 'config' ? (
+      {activeTab === 'config' && (
         <div className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -501,7 +520,27 @@ export const AiRouterConfig: React.FC = () => {
                   </div>
                 </motion.div>
               )}
-              <div className="mt-4">
+
+              <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-foreground">Agrupar Lote Fora de Expediente</h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Pausa a auditoria em tempo real à noite/fds para poupar recursos e condensa tudo no "Resumo Matinal".
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                     setOffHoursBatching(!offHoursBatching);
+                     if (testStatus !== 'idle') setTestStatus('idle');
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${offHoursBatching ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${offHoursBatching ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+
+              <div className="mt-6">
                 <button 
                   onClick={handleTest} 
                   disabled={(provider !== 'Local AI Proxy (CLI Tunnel)' && !apiKey) || testStatus === 'testing' || (provider === 'Local AI Proxy (CLI Tunnel)' && !apiUrl)}
@@ -598,10 +637,18 @@ export const AiRouterConfig: React.FC = () => {
             )}
           </AnimatePresence>
         </div>
-      ) : (
+      )}
+
+      {activeTab === 'telemetry' && (
         <div className="space-y-6">
           <TaskQueuePanel />
           <ProviderMonitoring activeProvider={aiSettings?.provider || 'Google'} activeModel={aiSettings?.model || ''} />
+        </div>
+      )}
+
+      {activeTab === 'digests' && (
+        <div className="space-y-6">
+          <DailyDigestsPanel />
         </div>
       )}
     </div>

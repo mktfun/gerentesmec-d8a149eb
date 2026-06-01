@@ -76,6 +76,12 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle()
 
+    const { data: aiSettings } = await supabase
+      .from('ai_settings')
+      .select('off_hours_batching')
+      .limit(1)
+      .maybeSingle()
+
     if (settings?.chatwoot_webhook_secret) {
       const signatureHeader = req.headers.get('x-chatwoot-signature');
       
@@ -345,22 +351,57 @@ serve(async (req) => {
           });
 
         if (!insertError) {
-          // Trigger AI Autonomous Evaluator asynchronously
-          const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-          const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+          // Check if we should batch off-hours
+          const isBatchingEnabled = aiSettings?.off_hours_batching !== false; // defaults to true
           
-          fetch(`${supabaseUrl}/functions/v1/ai-autonomous-evaluator`, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseKey}` },
-             body: JSON.stringify({
-                lead_id: leadId,
-                message_content: content || `[MEDIA ENVIADA: ${mediaType}]`,
-                message_id: messageId,
-                media_url: mediaUrl,
-                media_type: mediaType,
-                sender_type: senderType
-             })
-          }).catch(err => console.error('Error invoking AI Evaluator:', err));
+          let skipRealtimeEvaluation = false;
+          if (isBatchingEnabled) {
+            const bhConfig = settings?.business_hours || {
+              days: [1, 2, 3, 4, 5],
+              start: '08:00',
+              end: '18:00',
+              timezone: 'America/Sao_Paulo'
+            };
+            
+            // Check if current time is inside business hours
+            const nowDt = new Date();
+            // Convert to Brazil timezone manually if needed, or simply assume local execution if Supabase runs in UTC. 
+            // Deno in edge runs in UTC, so we need to adjust for GMT-3
+            const brazilTime = new Date(nowDt.getTime() - 3 * 3600000);
+            const dayOfWeek = brazilTime.getDay(); // 0 is Sunday
+            const h = brazilTime.getUTCHours();
+            const m = brazilTime.getUTCMinutes();
+            const minutesInDay = h * 60 + m;
+            const startMin = timeToMinutes(bhConfig.start || '08:00');
+            const endMin = timeToMinutes(bhConfig.end || '18:00');
+            
+            const isWorkingDay = bhConfig.days?.includes(dayOfWeek) ?? false;
+            const isWorkingHour = minutesInDay >= startMin && minutesInDay < endMin;
+            
+            if (!isWorkingDay || !isWorkingHour) {
+               skipRealtimeEvaluation = true;
+               console.log(`[webhook] Off-hours detected. Skipping real-time evaluation for lead ${leadId}. Added to pending queue.`);
+            }
+          }
+
+          if (!skipRealtimeEvaluation) {
+            // Trigger AI Autonomous Evaluator asynchronously
+            const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+            const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+            
+            fetch(`${supabaseUrl}/functions/v1/ai-autonomous-evaluator`, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${supabaseKey}` },
+               body: JSON.stringify({
+                  lead_id: leadId,
+                  message_content: content || `[MEDIA ENVIADA: ${mediaType}]`,
+                  message_id: messageId,
+                  media_url: mediaUrl,
+                  media_type: mediaType,
+                  sender_type: senderType
+               })
+            }).catch(err => console.error('Error invoking AI Evaluator:', err));
+          }
         }
       }
     }
