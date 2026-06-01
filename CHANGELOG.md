@@ -23,4 +23,5 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **001-multi-llm-providers**: Implementado o suporte a múltiplos provedores LLM na plataforma. Adicionado integração transparente com os endpoints gratuitos da NVIDIA NIM e autenticação baseada em JWT Service Accounts para uso da camada Enterprise/gratuita do Google Vertex AI.
 
+- **015-background-historical-auditor**: Implementado o Background Historical Auditor Hook, criando um processamento lento em 2º plano (Slow Mode) para auditar o histórico de mensagens antigas sem estourar rate limits e com fallback de persistência de rede no uso do túnel CLI.
 - [01/06/2026] Spec 014: Media Insights and Score Justification finalizada.
