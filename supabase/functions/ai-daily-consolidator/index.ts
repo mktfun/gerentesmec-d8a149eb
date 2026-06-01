@@ -30,151 +30,134 @@ serve(async (req) => {
       });
     }
 
-    console.log("[CONSOLIDATOR] Inciando varredura por leads com mensagens pendentes fora do expediente...");
+    const url = new URL(req.url);
+    const action = url.searchParams.get("action") || "auto"; // 'sweep', 'digest', or 'auto'
 
-    // 2. Buscar todas as mensagens criadas desde as 18:00 de ontem (simplificação: pegamos mensagens das últimas 14 horas, ou simplesmente todas que têm uma flag).
-    // Como não temos flag fácil, buscaremos LEADS que tiveram mensagens recentes e cujo funnel_stage não esteja fechado.
-    // Uma forma precisa é ver quais Leads possuem mensagens em `chat_messages` que ainda não constam no `audit_checklist_messages`.
-    // Isso pode ser complexo. Em vez disso, enviaremos todos os leads que interagiram nas últimas 16 horas. A edge function evaluator cuidará de não duplicar caso já esteja avaliado (ela reavalia a conversa inteira e atualiza).
-    
-    const now = new Date();
-    const threshold = new Date(now.getTime() - 16 * 60 * 60 * 1000).toISOString(); // 16h atrás
-
-    const { data: recentLeads, error: leadsError } = await supabase
-      .from("leads")
-      .select("id, customer_name")
-      .gte("last_message_at", threshold);
-
-    if (leadsError || !recentLeads || recentLeads.length === 0) {
-      console.log("[CONSOLIDATOR] Nenhum lead pendente encontrado nas últimas horas.");
-      return new Response(JSON.stringify({ message: "No pending leads found", count: 0 }), {
+    // ACTION: SWEEP - Apenas retorna quem precisa ser auditado
+    if (action === "sweep") {
+      const now = new Date();
+      // O usuário quer "todas as conversas para não faltar nenhuma sem análise completa"
+      // Vamos pegar todas das últimas 24 horas que tiveram mensagens
+      const threshold = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: recentLeads } = await supabase
+        .from("leads")
+        .select("id, customer_name")
+        .gte("last_message_at", threshold);
+        
+      return new Response(JSON.stringify({ success: true, leads: recentLeads || [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    console.log(`[CONSOLIDATOR] Encontrados ${recentLeads.length} leads recentes. Disparando avaliações em lote...`);
+    // ACTION: DIGEST - Recebe a lista de leads já processados pelo front e gera o resumo
+    if (action === "digest") {
+      const { leadIds } = await req.json().catch(() => ({ leadIds: [] }));
+      
+      let updatedLeads = [];
+      if (leadIds && leadIds.length > 0) {
+        const { data } = await supabase
+          .from("leads")
+          .select("id, customer_name, audit_reasons, audit_checklist")
+          .in("id", leadIds);
+        updatedLeads = data || [];
+      } else {
+        // Fallback: pega os das últimas 24h
+        const threshold = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { data } = await supabase
+          .from("leads")
+          .select("id, customer_name, audit_reasons, audit_checklist")
+          .gte("last_message_at", threshold);
+        updatedLeads = data || [];
+      }
 
-    // 3. Forçar processamento do evaluator para cada um deles
-    const evaluatorPromises = recentLeads.map(async (lead) => {
-      try {
-        console.log(`[CONSOLIDATOR] Disparando evaluator para lead: ${lead.id}`);
-        // Como o webhook pula o evaluator fora do expediente, a Fila do evaluator não foi chamada.
-        // Chamamos forçadamente enviando message_id = null (isso indica que é um reprocessamento global, sem mensagem engatilhada específica)
-        await fetch(`${supabaseUrl}/functions/v1/ai-autonomous-evaluator`, {
+      let digestContext = `DADOS DE AUDITORIA DAS ÚLTIMAS 24H (Varredura Completa):\n\n`;
+      updatedLeads.forEach((l) => {
+        digestContext += `LEAD: ${l.customer_name}\n`;
+        digestContext += `ERROS APONTADOS PELA IA: ${JSON.stringify(l.audit_reasons || {})}\n`;
+        digestContext += `---\n`;
+      });
+
+      console.log("[CONSOLIDATOR] Enviando contexto para a IA gerar Resumo...");
+
+      const isProxy = aiSettings?.provider?.toLowerCase() === "local ai proxy";
+      const apiKey = aiSettings?.api_key;
+      const proxyUrl = aiSettings?.api_url;
+      const model = isProxy ? (aiSettings?.model || "gemini-2.5-flash") : "gemini-2.5-flash";
+
+      const systemPrompt = `Você é o Assessor do Gerente da Mecânica.
+Sua função é ler os logs de auditoria dos clientes recentes e escrever um "Daily Digest".
+Isso inclui não só fora do expediente, mas TUDO que a equipe atendeu e a IA achou de errado.
+O relatório deve ser executivo, formatado em Markdown, com os seguintes pontos:
+1. Resumo Quantitativo (X conversas analisadas).
+2. Destaques Críticos: Clientes furiosos? Orçamentos altos não respondidos?
+3. Falhas do Atendimento: Resuma se a equipe esqueceu de algo ou não fez direito, segundo os "ERROS APONTADOS PELA IA".
+Seja direto, elegante e não invente dados.`;
+
+      let summaryText = "Resumo indisponível devido a erro no provedor de IA.";
+
+      if (isProxy && proxyUrl) {
+        // Limpar url
+        const baseUrl = proxyUrl.endsWith('/v1/chat/completions') ? proxyUrl : `${proxyUrl.replace(/\/+$/, '')}/v1/chat/completions`;
+        const llmReq = await fetch(baseUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseServiceRoleKey}`,
+            "Authorization": `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            lead_id: lead.id,
-            message_content: "[BATCH PROCESSING OFF-HOURS]",
-            sender_type: "system",
+            model: model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: digestContext }
+            ],
           }),
         });
-        return { lead, status: "success" };
-      } catch (err) {
-        console.error(`[CONSOLIDATOR] Erro ao disparar evaluator para ${lead.id}:`, err);
-        return { lead, status: "error", error: err };
+
+        if (llmReq.ok) {
+          const llmRes = await llmReq.json();
+          summaryText = llmRes.choices?.[0]?.message?.content || "Nenhum conteúdo retornado.";
+        } else {
+          console.error("[CONSOLIDATOR] LLM Proxy erro:", await llmReq.text());
+        }
+      } else {
+        const urlToUse = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+        const llmReq = await fetch(`${urlToUse}?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: "user", parts: [{ text: digestContext }] }]
+          })
+        });
+
+        if (llmReq.ok) {
+          const llmRes = await llmReq.json();
+          summaryText = llmRes.candidates?.[0]?.content?.parts?.[0]?.text || "Nenhum conteúdo retornado.";
+        } else {
+          console.error("[CONSOLIDATOR] Google LLM erro:", await llmReq.text());
+        }
       }
-    });
 
-    await Promise.all(evaluatorPromises);
-
-    // 4. Aguardar um pouco para dar tempo das Edge functions assíncronas do evaluator processarem o banco?
-    // Se o evaluator_promises apenas faz a chamada (que não aguarda a conclusão interna se for async), teríamos que esperar.
-    // Mas fetch com await espera a resposta HTTP 200. Então após o Promise.all, as avaliações no banco JÁ estão prontas!
-    
-    // 5. Coletar os relatórios fresquinhos desses leads no banco
-    const { data: updatedLeads } = await supabase
-      .from("leads")
-      .select("id, customer_name, audit_reasons, audit_checklist")
-      .in("id", recentLeads.map((l) => l.id));
-
-    // 6. Gerar Daily Digest usando a LLM
-    let digestContext = `DADOS DE AUDITORIA FORA DE EXPEDIENTE:\n\n`;
-    (updatedLeads || []).forEach((l) => {
-      digestContext += `LEAD: ${l.customer_name}\n`;
-      digestContext += `ERROS APONTADOS PELA IA: ${JSON.stringify(l.audit_reasons || {})}\n`;
-      digestContext += `---\n`;
-    });
-
-    console.log("[CONSOLIDATOR] Enviando contexto para a IA gerar Resumo...");
-
-    // Usa API do Provider
-    const isProxy = aiSettings?.provider?.toLowerCase() === "local ai proxy";
-    const apiKey = aiSettings?.api_key;
-    const apiUrl = isProxy ? (aiSettings?.api_url || "http://host.docker.internal:3001/v1/chat/completions") : "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-    const model = isProxy ? (aiSettings?.model || "gemini-2.5-flash") : "gemini-2.5-flash";
-
-    const systemPrompt = `Você é o Assessor Matinal do Gerente da Mecânica.
-Sua função é ler os logs de auditoria dos clientes que interagiram durante a noite/fora de expediente e escrever um "Daily Digest".
-O relatório deve ser executivo, formatado em Markdown, com os seguintes pontos:
-1. Resumo Quantitativo (X conversas analisadas).
-2. Destaques Críticos: Houve algum cliente furioso? Algum orçamento alto perdido?
-3. Falhas do Atendimento: Resuma se a equipe errou algo crucial segundo os "ERROS APONTADOS PELA IA".
-Não invente dados. Seja direto e elegante.`;
-
-    let summaryText = "Resumo indisponível devido a erro no provedor de IA.";
-
-    if (isProxy) {
-      const llmReq = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: digestContext }
-          ],
-        }),
+      const { error: digestError } = await supabase.from("daily_digests").insert({
+        target_date: new Date().toISOString().split("T")[0],
+        summary_text: summaryText,
+        leads_processed: updatedLeads.length,
       });
 
-      if (llmReq.ok) {
-        const llmRes = await llmReq.json();
-        summaryText = llmRes.choices?.[0]?.message?.content || "Nenhum conteúdo retornado.";
-      } else {
-        console.error("[CONSOLIDATOR] LLM Proxy erro:", await llmReq.text());
+      if (digestError) {
+        console.error("[CONSOLIDATOR] Erro salvando digest:", digestError);
       }
-    } else {
-      // Google Direct
-      const llmReq = await fetch(`${apiUrl}?key=${apiKey}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: "user", parts: [{ text: digestContext }] }]
-        })
+
+      return new Response(JSON.stringify({ success: true, digest: summaryText }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       });
-
-      if (llmReq.ok) {
-        const llmRes = await llmReq.json();
-        summaryText = llmRes.candidates?.[0]?.content?.parts?.[0]?.text || "Nenhum conteúdo retornado.";
-      } else {
-        console.error("[CONSOLIDATOR] Google LLM erro:", await llmReq.text());
-      }
     }
 
-    console.log("[CONSOLIDATOR] Salvando Daily Digest...");
-
-    // 7. Salvar no Banco
-    const { error: digestError } = await supabase.from("daily_digests").insert({
-      target_date: new Date().toISOString().split("T")[0],
-      summary_text: summaryText,
-      leads_processed: recentLeads.length,
-    });
-
-    if (digestError) {
-      console.error("[CONSOLIDATOR] Erro salvando digest:", digestError);
-    }
-
-    return new Response(JSON.stringify({ success: true, digest: summaryText }), {
+    return new Response(JSON.stringify({ error: "Invalid action" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+      status: 400,
     });
   } catch (error) {
     console.error("[CONSOLIDATOR] Erro Crítico:", error);
