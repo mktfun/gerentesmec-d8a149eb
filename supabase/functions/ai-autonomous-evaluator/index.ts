@@ -125,6 +125,9 @@ serve(async (req) => {
     const text = message_content.trim();
     if (text.length < 10 && !text.match(/[?]/)) {
       console.log(`[Cost-Efficiency] Mensagem ignorada por ser muito curta e sem pergunta: "${text}"`);
+      if (message_id) {
+        await supabaseClient.from('chat_messages').update({ ai_audited: true }).eq('id', message_id);
+      }
       await updateTask({ status: 'ignored', completed_at: new Date().toISOString() });
       return new Response(JSON.stringify({ status: 'ignored_by_deterministic_filter' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
     }
@@ -134,7 +137,7 @@ serve(async (req) => {
     aiSettings = dbAiSettings;
     if (!aiSettings || !aiSettings.features?.auto_scoring) {
       await updateTask({ status: 'ignored', completed_at: new Date().toISOString(), error_message: 'auto_scoring desabilitado' });
-      return new Response(JSON.stringify({ status: 'ai_automation_disabled' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
+      return new Response(JSON.stringify({ error: 'ai_automation_disabled' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 });
     }
 
     // EXTRAÇÃO E RASPAGEM DE LINKS (Regex aprimorado)
@@ -779,14 +782,19 @@ serve(async (req) => {
       last_processed_message_id: message_id
     });
 
-    // 7. Salvar o AI Insight inline na mensagem, se existir
-    if (mockOutput.message_insight && message_id) {
+    // 7. Salvar o AI Insight e marcar a mensagem como auditada
+    if (message_id) {
+      const payloadToUpdate: any = { ai_audited: true };
+      if (mockOutput.message_insight) {
+        payloadToUpdate.ai_insight = mockOutput.message_insight;
+      }
+      
       const { error: msgErr } = await supabaseClient
         .from('chat_messages')
-        .update({ ai_insight: mockOutput.message_insight })
-        .eq('chatwoot_message_id', message_id);
+        .update(payloadToUpdate)
+        .eq('id', message_id); // Ensure we use 'id', because message_id from context is chat_messages.id
       
-      if (msgErr) console.error("[AI-EVALUATOR] Erro ao salvar message_insight:", msgErr);
+      if (msgErr) console.error("[AI-EVALUATOR] Erro ao marcar mensagem como auditada:", msgErr);
     }
 
     return new Response(JSON.stringify({ status: 'success', evaluated: updatePayload }), {
