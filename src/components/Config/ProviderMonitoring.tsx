@@ -192,6 +192,16 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
       };
     }
     // Default / OpenRouter / etc
+    if (p.includes('local') || p.includes('proxy') || p.includes('tunnel')) {
+      return {
+        color: 'hsl(280, 70%, 55%)',
+        bg: 'rgba(168, 85, 247, 0.08)',
+        border: 'rgba(168, 85, 247, 0.3)',
+        text: 'text-purple-400',
+        glow: 'shadow-[0_0_20px_rgba(168,85,247,0.15)]',
+        liquidBg: 'from-purple-500/20 to-transparent'
+      };
+    }
     return {
       color: 'hsl(250, 84%, 60%)',
       bg: 'rgba(99, 102, 241, 0.08)',
@@ -256,6 +266,7 @@ export const ProviderMonitoring: React.FC<ProviderMonitoringProps> = ({
             <option value="OpenAI">OpenAI</option>
             <option value="NVIDIA NIM">NVIDIA NIM</option>
             <option value="OpenRouter">OpenRouter</option>
+            <option value="Local AI Proxy (CLI Tunnel)">Local AI Proxy</option>
           </select>
           
           <button 

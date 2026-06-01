@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, CheckCircle2, XCircle, Loader2, Circle, Clock, MinusCircle } from 'lucide-react';
+import { Activity, CheckCircle2, XCircle, Loader2, Circle, Clock, MinusCircle, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAppData } from '@/context/AppDataContext';
 
 interface Task {
   id: string;
@@ -15,6 +16,7 @@ interface Task {
   latency_ms: number | null;
   tokens_used: number | null;
   error_message: string | null;
+  retry_count: number;
   created_at: string;
   started_at: string | null;
   completed_at: string | null;
@@ -35,12 +37,19 @@ const providerColor = (p: string | null) => {
   if (v.includes('google') || v.includes('gemini') || v.includes('vertex')) return '#4285f4';
   if (v.includes('nvidia') || v.includes('nim')) return '#76b900';
   if (v.includes('anthropic')) return '#eb6821';
+  if (v.includes('local') || v.includes('proxy') || v.includes('tunnel')) return '#a855f7';
   return '#6366f1';
 };
 
 export const TaskQueuePanel: React.FC = () => {
+  const { aiSettings } = useAppData();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [tick, setTick] = useState(0); // forces re-render for relative timestamps
+  const [tick, setTick] = useState(0);
+  const [proxyStatus, setProxyStatus] = useState<'online' | 'offline' | 'checking' | 'idle'>('idle');
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const isLocalProxy = aiSettings?.provider === 'Local AI Proxy (CLI Tunnel)';
+  const proxyUrl = aiSettings?.api_url || '';
 
   // Re-render every second so "há Xs" stays live
   useEffect(() => {
@@ -91,9 +100,71 @@ export const TaskQueuePanel: React.FC = () => {
     };
   }, []);
 
+  // Heartbeat: ping proxy every 30s
+  const checkProxy = useCallback(async () => {
+    if (!isLocalProxy || !proxyUrl) {
+      setProxyStatus('idle');
+      return;
+    }
+    setProxyStatus('checking');
+    try {
+      const baseUrl = proxyUrl.replace(/\/+$/, '');
+      const res = await fetch(baseUrl, { method: 'GET', signal: AbortSignal.timeout(5000) });
+      setProxyStatus(res.ok ? 'online' : 'offline');
+    } catch {
+      setProxyStatus('offline');
+    }
+  }, [isLocalProxy, proxyUrl]);
+
+  useEffect(() => {
+    checkProxy();
+    const i = setInterval(checkProxy, 30000);
+    return () => clearInterval(i);
+  }, [checkProxy]);
+
+  // Retry failed tasks
+  const retryFailedTasks = useCallback(async () => {
+    const retryable = tasks.filter(
+      (t) => t.status === 'error' && (t.retry_count || 0) < 3
+    );
+    if (retryable.length === 0) return;
+
+    setIsRetrying(true);
+    for (const task of retryable) {
+      try {
+        // Mark as pending again
+        await supabase
+          .from('ai_task_queue' as any)
+          .update({ status: 'pending', started_at: null, completed_at: null, error_message: null } as any)
+          .eq('id', task.id);
+
+        // Re-invoke the evaluator
+        const { data: msgs } = await supabase
+          .from('chatwoot_messages' as any)
+          .select('content, sender_type')
+          .eq('id', task.message_id)
+          .single();
+
+        if (msgs) {
+          await supabase.functions.invoke('ai-autonomous-evaluator', {
+            body: {
+              lead_id: task.lead_id,
+              message_id: task.message_id,
+              message_content: (msgs as any).content || task.content_preview || '',
+              sender_type: (msgs as any).sender_type || task.sender_type || 'contact',
+            }
+          });
+        }
+      } catch (e) {
+        console.error('[TaskQueue] Retry failed for task:', task.id, e);
+      }
+    }
+    setIsRetrying(false);
+  }, [tasks]);
+
   const counts = useMemo(() => {
     const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-    let pending = 0, running = 0, ok = 0, err = 0;
+    let pending = 0, running = 0, ok = 0, err = 0, retryable = 0;
     for (const t of tasks) {
       if (t.status === 'pending') pending++;
       else if (t.status === 'running') running++;
@@ -103,13 +174,20 @@ export const TaskQueuePanel: React.FC = () => {
           if (t.status === 'success') ok++;
           else if (t.status === 'error') err++;
         }
+        if (t.status === 'error' && (t.retry_count || 0) < 3) retryable++;
       }
     }
-    return { pending, running, ok, err };
+    return { pending, running, ok, err, retryable };
   }, [tasks, tick]);
 
-  // Heartbeat color
+  // Heartbeat visual
   const heartbeat = useMemo(() => {
+    if (isLocalProxy) {
+      if (proxyStatus === 'online') return { color: 'bg-emerald-500', label: 'Online' };
+      if (proxyStatus === 'offline') return { color: 'bg-rose-500', label: 'Offline' };
+      if (proxyStatus === 'checking') return { color: 'bg-amber-500', label: 'Verificando...' };
+      return { color: 'bg-muted-foreground/40', label: 'Ocioso' };
+    }
     const now = Date.now();
     const recent = tasks.find((t) => now - new Date(t.created_at).getTime() < 30000);
     const stalePending = tasks.find(
@@ -120,7 +198,7 @@ export const TaskQueuePanel: React.FC = () => {
     if (stalePending) return { color: 'bg-amber-500', label: 'Travado' };
     if (recent) return { color: 'bg-emerald-500', label: 'Vivo' };
     return { color: 'bg-muted-foreground/40', label: 'Ocioso' };
-  }, [tasks, tick]);
+  }, [tasks, tick, isLocalProxy, proxyStatus]);
 
   return (
     <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -137,6 +215,18 @@ export const TaskQueuePanel: React.FC = () => {
               <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
                 {heartbeat.label}
               </span>
+              {isLocalProxy && (
+                <span className={`inline-flex items-center gap-1 text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded-full border ${
+                  proxyStatus === 'online' 
+                    ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' 
+                    : proxyStatus === 'offline'
+                    ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                    : 'text-muted-foreground bg-muted border-border'
+                }`}>
+                  {proxyStatus === 'online' ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                  Túnel
+                </span>
+              )}
             </h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">
               Cada mensagem que chega vira uma task — acompanhe ao vivo.
@@ -153,6 +243,17 @@ export const TaskQueuePanel: React.FC = () => {
           </span>
           <span className="text-emerald-500">✓ {counts.ok}</span>
           <span className="text-rose-500">✗ {counts.err}</span>
+          
+          {counts.retryable > 0 && (
+            <button
+              onClick={retryFailedTasks}
+              disabled={isRetrying || (isLocalProxy && proxyStatus === 'offline')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-[10px] font-black uppercase tracking-widest"
+            >
+              <RefreshCw className={`w-3 h-3 ${isRetrying ? 'animate-spin' : ''}`} />
+              Retry ({counts.retryable})
+            </button>
+          )}
         </div>
       </div>
 
@@ -238,6 +339,12 @@ export const TaskQueuePanel: React.FC = () => {
                         <>
                           <span>·</span>
                           <span className="font-mono">{t.tokens_used} tk</span>
+                        </>
+                      )}
+                      {(t.retry_count || 0) > 0 && (
+                        <>
+                          <span>·</span>
+                          <span className="font-mono text-amber-500">retry {t.retry_count}/3</span>
                         </>
                       )}
                     </div>

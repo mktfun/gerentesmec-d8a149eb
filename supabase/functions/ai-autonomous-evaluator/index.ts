@@ -83,25 +83,42 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Missing lead_id or message_content' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
     }
 
-    // Insere task na fila como 'pending' (não bloqueia se falhar)
-    try {
-      const previewText = typeof message_content === 'string'
-        ? message_content.substring(0, 140)
-        : JSON.stringify(message_content).substring(0, 140);
-      const { data: taskRow } = await supabaseClient
-        .from('ai_task_queue')
-        .insert({
-          lead_id: String(lead_id),
-          message_id: message_id ? String(message_id) : null,
-          content_preview: previewText,
-          sender_type: sender_type || null,
-          status: 'pending'
-        })
-        .select('id')
-        .single();
-      if (taskRow) taskId = taskRow.id;
-    } catch (e) {
-      console.error('[AI-EVALUATOR] Falha ao criar task na fila:', e);
+    let retryCount = 0;
+    // Usa a task_id se foi enviada (retry), senão cria uma nova
+    if (payload.task_id) {
+      taskId = payload.task_id;
+      try {
+        const { data: existingTask } = await supabaseClient
+          .from('ai_task_queue')
+          .select('retry_count')
+          .eq('id', taskId)
+          .single();
+        if (existingTask) retryCount = existingTask.retry_count || 0;
+        
+        await supabaseClient.from('ai_task_queue').update({ status: 'running', started_at: new Date().toISOString() }).eq('id', taskId);
+      } catch (e) {
+        console.error('[AI-EVALUATOR] Erro ao recuperar task de retry:', e);
+      }
+    } else {
+      try {
+        const previewText = typeof message_content === 'string'
+          ? message_content.substring(0, 140)
+          : JSON.stringify(message_content).substring(0, 140);
+        const { data: taskRow } = await supabaseClient
+          .from('ai_task_queue')
+          .insert({
+            lead_id: String(lead_id),
+            message_id: message_id ? String(message_id) : null,
+            content_preview: previewText,
+            sender_type: sender_type || null,
+            status: 'pending'
+          })
+          .select('id')
+          .single();
+        if (taskRow) taskId = taskRow.id;
+      } catch (e) {
+        console.error('[AI-EVALUATOR] Falha ao criar task na fila:', e);
+      }
     }
 
     // 1. Pré-processamento Determinístico (Filtro Anti-Gasto)
@@ -620,6 +637,7 @@ serve(async (req) => {
         model: loggedModel,
         latency_ms: latencyMs,
         error_message: err.message || JSON.stringify(err),
+        retry_count: payload.task_id ? retryCount + 1 : 0,
         completed_at: new Date().toISOString()
       });
 
