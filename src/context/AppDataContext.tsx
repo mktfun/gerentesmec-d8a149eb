@@ -346,10 +346,21 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const businessHours = useMemo<BusinessHoursConfig>(() => {
     const bh = (integrationSettings as any)?.business_hours;
     if (!bh) return DEFAULT_BUSINESS_HOURS;
+    // Já no novo formato { schedule }
+    if (bh.schedule && typeof bh.schedule === 'object') {
+      return {
+        schedule: bh.schedule,
+        timezone: bh.timezone || DEFAULT_BUSINESS_HOURS.timezone,
+      };
+    }
+    // Formato legado { days: number[], start, end, timezone }
+    const days: number[] = Array.isArray(bh.days) ? bh.days : [1, 2, 3, 4, 5];
+    const start: string = bh.start || '08:00';
+    const end: string = bh.end || '18:00';
+    const schedule: Record<number, { start: string; end: string }> = {};
+    days.forEach((d) => { schedule[d] = { start, end }; });
     return {
-      days: Array.isArray(bh.days) ? bh.days : DEFAULT_BUSINESS_HOURS.days,
-      start: bh.start || DEFAULT_BUSINESS_HOURS.start,
-      end: bh.end || DEFAULT_BUSINESS_HOURS.end,
+      schedule,
       timezone: bh.timezone || DEFAULT_BUSINESS_HOURS.timezone,
     };
   }, [integrationSettings]);
