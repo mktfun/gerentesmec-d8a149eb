@@ -372,7 +372,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                             {item.text}
                           </label>
                           {(() => {
-                            const reason = lead.audit_justifications?.[item.id] || (!checked[item.id] ? lead.audit_reasons?.[item.id] : null);
+                            const reason = (lead as any).audit_justifications?.[item.id] || (!checked[item.id] ? lead.audit_reasons?.[item.id] : null);
                             if (!reason) return null;
                             const isNegative = !checked[item.id];
                             return (
