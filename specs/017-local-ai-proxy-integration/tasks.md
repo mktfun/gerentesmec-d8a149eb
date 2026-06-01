@@ -16,18 +16,18 @@
 - [x] Rodar `npx tsc --noEmit` e confirmar zero erros
 
 ### 3. Edge Function
-- [ ] Verificar que `aiSettings.api_url` na linha 522 agora recebe o valor correto do banco
-- [ ] Confirmar que o bloco Local AI Proxy usa `gemini-2.5-flash` obrigatoriamente (já feito no commit `f758c2b`)
-- [ ] Deploy da Edge Function: `npx supabase functions deploy ai-autonomous-evaluator --project-ref qtjitszradxsmnilnqtj`
+- [x] Verificar que `aiSettings.api_url` na linha 522 agora recebe o valor correto do banco
+- [x] Confirmar que o bloco Local AI Proxy usa `gemini-2.5-flash` obrigatoriamente (já feito no commit `f758c2b`)
+- [x] Deploy da Edge Function: `npx supabase functions deploy ai-autonomous-evaluator --project-ref qtjitszradxsmnilnqtj`
   - Requer `SUPABASE_ACCESS_TOKEN` — fazer login no CLI primeiro: `npx supabase login`
 
 ### 4. Validação End-to-End
-- [ ] Abrir Config → IA → selecionar `Local AI Proxy (CLI Tunnel)`
-- [ ] Preencher URL do tunnel e API Key → clicar em "Diagnóstico Inteligente"
-- [ ] Verificar no Supabase que `ai_settings.api_url` foi salvo
-- [ ] Recarregar a página e confirmar que a URL continua preenchida
-- [ ] Enviar uma mensagem de teste no Chatwoot e verificar que a task aparece como `success` na fila
-- [ ] Confirmar que o modelo logado em `llm_usage_logs` é `gemini-2.5-flash`
+- [x] Abrir Config → IA → selecionar `Local AI Proxy (CLI Tunnel)`
+- [x] Preencher URL do tunnel e API Key → clicar em "Diagnóstico Inteligente"
+- [x] Verificar no Supabase que `ai_settings.api_url` foi salvo
+- [x] Recarregar a página e confirmar que a URL continua preenchida
+- [x] Enviar uma mensagem de teste no Chatwoot e verificar que a task aparece como `success` na fila
+- [x] Confirmar que o modelo logado em `llm_usage_logs` é `gemini-2.5-flash`
 
 ### 5. Git
 - [ ] Commit com `feat(017): add api_url column to ai_settings + fix proxy integration`
