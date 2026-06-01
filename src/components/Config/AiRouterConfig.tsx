@@ -176,25 +176,19 @@ export const AiRouterConfig: React.FC = () => {
       } else if (provider === 'Local AI Proxy (CLI Tunnel)') {
         addLog(`Iniciando handshake com Túnel Local`, 'ok');
         const baseUrl = apiUrl.replace(/\/+$/, '');
-        const endpoint = baseUrl.endsWith('/v1/chat/completions') ? baseUrl : `${baseUrl}/v1/chat/completions`;
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: [{ role: "user", content: "Responda apenas 'OK'" }]
-          })
-        });
+        const res = await fetch(baseUrl, { method: 'GET' });
 
         if (res.ok) {
-          addLog('Conexão com o túnel estabelecida', 'ok');
-          addLog('Teste de Geração via Proxy: SUCESSO', 'ok');
+          const data = await res.json().catch(() => null);
+          if (data?.message || data?.endpoints) {
+            addLog('Túnel Cloudflare ativo e respondendo', 'ok');
+            addLog(`Servidor detectado: ${data.message || 'CLI Proxy API'}`, 'ok');
+          } else {
+            addLog('Túnel respondeu (200 OK)', 'ok');
+          }
           setTestStatus('success');
         } else {
-          addLog(`Falha na Conexão (${res.status})`, 'fail');
+          addLog(`Túnel retornou status ${res.status} — verifique se o servidor local está rodando`, 'fail');
           setTestStatus('error');
         }
       } else {
