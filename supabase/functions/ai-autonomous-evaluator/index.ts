@@ -395,7 +395,7 @@ serve(async (req) => {
         llmOutputText = data.candidates[0].content.parts[0].text;
         tokensUsed = data.usageMetadata?.totalTokenCount || null;
         
-      } else if (provider === 'Google' || provider === 'Gemini Studio' || (apiKey && !apiKey.startsWith("sk-") && !apiKey.startsWith("nvapi-") && !provider.includes('OpenRouter') && !provider.includes('Anthropic'))) {
+      } else if (provider === 'Google' || provider === 'Gemini Studio' || (provider !== 'Local AI Proxy (CLI Tunnel)' && apiKey && !apiKey.startsWith("sk-") && !apiKey.startsWith("nvapi-") && !provider.includes('OpenRouter') && !provider.includes('Anthropic'))) {
         // Gemini (Direct Google API via AI Studio)
         let parts: any[] = [{ text: prompt }];
         userMessageContent = prompt; // FIX: Ensure input_text is populated for Gemini
