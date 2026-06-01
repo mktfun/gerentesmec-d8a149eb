@@ -68,6 +68,9 @@ const availableModels: Record<string, string[]> = {
   'Google Vertex AI': [
     'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'
   ],
+  'Local AI Proxy (CLI Tunnel)': [
+    'gemini-3.5-flash', 'gemini-2.5-flash', 'gemma-4-31b-it', 'llama3'
+  ],
 };
 
 export const AiRouterConfig: React.FC = () => {
@@ -81,6 +84,9 @@ export const AiRouterConfig: React.FC = () => {
   const [gcpProjectId, setGcpProjectId] = useState('');
   const [gcpRegion, setGcpRegion] = useState('us-central1');
   const [gcpCredentials, setGcpCredentials] = useState('');
+  
+  // Local Proxy Field
+  const [apiUrl, setApiUrl] = useState('');
   
   const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [testLog, setTestLog] = useState<{ step: string; status: 'ok' | 'fail' | 'warn' }[]>([]);
@@ -98,12 +104,14 @@ export const AiRouterConfig: React.FC = () => {
       if (aiSettings.gcp_project_id) setGcpProjectId(aiSettings.gcp_project_id);
       if (aiSettings.gcp_region) setGcpRegion(aiSettings.gcp_region);
       if (aiSettings.gcp_credentials) setGcpCredentials(typeof aiSettings.gcp_credentials === 'string' ? aiSettings.gcp_credentials : JSON.stringify(aiSettings.gcp_credentials, null, 2));
+      if (aiSettings.api_url) setApiUrl(aiSettings.api_url);
     }
   }, [aiSettings]);
 
   const handleTest = async () => {
     if (provider === 'Google Vertex AI' && (!gcpCredentials || !gcpProjectId)) return;
-    if (provider !== 'Google Vertex AI' && !apiKey) return;
+    if (provider === 'Local AI Proxy (CLI Tunnel)' && !apiUrl) return;
+    if (provider !== 'Google Vertex AI' && !apiKey && provider !== 'Local AI Proxy (CLI Tunnel)') return;
     
     setTestStatus('testing');
     setTestLog([]);
@@ -165,6 +173,30 @@ export const AiRouterConfig: React.FC = () => {
           addLog(`Falha de Autenticação (${res.status})`, 'fail');
           setTestStatus('error');
         }
+      } else if (provider === 'Local AI Proxy (CLI Tunnel)') {
+        addLog(`Iniciando handshake com Túnel Local`, 'ok');
+        const baseUrl = apiUrl.replace(/\/+$/, '');
+        const endpoint = baseUrl.endsWith('/v1/chat/completions') ? baseUrl : `${baseUrl}/v1/chat/completions`;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [{ role: "user", content: "Responda apenas 'OK'" }]
+          })
+        });
+
+        if (res.ok) {
+          addLog('Conexão com o túnel estabelecida', 'ok');
+          addLog('Teste de Geração via Proxy: SUCESSO', 'ok');
+          setTestStatus('success');
+        } else {
+          addLog(`Falha na Conexão (${res.status})`, 'fail');
+          setTestStatus('error');
+        }
       } else {
         // Fallback genérico / mock para os que não implementamos teste real ainda
         addLog(`Mock Test: Provedor ${provider} não tem teste de rede nativo na UI`, 'warn');
@@ -175,7 +207,8 @@ export const AiRouterConfig: React.FC = () => {
         await updateAiSettings({ 
           provider, 
           model, 
-          api_key: apiKey 
+          api_key: apiKey,
+          api_url: provider === 'Local AI Proxy (CLI Tunnel)' ? apiUrl : undefined
         });
         addLog('Configuração salva na base de dados.', 'ok');
       }
@@ -194,7 +227,8 @@ export const AiRouterConfig: React.FC = () => {
     await updateAiSettings({ 
       provider, model: recommendedModel, api_key: apiKey,
       gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
-      gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null
+      gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null,
+      api_url: provider === 'Local AI Proxy (CLI Tunnel)' ? apiUrl : undefined
     });
   };
 
@@ -375,6 +409,41 @@ export const AiRouterConfig: React.FC = () => {
                   className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
                 />
               </div>
+              
+              {provider === 'Local AI Proxy (CLI Tunnel)' && (
+                <div className="mt-4">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center justify-between">
+                    <span>API URL (Cloudflare/Ngrok Tunnel)</span>
+                  </label>
+                  <div className="relative">
+                    <Server className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={apiUrl}
+                      onChange={(e) => {
+                        setApiUrl(e.target.value);
+                        if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+                      }}
+                      placeholder={`https://meu-tunel.trycloudflare.com`}
+                      className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                    />
+                  </div>
+                  
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                    className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20 backdrop-blur-md overflow-hidden shadow-inner"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Network className="w-4 h-4 text-primary" />
+                      <h4 className="text-sm font-bold text-primary">Proxy Local em Execução</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Lembre-se de manter o comando <code className="bg-black/20 px-1 py-0.5 rounded text-primary">cloudflared tunnel</code> rodando no seu terminal. Se você fechar a janela, a plataforma não conseguirá classificar os leads.
+                    </p>
+                  </motion.div>
+                </div>
+              )}
+
               {model === 'Gemini Free-Tier Ensemble (Auto-Routing)' && (
                 <motion.div 
                   initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}

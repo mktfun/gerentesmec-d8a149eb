@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-06-01]
+### Added
+- **011-local-ai-proxy-provider**: Implementado suporte nativo para o "Local AI Proxy (CLI Tunnel)". Adicionado bypass e roteamento na edge function `ai-autonomous-evaluator` direcionando as chamadas para a máquina local do usuário via Cloudflare/Ngrok. Adicionado campo `API URL` na interface.
+
+## [2026-05-29]
+### Added
+- **004-score-metrics-refactoring**: Implementada a arquitetura de Score Ponderado (60/40) em todo o sistema. Alteração das métricas principais nos dashboards (TVs, Relatórios, Kanban) para considerar o peso de 60% para leads ganhos e 40% para perdidos, garantindo justiça ao avaliar os gerentes e maior assertividade analítica.
 ## [2026-05-28]
 ### Added
 - **010-ai-ensemble-telemetry**: Implementação do loop real de Fallbacks (bypass de Rate Limits) no backend via Supabase Edge Functions para a arquitetura "Gemini Free-Tier Ensemble". Integração da inserção de "Inputs (Prompts)" e "Outputs" completos na Telemetria, visíveis em logs bem-sucedidos.

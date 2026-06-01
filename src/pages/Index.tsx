@@ -13,7 +13,7 @@ import TvDashboard from '@/components/Dashboard/TvDashboard';
 
 import { fadeUp } from '@/utils/motion';
 
-const WEEK_DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const WEEK_DAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b'];
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
@@ -21,7 +21,7 @@ const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / 
 const Index = () => {
   const { leads, managers, units, isTvMode, setIsTvMode, businessHours } = useAppData();
 
-  // ── Hooks devem vir antes de qualquer early return (Rules of Hooks) ──
+  // â”€â”€ Hooks devem vir antes de qualquer early return (Rules of Hooks) â”€â”€
   
   if (isTvMode) {
     return <TvDashboard />;
@@ -38,11 +38,11 @@ const Index = () => {
   const now = new Date();
   const today0 = startOfDay(now);
 
-  // Global score (Últimos 30 dias) — usa APENAS leads auditados no denominador
+  // Global score (Ãšltimos 30 dias) â€” usa APENAS leads auditados no denominador
   const leads30Days = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime() - 29 * 86400000);
   const globalScore = avgScore(leads30Days);
 
-  // Score series — last 7 days (trailing 30-day average for each day to show true global evolution)
+  // Score series â€” last 7 days (trailing 30-day average for each day to show true global evolution)
   const scoreHistory = useMemo(() => {
     const series: { day: string; score: number | null }[] = [];
     let validPoints = 0;
@@ -63,8 +63,8 @@ const Index = () => {
       series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a * 10) / 10 : null });
     }
 
-    // Chart Fallback: Se for o dia 1 de uso e só tem 1 ponto, vamos "esticar" essa linha horizontalmente 
-    // para preencher o gráfico de forma visualmente agradável ao invés de um ponto solto solitário.
+    // Chart Fallback: Se for o dia 1 de uso e sÃ³ tem 1 ponto, vamos "esticar" essa linha horizontalmente 
+    // para preencher o grÃ¡fico de forma visualmente agradÃ¡vel ao invÃ©s de um ponto solto solitÃ¡rio.
     if (validPoints === 1) {
       const singleScore = series.find(s => s.score !== null)?.score;
       if (singleScore !== undefined) {
@@ -95,7 +95,7 @@ const Index = () => {
     return Math.round((a - b) * 10) / 10;
   }, [leads, today0]);
 
-  // Unit scores — usa apenas auditados no denominador
+  // Unit scores â€” usa apenas auditados no denominador
   const unitScores = units.map(u => {
     const uLeadsAll = leads.filter(l => l.unit_id === u.id);
     return { ...u, score: avgScoreInt(uLeadsAll) };
@@ -114,7 +114,7 @@ const Index = () => {
 
 
 
-  // Manager ranking — usa apenas auditados no denominador
+  // Manager ranking â€” usa apenas auditados no denominador
   const managerRanking = managers.map(m => {
     const unit = units.find(u => u.id === m.unit_id);
     const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
@@ -126,13 +126,13 @@ const Index = () => {
   return (
     <div className="p-8 pb-20 min-h-screen">
       
-      {/* ── HERO CARD: SCORE GLOBAL ── */}
+      {/* â”€â”€ HERO CARD: SCORE GLOBAL â”€â”€ */}
       <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-border p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
         <div className="flex-1">
           <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-500/70 dark:text-indigo-300/70 mb-4">Score Global da Rede</p>
           <div className="flex items-end gap-6 mb-2">
             <h2 className="text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
-              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
+              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">â€”</span>}
             </h2>
             {weekTrend !== null && (
               <div className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
@@ -142,7 +142,7 @@ const Index = () => {
             )}
           </div>
           <p className="text-sm text-slate-400 mt-4">
-            {globalScore !== null ? `Média dos últimos 30 dias · Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
+            {globalScore !== null ? `MÃ©dia dos Ãºltimos 30 dias Â· Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
           </p>
         </div>
 
@@ -154,13 +154,13 @@ const Index = () => {
           </div>
 
           <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Resolução Hoje</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">ResoluÃ§Ã£o Hoje</p>
             <p className="text-3xl font-black text-emerald-500 dark:text-emerald-400">{resolutionRate}%</p>
           </div>
 
           <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner relative overflow-hidden">
             <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Tempo Médio</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Tempo MÃ©dio</p>
             <p className="text-3xl font-black text-indigo-500 dark:text-indigo-400">
               {todayTmr}<span className="text-sm font-bold text-indigo-500/50 dark:text-indigo-400/50 ml-1">min</span>
             </p>
@@ -169,7 +169,7 @@ const Index = () => {
         </div>
       </motion.div>
 
-      {/* ── METRICS ROW ── */}
+      {/* â”€â”€ METRICS ROW â”€â”€ */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <motion.div {...fadeUp(0.1)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
@@ -185,8 +185,8 @@ const Index = () => {
             <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
           </div>
           <h3 className="text-4xl font-black text-foreground mb-2">{completedLeads.length}</h3>
-          <p className="text-sm text-muted-foreground font-medium mb-1">Concluídos com Sucesso</p>
-          <p className="text-xs text-emerald-500 dark:text-emerald-400">{resolutionRate}% de resolução</p>
+          <p className="text-sm text-muted-foreground font-medium mb-1">ConcluÃ­dos com Sucesso</p>
+          <p className="text-xs text-emerald-500 dark:text-emerald-400">{resolutionRate}% de resoluÃ§Ã£o</p>
         </motion.div>
 
         <motion.div {...fadeUp(0.2)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
@@ -195,23 +195,23 @@ const Index = () => {
           </div>
           <h3 className={`text-4xl font-black mb-2 ${dangerLeads.length > 0 ? 'text-rose-500' : 'text-foreground'}`}>{dangerLeads.length}</h3>
           <p className="text-sm text-muted-foreground font-medium mb-1">Leads em Alerta ({'>'}20m)</p>
-          <p className="text-xs text-rose-500 dark:text-rose-400">Ação imediata necessária</p>
+          <p className="text-xs text-rose-500 dark:text-rose-400">AÃ§Ã£o imediata necessÃ¡ria</p>
         </motion.div>
       </div>
 
-      {/* ── CHARTS & RANKING ROW ── */}
+      {/* â”€â”€ CHARTS & RANKING ROW â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Area Chart */}
         <motion.div {...fadeUp(0.25)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border lg:col-span-2 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h3 className="text-lg font-bold text-foreground">Evolução do Score Global</h3>
-              <p className="text-sm text-muted-foreground mt-1">Últimos 7 dias</p>
+              <h3 className="text-lg font-bold text-foreground">EvoluÃ§Ã£o do Score Global</h3>
+              <p className="text-sm text-muted-foreground mt-1">Ãšltimos 7 dias</p>
             </div>
             {weekTrend !== null && (
               <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
-                {weekTrend >= 0 ? '▲' : '▼'} {weekTrend >= 0 ? '+' : ''}{weekTrend}%
+                {weekTrend >= 0 ? 'â–²' : 'â–¼'} {weekTrend >= 0 ? '+' : ''}{weekTrend}%
               </div>
             )}
           </div>
@@ -237,8 +237,8 @@ const Index = () => {
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center text-slate-400">
                 <Clock className="w-8 h-8 mb-3 opacity-40" />
-                <p className="text-sm font-semibold">Sem auditorias nos últimos 7 dias</p>
-                <p className="text-xs text-slate-500 mt-1">O gráfico será preenchido conforme novos atendimentos forem pontuados.</p>
+                <p className="text-sm font-semibold">Sem auditorias nos Ãºltimos 7 dias</p>
+                <p className="text-xs text-slate-500 mt-1">O grÃ¡fico serÃ¡ preenchido conforme novos atendimentos forem pontuados.</p>
               </div>
             )}
           </div>
@@ -262,7 +262,7 @@ const Index = () => {
                 </div>
                 <div className="text-right">
                   <div className={`text-sm font-black flex items-center justify-end gap-1 mb-1 ${m.score === null ? 'text-muted-foreground/30' : m.score >= 75 ? 'text-emerald-500 dark:text-emerald-400' : m.score >= 50 ? 'text-indigo-400 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400'}`}>
-                    {m.score !== null ? `${m.score}%` : '—'}
+                    {m.score !== null ? `${m.score}%` : 'â€”'}
                   </div>
                   <div className="w-16 h-1.5 bg-black/5 dark:bg-[#13111A] rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${m.score ?? 0}%` }} />

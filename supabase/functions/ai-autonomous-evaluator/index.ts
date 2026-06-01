@@ -493,6 +493,10 @@ serve(async (req) => {
         let apiUrl = aiSettings.api_url || 'https://api.openai.com/v1/chat/completions';
         if (provider === 'OpenRouter') apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
         if (provider === 'NVIDIA NIM') apiUrl = 'https://integrate.api.nvidia.com/v1/chat/completions';
+        if (provider === 'Local AI Proxy (CLI Tunnel)') {
+          const baseUrl = (aiSettings.api_url || '').replace(/\/+$/, '');
+          apiUrl = baseUrl.endsWith('/v1/chat/completions') ? baseUrl : `${baseUrl}/v1/chat/completions`;
+        }
         
         let modelsToTry = [finalModel];
         if (provider === 'NVIDIA NIM') {
@@ -507,20 +511,32 @@ serve(async (req) => {
           finalModel = modelsToTry[i];
           console.log(`[AI-EVALUATOR] Tentando modelo: ${finalModel} (Tentativa ${i+1}/${modelsToTry.length})`);
           
-          const res = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model: finalModel,
-              ...(provider !== 'NVIDIA NIM' ? { response_format: { type: "json_object" } } : {}),
-              messages: [{ role: 'user', content: userMessageContent }]
-            })
-          });
+          let res;
+          try {
+            res = await fetch(apiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                model: finalModel,
+                ...(provider !== 'NVIDIA NIM' ? { response_format: { type: "json_object" } } : {}),
+                messages: [{ role: 'user', content: userMessageContent }]
+              })
+            });
+          } catch (fetchErr: any) {
+            if (provider === 'Local AI Proxy (CLI Tunnel)') {
+              throw new Error(`Túnel Offline ou Inalcançável: Não foi possível conectar ao proxy local em ${apiUrl}. Certifique-se que o cloudflared tunnel está rodando no PC.`);
+            }
+            throw fetchErr;
+          }
           
           if (!res.ok) {
+            if (provider === 'Local AI Proxy (CLI Tunnel)' && (res.status === 502 || res.status === 530)) {
+              throw new Error(`Túnel Offline (Cloudflare Error ${res.status}): O túnel está configurado mas o processo local não está respondendo.`);
+            }
+
             const errorText = await res.text();
             let parsedError;
             try {
