@@ -761,9 +761,9 @@ serve(async (req) => {
     }
 
     if (mockOutput.media_summaries && Object.keys(mockOutput.media_summaries).length > 0) {
-      // Merge media_summaries to keep previous ones!
-      const currentSummaries = (leadData as any)?.media_summaries || {};
-      (updatePayload as any).media_summaries = { ...currentSummaries, ...mockOutput.media_summaries };
+      if (!mockOutput.audit_reasons) mockOutput.audit_reasons = {};
+      // Just keep them in audit_reasons so they are saved
+      mockOutput.audit_reasons = { ...mockOutput.audit_reasons, ...mockOutput.media_summaries };
     }
     if (mockOutput.audit_reasons && Object.keys(mockOutput.audit_reasons).length > 0) {
       updatePayload.audit_reasons = mockOutput.audit_reasons;
