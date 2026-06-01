@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_settings ADD COLUMN IF NOT EXISTS api_url TEXT DEFAULT NULL;

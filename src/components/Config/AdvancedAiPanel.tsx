@@ -78,14 +78,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
         for (const msg of data) {
           // Trigger a reavaliação enviando o payload que o webhook original enviaria
           await supabase.functions.invoke('ai-autonomous-evaluator', {
-             body: {
-              message_content: msg.content,
-              lead_id: msg.lead_id,
-              message_id: msg.id,
-              media_url: msg.media_url,
-              media_type: msg.media_type,
-              sender_type: msg.sender_type
-            }
+             body: { record: msg }
           });
         }
         setQueueOk(true);

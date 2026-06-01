@@ -17,6 +17,7 @@ export type Database = {
       ai_settings: {
         Row: {
           api_key: string | null
+          api_url: string | null
           embedding_provider: string | null
           evaluation_criteria: Json | null
           features: Json
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           api_key?: string | null
+          api_url?: string | null
           embedding_provider?: string | null
           evaluation_criteria?: Json | null
           features?: Json
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           api_key?: string | null
+          api_url?: string | null
           embedding_provider?: string | null
           evaluation_criteria?: Json | null
           features?: Json

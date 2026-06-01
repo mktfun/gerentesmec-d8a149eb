@@ -12,6 +12,7 @@ export type Manager = Database['public']['Tables']['managers']['Row'] & {
 };
 export type Unit = Database['public']['Tables']['units']['Row'];
 export type AiSettings = Database['public']['Tables']['ai_settings']['Row'] & {
+  api_url?: string | null;
   system_prompt?: string;
   evaluation_criteria?: any;
   features?: { auto_scoring?: boolean; auto_pipeline?: boolean; vision?: boolean; audio?: boolean; };

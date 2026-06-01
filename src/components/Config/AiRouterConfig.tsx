@@ -107,8 +107,8 @@ export const AiRouterConfig: React.FC = () => {
       if (aiSettings.gcp_project_id) setGcpProjectId(aiSettings.gcp_project_id);
       if (aiSettings.gcp_region) setGcpRegion(aiSettings.gcp_region);
       if (aiSettings.gcp_credentials) setGcpCredentials(typeof aiSettings.gcp_credentials === 'string' ? aiSettings.gcp_credentials : JSON.stringify(aiSettings.gcp_credentials, null, 2));
-      if ((aiSettings as any).api_url || (aiSettings.features as any)?.api_url) {
-        setApiUrl((aiSettings as any).api_url || (aiSettings.features as any)?.api_url);
+      if (aiSettings.api_url || (aiSettings.features as any)?.api_url) {
+        setApiUrl(aiSettings.api_url || (aiSettings.features as any)?.api_url);
       }
     }
   }, [aiSettings]);
@@ -209,7 +209,7 @@ export const AiRouterConfig: React.FC = () => {
           provider, 
           model, 
           api_key: apiKey,
-          ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } as any : {})
+          ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } : {})
         });
         addLog('Configuração salva na base de dados.', 'ok');
       }
@@ -229,8 +229,8 @@ export const AiRouterConfig: React.FC = () => {
       provider, model: recommendedModel, api_key: apiKey,
       gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
       gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null,
-      ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } as any : {})
-    } as any);
+      ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } : {})
+    });
   };
 
   return (
