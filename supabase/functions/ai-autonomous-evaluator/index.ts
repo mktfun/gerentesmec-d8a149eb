@@ -507,7 +507,7 @@ serve(async (req) => {
               // Para o Local AI Proxy, vamos injetar áudios e vídeos como data URIs também, 
               // para que o roteador local possa converter e enviar para a CLI do Gemini
               userMessageContent = [
-                { type: "text", text: prompt },
+                { type: "text", text: prompt + (provider === 'Local AI Proxy (CLI Tunnel)' ? '\n\nCRITICAL: OUTPUT ONLY PURE JSON! NO MARKDOWN! NO CONVERSATIONAL TEXT!' : '') },
                 { type: "image_url", image_url: { url: `data:${actualMime};base64,${mediaBase64}` } }
               ];
             } else {
@@ -515,7 +515,7 @@ serve(async (req) => {
               userMessageContent = prompt;
             }
           } else {
-            userMessageContent = prompt;
+            userMessageContent = prompt + (provider === 'Local AI Proxy (CLI Tunnel)' ? '\n\nCRITICAL: OUTPUT ONLY PURE JSON! NO MARKDOWN! NO CONVERSATIONAL TEXT! START WITH { AND END WITH }.' : '');
           }
         }
         
