@@ -20,6 +20,7 @@ export const DEFAULT_BUSINESS_HOURS: BusinessHoursConfig = {
 
 /** Converte "HH:MM" em minutos desde meia-noite */
 const timeToMinutes = (time: string): number => {
+  if (!time) return 0;
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;
 };
@@ -33,8 +34,8 @@ export const isInsideBusinessHours = (
   if (!config.days.includes(dayOfWeek)) return false;
 
   const minutesInDay = date.getHours() * 60 + date.getMinutes();
-  const startMin = timeToMinutes(config.start);
-  const endMin = timeToMinutes(config.end);
+  const startMin = timeToMinutes(config?.start || '08:00');
+  const endMin = timeToMinutes(config?.end || '18:00');
 
   return minutesInDay >= startMin && minutesInDay < endMin;
 };
@@ -51,9 +52,9 @@ export const getWorkMinutes = (
   config: BusinessHoursConfig
 ): number => {
   if (from >= to) return 0;
-
-  const startMin = timeToMinutes(config.start);
-  const endMin = timeToMinutes(config.end);
+  if (!config?.days) config = DEFAULT_BUSINESS_HOURS;
+  const startMin = timeToMinutes(config?.start || '08:00');
+  const endMin = timeToMinutes(config?.end || '18:00');
   const dayWorkMinutes = endMin - startMin; // minutos úteis por dia
 
   if (dayWorkMinutes <= 0) return 0;

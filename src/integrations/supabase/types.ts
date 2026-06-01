@@ -26,6 +26,7 @@ export type Database = {
           gcp_region: string | null
           id: string
           model: string
+          off_hours_batching: boolean | null
           provider: string
           system_prompt: string | null
           updated_at: string
@@ -165,6 +166,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      daily_digests: {
+        Row: {
+          created_at: string | null
+          id: string
+          leads_processed: number | null
+          summary_text: string
+          target_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          leads_processed?: number | null
+          summary_text: string
+          target_date: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          leads_processed?: number | null
+          summary_text?: string
+          target_date?: string
+        }
+        Relationships: []
       }
       daily_score_snapshots: {
         Row: {
