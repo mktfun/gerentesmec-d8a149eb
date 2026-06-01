@@ -1,9 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type AuditorStatus = 'idle' | 'processing' | 'cooldown' | 'paused_error';
 
-export function useBackgroundAuditor() {
+interface BackgroundAuditorContextType {
+  enabled: boolean;
+  setEnabled: (v: boolean) => void;
+  cooldown: number;
+  setCooldown: (v: number) => void;
+  status: AuditorStatus;
+  lastError: string | null;
+}
+
+const BackgroundAuditorContext = createContext<BackgroundAuditorContextType | undefined>(undefined);
+
+export const BackgroundAuditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [enabled, setEnabled] = useState(() => {
     const saved = localStorage.getItem('background_auditor_enabled');
     return saved === 'true';
@@ -17,7 +28,6 @@ export function useBackgroundAuditor() {
   const [status, setStatus] = useState<AuditorStatus>('idle');
   const [lastError, setLastError] = useState<string | null>(null);
   
-  // Ref para controlar o timeout ativo e evitar memory leaks
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -40,7 +50,7 @@ export function useBackgroundAuditor() {
       try {
         const { data, error } = await supabase.from('chat_messages')
           .select('*')
-          .eq('ai_audited', false)
+          .or('ai_audited.eq.false,ai_audited.is.null')
           .eq('sender_type', 'user')
           .order('created_at', { ascending: true })
           .limit(1);
@@ -76,12 +86,15 @@ export function useBackgroundAuditor() {
     };
   }, [enabled, cooldown]);
 
-  return {
-    enabled,
-    setEnabled,
-    cooldown,
-    setCooldown,
-    status,
-    lastError
-  };
-}
+  return (
+    <BackgroundAuditorContext.Provider value={{ enabled, setEnabled, cooldown, setCooldown, status, lastError }}>
+      {children}
+    </BackgroundAuditorContext.Provider>
+  );
+};
+
+export const useBackgroundAuditor = () => {
+  const context = useContext(BackgroundAuditorContext);
+  if (!context) throw new Error('useBackgroundAuditor must be used within BackgroundAuditorProvider');
+  return context;
+};

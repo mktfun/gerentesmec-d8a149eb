@@ -23,7 +23,7 @@ import TvDashboard from "./components/Dashboard/TvDashboard";
 import NotFound from "./pages/NotFound";
 import { useAppData } from "./context/AppDataContext";
 import { useAuth } from "./features/auth/hooks/useAuth";
-import { BackgroundAuditorService } from "./components/Config/BackgroundAuditorService";
+import { BackgroundAuditorProvider } from "./context/BackgroundAuditorContext";
 
 const queryClient = new QueryClient();
 
@@ -74,16 +74,17 @@ const App = () => (
   <ThemeProvider>
     <AuthProvider>
       <AppDataProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BackgroundAuditorService />
-            <BrowserRouter>
-              <AppRoutes />
-            </BrowserRouter>
-          </TooltipProvider>
-        </QueryClientProvider>
+        <BackgroundAuditorProvider>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </BackgroundAuditorProvider>
       </AppDataProvider>
     </AuthProvider>
   </ThemeProvider>

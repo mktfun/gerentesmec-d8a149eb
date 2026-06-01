@@ -4,7 +4,7 @@ import { Cpu, X, Save, Sparkles, AlertTriangle, Eye, Activity, Database, Check }
 import { useAppData } from '@/context/AppDataContext';
 import { Switch } from '@/components/ui/switch';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
-import { useBackgroundAuditor } from '@/hooks/useBackgroundAuditor';
+import { useBackgroundAuditor } from '@/context/BackgroundAuditorContext';
 
 interface Props {
   isOpen: boolean;

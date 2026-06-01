@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2, User as UserIcon, CheckCheck } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2, User as UserIcon, CheckCheck, Database } from 'lucide-react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
 import { isLeadDanger } from '@/utils/metrics';
@@ -10,6 +10,7 @@ import KanbanView from '@/components/Crm/KanbanView';
 import LeadModalForm from '@/components/Crm/LeadModalForm';
 import UnitSwitcher from '@/components/Crm/UnitSwitcher';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useBackgroundAuditor } from '@/context/BackgroundAuditorContext';
 
 type ViewMode = 'list' | 'kanban';
 
@@ -17,6 +18,8 @@ const Crm = () => {
   const { leads, moveLeadStage, managers, units, deleteLeads } = useAppData();
   const { user } = useAuth();
   
+  const auditor = useBackgroundAuditor();
+
   const isUnitManager = user?.user_metadata?.role === 'unit_manager';
   const userUnitId = user?.user_metadata?.unit_id;
   
@@ -243,8 +246,29 @@ const Crm = () => {
           </AnimatePresence>
         </div>
 
-        {/* Direita: SLA Filter + Novo Atendimento */}
+        {/* Direita: SLA Filter + Novo Atendimento + Auditor de Fundo */}
         <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => auditor.setEnabled(!auditor.enabled)}
+            title="Auto-Auditar Mensagens Antigas (2º Plano)"
+            className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all border relative ${
+              auditor.enabled
+                ? 'bg-indigo-500/20 text-indigo-500 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)]'
+                : 'bg-black/5 dark:bg-white/5 text-muted-foreground/50 border-border hover:border-muted-foreground/30 hover:text-muted-foreground'
+            }`}
+          >
+            <Database className="w-4 h-4" />
+            {auditor.status === 'processing' && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+            )}
+            {auditor.status === 'cooldown' && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
+            )}
+            {auditor.status === 'paused_error' && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
+            )}
+          </button>
+
           <button
             onClick={() => setSlaFilter(!slaFilter)}
             className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
