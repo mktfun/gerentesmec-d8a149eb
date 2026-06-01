@@ -634,7 +634,24 @@ serve(async (req) => {
       llmOutputText = llmOutputText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     }
 
-    const mockOutput = JSON.parse(llmOutputText);
+    // Tenta extrair JSON de dentro do texto (proxy local pode retornar texto + JSON misturado)
+    let mockOutput: any;
+    try {
+      mockOutput = JSON.parse(llmOutputText);
+    } catch (_parseErr) {
+      // Tenta encontrar um bloco JSON {...} dentro do texto
+      const jsonMatch = llmOutputText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          mockOutput = JSON.parse(jsonMatch[0]);
+          console.log('[AI-EVALUATOR] JSON extraído de dentro do texto bruto do proxy.');
+        } catch (_innerErr) {
+          throw new Error(`Resposta da IA não é JSON válido. Início: "${llmOutputText.substring(0, 120)}..."`);
+        }
+      } else {
+        throw new Error(`Resposta da IA não contém JSON. Início: "${llmOutputText.substring(0, 120)}..."`);
+      }
+    }
 
     // 5. Rastreabilidade de Auditoria: descobrir quais checks viraram true agora
     const { data: leadData } = await supabaseClient.from('leads').select('ticket_value, customer_vehicle, audit_checklist, audit_checklist_messages').eq('id', lead_id).single();
