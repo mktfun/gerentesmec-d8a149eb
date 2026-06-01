@@ -4,17 +4,25 @@
  * considerando apenas o horário de expediente configurado.
  */
 
+export type DailySchedule = {
+  start: string; // "HH:MM"
+  end: string;   // "HH:MM"
+};
+
 export type BusinessHoursConfig = {
-  days: number[];      // 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
-  start: string;       // "HH:MM" — horário de abertura
-  end: string;         // "HH:MM" — horário de fechamento
+  schedule: Record<number, DailySchedule>; // 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
   timezone?: string;   // ex: "America/Sao_Paulo"
 };
 
 export const DEFAULT_BUSINESS_HOURS: BusinessHoursConfig = {
-  days: [1, 2, 3, 4, 5],
-  start: '08:00',
-  end: '18:00',
+  schedule: {
+    1: { start: '08:00', end: '18:00' },
+    2: { start: '08:00', end: '18:00' },
+    3: { start: '08:00', end: '18:00' },
+    4: { start: '08:00', end: '18:00' },
+    5: { start: '08:00', end: '18:00' },
+    6: { start: '08:00', end: '14:00' },
+  },
   timezone: 'America/Sao_Paulo',
 };
 
@@ -30,11 +38,12 @@ export const isInsideBusinessHours = (
   config: BusinessHoursConfig
 ): boolean => {
   const dayOfWeek = date.getDay(); // 0=Dom
-  if (!config.days.includes(dayOfWeek)) return false;
+  const daySchedule = config.schedule[dayOfWeek];
+  if (!daySchedule) return false;
 
   const minutesInDay = date.getHours() * 60 + date.getMinutes();
-  const startMin = timeToMinutes(config.start);
-  const endMin = timeToMinutes(config.end);
+  const startMin = timeToMinutes(daySchedule.start);
+  const endMin = timeToMinutes(daySchedule.end);
 
   return minutesInDay >= startMin && minutesInDay < endMin;
 };
@@ -52,12 +61,6 @@ export const getWorkMinutes = (
 ): number => {
   if (from >= to) return 0;
 
-  const startMin = timeToMinutes(config.start);
-  const endMin = timeToMinutes(config.end);
-  const dayWorkMinutes = endMin - startMin; // minutos úteis por dia
-
-  if (dayWorkMinutes <= 0) return 0;
-
   let totalMinutes = 0;
 
   // Clonar para não mutar o original; zerar segundos e ms
@@ -72,14 +75,18 @@ export const getWorkMinutes = (
 
   while (cursor < limit && daysProcessed < maxDays) {
     const dayOfWeek = cursor.getDay();
+    const daySchedule = config.schedule[dayOfWeek];
 
-    if (!config.days.includes(dayOfWeek)) {
+    if (!daySchedule) {
       // Dia não útil — avança para a meia-noite do próximo dia
       cursor.setDate(cursor.getDate() + 1);
       cursor.setHours(0, 0, 0, 0);
       daysProcessed++;
       continue;
     }
+
+    const startMin = timeToMinutes(daySchedule.start);
+    const endMin = timeToMinutes(daySchedule.end);
 
     // Calcular janela útil deste dia
     const dayStart = new Date(cursor);
@@ -115,17 +122,21 @@ export const nextBusinessStart = (
   if (isInsideBusinessHours(date, config)) return date;
 
   const cursor = new Date(date);
-  const startMin = timeToMinutes(config.start);
 
   // Tenta até 14 dias à frente
   for (let i = 0; i < 14; i++) {
     const dayOfWeek = cursor.getDay();
-    if (config.days.includes(dayOfWeek)) {
+    const daySchedule = config.schedule[dayOfWeek];
+    
+    if (daySchedule) {
+      const startMin = timeToMinutes(daySchedule.start);
       const dayStart = new Date(cursor);
       dayStart.setHours(Math.floor(startMin / 60), startMin % 60, 0, 0);
+      
       if (cursor <= dayStart) return dayStart;
       // Se passou do fim do expediente hoje, tenta amanhã
     }
+    
     cursor.setDate(cursor.getDate() + 1);
     cursor.setHours(0, 0, 0, 0);
   }
