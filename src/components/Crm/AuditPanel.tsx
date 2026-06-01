@@ -26,8 +26,6 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     const checklist = (lead as any).audit_checklist;
     if (checklist && Object.keys(checklist).length > 0) {
       setChecked(checklist as Record<string, boolean>);
-    } else if (lead.score !== null) {
-      setChecked({ '1a': true, '1b': true, '2a': true, '2b': true, '2c': true, '2d': true, '2e': true, '3a': true, '3b': true, '4a': true, '4b': true });
     } else {
       setChecked({});
     }

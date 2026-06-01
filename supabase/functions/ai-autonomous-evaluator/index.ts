@@ -249,6 +249,9 @@ serve(async (req) => {
          Exemplo 1: "Movi para Em Negociação pois o vídeo do orçamento foi enviado."
          Exemplo 2: "Zerei o item 2d pois o link do checklist não possui fotos."
          REGRA DE OURO: Se for apenas uma troca de mensagens comum (ex: bom dia, tirando dúvida simples, enviando áudio sem alterar score), você DEVE retornar o valor primitivo \`null\` (sem aspas) no JSON. NÃO invente insights se nada mudou. Fale de forma técnica e minimalista.
+      10. PROIBIDO INVENTAR PREENCHIMENTO DE CHECKLIST (ZERO HALLUCINATION):
+         O JSON "audit_checklist" DEVE ser retornado APENAS com chaves dos itens EXPLICITAMENTE GANHOS/VISTOS e provados pela ação do gerente.
+         Se é o começo do atendimento (lead_new, negotiation inicial) e o gerente apenas disse "bom dia", NADA do checklist deve ser retornado como \`true\`. Você não deve assumir que os itens 1a, 1b ou 2a ocorreram se não há prova contundente. Mantenha os itens que não aconteceram omitidos ou como \`false\`.
       
       [SISTEMA DE BLINDAGEM DE MEMÓRIA (MANDATÓRIO)]
       Sempre que você receber na variável \`scrapedContent\` o conteúdo lido de um link (Checklist, Orçamento em PDF, Sistema Web, etc):
@@ -493,7 +496,9 @@ serve(async (req) => {
           // Outros provedores
           finalModel = aiSettings.model || 'gpt-4o';
           if (mediaBase64) {
-            if (actualMime.startsWith('image/')) {
+            if (actualMime.startsWith('image/') || provider === 'Local AI Proxy (CLI Tunnel)') {
+              // Para o Local AI Proxy, vamos injetar áudios e vídeos como data URIs também, 
+              // para que o roteador local possa converter e enviar para a CLI do Gemini
               userMessageContent = [
                 { type: "text", text: prompt },
                 { type: "image_url", image_url: { url: `data:${actualMime};base64,${mediaBase64}` } }
