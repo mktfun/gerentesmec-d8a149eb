@@ -263,6 +263,8 @@ export type Database = {
           ai_feedback: string | null
           audit_checklist: Json | null
           audit_checklist_messages: Json | null
+          audit_justifications: Json | null
+          media_summaries: Json | null
           audit_reasons: Json | null
           chatwoot_contact_id: number | null
           chatwoot_conversation_id: number | null
@@ -292,6 +294,8 @@ export type Database = {
           ai_feedback?: string | null
           audit_checklist?: Json | null
           audit_checklist_messages?: Json | null
+          audit_justifications?: Json | null
+          media_summaries?: Json | null
           audit_reasons?: Json | null
           chatwoot_contact_id?: number | null
           chatwoot_conversation_id?: number | null
@@ -321,6 +325,8 @@ export type Database = {
           ai_feedback?: string | null
           audit_checklist?: Json | null
           audit_checklist_messages?: Json | null
+          audit_justifications?: Json | null
+          media_summaries?: Json | null
           audit_reasons?: Json | null
           chatwoot_contact_id?: number | null
           chatwoot_conversation_id?: number | null

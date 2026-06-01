@@ -371,14 +371,29 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                             }`}>
                             {item.text}
                           </label>
-                          {!checked[item.id] && lead.audit_reasons?.[item.id] && (
-                            <div className="mt-1 flex gap-1.5 items-start">
-                              <AlertCircle className="w-3.5 h-3.5 text-rose-500/70 shrink-0 mt-0.5" />
-                              <p className="text-[10px] leading-snug text-rose-500/80 font-medium">
-                                {lead.audit_reasons[item.id] as string}
-                              </p>
-                            </div>
-                          )}
+                          {(() => {
+                            const reason = lead.audit_justifications?.[item.id] || (!checked[item.id] ? lead.audit_reasons?.[item.id] : null);
+                            if (!reason) return null;
+                            const isNegative = !checked[item.id];
+                            return (
+                              <div className={`mt-1.5 flex gap-1.5 items-start p-2 rounded-lg backdrop-blur-md border ${
+                                isNegative 
+                                  ? 'bg-rose-500/5 border-rose-500/10' 
+                                  : 'bg-emerald-500/5 border-emerald-500/10'
+                              }`}>
+                                {isNegative ? (
+                                  <AlertCircle className="w-3.5 h-3.5 text-rose-500/70 shrink-0 mt-0.5" />
+                                ) : (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500/70 shrink-0 mt-0.5" />
+                                )}
+                                <p className={`text-[10px] leading-snug font-medium italic ${
+                                  isNegative ? 'text-rose-500/80' : 'text-emerald-500/80'
+                                }`}>
+                                  {reason as string}
+                                </p>
+                              </div>
+                            );
+                          })()}
                         </div>
                         {checked[item.id] && lead.audit_checklist_messages?.[item.id] && (
                           <button

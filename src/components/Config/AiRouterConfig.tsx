@@ -93,8 +93,11 @@ export const AiRouterConfig: React.FC = () => {
   const [recommendation, setRecommendation] = useState<{ model: string; reason: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'config' | 'telemetry'>('config');
 
+  const settingsInitialized = React.useRef(false);
+
   React.useEffect(() => {
-    if (aiSettings) {
+    if (aiSettings && !settingsInitialized.current) {
+      settingsInitialized.current = true;
       const p = availableModels[aiSettings.provider] ? aiSettings.provider : 'Google';
       let m = availableModels[p]?.includes(aiSettings.model) ? aiSettings.model : (availableModels[p] || [])[0];
       if (p === 'NVIDIA NIM') m = 'nvidia-auto-ensemble';
@@ -276,14 +279,18 @@ export const AiRouterConfig: React.FC = () => {
                 Provider AI
               </label>
               <select value={provider} onChange={(e) => {
-                setProvider(e.target.value);
-                if (e.target.value === 'NVIDIA NIM') {
-                  setModel('nvidia-auto-ensemble');
-                } else {
-                  setModel((availableModels[e.target.value] || [])[0]);
+                const newProv = e.target.value;
+                setProvider(newProv);
+                let newMod = (availableModels[newProv] || [])[0];
+                if (newProv === 'NVIDIA NIM') {
+                  newMod = 'nvidia-auto-ensemble';
                 }
+                setModel(newMod);
                 setTestStatus('idle');
                 setTestLog([]);
+                
+                // Salvar instantaneamente ao mudar para evitar que o "Aplicar Alterações" reverta
+                updateAiSettings({ provider: newProv, model: newMod });
               }} className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-medium text-foreground focus:outline-none focus:border-primary/50 transition-colors appearance-none">
                 {Object.keys(availableModels).map(p => (
                   <option key={p} value={p}>{p}</option>
@@ -303,9 +310,11 @@ export const AiRouterConfig: React.FC = () => {
               ) : model === 'Gemini Free-Tier Ensemble (Auto-Routing)' ? (
                 <div className="relative">
                   <select value={model} onChange={(e) => {
-                    setModel(e.target.value);
+                    const newMod = e.target.value;
+                    setModel(newMod);
                     setTestStatus('idle');
                     setTestLog([]);
+                    updateAiSettings({ provider, model: newMod });
                   }} className="w-full px-3 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-sm font-bold text-emerald-500 focus:outline-none focus:border-emerald-500/50 transition-colors appearance-none">
                     {(availableModels[provider] || []).map(m => (
                       <option key={m} value={m}>{m}</option>
@@ -315,9 +324,11 @@ export const AiRouterConfig: React.FC = () => {
                 </div>
               ) : (
                 <select value={model} onChange={(e) => {
-                  setModel(e.target.value);
+                  const newMod = e.target.value;
+                  setModel(newMod);
                   setTestStatus('idle');
                   setTestLog([]);
+                  updateAiSettings({ provider, model: newMod });
                 }} className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-medium text-foreground focus:outline-none focus:border-primary/50 transition-colors appearance-none">
                   {(availableModels[provider] || []).map(m => (
                     <option key={m} value={m}>{m}</option>

@@ -21,6 +21,10 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
   const [criteria, setCriteria] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveOk, setSaveOk] = useState(false);
+  
+  const [pendingCount, setPendingCount] = useState(0);
+  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
+  const [queueOk, setQueueOk] = useState(false);
 
   useEffect(() => {
     if (aiSettings && isOpen) {
@@ -33,6 +37,59 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
       setCriteria(aiSettings.evaluation_criteria ? JSON.stringify(aiSettings.evaluation_criteria, null, 2) : '{\n  "peso_cordialidade": 25,\n  "peso_orcamento": 25,\n  "peso_checklist": 25,\n  "peso_fechamento": 25\n}');
     }
   }, [aiSettings, isOpen]);
+
+  useEffect(() => {
+    let int: ReturnType<typeof setInterval>;
+    if (isOpen) {
+      const fetchQueue = async () => {
+        try {
+          const { count } = await supabase.from('chat_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('ai_audited', false)
+            .eq('sender_type', 'user');
+          setPendingCount(count || 0);
+        } catch (err) {}
+      };
+      fetchQueue();
+      int = setInterval(fetchQueue, 5000); // Heartbeat/Polling a cada 5s
+    }
+    return () => clearInterval(int);
+  }, [isOpen]);
+
+  const processQueue = async () => {
+    if (pendingCount === 0 || isProcessingQueue) return;
+    setIsProcessingQueue(true);
+    try {
+      // Buscar até 10 da fila para processar nesta rodada
+      const { data } = await supabase.from('chat_messages')
+        .select('*')
+        .eq('ai_audited', false)
+        .eq('sender_type', 'user')
+        .order('created_at', { ascending: true })
+        .limit(10);
+        
+      if (data && data.length > 0) {
+        for (const msg of data) {
+          // Trigger a reavaliação enviando o payload que o webhook original enviaria
+          await supabase.functions.invoke('ai-autonomous-evaluator', {
+             body: { record: msg }
+          });
+        }
+        setQueueOk(true);
+        setTimeout(() => setQueueOk(false), 3000);
+      }
+    } catch (err: any) {
+      alert('Erro ao processar fila: ' + err.message);
+    } finally {
+      setIsProcessingQueue(false);
+      // Força um fetch imediato após processar
+      const { count } = await supabase.from('chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('ai_audited', false)
+        .eq('sender_type', 'user');
+      setPendingCount(count || 0);
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -160,6 +217,34 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                       <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Transcreve e avalia o tom de voz dos áudios enviados.</p>
                     </div>
                     <Switch checked={audioEnabled} onCheckedChange={setAudioEnabled} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <Activity className="w-3.5 h-3.5" /> Fila de Avaliação IA (Heartbeat)
+                </h3>
+                <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                      Mensagens Pendentes 
+                      {pendingCount > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground leading-tight mt-0.5 max-w-[300px]">
+                      Se o servidor IA local cair, as avaliações acumulam aqui. O sistema verifica periodicamente.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-2xl font-black text-indigo-500">{pendingCount}</span>
+                    <button 
+                      onClick={processQueue} 
+                      disabled={pendingCount === 0 || isProcessingQueue}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(99,102,241,0.2)] flex items-center gap-2 transition-all"
+                    >
+                      {isProcessingQueue ? <Cpu className="w-3.5 h-3.5 animate-spin" /> : queueOk ? <Check className="w-3.5 h-3.5" /> : <Activity className="w-3.5 h-3.5" />}
+                      {isProcessingQueue ? 'Processando...' : queueOk ? 'Enviados!' : 'Forçar Fila'}
+                    </button>
                   </div>
                 </div>
               </div>

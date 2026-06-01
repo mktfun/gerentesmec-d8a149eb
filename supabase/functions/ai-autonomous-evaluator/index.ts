@@ -279,8 +279,12 @@ serve(async (req) => {
         "score": (número de 0 a 100),
         "funnel_stage": (sugestão de nova etapa),
         "stage_change_reason": (string ou null. OBRIGATÓRIO preencher se mudar para closed_lost ou closed_won. Motivo claro, curto e objetivo da transição),
-        "audit_reasons": {
-           // (Dicionário Opcional) Se você marcou algum item acima como 'false', forneça aqui a justificativa curta. Ex: "2c": "O gerente não explicou o defeito em detalhes."
+        "audit_justifications": {
+           // (Dicionário) Justificativa CURTA em 1 frase para CADA item avaliado como true ou false. Ex: "2c": "Gerente explicou o vazamento em detalhes."
+        },
+        "media_summaries": {
+           // (Dicionário Opcional) Se houver mídia anexa e você a analisou (áudio/vídeo/imagem), insira o ID da mensagem como chave e o resumo da transcrição como valor. O ID atual é: ${message_id}.
+           // Ex: "${message_id}": "Áudio: Gerente justifica a troca da correia dentada por conta do desgaste prematuro."
         },
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
         "closing_summary": (Resumo descritivo narrando a evolução e histórico geral),
@@ -744,6 +748,16 @@ serve(async (req) => {
       updatePayload.funnel_stage_reason = mockOutput.stage_change_reason;
     }
     
+    if (mockOutput.audit_justifications) {
+      // Merge with existing ones (assuming lead.audit_justifications might have previous reasons, but since AI evaluates the whole chat it can just overwrite)
+      updatePayload.audit_justifications = mockOutput.audit_justifications;
+    }
+
+    if (mockOutput.media_summaries && Object.keys(mockOutput.media_summaries).length > 0) {
+      // Merge media_summaries to keep previous ones!
+      const currentSummaries = lead.media_summaries || {};
+      updatePayload.media_summaries = { ...currentSummaries, ...mockOutput.media_summaries };
+    }
     if (mockOutput.audit_reasons && Object.keys(mockOutput.audit_reasons).length > 0) {
       updatePayload.audit_reasons = mockOutput.audit_reasons;
     }

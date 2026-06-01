@@ -409,7 +409,6 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         </div>
                       )}
 
-                      {/* Other Document Types */}
                       {msg.media_url && !msg.media_type?.match(/^(image|audio|video)/) && (
                         <a href={msg.media_url} target="_blank" rel="noreferrer" className="mb-2 inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors shadow-sm">
                           <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center shrink-0">
@@ -418,6 +417,25 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                           <span className="text-xs font-semibold text-foreground underline truncate max-w-[150px]">Baixar Anexo</span>
                         </a>
                       )}
+
+                      {/* Render Media Summary (Transcrições e análises visuais) */}
+                      {(() => {
+                        const summaries = (lead as any).media_summaries || {};
+                        const summaryText = summaries[msg.id] || (msg.chatwoot_message_id && summaries[msg.chatwoot_message_id]);
+                        if (!summaryText) return null;
+                        
+                        return (
+                          <div className="mb-2 w-full px-3 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex flex-col gap-1.5 shadow-sm">
+                            <div className="flex items-center gap-1.5 opacity-80">
+                              <Wrench className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+                              <span className="text-[9px] uppercase tracking-widest font-black text-indigo-500 dark:text-indigo-400">Resumo da IA Multimodal</span>
+                            </div>
+                            <p className="text-[11px] leading-relaxed font-medium text-foreground/90">
+                              {summaryText}
+                            </p>
+                          </div>
+                        );
+                      })()}
 
                       {/* Bubble (only render if there's text after cleaning, OR no media at all) */}
                       {(cleanContent || !msg.media_url) ? (
