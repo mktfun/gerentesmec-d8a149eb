@@ -572,7 +572,18 @@ serve(async (req) => {
             throw new Error(errMsg);
           }
           
-          const data = await res.json();
+          const responseText = await res.text();
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (_) {
+            // Se o proxy retornou 200 OK mas não é JSON, assumimos que ele retornou
+            // o próprio texto bruto da IA direto no corpo da resposta (comportamento de alguns proxies simples)
+            data = {
+              choices: [{ message: { content: responseText } }]
+            };
+          }
+
           if (data.error) {
             if (i < modelsToTry.length - 1) {
               console.log(`[AI-EVALUATOR] Fallback Acionado (Erro no corpo)! ${finalModel} falhou. Indo para o próximo modelo.`);
