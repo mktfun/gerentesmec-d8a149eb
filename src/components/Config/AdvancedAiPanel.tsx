@@ -4,6 +4,7 @@ import { Cpu, X, Save, Sparkles, AlertTriangle, Eye, Activity, Database, Check }
 import { useAppData } from '@/context/AppDataContext';
 import { Switch } from '@/components/ui/switch';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
+import { useBackgroundAuditor } from '@/hooks/useBackgroundAuditor';
 
 interface Props {
   isOpen: boolean;
@@ -23,8 +24,12 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
   const [saveOk, setSaveOk] = useState(false);
   
   const [pendingCount, setPendingCount] = useState(0);
-  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
-  const [queueOk, setQueueOk] = useState(false);
+  const [isProcessingQueue, setIsProcessingQueue] = React.useState(false);
+  const [queueOk, setQueueOk] = React.useState(false);
+
+  const backgroundAuditor = useBackgroundAuditor();
+
+  const [saving, setSaving] = React.useState(false);
 
   useEffect(() => {
     if (aiSettings && isOpen) {
@@ -247,7 +252,59 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                     </button>
                   </div>
                 </div>
+                
+                {/* Historical Background Auditor */}
+                <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-bold text-indigo-500 flex items-center gap-2">
+                        Auditor de Fundo (Slow Mode)
+                        {backgroundAuditor.status === 'processing' && <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />}
+                        {backgroundAuditor.status === 'cooldown' && <span className="w-2 h-2 rounded-full bg-amber-500" />}
+                        {backgroundAuditor.status === 'paused_error' && <span className="w-2 h-2 rounded-full bg-rose-500" />}
+                      </p>
+                      <p className="text-[10px] text-indigo-500/70 leading-tight mt-0.5 max-w-[300px]">
+                        Limpa mensagens pendentes do histórico de forma cadenciada para não sobrecarregar a IA local nem estourar rate limits.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <select 
+                        value={backgroundAuditor.cooldown} 
+                        onChange={e => backgroundAuditor.setCooldown(parseInt(e.target.value, 10))}
+                        className="bg-transparent text-xs border border-indigo-500/30 text-indigo-500 rounded-lg p-1.5 outline-none cursor-pointer"
+                        disabled={backgroundAuditor.enabled}
+                      >
+                        <option value="5">A cada 5s</option>
+                        <option value="15">A cada 15s</option>
+                        <option value="30">A cada 30s</option>
+                        <option value="60">A cada 1m</option>
+                      </select>
+                      <Switch 
+                        checked={backgroundAuditor.enabled} 
+                        onCheckedChange={backgroundAuditor.setEnabled} 
+                      />
+                    </div>
+                  </div>
+                  
+                  {backgroundAuditor.enabled && (
+                    <div className="flex flex-col gap-1 pt-2 border-t border-indigo-500/10">
+                      <p className="text-[10px] font-bold text-indigo-500 uppercase flex items-center gap-1">
+                        STATUS: 
+                        {backgroundAuditor.status === 'idle' && 'AGUARDANDO MENSAGENS...'}
+                        {backgroundAuditor.status === 'processing' && 'ENVIANDO PARA A IA...'}
+                        {backgroundAuditor.status === 'cooldown' && `DESCANSO DE ${backgroundAuditor.cooldown} SEGUNDOS...`}
+                        {backgroundAuditor.status === 'paused_error' && 'PAUSADO: ERRO DA IA (TENTANDO EM 2 MIN)'}
+                      </p>
+                      {backgroundAuditor.lastError && (
+                        <p className="text-[10px] text-rose-500 truncate max-w-full">
+                          Último erro: {backgroundAuditor.lastError}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
+
 
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">

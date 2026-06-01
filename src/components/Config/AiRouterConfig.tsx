@@ -107,7 +107,9 @@ export const AiRouterConfig: React.FC = () => {
       if (aiSettings.gcp_project_id) setGcpProjectId(aiSettings.gcp_project_id);
       if (aiSettings.gcp_region) setGcpRegion(aiSettings.gcp_region);
       if (aiSettings.gcp_credentials) setGcpCredentials(typeof aiSettings.gcp_credentials === 'string' ? aiSettings.gcp_credentials : JSON.stringify(aiSettings.gcp_credentials, null, 2));
-      if (aiSettings.api_url) setApiUrl(aiSettings.api_url);
+      if ((aiSettings as any).api_url || (aiSettings.features as any)?.api_url) {
+        setApiUrl((aiSettings as any).api_url || (aiSettings.features as any)?.api_url);
+      }
     }
   }, [aiSettings]);
 
