@@ -49,18 +49,46 @@ export const BackgroundAuditorProvider: React.FC<{ children: React.ReactNode }> 
       setStatus('processing');
       try {
         const { data, error } = await supabase.from('chat_messages')
-          .select('*')
+          .select(`
+            *,
+            leads!inner(funnel_stage)
+          `)
           .or('ai_audited.eq.false,ai_audited.is.null')
           .eq('sender_type', 'user')
           .order('created_at', { ascending: true })
-          .limit(1);
+          .limit(200);
 
         if (error) throw error;
 
         if (data && data.length > 0) {
-          const msg = data[0];
+          const STAGE_PRIORITY: Record<string, number> = {
+            'em_orcamento': 1,
+            'orcamento_enviado': 2,
+            'em_atendimento': 3,
+            'novo_lead': 4,
+            'closed_won': 5,
+            'closed_lost': 6
+          };
+
+          // Prioriza pela etapa do funil (1 a 6) e, como o banco já ordenou por created_at (ascending),
+          // o sort estável manterá a ordem dos mais antigos primeiro dentro de cada etapa.
+          const sorted = [...data].sort((a, b) => {
+            const stageA = (a.leads as any)?.funnel_stage || 'novo_lead';
+            const stageB = (b.leads as any)?.funnel_stage || 'novo_lead';
+            return (STAGE_PRIORITY[stageA] || 99) - (STAGE_PRIORITY[stageB] || 99);
+          });
+
+          const msg = sorted[0];
+
           await supabase.functions.invoke('ai-autonomous-evaluator', {
-            body: { record: msg }
+            body: {
+              message_content: msg.content,
+              lead_id: msg.lead_id,
+              message_id: msg.id,
+              media_url: msg.media_url,
+              media_type: msg.media_type,
+              sender_type: msg.sender_type
+            }
           });
           
           setLastError(null);
