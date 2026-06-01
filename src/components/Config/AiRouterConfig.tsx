@@ -197,10 +197,10 @@ export const AiRouterConfig: React.FC = () => {
         setTestStatus('warning');
       }
 
-      if (logs.every(l => l.status === 'ok') || logs.some(l => l.status === 'warn')) {
+      if (logs.every(l => l.status === 'ok') || logs.some(l => l.status === 'warn') || provider === 'Local AI Proxy (CLI Tunnel)') {
         await updateAiSettings({ 
           provider, 
-          model, 
+          model: provider === 'Local AI Proxy (CLI Tunnel)' ? 'auto' : model, 
           api_key: apiKey,
           api_url: provider === 'Local AI Proxy (CLI Tunnel)' ? apiUrl : undefined
         });
