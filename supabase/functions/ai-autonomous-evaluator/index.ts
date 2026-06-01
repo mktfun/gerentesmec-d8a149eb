@@ -395,7 +395,7 @@ serve(async (req) => {
         llmOutputText = data.candidates[0].content.parts[0].text;
         tokensUsed = data.usageMetadata?.totalTokenCount || null;
         
-      } else if (provider === 'Google' || provider === 'Gemini Studio' || (apiKey && !apiKey.startsWith("sk-") && !apiKey.startsWith("nvapi-") && !provider.includes('OpenRouter') && !provider.includes('Anthropic') && !provider.includes('Local AI'))) {
+      } else if (provider === 'Google' || provider === 'Gemini Studio' || (apiKey && !apiKey.startsWith("sk-") && !apiKey.startsWith("nvapi-") && !provider.includes('OpenRouter') && !provider.includes('Anthropic'))) {
         // Gemini (Direct Google API via AI Studio)
         let parts: any[] = [{ text: prompt }];
         userMessageContent = prompt; // FIX: Ensure input_text is populated for Gemini
@@ -507,7 +507,7 @@ serve(async (req) => {
               // Para o Local AI Proxy, vamos injetar áudios e vídeos como data URIs também, 
               // para que o roteador local possa converter e enviar para a CLI do Gemini
               userMessageContent = [
-                { type: "text", text: prompt + (provider === 'Local AI Proxy (CLI Tunnel)' ? '\n\nCRITICAL: OUTPUT ONLY PURE JSON! NO MARKDOWN! NO CONVERSATIONAL TEXT!' : '') },
+                { type: "text", text: prompt },
                 { type: "image_url", image_url: { url: `data:${actualMime};base64,${mediaBase64}` } }
               ];
             } else {
@@ -515,7 +515,7 @@ serve(async (req) => {
               userMessageContent = prompt;
             }
           } else {
-            userMessageContent = prompt + (provider === 'Local AI Proxy (CLI Tunnel)' ? '\n\nCRITICAL: OUTPUT ONLY PURE JSON! NO MARKDOWN! NO CONVERSATIONAL TEXT! START WITH { AND END WITH }.' : '');
+            userMessageContent = prompt;
           }
         }
         
@@ -528,7 +528,11 @@ serve(async (req) => {
         }
         
         let modelsToTry = [finalModel];
-        if (provider === 'NVIDIA NIM') {
+        // Para o Local AI Proxy, usa sempre gemini-2.5-flash — sem fallbacks extras
+        if (provider === 'Local AI Proxy (CLI Tunnel)') {
+          modelsToTry = ['gemini-2.5-flash'];
+          finalModel = 'gemini-2.5-flash';
+        } else if (provider === 'NVIDIA NIM') {
           if (finalModel === 'deepseek-ai/deepseek-v4-pro') {
             modelsToTry = ['deepseek-ai/deepseek-v4-pro', 'meta/llama-3.1-405b-instruct', 'meta/llama-3.3-70b-instruct'];
           } else if (finalModel === 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning') {
@@ -549,7 +553,7 @@ serve(async (req) => {
                 'Authorization': `Bearer ${provider === 'Local AI Proxy (CLI Tunnel)' ? (Deno.env.get('CLIPROXY_KEY') || apiKey) : apiKey}`
               },
               body: JSON.stringify({
-                model: finalModel,
+                model: provider === 'Local AI Proxy (CLI Tunnel)' ? 'gemini-2.5-flash' : finalModel,
                 ...(provider !== 'NVIDIA NIM' ? { response_format: { type: "json_object" } } : {}),
                 messages: [{ role: 'user', content: userMessageContent }]
               })

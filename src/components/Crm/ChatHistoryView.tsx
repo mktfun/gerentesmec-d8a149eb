@@ -280,7 +280,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                               Auditoria Salva
                             </span>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-black text-foreground">{msg.content.split(': ')[1]}</span>
+                              <span className="text-xs font-black text-foreground">{msg.content.includes(': ') ? msg.content.slice(msg.content.indexOf(': ') + 2) : msg.content}</span>
                               <ChevronDown className={`w-3 h-3 text-muted-foreground/50 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                             </div>
                           </div>
