@@ -28,7 +28,7 @@ export const BackgroundAuditorProvider: React.FC<{ children: React.ReactNode }> 
   const [status, setStatus] = useState<AuditorStatus>('idle');
   const [lastError, setLastError] = useState<string | null>(null);
   
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     localStorage.setItem('background_auditor_enabled', String(enabled));
