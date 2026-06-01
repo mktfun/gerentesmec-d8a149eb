@@ -317,6 +317,11 @@ export const AiRouterConfig: React.FC = () => {
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                 </div>
+              ) : provider === 'Local AI Proxy (CLI Tunnel)' ? (
+                <div className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-sm font-bold text-primary flex items-center justify-between">
+                  <span>Auto-Routing (CLI Proxy)</span>
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                </div>
               ) : (
                 <select value={model} onChange={(e) => {
                   setModel(e.target.value);
@@ -393,22 +398,26 @@ export const AiRouterConfig: React.FC = () => {
             </div>
           ) : (
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center justify-between">
-                <span>API Key</span>
-              </label>
-              <div className="relative">
-                <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => {
-                    setApiKey(e.target.value);
-                    if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
-                  }}
-                  placeholder={`sk-...`}
-                  className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                />
-              </div>
+              {provider !== 'Local AI Proxy (CLI Tunnel)' && (
+                <>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center justify-between">
+                    <span>API Key</span>
+                  </label>
+                  <div className="relative">
+                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="password"
+                      value={apiKey}
+                      onChange={(e) => {
+                        setApiKey(e.target.value);
+                        if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+                      }}
+                      placeholder={`sk-...`}
+                      className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                    />
+                  </div>
+                </>
+              )}
               
               {provider === 'Local AI Proxy (CLI Tunnel)' && (
                 <div className="mt-4">
@@ -491,7 +500,7 @@ export const AiRouterConfig: React.FC = () => {
               <div className="mt-4">
                 <button 
                   onClick={handleTest} 
-                  disabled={!apiKey || testStatus === 'testing'}
+                  disabled={(provider !== 'Local AI Proxy (CLI Tunnel)' && !apiKey) || testStatus === 'testing' || (provider === 'Local AI Proxy (CLI Tunnel)' && !apiUrl)}
                   className="w-full px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {testStatus === 'testing' ? (
