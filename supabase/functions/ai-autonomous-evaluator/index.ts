@@ -756,8 +756,8 @@ serve(async (req) => {
     }
     
     if (mockOutput.audit_justifications) {
-      // Merge with existing ones (assuming lead.audit_justifications might have previous reasons, but since AI evaluates the whole chat it can just overwrite)
-      updatePayload.audit_justifications = mockOutput.audit_justifications;
+      if (!mockOutput.audit_reasons) mockOutput.audit_reasons = {};
+      mockOutput.audit_reasons = { ...mockOutput.audit_reasons, ...mockOutput.audit_justifications };
     }
 
     if (mockOutput.media_summaries && Object.keys(mockOutput.media_summaries).length > 0) {
