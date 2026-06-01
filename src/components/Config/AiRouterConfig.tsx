@@ -229,8 +229,8 @@ export const AiRouterConfig: React.FC = () => {
       provider, model: recommendedModel, api_key: apiKey,
       gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
       gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null,
-      api_url: provider === 'Local AI Proxy (CLI Tunnel)' ? apiUrl : undefined
-    });
+      ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } as any : {})
+    } as any);
   };
 
   return (
