@@ -49,7 +49,7 @@ export const TaskQueuePanel: React.FC = () => {
   const [isRetrying, setIsRetrying] = useState(false);
 
   const isLocalProxy = aiSettings?.provider === 'Local AI Proxy (CLI Tunnel)';
-  const proxyUrl = aiSettings?.api_url || '';
+  const proxyUrl = (aiSettings as any)?.api_url || '';
 
   // Re-render every second so "há Xs" stays live
   useEffect(() => {

@@ -26,10 +26,13 @@ const Config = () => {
   const [copied, setCopied] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
   const [ignoredLabelsStr, setIgnoredLabelsStr] = useState('fornecedor, dono, ignorar, ignore, equipe, grupo, rh, socios');
-  // Horário de Atendimento
-  const [bhDays, setBhDays] = useState<number[]>(businessHours.days);
-  const [bhStart, setBhStart] = useState(businessHours.start);
-  const [bhEnd, setBhEnd] = useState(businessHours.end);
+  // Horário de Atendimento — derivado do schedule
+  const _bhDaysInit = Object.keys(businessHours.schedule || {}).map(Number);
+  const _bhFirstDay = _bhDaysInit[0];
+  const _bhFirst = _bhFirstDay !== undefined ? businessHours.schedule[_bhFirstDay] : { start: '08:00', end: '18:00' };
+  const [bhDays, setBhDays] = useState<number[]>(_bhDaysInit.length ? _bhDaysInit : [1, 2, 3, 4, 5]);
+  const [bhStart, setBhStart] = useState(_bhFirst?.start || '08:00');
+  const [bhEnd, setBhEnd] = useState(_bhFirst?.end || '18:00');
   const [bhSaveStatus, setBhSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
   // Ref para sincronizar integrationSettings apenas 1x (evita flash ao entrar na tela)
   const settingsInitialized = useRef(false);

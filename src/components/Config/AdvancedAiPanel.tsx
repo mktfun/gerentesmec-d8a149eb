@@ -5,6 +5,7 @@ import { useAppData } from '@/context/AppDataContext';
 import { Switch } from '@/components/ui/switch';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { useBackgroundAuditor } from '@/context/BackgroundAuditorContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Props {
   isOpen: boolean;
