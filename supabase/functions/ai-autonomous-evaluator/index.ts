@@ -421,19 +421,13 @@ serve(async (req) => {
         }
         
         let modelsToTry = [finalModel];
-        // Handle Auto-Routing string explicitly and build fallback loop to bypass rate limits
+        // Handle Auto-Routing string explicitly
         if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.toLowerCase().includes('ensemble')) {
           if (mediaBase64 && actualMime.startsWith('image/')) {
             modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'];
           } else {
             modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash-exp', 'gemma-4-31b-it', 'gemini-1.5-pro', 'gemini-1.5-flash'];
           }
-        } else {
-          // Adiciona fallbacks garantidos para qualquer modelo Google para contornar Rate Limit
-          if (finalModel === 'gemini-2.5-flash') modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemma-4-31b-it'];
-          else if (finalModel === 'gemini-1.5-flash') modelsToTry = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemma-4-31b-it'];
-          else if (finalModel === 'gemma-4-31b-it') modelsToTry = ['gemma-4-31b-it', 'gemma-4-26b-it', 'gemini-2.5-flash'];
-          else modelsToTry = [finalModel, 'gemma-4-31b-it', 'gemini-1.5-flash'];
         }
         
         for (let i = 0; i < modelsToTry.length; i++) {
@@ -627,7 +621,8 @@ serve(async (req) => {
         model: loggedModel,
         status: 'success',
         latency_ms: latencyMs,
-        tokens_used: tokensUsed
+        tokens_used: tokensUsed,
+        error_message: llmOutputText // Hack: save raw JSON output in error_message column so telemetry can display it
       });
       if (logSuccessErr) console.error('[AI-EVALUATOR] Failed to insert success log:', logSuccessErr);
 
