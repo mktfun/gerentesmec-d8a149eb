@@ -169,7 +169,9 @@ export const AiRouterConfig: React.FC = () => {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': window.location.origin || 'http://localhost',
+            'X-Title': 'Antigravity Studio'
           },
           body: JSON.stringify({
             model: model,
@@ -182,7 +184,12 @@ export const AiRouterConfig: React.FC = () => {
           addLog('Teste de Geração de Texto: SUCESSO', 'ok');
           setTestStatus('success');
         } else {
-          addLog(`Falha de Autenticação (${res.status})`, 'fail');
+          let errorMsg = res.statusText;
+          try {
+            const errJson = await res.json();
+            errorMsg = errJson.error?.message || JSON.stringify(errJson);
+          } catch (e) { }
+          addLog(`Falha na API (${res.status}): ${errorMsg}`, 'fail');
           setTestStatus('error');
         }
       } else if (provider === 'Local AI Proxy (CLI Tunnel)') {
