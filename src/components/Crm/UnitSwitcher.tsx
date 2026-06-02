@@ -39,14 +39,20 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect,
     // Score
     const score = avgScore(unitLeads);
     
-    return { dangerCount, score };
+    const lastActiveAt = unitLeads.reduce((max, l) => {
+      const time = new Date(l.last_message_at || l.created_at).getTime();
+      return time > max ? time : max;
+    }, 0);
+    const isInactive = lastActiveAt === 0 || (Date.now() - lastActiveAt) > 24 * 60 * 60 * 1000;
+
+    return { dangerCount, score, isInactive };
   };
 
   const selectedUnit = selectedUnitId === 'all' 
     ? { id: 'all', name: 'Visão Global' } 
     : units.find(u => u.id === selectedUnitId) || { id: 'all', name: 'Visão Global' };
 
-  const { dangerCount: selectedDanger, score: selectedScore } = getUnitMetrics(selectedUnit.id);
+  const { dangerCount: selectedDanger, score: selectedScore, isInactive: selectedIsInactive } = getUnitMetrics(selectedUnit.id);
 
   const options = [{ id: 'all', name: 'Visão Global' }, ...units];
 
@@ -65,7 +71,14 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect,
           ) : (
             <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] ${selectedDanger > 0 ? 'bg-rose-500 text-rose-500 animate-pulse' : 'bg-emerald-500 text-emerald-500'}`} />
           )}
-          <span className="font-bold text-foreground tracking-wide">{selectedUnit.name}</span>
+          <span className="font-bold text-foreground tracking-wide flex items-center gap-2">
+            {selectedUnit.name}
+            {selectedIsInactive && selectedUnit.id !== 'all' && (
+               <span className="inline-flex items-center gap-1 text-[10px] uppercase font-black text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded-sm">
+                 <AlertTriangle className="w-3 h-3" /> Off?
+               </span>
+            )}
+          </span>
         </div>
 
         {/* Score Pill in Trigger */}
@@ -88,7 +101,7 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect,
           >
             <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
               {options.map((opt, i) => {
-                const { dangerCount, score } = getUnitMetrics(opt.id);
+                const { dangerCount, score, isInactive } = getUnitMetrics(opt.id);
                 const isSelected = selectedUnitId === opt.id;
                 
                 return (
@@ -117,6 +130,7 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect,
                       <div>
                         <h4 className={`text-sm font-bold ${isSelected ? 'text-indigo-400' : 'text-foreground/90'}`}>{opt.name}</h4>
                         {dangerCount > 0 && <p className="text-[10px] font-bold text-rose-500 mt-0.5">{dangerCount} LEAD{dangerCount > 1 && 'S'} EM RISCO</p>}
+                        {isInactive && opt.id !== 'all' && <p className="text-[10px] font-black text-rose-500 mt-0.5 flex items-center gap-1 bg-rose-500/10 px-1.5 py-0.5 rounded-sm w-fit uppercase" title="Mais de 24h sem mensagens. O WhatsApp caiu?"><AlertTriangle className="w-3 h-3"/> Sem Conexão?</p>}
                       </div>
                     </div>
 
