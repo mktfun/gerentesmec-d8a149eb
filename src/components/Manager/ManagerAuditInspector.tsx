@@ -9,6 +9,7 @@ import { ptBR } from 'date-fns/locale';
 import { useTheme } from '@/context/ThemeContext';
 import { CustomAudioPlayer } from '../Crm/CustomAudioPlayer';
 import { ExpandableMedia } from '../Crm/ExpandableMedia';
+import { AIXrayModal } from './AIXrayModal';
 
 interface Props { lead: Lead; onClose: () => void; }
 
@@ -26,6 +27,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [showIndex, setShowIndex] = useState(false);
+  const [showXray, setShowXray] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   
   const { isDark } = useTheme();
@@ -97,7 +99,14 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
     setShowIndex(false);
     setTimeout(() => {
       const el = document.getElementById(eventId);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Pulse effect
+        el.classList.add('animate-pulse', 'ring-2', 'ring-indigo-500', 'shadow-[0_0_15px_rgba(99,102,241,0.5)]');
+        setTimeout(() => {
+          el.classList.remove('animate-pulse', 'ring-2', 'ring-indigo-500', 'shadow-[0_0_15px_rgba(99,102,241,0.5)]');
+        }, 3000);
+      }
     }, 150);
   }, []);
 
@@ -137,6 +146,16 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
             <span className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${scoreText} opacity-80`}>Score</span>
           </div>
         )}
+
+        {/* AI X-Ray Button */}
+        <button
+          onClick={() => setShowXray(true)}
+          className={`relative px-3 h-10 flex items-center justify-center gap-2 rounded-xl transition-all border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20' : 'bg-indigo-50 border-indigo-200 text-indigo-600 hover:bg-indigo-100'}`}
+          aria-label="Raio-X da IA"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Raio-X IA</span>
+        </button>
 
         {/* Index toggle */}
         <button
@@ -360,15 +379,23 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                                 {qualityFeedbackMap[item.id]?.label ?? item.text}
                               </span>
                               {pass && checklistMessages[item.id] && (
-                                <ChevronRight className={`w-4 h-4 shrink-0 ${isDark ? 'opacity-20' : 'opacity-20'}`} />
+                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border flex items-center gap-1 ${isDark ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-indigo-50 text-indigo-600 border-indigo-200'}`}>
+                                  🔍 Ver Evidência
+                                </span>
                               )}
                             </button>
                             
                             {!pass && (lead.audit_reasons as any)?.[item.id] && (
                               <div className="mt-2 pl-9 pr-2">
-                                <p className={`text-xs leading-relaxed font-semibold px-3 py-2 rounded-xl ${isDark ? 'bg-rose-500/10 text-rose-400' : 'bg-rose-50 text-rose-600'}`}>
-                                  {(lead.audit_reasons as any)[item.id]}
-                                </p>
+                                <div className={`relative px-4 py-3 rounded-xl border flex flex-col gap-1.5 ${isDark ? 'bg-rose-950/30 border-rose-900/50' : 'bg-rose-50 border-rose-100'}`}>
+                                  <div className="flex items-center gap-1.5 opacity-80">
+                                    <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-rose-400' : 'text-rose-600'}`} />
+                                    <span className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>Análise Contextual IA</span>
+                                  </div>
+                                  <p className={`text-xs leading-relaxed font-semibold ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>
+                                    {(lead.audit_reasons as any)[item.id]}
+                                  </p>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -382,6 +409,13 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* AI X-Ray Modal */}
+      <AIXrayModal 
+        isOpen={showXray} 
+        onClose={() => setShowXray(false)} 
+        lead={lead} 
+      />
     </motion.div>
   );
 };
