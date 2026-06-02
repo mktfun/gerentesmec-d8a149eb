@@ -627,9 +627,7 @@ serve(async (req) => {
         model: loggedModel,
         status: 'success',
         latency_ms: latencyMs,
-        tokens_used: tokensUsed,
-        input_text: typeof userMessageContent === 'string' ? userMessageContent : JSON.stringify(userMessageContent),
-        output_text: llmOutputText
+        tokens_used: tokensUsed
       });
       if (logSuccessErr) console.error('[AI-EVALUATOR] Failed to insert success log:', logSuccessErr);
 
@@ -654,9 +652,7 @@ serve(async (req) => {
         status: 'error',
         error_message: err.message || JSON.stringify(err),
         latency_ms: latencyMs,
-        tokens_used: null,
-        input_text: typeof userMessageContent === 'string' ? userMessageContent : JSON.stringify(userMessageContent),
-        output_text: null
+        tokens_used: null
       });
       if (logErrErr) console.error('[AI-EVALUATOR] Failed to insert error log:', logErrErr);
 
@@ -829,9 +825,7 @@ serve(async (req) => {
         model: 'edge-function',
         status: 'error',
         error_message: 'FATAL: ' + (error.message || JSON.stringify(error)),
-        latency_ms: 0,
-        input_text: null,
-        output_text: null
+        latency_ms: 0
       });
     } catch (e2) { 
       console.error("Erro ao salvar log fatal:", e2);
