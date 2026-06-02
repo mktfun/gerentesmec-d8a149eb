@@ -523,10 +523,11 @@ serve(async (req) => {
         }
         
         let modelsToTry = [finalModel];
-        // Para o Local AI Proxy, usa sempre gemini-2.5-flash — sem fallbacks extras
+        // Para o Local AI Proxy, usa o modelo escolhido pelo usuário — sem fallbacks
         if (provider === 'Local AI Proxy (CLI Tunnel)') {
-          modelsToTry = ['gemini-2.5-flash'];
-          finalModel = 'gemini-2.5-flash';
+          const proxyModel = aiSettings.model || 'gemini-2.5-flash';
+          modelsToTry = [proxyModel];
+          finalModel = proxyModel;
         } else if (provider === 'NVIDIA NIM') {
           if (finalModel === 'deepseek-ai/deepseek-v4-pro') {
             modelsToTry = ['deepseek-ai/deepseek-v4-pro', 'meta/llama-3.1-405b-instruct', 'meta/llama-3.3-70b-instruct'];
@@ -548,7 +549,7 @@ serve(async (req) => {
                 'Authorization': `Bearer ${provider === 'Local AI Proxy (CLI Tunnel)' ? (Deno.env.get('CLIPROXY_KEY') || apiKey) : apiKey}`
               },
               body: JSON.stringify({
-                model: provider === 'Local AI Proxy (CLI Tunnel)' ? 'gemini-2.5-flash' : finalModel,
+                model: finalModel,
                 ...(provider !== 'NVIDIA NIM' ? { response_format: { type: "json_object" } } : {}),
                 messages: [{ role: 'user', content: userMessageContent }]
               })
