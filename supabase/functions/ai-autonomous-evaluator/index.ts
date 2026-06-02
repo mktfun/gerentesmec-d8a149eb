@@ -77,10 +77,15 @@ serve(async (req) => {
 
     const payload = await req.json();
     console.log("[AI-EVALUATOR] Iniciando avaliação para payload:", JSON.stringify(payload));
-    const { message_content, lead_id, message_id, media_url, media_type, sender_type } = payload;
+    let { message_content, lead_id, message_id, media_url, media_type, sender_type } = payload;
 
-    if (!lead_id || !message_content) {
-      return new Response(JSON.stringify({ error: 'Missing lead_id or message_content' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
+    if (!lead_id) {
+      return new Response(JSON.stringify({ error: 'Missing lead_id' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
+    }
+
+    // Garante que message_content sempre tenha um valor (para áudios/imagens sem texto)
+    if (!message_content) {
+      message_content = media_url ? `[MEDIA ENVIADA: ${media_type || 'desconhecida'}]` : "[MENSAGEM VAZIA/SISTEMA]";
     }
 
     let retryCount = 0;
@@ -223,11 +228,9 @@ serve(async (req) => {
       
       IMPORTANTE:
       1. Para "ticket_value", NUNCA invente ou extraia valores de chaves PIX, CNPJ, números de telefone ou links de pagamento. Só preencha se o gerente falar EXPLICITAMENTE o valor total do orçamento (ex: "ficou 1650,00", "total de 2700"). Se ele enviou apenas um link de pagamento e não falou o valor, deixe como null.
-      2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANEXO ENVIADO: image]" como evidência cabal de envio de mídia.
-      
-      CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
-      - 'closed_won' (Ganho): USE APENAS SE o cliente pagou OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado") APÓS o gerente já ter enviado o link do orçamento/checklist. Um "sim" antes de receber o orçamento NÃO aprova o serviço.
-      - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer.
+      2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANE      CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
+      - 'closed_won' (Ganho): USE APENAS SE o cliente pagou OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado", "manda bala", "pode marchar") APÓS o gerente já ter enviado o link do orçamento/checklist. Um "sim" antes de receber o orçamento NÃO aprova o serviço.
+      - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer ou achou muito caro e encerrou.
       - 'quote' (Orçamento Enviado): O gerente CRAVOU O PREÇO ou enviou o PDF/link do orçamento e checklist, e agora está aguardando aprovação. Use esta etapa assim que os valores forem enviados.
       - 'negotiation' (Em Atendimento): O gerente respondeu ao cliente e INICIOU o atendimento. Eles estão conversando, diagnosticando ou agendando, mas o orçamento final/preço AINDA NÃO FOI ENVIADO. 
       - 'lead_new' (Novo Lead): O cliente mandou a 1ª mensagem e o gerente AINDA NÃO RESPONDEU. SE O GERENTE ENVIOU MENSAGEM AGORA, É PROIBIDO MANTER EM 'lead_new'. Mude IMEDIATAMENTE para 'negotiation' ou 'quote'.
@@ -238,33 +241,18 @@ serve(async (req) => {
       Gerente: "Maravilha. Serviço finalizado. Muito obrigado pela confiança! Pode nos deixar uma avaliação no Google? [LINK]"
       [FIM DO EXEMPLO]
 
-      INSTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST (Seja Rigoroso - APLICÁVEL APENAS A MENSAGENS DO GERENTE):
-      1. AVALIAÇÃO FINAL PARA 1a e 1b: Os dois primeiros itens (1a e 1b) representam a qualidade contínua da conversa. Você SÓ PODE avaliá-los e marcá-los como true NO MOMENTO EM QUE FINALIZAR O ATENDIMENTO (quando o funnel_stage for para 'closed_won' ou 'closed_lost'). Durante o atendimento (em negotiation/quote), MANTENHA-OS COMO false. No final, avalie se o gerente manteve a cordialidade/investigação a conversa inteira e dê os pontos.
-      2. Foco na Intenção Real: Os gerentes usam linguagem informal. Se a INTENÇÃO da mensagem for explicar um defeito, marque que ele justificou.
-      3. Orçamento (2a): Só marque true se o gerente de fato passar o valor total ou enviar um PDF/link claro do orçamento/checklist.
-      4. Upsell (3a): Se o gerente oferecer qualquer serviço ou peça adicional além do pedido, marque como true.
-      5. Avaliação Google (4b): Só marque true se o gerente pedir de forma EXPLÍCITA para o cliente avaliar a oficina no Google.
-      6. AVALIAÇÃO MULTIMODAL DE VÍDEO/ÁUDIO: Se houver anexo, VOCÊ DEVE TRANSCRVER E ANALISAR O CONTEÚDO. Um vídeo curto (< 2 min) não significa automaticamente que é ruim, mas você deve ser rígido: ele explicou TUDO certinho? Explicou o problema e justificou POR QUE o cliente tem que pagar aquilo? Se a explicação for rasa, silenciosa ou insuficiente, PONTUE ZERO (false) nas etapas 2c e 3c de explicação, não dê a nota máxima!
-      7. AVALIAÇÃO DE LINKS: Se houver um conteúdo raspado dos links abaixo, ANALISE O TEXTO. Se o gerente enviou um link de checklist/orçamento, mas o conteúdo dele é pobre, não possui justificativa descrita ou as fotos necessárias não parecem estar detalhadas, VOCÊ DEVE ZERAR os itens correspondentes (como o 2d) e adicionar ao insight "Orçamento/Checklist sem descrições técnicas no link".
-      8. PROVA DE TRANSCRIÇÃO: No campo "closing_summary", você DEVE incluir um parágrafo começando com "[ANÁLISE DE MÍDIA]:" descrevendo exatamente o que você ouviu e viu no vídeo/áudio ou no CONTEÚDO DO LINK para provar que você o avaliou e justificar sua nota.
-      9. INSTRUÇÕES DE INSIGHT (MENSAGEM INLINE):
-         No JSON de saída, você deve preencher o campo "message_insight" apenas quando tomar uma decisão drástica ou houver uma mudança visível no fluxo (ex: alterar funnel_stage, zerar uma nota, validar um anexo).
-         Exemplo 1: "Movi para Em Negociação pois o vídeo do orçamento foi enviado."
-         Exemplo 2: "Zerei o item 2d pois o link do checklist não possui fotos."
-         REGRA DE OURO: Se for apenas uma troca de mensagens comum (ex: bom dia, tirando dúvida simples, enviando áudio sem alterar score), você DEVE retornar o valor primitivo \`null\` (sem aspas) no JSON. NÃO invente insights se nada mudou. Fale de forma técnica e minimalista.
-      10. PROIBIDO INVENTAR PREENCHIMENTO DE CHECKLIST (ZERO HALLUCINATION):
-         O JSON "audit_checklist" DEVE ser retornado APENAS com chaves dos itens EXPLICITAMENTE GANHOS/VISTOS e provados pela ação do gerente.
-         Se é o começo do atendimento (lead_new, negotiation inicial) e o gerente apenas disse "bom dia", NADA do checklist deve ser retornado como \`true\`. Você não deve assumir que os itens 1a, 1b ou 2a ocorreram se não há prova contundente. Mantenha os itens que não aconteceram omitidos ou como \`false\`.
-      
+      INSTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST E JUSTIFICATIVAS:
+      1. AVALIAÇÃO FINAL PARA 1a, 1b, 4a e 4b: Estes itens SÓ PODEM SER MARCADOS COMO TRUE NO MOMENTO EM QUE FINALIZAR O ATENDIMENTO (quando o funnel_stage mudar para 'closed_won' ou 'closed_lost'). Durante o atendimento, MANTENHA-OS COMO false.
+      2. MENSAGEM DE AGRADECIMENTO E AVALIAÇÃO (4a, 4b): NEGATIVE CONSTRAINT: Um simples "Valeu" ou "Obrigado" do gerente NO MEIO do atendimento NÃO é mensagem de finalização. Só pontue se a conversa realmente chegou ao fim e o serviço foi aprovado/recusado.
+      3. CHAIN-OF-THOUGHT (OBRIGATÓRIO): A PRIMEIRA CHAVE do seu JSON de resposta DEVE ser "reasoning_step_by_step". Você deve pensar alto e justificar como interpretou gírias e intenções cruzando com o histórico ANTES de preencher o checklist e a etapa do funil. Se for um áudio ou link, resuma o que ele contém nesta etapa.
+
       [SISTEMA DE BLINDAGEM DE MEMÓRIA (MANDATÓRIO)]
-      Sempre que você receber na variável \`scrapedContent\` o conteúdo lido de um link (Checklist, Orçamento em PDF, Sistema Web, etc):
-      Você É OBRIGADO a extrair as informações cruciais (quais peças foram sugeridas, defeitos listados, preço total ou unitário) e SALVÁ-LAS em texto corrido dentro do campo \`new_compressed_history\`.
-      Se você apenas avaliar e NÃO GUARDAR na memória comprimida o conteúdo do link, a IA sofrerá de amnésia no próximo turno.
-      Exemplo do que adicionar na memória: "O link do orçamento contém: Pastilha freio (200), Discos (150). Total 350. Aguardando cliente."
+      Sempre que houver conteúdo lido de um link (Checklist/Orçamento), você É OBRIGADO a extrair peças e valores e SALVÁ-LAS em texto corrido no campo \`new_compressed_history\`.
       ${scrapedContent}
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
+        "reasoning_step_by_step": "String descrevendo passo a passo o raciocínio da sua avaliação, interpretando gírias e o histórico",
         "audit_checklist": {
           "1a": true ou false,
           "1b": true ou false,
@@ -280,10 +268,17 @@ serve(async (req) => {
           "4b": true ou false
         },
         "score": (número de 0 a 100),
+        "funnel_stage": (sugestão de nova etapa),ue ou false,
+          "3b": true ou false,
+          "3c": true ou false,
+          "4a": true ou false,
+          "4b": true ou false
+        },
+        "score": (número de 0 a 100),
         "funnel_stage": (sugestão de nova etapa),
         "stage_change_reason": (string ou null. OBRIGATÓRIO preencher se mudar para closed_lost ou closed_won. Motivo claro, curto e objetivo da transição),
         "audit_justifications": {
-           // (Dicionário) Justificativa CURTA em 1 frase para CADA item avaliado como true ou false. Ex: "2c": "Gerente explicou o vazamento em detalhes."
+           // (Dicionário) Apenas para itens que você marcou como true ou false NESTA mensagem, justifique sucintamente o porquê. Ex: "4a": "Marcado como false pois 'valeu' não encerra o atendimento."
         },
         "media_summaries": {
            // (Dicionário Opcional) Se houver mídia anexa e você a analisou (áudio/vídeo/imagem), insira o ID da mensagem como chave e o resumo da transcrição como valor. O ID atual é: ${message_id}.
@@ -730,46 +725,43 @@ serve(async (req) => {
       calculatedScore += (done / step.items.length) * step.weight;
     });
     calculatedScore = Math.round(calculatedScore);
-
-    const updatePayload: any = {
-      score: calculatedScore,
-      closing_summary: mockOutput.closing_summary,
-      audit_checklist: mergedChecklist,
-      audit_checklist_messages: newMessagesMap
+    // ==========================================
+    // ESTRITA PROGRESSÃO DE FUNIL (EVITAR REGRESSÕES BURRAS)
+    // ==========================================
+    const STAGE_ORDER: Record<string, number> = {
+      'lead_new': 0,
+      'negotiation': 1,
+      'quote': 2,
+      'closed_won': 3,
+      'closed_lost': 3
     };
-    
-    // Atualiza ticket apenas se a IA não retornou null
-    if (mockOutput.ticket_value !== null && mockOutput.ticket_value !== undefined) {
-      updatePayload.ticket_value = mockOutput.ticket_value;
-    }
-    
-    if (mockOutput.customer_vehicle) {
-      updatePayload.customer_vehicle = mockOutput.customer_vehicle;
+
+    const currentStage = leadData?.funnel_stage || 'lead_new';
+    let newFunnelStage = parsedData.funnel_stage;
+
+    if (newFunnelStage && STAGE_ORDER[currentStage] !== undefined && STAGE_ORDER[newFunnelStage] !== undefined) {
+      // Se a IA sugerir uma etapa cujo valor é MENOR que o atual (ex: de closed_won (3) para negotiation (1)), REJEITE!
+      // A exceção é se ele for para closed_lost (que é 3 e pode ocorrer a partir de qualquer uma exceto won, mas vamos simplificar: só não pode voltar).
+      if (STAGE_ORDER[newFunnelStage] < STAGE_ORDER[currentStage]) {
+        console.log(`[AI-EVALUATOR] BLOQUEADO: IA tentou regredir o funil de ${currentStage} para ${newFunnelStage}. Mantendo ${currentStage}.`);
+        newFunnelStage = currentStage;
+      }
+    } else {
+      newFunnelStage = currentStage;
     }
 
-    if (mockOutput.funnel_stage) {
-      updatePayload.funnel_stage = mockOutput.funnel_stage;
-    }
-    
-    if (mockOutput.stage_change_reason) {
-      updatePayload.funnel_stage_reason = mockOutput.stage_change_reason;
-    }
-    
-    if (mockOutput.audit_justifications) {
-      if (!mockOutput.audit_reasons) mockOutput.audit_reasons = {};
-      mockOutput.audit_reasons = { ...mockOutput.audit_reasons, ...mockOutput.audit_justifications };
-    }
+    // UPDATE DO LEAD
+    const updatePayload: any = {
+      audit_checklist: mergedChecklist,
+      score: parsedData.score || leadData?.score || 0,
+      funnel_stage: newFunnelStage,
+      audit_checklist_messages: newMessagesMap,
+      customer_vehicle: parsedData.customer_vehicle || leadData?.customer_vehicle,
+      ticket_value: parsedData.ticket_value || leadData?.ticket_value,
+      audit_reasons: { ...(leadData?.audit_reasons || {}), ...(parsedData.audit_justifications || {}) }
+    };
 
-    if (mockOutput.media_summaries && Object.keys(mockOutput.media_summaries).length > 0) {
-      if (!mockOutput.audit_reasons) mockOutput.audit_reasons = {};
-      // Just keep them in audit_reasons so they are saved
-      mockOutput.audit_reasons = { ...mockOutput.audit_reasons, ...mockOutput.media_summaries };
-    }
-    if (mockOutput.audit_reasons && Object.keys(mockOutput.audit_reasons).length > 0) {
-      updatePayload.audit_reasons = mockOutput.audit_reasons;
-    }
-    
-    console.log("[AI-EVALUATOR] Resultado final da LLM parseado:", JSON.stringify(mockOutput));
+    console.log("[AI-EVALUATOR] Resultado final da LLM parseado:", JSON.stringify(parsedData));
     console.log("[AI-EVALUATOR] Salvando no banco de dados (leads). Payload:", JSON.stringify(updatePayload));
 
     const { error: updateError } = await supabaseClient.from('leads').update(updatePayload).eq('id', lead_id);
@@ -782,28 +774,37 @@ serve(async (req) => {
     // 6. Atualiza a Memoization (Lead Memories)
     await supabaseClient.from('lead_memories').upsert({
       lead_id: lead_id,
-      compressed_history: mockOutput.new_compressed_history,
+      compressed_history: parsedData.new_compressed_history,
       last_processed_message_id: message_id
     });
 
     // 7. Salvar o AI Insight e marcar a mensagem como auditada
     if (message_id) {
       const payloadToUpdate: any = { ai_audited: true };
-      if (mockOutput.message_insight) {
-        payloadToUpdate.ai_insight = mockOutput.message_insight;
+      if (parsedData.message_insight) {
+        payloadToUpdate.ai_insight = parsedData.message_insight;
       }
       
       const { error: msgErr } = await supabaseClient
         .from('chat_messages')
         .update(payloadToUpdate)
-        .eq('id', message_id); // Ensure we use 'id', because message_id from context is chat_messages.id
+        .eq('id', message_id); 
       
       if (msgErr) console.error("[AI-EVALUATOR] Erro ao marcar mensagem como auditada:", msgErr);
     }
+    console.log(`[AI-EVALUATOR] Lead ${lead_id} auditado com sucesso. Novo Score: ${updatePayload.score}`);
 
-    return new Response(JSON.stringify({ status: 'success', evaluated: updatePayload }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    // SALVAR ai_transcription NO CHAT_MESSAGES SE HOUVER MÍDIA ANALISADA
+    if (parsedData.media_summaries && parsedData.media_summaries[message_id]) {
+       const aiTranscription = parsedData.media_summaries[message_id];
+       await supabaseClient.from('chat_messages').update({ ai_transcription: aiTranscription }).eq('id', message_id);
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      insight: parsedData.message_insight || parsedData.reasoning_step_by_step,
+      score: updatePayload.score
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
   } catch (error: any) {
     console.error(error);
     // Tenta salvar o erro fatal na tabela de logs para o usuário poder ver no frontend

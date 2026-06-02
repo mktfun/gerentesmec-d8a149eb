@@ -69,64 +69,13 @@ const STEP_WINDOWS: Record<string, [number, number]> = {
 };
 const DELAY_THRESHOLD = 30;
 
-function buildTimeline(messages: ChatMessage[], checklist: Record<string, boolean>): TimelineItem[] {
+function buildTimeline(messages: ChatMessage[]): MessageItem[] {
   const n = messages.length;
-  const timeline: TimelineItem[] = [];
-  const injectedIds = new Set<string>();
-
-  const qualityByStep: Record<string, InlineEvent[]> = {};
-  auditStepsConfig.forEach(step => {
-    const events: InlineEvent[] = [];
-    step.items.forEach(item => {
-      if (!checklist[item.id]) return;
-      events.push({
-        kind: 'event', id: `quality-${item.id}`, eventType: 'quality_pass',
-        label: qualityFeedbackMap[item.id]?.label ?? item.text,
-        detail: qualityFeedbackMap[item.id]?.detail ?? '',
-      });
-    });
-    qualityByStep[step.id] = events;
-  });
-
-  const stepInjectionIndex: Record<string, number> = {};
-  auditStepsConfig.forEach(step => {
-    const [lo, hi] = STEP_WINDOWS[step.id];
-    const idx = Math.min(Math.floor(lo * n) + Math.floor((hi - lo) * n * 0.5), n - 1);
-    stepInjectionIndex[step.id] = Math.max(0, idx);
-  });
-
-  const injectAfter: Record<number, InlineEvent[]> = {};
-  Object.entries(stepInjectionIndex).forEach(([stepId, idx]) => {
-    if (!injectAfter[idx]) injectAfter[idx] = [];
-    (injectAfter[idx] as InlineEvent[]).push(...(qualityByStep[stepId] ?? []));
-  });
+  const timeline: MessageItem[] = [];
 
   for (let i = 0; i < n; i++) {
     const msg = messages[i];
     timeline.push({ kind: 'message', data: msg });
-
-    if (i < n - 1) {
-      const next = messages[i + 1];
-      if (msg.sender_type !== next.sender_type && msg.sender_type !== 'system' && next.sender_type !== 'system') {
-        const delay = differenceInMinutes(new Date(next.created_at), new Date(msg.created_at));
-        if (delay >= DELAY_THRESHOLD) {
-          timeline.push({
-            kind: 'event', id: `delay-${i}`, eventType: 'response_delay',
-            label: `Demora de ${delay} min`,
-            detail: `Resposta levou ${delay} minutos.`,
-          });
-        }
-      }
-    }
-
-    if (injectAfter[i]) {
-      injectAfter[i].forEach(ev => {
-        if (!injectedIds.has(ev.id)) {
-          injectedIds.add(ev.id);
-          timeline.push(ev);
-        }
-      });
-    }
   }
 
   return timeline;
@@ -147,8 +96,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
     }
   }, [messages, expandedAudit, highlightMessageId]);
 
-  const checklist = (lead as any).audit_checklist || {};
-  const timeline = buildTimeline(messages, checklist);
+  const timeline = buildTimeline(messages);
 
   return (
     <div className="flex flex-col h-full bg-background dark:bg-[#0a0a10] relative overflow-hidden">
@@ -188,34 +136,6 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
         ) : (
           <AnimatePresence initial={false}>
             {timeline.map((item, idx) => {
-              if (item.kind === 'event') {
-                const ev = item as InlineEvent;
-                const isPass = ev.eventType === 'quality_pass';
-                const isDelay = ev.eventType === 'response_delay';
-                const color = isPass ? '#34d399' : isDelay ? '#fb923c' : '#f87171';
-                const bg = isPass ? 'rgba(52,211,153,0.08)' : isDelay ? 'rgba(251,146,60,0.08)' : 'rgba(248,113,113,0.08)';
-                const border = isPass ? 'rgba(52,211,153,0.2)' : isDelay ? 'rgba(251,146,60,0.2)' : 'rgba(248,113,113,0.2)';
-                
-                return (
-                  <div
-                    key={ev.id}
-                    id={ev.id}
-                    className="flex justify-center my-2.5 px-2"
-                  >
-                    <div
-                      className="flex items-start gap-2 max-w-[90%] w-full rounded-2xl px-3.5 py-2.5"
-                      style={{ background: bg, border: `1px solid ${border}` }}
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color }} />
-                      <div>
-                        <p className="text-[11px] font-bold" style={{ color }}>{ev.label}</p>
-                        <p className="text-[10px] mt-0.5" style={{ color: color + 'aa' }}>{ev.detail}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
               const { data: msg } = item as MessageItem;
               const isSystem = msg.sender_type === 'system';
               const isUser = msg.sender_type === 'user';
@@ -418,19 +338,18 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         </a>
                       )}
 
-                      {/* Render Media Summary (Transcrições e análises visuais) */}
+                      {/* Render Media Summary from ai_transcription */}
                       {(() => {
-                        const summaries = (lead as any).media_summaries || {};
-                        const summaryText = summaries[msg.id] || (msg.chatwoot_message_id && summaries[msg.chatwoot_message_id]);
+                        const summaryText = (msg as any).ai_transcription || null;
                         if (!summaryText) return null;
                         
                         return (
-                          <div className="mb-2 w-full px-3 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex flex-col gap-1.5 shadow-sm">
+                          <div className="mb-2 w-full px-3 py-2.5 rounded-xl bg-white/5 dark:bg-white/[0.02] border border-white/10 backdrop-blur-md flex flex-col gap-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
                             <div className="flex items-center gap-1.5 opacity-80">
-                              <Wrench className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
-                              <span className="text-[9px] uppercase tracking-widest font-black text-indigo-500 dark:text-indigo-400">Resumo da IA Multimodal</span>
+                              <Wrench className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
+                              <span className="text-[9px] uppercase tracking-widest font-black text-emerald-500 dark:text-emerald-400">Resumo da Mídia (IA)</span>
                             </div>
-                            <p className="text-[11px] leading-relaxed font-medium text-foreground/90">
+                            <p className="text-[11px] leading-relaxed font-medium text-foreground/90 italic">
                               {summaryText}
                             </p>
                           </div>
@@ -467,17 +386,50 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                       )}
                     
                     {/* Renderiza AI Insight (Auditoria Inline - Minimalista) */}
-                    {msg.ai_insight && (
-                      <div className={`mt-1.5 px-3 py-2 rounded-xl max-w-[85%] bg-black/5 dark:bg-white/5 border border-border/50 flex flex-col gap-1 ${isUser ? 'self-end items-end text-right' : 'self-start items-start text-left'}`}>
-                        <div className="flex items-center gap-1.5 opacity-60">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span className="text-[9px] uppercase tracking-widest font-bold">Nota de Auditoria</span>
+                    {(() => {
+                      const checklistMsgs = (lead as any).audit_checklist_messages || {};
+                      const auditReasons = (lead as any).audit_reasons || {};
+                      
+                      // Encontra se esta mensagem ativou algum item do checklist
+                      const activatedItems = Object.entries(checklistMsgs)
+                        .filter(([_, msgId]) => msgId === msg.id || (msg.chatwoot_message_id && msgId === msg.chatwoot_message_id))
+                        .map(([key, _]) => {
+                          const reason = auditReasons[key] || msg.ai_insight;
+                          return { key, reason };
+                        });
+
+                      if (activatedItems.length === 0 && !msg.ai_insight) return null;
+
+                      return (
+                        <div className={`mt-1.5 flex flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
+                          {activatedItems.length > 0 ? (
+                            activatedItems.map(({ key, reason }) => (
+                              <div key={key} className={`px-2 py-1.5 max-w-[85%] rounded-lg bg-emerald-500/5 dark:bg-emerald-500/10 border-l-2 border-emerald-500/40 flex flex-col gap-0.5 text-left`}>
+                                <div className="flex items-center gap-1.5 opacity-80">
+                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
+                                  <span className="text-[9px] uppercase tracking-widest font-bold text-emerald-600 dark:text-emerald-400">Ponto Auditoria ({key})</span>
+                                </div>
+                                {reason && (
+                                  <span className="text-[10px] font-mono leading-tight text-muted-foreground/80">
+                                    {reason}
+                                  </span>
+                                )}
+                              </div>
+                            ))
+                          ) : msg.ai_insight ? (
+                            <div className={`px-2 py-1.5 max-w-[85%] rounded-lg bg-black/5 dark:bg-white/5 border-l-2 border-border/50 flex flex-col gap-0.5 text-left`}>
+                                <div className="flex items-center gap-1.5 opacity-60">
+                                  <CheckCircle2 className="w-2.5 h-2.5" />
+                                  <span className="text-[9px] uppercase tracking-widest font-bold">Nota de IA</span>
+                                </div>
+                                <span className="text-[10px] font-mono leading-tight text-muted-foreground/80">
+                                  {msg.ai_insight}
+                                </span>
+                            </div>
+                          ) : null}
                         </div>
-                        <span className="text-[11px] leading-relaxed font-medium text-muted-foreground/80">
-                          {msg.ai_insight}
-                        </span>
-                      </div>
-                    )}
+                      );
+                    })()}
                     
                     </div>
                     
