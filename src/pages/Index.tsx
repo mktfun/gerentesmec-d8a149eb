@@ -118,7 +118,12 @@ const Index = () => {
   const managerRanking = managers.map(m => {
     const unit = units.find(u => u.id === m.unit_id);
     const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
-    return { ...m, score: avgScoreInt(mLeadsAll), unitName: unit?.name || 'N/A' };
+    const lastActiveAt = mLeadsAll.reduce((max, l) => {
+      const time = new Date(l.last_message_at || l.created_at).getTime();
+      return time > max ? time : max;
+    }, 0);
+    const isInactive = lastActiveAt === 0 || (Date.now() - lastActiveAt) > 24 * 60 * 60 * 1000;
+    return { ...m, score: avgScoreInt(mLeadsAll), unitName: unit?.name || 'N/A', isInactive };
   }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 
   const todayStr = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date());
@@ -269,7 +274,7 @@ const Index = () => {
                 </div>
                 <div className="text-right">
                   <div className={`text-sm font-black flex items-center justify-end gap-1 mb-1 ${m.score === null ? 'text-muted-foreground/30' : m.score >= 75 ? 'text-emerald-500 dark:text-emerald-400' : m.score >= 50 ? 'text-indigo-400 dark:text-indigo-300' : 'text-rose-500 dark:text-rose-400'}`}>
-                    {m.score !== null ? `${m.score}%` : 'â€”'}
+                    {m.score !== null ? `${m.score}%` : '—'}
                   </div>
                   <div className="w-16 h-1.5 bg-black/5 dark:bg-[#13111A] rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${m.score ?? 0}%` }} />
