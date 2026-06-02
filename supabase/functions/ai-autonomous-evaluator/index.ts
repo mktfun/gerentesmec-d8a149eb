@@ -693,8 +693,11 @@ serve(async (req) => {
       }
     }
 
+    // Bridge: mockOutput → parsedData (used from line 740 onwards)
+    const parsedData = mockOutput;
+
     // 5. Rastreabilidade de Auditoria: descobrir quais checks viraram true agora
-    const { data: leadData } = await supabaseClient.from('leads').select('ticket_value, customer_vehicle, audit_checklist, audit_checklist_messages').eq('id', lead_id).single();
+    const { data: leadData } = await supabaseClient.from('leads').select('ticket_value, customer_vehicle, audit_checklist, audit_checklist_messages, funnel_stage, score, audit_reasons').eq('id', lead_id).single();
     const currentChecklist = leadData?.audit_checklist || {};
     const newMessagesMap = leadData?.audit_checklist_messages || {};
 
@@ -753,7 +756,7 @@ serve(async (req) => {
     // UPDATE DO LEAD
     const updatePayload: any = {
       audit_checklist: mergedChecklist,
-      score: parsedData.score || leadData?.score || 0,
+      score: calculatedScore || leadData?.score || 0,
       funnel_stage: newFunnelStage,
       audit_checklist_messages: newMessagesMap,
       customer_vehicle: parsedData.customer_vehicle || leadData?.customer_vehicle,
