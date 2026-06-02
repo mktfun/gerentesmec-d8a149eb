@@ -70,24 +70,37 @@ export const BackgroundAuditorProvider: React.FC<{ children: React.ReactNode }> 
             'closed_lost': 6
           };
 
-          // Prioriza pela etapa do funil (1 a 6) e, como o banco já ordenou por created_at (ascending),
-          // o sort estável manterá a ordem dos mais antigos primeiro dentro de cada etapa.
+          // Prioriza pela etapa do funil (1 a 6) e mantem a ordem dos mais antigos primeiro
           const sorted = [...data].sort((a, b) => {
             const stageA = (a.leads as any)?.funnel_stage || 'novo_lead';
             const stageB = (b.leads as any)?.funnel_stage || 'novo_lead';
             return (STAGE_PRIORITY[stageA] || 99) - (STAGE_PRIORITY[stageB] || 99);
           });
 
-          const msg = sorted[0];
+          // Pega o lead de maior prioridade
+          const targetLeadId = sorted[0].lead_id;
+          
+          // Agrupa todas as mensagens não auditadas DESSE lead
+          const msgsForLead = sorted.filter(m => m.lead_id === targetLeadId)
+                                    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+          // Concatena os textos em ordem cronológica
+          const bundledContent = msgsForLead.map(m => {
+            const time = new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            return `[${time}] ${m.sender_type}: ${m.content}`;
+          }).join('\n\n');
+
+          const messageIds = msgsForLead.map(m => m.id);
 
           await supabase.functions.invoke('ai-autonomous-evaluator', {
             body: {
-              message_content: msg.content,
-              lead_id: msg.lead_id,
-              message_id: msg.id,
-              media_url: msg.media_url,
-              media_type: msg.media_type,
-              sender_type: msg.sender_type
+              message_content: bundledContent,
+              lead_id: targetLeadId,
+              message_ids: messageIds,
+              // Mantem media da primeira se houver, ou a Edge function pega do historico
+              media_url: msgsForLead[0].media_url,
+              media_type: msgsForLead[0].media_type,
+              sender_type: msgsForLead[msgsForLead.length - 1].sender_type // Trata o sender_type da última
             }
           });
           

@@ -66,19 +66,38 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
     if (pendingCount === 0 || isProcessingQueue) return;
     setIsProcessingQueue(true);
     try {
-      // Buscar até 10 da fila para processar nesta rodada
       const { data } = await supabase.from('chat_messages')
         .select('*')
         .eq('ai_audited', false)
         .eq('sender_type', 'user')
         .order('created_at', { ascending: true })
-        .limit(10);
+        .limit(50);
         
       if (data && data.length > 0) {
-        for (const msg of data) {
-          // Trigger a reavaliação enviando o payload que o webhook original enviaria
+        // Agrupa por lead_id
+        const groups: Record<string, any[]> = {};
+        data.forEach(m => {
+          if (!groups[m.lead_id]) groups[m.lead_id] = [];
+          groups[m.lead_id].push(m);
+        });
+
+        for (const [leadId, msgs] of Object.entries(groups)) {
+          const bundledContent = msgs.map(m => {
+            const time = new Date(m.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            return `[${time}] ${m.sender_type}: ${m.content}`;
+          }).join('\n\n');
+
+          const messageIds = msgs.map(m => m.id);
+
           await supabase.functions.invoke('ai-autonomous-evaluator', {
-             body: { record: msg }
+             body: { 
+               message_content: bundledContent,
+               lead_id: leadId,
+               message_ids: messageIds,
+               media_url: msgs[0].media_url,
+               media_type: msgs[0].media_type,
+               sender_type: msgs[msgs.length - 1].sender_type
+             }
           });
         }
         setQueueOk(true);
@@ -249,7 +268,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                       className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(99,102,241,0.2)] flex items-center gap-2 transition-all"
                     >
                       {isProcessingQueue ? <Cpu className="w-3.5 h-3.5 animate-spin" /> : queueOk ? <Check className="w-3.5 h-3.5" /> : <Activity className="w-3.5 h-3.5" />}
-                      {isProcessingQueue ? 'Processando...' : queueOk ? 'Enviados!' : 'Forçar Fila'}
+                      {isProcessingQueue ? 'Processando Lotes...' : queueOk ? 'Lotes Concluídos!' : 'Forçar Lote Manual (Fim de Expediente)'}
                     </button>
                   </div>
                 </div>

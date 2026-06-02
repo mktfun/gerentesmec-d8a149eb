@@ -32,6 +32,8 @@ const availableModels: Record<string, string[]> = {
   'OpenAI': ['gpt-3.5-turbo', 'gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'o1-mini', 'o1', 'o3-mini'],
   'Anthropic': ['claude-3-haiku-20240307', 'claude-3-5-sonnet-20240620', 'claude-3-5-haiku-latest', 'claude-opus-4-5', 'claude-sonnet-4-5'],
   'OpenRouter': [
+    'openrouter/free',
+    'openrouter/auto',
     // Google via OpenRouter
     'google/gemini-2.0-flash', 'google/gemini-2.5-pro-preview', 'google/gemini-flash-1.5',
     // Anthropic via OpenRouter

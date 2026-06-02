@@ -77,7 +77,7 @@ serve(async (req) => {
 
     const payload = await req.json();
     console.log("[AI-EVALUATOR] Iniciando avaliação para payload:", JSON.stringify(payload));
-    let { message_content, lead_id, message_id, media_url, media_type, sender_type } = payload;
+    let { message_content, lead_id, message_id, message_ids, media_url, media_type, sender_type } = payload;
 
     if (!lead_id) {
       return new Response(JSON.stringify({ error: 'Missing lead_id' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
@@ -130,8 +130,9 @@ serve(async (req) => {
     const text = message_content.trim();
     if (text.length < 10 && !text.match(/[?]/)) {
       console.log(`[Cost-Efficiency] Mensagem ignorada por ser muito curta e sem pergunta: "${text}"`);
-      if (message_id) {
-        await supabaseClient.from('chat_messages').update({ ai_audited: true }).eq('id', message_id);
+      const ignoreIds = (message_ids && Array.isArray(message_ids) && message_ids.length > 0) ? message_ids : (message_id ? [message_id] : []);
+      if (ignoreIds.length > 0) {
+        await supabaseClient.from('chat_messages').update({ ai_audited: true }).in('id', ignoreIds);
       }
       await updateTask({ status: 'ignored', completed_at: new Date().toISOString() });
       return new Response(JSON.stringify({ status: 'ignored_by_deterministic_filter' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }});
@@ -780,8 +781,10 @@ serve(async (req) => {
       last_processed_message_id: message_id
     });
 
-    // 7. Salvar o AI Insight e marcar a mensagem como auditada
-    if (message_id) {
+    // 7. Salvar o AI Insight e marcar a mensagem (ou mensagens) como auditada
+    const targetIds = (message_ids && Array.isArray(message_ids) && message_ids.length > 0) ? message_ids : (message_id ? [message_id] : []);
+    
+    if (targetIds.length > 0) {
       const payloadToUpdate: any = { ai_audited: true };
       if (parsedData.message_insight) {
         payloadToUpdate.ai_insight = parsedData.message_insight;
@@ -790,9 +793,9 @@ serve(async (req) => {
       const { error: msgErr } = await supabaseClient
         .from('chat_messages')
         .update(payloadToUpdate)
-        .eq('id', message_id); 
+        .in('id', targetIds); 
       
-      if (msgErr) console.error("[AI-EVALUATOR] Erro ao marcar mensagem como auditada:", msgErr);
+      if (msgErr) console.error("[AI-EVALUATOR] Erro ao marcar mensagens como auditadas:", msgErr);
     }
     console.log(`[AI-EVALUATOR] Lead ${lead_id} auditado com sucesso. Novo Score: ${updatePayload.score}`);
 
