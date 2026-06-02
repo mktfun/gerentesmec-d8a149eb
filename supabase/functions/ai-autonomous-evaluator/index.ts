@@ -278,7 +278,14 @@ serve(async (req) => {
         "funnel_stage": (sugestão de nova etapa),
         "stage_change_reason": (string ou null. OBRIGATÓRIO preencher se mudar para closed_lost ou closed_won. Motivo claro, curto e objetivo da transição),
         "audit_justifications": {
-           // (Dicionário) Apenas para itens que você marcou como true ou false NESTA mensagem, justifique sucintamente o porquê. Ex: "4a": "Marcado como false pois 'valeu' não encerra o atendimento."
+           // (Dicionário) APENAS para itens que ficaram FALSE e que faziam sentido ter sido cumpridos nesta etapa do funil.
+           // NÃO justifique itens TRUE (esses já foram cumpridos).
+           // NÃO justifique TODOS os itens false — só aqueles que o gerente DEVERIA ter feito mas PULOU ou ESQUECEU dado o contexto da conversa.
+           // A justificativa DEVE ser contextual e específica da conversa, citando o que aconteceu de fato.
+           // EXEMPLO BOM: "3a": "Gerente pulou direto pro orçamento sem enviar foto/vídeo do defeito. Cliente perguntou o preço e ele já mandou o valor."
+           // EXEMPLO BOM: "2e": "Não enviou vídeo educativo. Atendimento foi rápido, cliente já sabia o problema e pediu só o preço."
+           // EXEMPLO RUIM (NÃO FAÇA): "3a": "Não foi marcado pois o gerente não enviou." (isso é genérico e inútil)
+           // Se o item ainda não faz sentido na etapa atual (ex: 4a/4b durante negotiation), NÃO inclua.
         },
         "media_summaries": {
            // (Dicionário Opcional) Se houver mídia anexa e você a analisou (áudio/vídeo/imagem), insira o ID da mensagem como chave e o resumo da transcrição como valor. O ID atual é: ${message_id}.
