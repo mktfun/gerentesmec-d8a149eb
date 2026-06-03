@@ -71,12 +71,28 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
     fetch();
   }, [lead.id]);
 
+  // Helper to identify client messages
+  const isClientMsg = (msg: ChatMessage) => msg.sender === 'client' || msg.sender === 'contact' || msg.sender === 'customer';
+  const isSystemMsg = (msg: ChatMessage) => msg.sender === 'system' || msg.sender === 'bot';
+
   // Group quality hits by message ID
   const hitsByMessageId: Record<string, { id: string, label: string, detail: string, pass: boolean }[]> = {};
   auditStepsConfig.forEach(step => {
     step.items.forEach(item => {
       const pass = !!checklist[item.id];
-      const msgId = checklistMessages[item.id];
+      let msgId = checklistMessages[item.id];
+
+      // Heuristic fallback if backend didn't provide message ID
+      if (pass && !msgId && messages.length > 0) {
+        if (item.id === 'audio') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && m.media_type?.startsWith('audio/'))?.id;
+        else if (item.id === 'video') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && m.media_type?.startsWith('video/'))?.id;
+        else if (item.id === 'image') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && m.media_type?.startsWith('image/'))?.id;
+        else if (item.id === 'budget' || item.id === 'price') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && (m.content.includes('R$') || m.content.toLowerCase().includes('orçamento')))?.id;
+        
+        // Final fallback: just attach to the last attendant message
+        if (!msgId) msgId = [...messages].reverse().find(m => !isClientMsg(m) && !isSystemMsg(m))?.id;
+      }
+
       if (pass && msgId) {
         if (!hitsByMessageId[msgId]) hitsByMessageId[msgId] = [];
         hitsByMessageId[msgId].push({
@@ -210,8 +226,8 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
           )}
 
           {!loading && messages.map((msg) => {
-            const isClient = msg.sender === 'client' || msg.sender === 'contact' || msg.sender === 'customer';
-            const isSystem = msg.sender === 'system' || msg.sender === 'bot';
+            const isClient = isClientMsg(msg);
+            const isSystem = isSystemMsg(msg);
             
             let displayContent = msg.content || '';
             const isAudio = msg.media_type?.startsWith('audio/');
@@ -337,15 +353,16 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                   </button>
                 </div>
 
-                {/* Score mini */}
+                {/* Acertos e Erros Cards */}
                 {score !== null && (
-                  <div className={`px-6 py-5 border-b shrink-0 ${isDark ? 'border-white/5' : 'border-black/5'}`}>
-                    <div className={`w-full py-4 rounded-3xl flex items-center justify-center gap-4 border ${scoreBg} ${scoreBorder}`}>
-                      <span className={`text-4xl font-black ${scoreText}`}>{score}</span>
-                      <div>
-                        <p className="text-sm font-bold">Score Final</p>
-                        <p className={`text-xs font-semibold truncate max-w-[120px] mt-0.5 ${isDark ? 'opacity-60' : 'opacity-60'}`}>{customerName}</p>
-                      </div>
+                  <div className={`px-6 py-5 border-b shrink-0 grid grid-cols-2 gap-4 ${isDark ? 'border-white/5' : 'border-black/5'}`}>
+                    <div className={`p-4 rounded-3xl border flex flex-col items-center justify-center gap-1 shadow-sm ${isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100'}`}>
+                      <span className={`text-4xl font-black ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{passingCount}</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-widest text-center ${isDark ? 'text-emerald-500/60' : 'text-emerald-600/60'}`}>Acertos</span>
+                    </div>
+                    <div className={`p-4 rounded-3xl border flex flex-col items-center justify-center gap-1 shadow-sm ${isDark ? 'bg-rose-500/10 border-rose-500/20' : 'bg-rose-50 border-rose-100'}`}>
+                      <span className={`text-4xl font-black ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>{allQualityItems.length - passingCount}</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-widest text-center ${isDark ? 'text-rose-500/60' : 'text-rose-600/60'}`}>Erros</span>
                     </div>
                   </div>
                 )}
