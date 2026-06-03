@@ -21,7 +21,7 @@ const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / 
 const Index = () => {
   const { leads, managers, units, isTvMode, setIsTvMode, businessHours } = useAppData();
 
-  // â”€â”€ Hooks devem vir antes de qualquer early return (Rules of Hooks) â”€â”€
+  // ── Hooks devem vir antes de qualquer early return (Rules of Hooks) ──
   
   if (isTvMode) {
     return <TvDashboard />;
@@ -38,11 +38,11 @@ const Index = () => {
   const now = new Date();
   const today0 = startOfDay(now);
 
-  // Global score (Últimos 30 dias) â€” usa APENAS leads auditados no denominador
+  // Global score (Últimos 30 dias) — usa APENAS leads auditados no denominador
   const leads30Days = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime() - 29 * 86400000);
   const globalScore = avgScore(leads30Days);
 
-  // Score series â€” last 7 days (trailing 30-day average for each day to show true global evolution)
+  // Score series — last 7 days (trailing 30-day average for each day to show true global evolution)
   const scoreHistory = useMemo(() => {
     const series: { day: string; score: number | null }[] = [];
     let validPoints = 0;
@@ -95,7 +95,7 @@ const Index = () => {
     return Math.round((a - b) * 10) / 10;
   }, [leads, today0]);
 
-  // Unit scores â€” usa apenas auditados no denominador
+  // Unit scores — usa apenas auditados no denominador
   const unitScores = units.map(u => {
     const uLeadsAll = leads.filter(l => l.unit_id === u.id);
     return { ...u, score: avgScoreInt(uLeadsAll) };
@@ -114,7 +114,7 @@ const Index = () => {
 
 
 
-  // Manager ranking â€” usa apenas auditados no denominador
+  // Manager ranking — usa apenas auditados no denominador
   const managerRanking = managers.map(m => {
     const unit = units.find(u => u.id === m.unit_id);
     const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
@@ -131,13 +131,13 @@ const Index = () => {
   return (
     <div className="p-8 pb-20 min-h-screen">
       
-      {/* â”€â”€ HERO CARD: SCORE GLOBAL â”€â”€ */}
+      {/* ── HERO CARD: SCORE GLOBAL ── */}
       <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-border p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
         <div className="flex-1">
           <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-500/70 dark:text-indigo-300/70 mb-4">Score Global da Rede</p>
           <div className="flex items-end gap-6 mb-2">
             <h2 className="text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
-              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">â€”</span>}
+              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
             </h2>
             {weekTrend !== null && (
               <div className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
@@ -147,7 +147,7 @@ const Index = () => {
             )}
           </div>
           <p className="text-sm text-slate-400 mt-4">
-            {globalScore !== null ? `Média dos últimos 30 dias Â· Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
+            {globalScore !== null ? `Média dos últimos 30 dias · Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
           </p>
         </div>
 
@@ -174,7 +174,7 @@ const Index = () => {
         </div>
       </motion.div>
 
-      {/* â”€â”€ METRICS ROW â”€â”€ */}
+      {/* ── METRICS ROW ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <motion.div {...fadeUp(0.1)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
@@ -204,7 +204,7 @@ const Index = () => {
         </motion.div>
       </div>
 
-      {/* â”€â”€ CHARTS & RANKING ROW â”€â”€ */}
+      {/* ── CHARTS & RANKING ROW ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Area Chart */}
@@ -216,7 +216,7 @@ const Index = () => {
             </div>
             {weekTrend !== null && (
               <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
-                {weekTrend >= 0 ? 'â–²' : 'â–¼'} {weekTrend >= 0 ? '+' : ''}{weekTrend}%
+                {weekTrend >= 0 ? '▲' : '▼'} {weekTrend >= 0 ? '+' : ''}{weekTrend}%
               </div>
             )}
           </div>

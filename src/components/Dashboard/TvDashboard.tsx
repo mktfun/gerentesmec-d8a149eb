@@ -212,7 +212,7 @@ const TvDashboard: React.FC = () => {
             {page === 0 ? (
               <div className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-8 h-full px-8 lg:px-12 pb-4">
                 
-                {/* ESQUERDA: SaÃºde + GrÃ¡fico */}
+                {/* ESQUERDA: Saúde + Gráfico */}
                 <div className="lg:col-span-2 flex flex-col gap-8 h-full">
                   
                   {/* Macro View: Global Score */}
@@ -228,7 +228,7 @@ const TvDashboard: React.FC = () => {
                             <Target className="w-8 h-8" />
                             <span className="text-3xl font-bold uppercase tracking-widest">Score Geral</span>
                           </div>
-                          <p className="text-sm font-medium">MÃ©dia unificada de todas as lojas ativas.</p>
+                          <p className="text-sm font-medium">Média unificada de todas as lojas ativas.</p>
                         </div>
                         <div className="relative w-64 h-64 lg:w-80 lg:h-80 flex items-center justify-center">
                           <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 256 256">
@@ -256,7 +256,7 @@ const TvDashboard: React.FC = () => {
                   <div className="flex-1 flex flex-col p-8 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl">
                     <div className="flex items-center gap-4 text-white/50 mb-6">
                       <TrendingUp className="w-6 h-6" />
-                      <span className="text-xl font-bold uppercase tracking-widest">EvoluÃ§Ã£o Global</span>
+                      <span className="text-xl font-bold uppercase tracking-widest">Evolução Global</span>
                     </div>
                     <div className="flex-1 min-h-[220px]">
                       {(() => {
@@ -340,7 +340,7 @@ const TvDashboard: React.FC = () => {
                             </AreaChart>
                           </ResponsiveContainer>
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white/30 font-medium">Sem auditorias nos Ãºltimos dias</div>
+                          <div className="w-full h-full flex items-center justify-center text-white/30 font-medium">Sem auditorias nos últimos dias</div>
                         );
                       })()}
                     </div>
