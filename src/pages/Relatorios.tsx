@@ -344,8 +344,15 @@ const Relatorios = () => {
           
           <div className="relative z-10">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400 mb-4 opacity-80">Score Global de Qualidade</p>
-            <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500">
-              {metrics.score !== null ? <>{metrics.score}<span className="text-3xl text-muted-foreground/60">%</span></> : <span className="text-muted-foreground/30">—</span>}
+            <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500 flex flex-col items-start gap-1">
+              {metrics.score !== null ? (
+                <>{metrics.score}<span className="text-3xl text-muted-foreground/60">%</span></>
+              ) : (
+                <>
+                  <span className="text-muted-foreground/30 leading-none">—</span>
+                  <span className="text-xs font-bold text-indigo-500/80 uppercase tracking-widest mt-2 bg-indigo-500/10 px-2 py-1 rounded-md">Pendente Processamento Lote</span>
+                </>
+              )}
             </h2>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Unidade:</span>

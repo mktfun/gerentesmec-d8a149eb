@@ -63,12 +63,23 @@ const Index = () => {
       series.push({ day: WEEK_DAY_LABELS[day.getDay()], score: a !== null ? Math.round(a * 10) / 10 : null });
     }
 
-    // Chart Fallback: Se for o dia 1 de uso e sÃ³ tem 1 ponto, vamos "esticar" essa linha horizontalmente 
-    // para preencher o grÃ¡fico de forma visualmente agradÃ¡vel ao invÃ©s de um ponto solto solitÃ¡rio.
-    if (validPoints === 1) {
-      const singleScore = series.find(s => s.score !== null)?.score;
-      if (singleScore !== undefined) {
-        return series.map(s => ({ ...s, score: singleScore }));
+    // Backfill nulls to avoid line dropping to 0 when data is sparse
+    if (validPoints > 0) {
+      let lastValid = series.find(s => s.score !== null)?.score ?? null;
+      for (let i = 0; i < series.length; i++) {
+        if (series[i].score === null && lastValid !== null) {
+          series[i].score = lastValid;
+        } else if (series[i].score !== null) {
+          lastValid = series[i].score;
+        }
+      }
+      let firstValid = [...series].reverse().find(s => s.score !== null)?.score ?? null;
+      for (let i = series.length - 1; i >= 0; i--) {
+        if (series[i].score === null && firstValid !== null) {
+          series[i].score = firstValid;
+        } else if (series[i].score !== null) {
+          firstValid = series[i].score;
+        }
       }
     }
     
@@ -131,125 +142,8 @@ const Index = () => {
   return (
     <div className="p-8 pb-20 min-h-screen">
       
-      {/* â”€â”€ HERO CARD: SCORE GLOBAL â”€â”€ */}
-      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-border p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
-        <div className="flex-1">
-          <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-500/70 dark:text-indigo-300/70 mb-4">Score Global da Rede</p>
-          <div className="flex items-end gap-6 mb-2">
-            <h2 className="text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
-              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">â€”</span>}
-            </h2>
-            {weekTrend !== null && (
-              <div className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                <TrendingUp className={`w-4 h-4 ${weekTrend < 0 ? 'rotate-180' : ''}`} />
-                {weekTrend >= 0 ? '+' : ''}{weekTrend}% vs semana anterior
-              </div>
-            )}
-          </div>
-          <p className="text-sm text-slate-400 mt-4">
-            {globalScore !== null ? `MÃ©dia dos Ãºltimos 30 dias Â· Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-stretch justify-start lg:justify-end gap-4 w-full lg:w-auto mt-6 lg:mt-0">
-          
-          <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Unidades Ativas</p>
-            <p className="text-3xl font-black text-foreground">{units.length}</p>
-          </div>
-
-          <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">ResoluÃ§Ã£o Hoje</p>
-            <p className="text-3xl font-black text-emerald-500 dark:text-emerald-400">{resolutionRate}%</p>
-          </div>
-
-          <div className="bg-black/5 dark:bg-black/20 backdrop-blur-md px-6 py-5 rounded-2xl flex flex-col justify-center min-w-[140px] border border-black/5 dark:border-white/5 shadow-inner relative overflow-hidden">
-            <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Tempo MÃ©dio</p>
-            <p className="text-3xl font-black text-indigo-500 dark:text-indigo-400">
-              {todayTmr}<span className="text-sm font-bold text-indigo-500/50 dark:text-indigo-400/50 ml-1">min</span>
-            </p>
-          </div>
-
-        </div>
-      </motion.div>
-
-      {/* â”€â”€ METRICS ROW â”€â”€ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <motion.div {...fadeUp(0.1)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-6">
-            <Clock className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-          </div>
-          <h3 className="text-4xl font-black text-foreground mb-2">{todayLeads.length}</h3>
-          <p className="text-sm text-muted-foreground font-medium mb-1">Atendimentos Hoje</p>
-          <p className="text-xs text-indigo-500 dark:text-indigo-400">{pendingAudits} auditorias pendentes</p>
-        </motion.div>
-
-        <motion.div {...fadeUp(0.15)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-          </div>
-          <h3 className="text-4xl font-black text-foreground mb-2">{completedLeads.length}</h3>
-          <p className="text-sm text-muted-foreground font-medium mb-1">ConcluÃ­dos com Sucesso</p>
-          <p className="text-xs text-emerald-500 dark:text-emerald-400">{resolutionRate}% de resoluÃ§Ã£o</p>
-        </motion.div>
-
-        <motion.div {...fadeUp(0.2)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] relative overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-6">
-            <AlertTriangle className="w-5 h-5 text-rose-500 dark:text-rose-400" />
-          </div>
-          <h3 className={`text-4xl font-black mb-2 ${dangerLeads.length > 0 ? 'text-rose-500' : 'text-foreground'}`}>{dangerLeads.length}</h3>
-          <p className="text-sm text-muted-foreground font-medium mb-1">Leads em Alerta ({'>'}20m)</p>
-          <p className="text-xs text-rose-500 dark:text-rose-400">AÃ§Ã£o imediata necessÃ¡ria</p>
-        </motion.div>
-      </div>
-
-      {/* â”€â”€ CHARTS & RANKING ROW â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Area Chart */}
-        <motion.div {...fadeUp(0.25)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border lg:col-span-2 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
-          <div className="flex items-start justify-between mb-8">
-            <div>
-              <h3 className="text-lg font-bold text-foreground">EvoluÃ§Ã£o do Score Global</h3>
-              <p className="text-sm text-muted-foreground mt-1">Ãšltimos 7 dias</p>
-            </div>
-            {weekTrend !== null && (
-              <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-500 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-500 dark:text-rose-400'}`}>
-                {weekTrend >= 0 ? 'â–²' : 'â–¼'} {weekTrend >= 0 ? '+' : ''}{weekTrend}%
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-h-[220px]">
-            {hasHistory ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={scoreHistory} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
-                  <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dx={-10} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#13111A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }} 
-                    itemStyle={{ color: '#fff' }}
-                  />
-                  <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" connectNulls activeDot={{ r: 6, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center text-slate-400">
-                <Clock className="w-8 h-8 mb-3 opacity-40" />
-                <p className="text-sm font-semibold">Sem auditorias nos Ãºltimos 7 dias</p>
-                <p className="text-xs text-slate-500 mt-1">O grÃ¡fico serÃ¡ preenchido conforme novos atendimentos forem pontuados.</p>
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Ranking */}
         <motion.div {...fadeUp(0.3)} className="rounded-2xl p-6 bg-card/50 backdrop-blur-xl border border-border lg:col-span-1 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)] flex flex-col">
           <div className="mb-6">
             <h3 className="text-lg font-bold text-foreground">Ranking de Gerentes</h3>
