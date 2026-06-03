@@ -21,9 +21,9 @@ import Presentation from "./pages/Presentation";
 import TvOperacional from "./pages/tv/TvOperacional";
 import TvDashboard from "./components/Dashboard/TvDashboard";
 import NotFound from "./pages/NotFound";
-import { useAppData } from "./context/AppDataContext";
 import { useAuth } from "./features/auth/hooks/useAuth";
 import { BackgroundAuditorProvider } from "./context/BackgroundAuditorContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -50,12 +50,12 @@ const AppRoutes: React.FC = () => {
         /* Admin Routes */
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/crm" element={<Crm />} />
-            <Route path="/gerentes" element={<Gerentes />} />
-            <Route path="/config" element={<Config />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="/apresentacao" element={<Presentation />} />
+            <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
+            <Route path="/crm" element={<ErrorBoundary><Crm /></ErrorBoundary>} />
+            <Route path="/gerentes" element={<ErrorBoundary><Gerentes /></ErrorBoundary>} />
+            <Route path="/config" element={<ErrorBoundary><Config /></ErrorBoundary>} />
+            <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
+            <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />
           </Route>
 
