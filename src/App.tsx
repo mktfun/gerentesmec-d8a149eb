@@ -21,6 +21,7 @@ import Presentation from "./pages/Presentation";
 import TvOperacional from "./pages/tv/TvOperacional";
 import TvDashboard from "./components/Dashboard/TvDashboard";
 import NotFound from "./pages/NotFound";
+import { useAppData } from "./context/AppDataContext";
 import { useAuth } from "./features/auth/hooks/useAuth";
 import { BackgroundAuditorProvider } from "./context/BackgroundAuditorContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
