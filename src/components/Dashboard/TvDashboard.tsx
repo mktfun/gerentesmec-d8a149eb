@@ -210,152 +210,189 @@ const TvDashboard: React.FC = () => {
             className="grid grid-cols-1 md:grid-cols-3 gap-8 h-full"
           >
             {page === 0 ? (
-              <div className="col-span-3 flex items-center justify-center h-full gap-16 px-12">
-                {/* Macro View: Global Score */}
-                {(() => {
-                  const globalScore = avgScore(leads);
-                  const roundedGlobal = globalScore !== null ? Math.round(globalScore) : 0;
-                  const scoreColor = roundedGlobal >= 75 ? '#34d399' : roundedGlobal >= 50 ? '#818cf8' : '#f87171';
+              <div className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-8 h-full px-8 lg:px-12 pb-4">
+                
+                {/* ESQUERDA: SaÃºde + GrÃ¡fico */}
+                <div className="lg:col-span-2 flex flex-col gap-8 h-full">
                   
-                  return (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl">
-                      <div className="flex items-center gap-4 text-white/50 mb-12">
-                        <Target className="w-8 h-8" />
-                        <span className="text-3xl font-bold uppercase tracking-widest">Score Geral</span>
-                      </div>
-                      <div className="relative w-80 h-80 lg:w-[400px] lg:h-[400px] flex items-center justify-center">
-                        <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 256 256">
-                          <circle cx="128" cy="128" r="116" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
-                          <motion.circle
-                            cx="128" cy="128" r="116" stroke={scoreColor} strokeWidth="12" fill="transparent"
-                            strokeDasharray={2 * Math.PI * 116}
-                            initial={{ strokeDashoffset: 2 * Math.PI * 116 }}
-                            animate={{ strokeDashoffset: (2 * Math.PI * 116) * (1 - roundedGlobal / 100) }}
-                            transition={{ duration: 2, ease: "easeOut" }}
-                            className="drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        <div className="absolute flex flex-col items-center justify-center">
-                          <span className="text-[6rem] lg:text-[8rem] font-black tracking-tighter" style={{ color: scoreColor }}>{roundedGlobal}</span>
-                          <span className="text-xl uppercase font-bold text-white/40 mt-2">Pontos</span>
+                  {/* Macro View: Global Score */}
+                  {(() => {
+                    const globalScore = avgScore(leads);
+                    const roundedGlobal = globalScore !== null ? Math.round(globalScore) : 0;
+                    const scoreColor = roundedGlobal >= 75 ? '#34d399' : roundedGlobal >= 50 ? '#818cf8' : '#f87171';
+                    
+                    return (
+                      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between p-8 lg:p-12 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl">
+                        <div className="flex flex-col gap-4 text-white/50 mb-8 lg:mb-0">
+                          <div className="flex items-center gap-4">
+                            <Target className="w-8 h-8" />
+                            <span className="text-3xl font-bold uppercase tracking-widest">Score Geral</span>
+                          </div>
+                          <p className="text-sm font-medium">MÃ©dia unificada de todas as lojas ativas.</p>
+                        </div>
+                        <div className="relative w-64 h-64 lg:w-80 lg:h-80 flex items-center justify-center">
+                          <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 256 256">
+                            <circle cx="128" cy="128" r="116" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
+                            <motion.circle
+                              cx="128" cy="128" r="116" stroke={scoreColor} strokeWidth="12" fill="transparent"
+                              strokeDasharray={2 * Math.PI * 116}
+                              initial={{ strokeDashoffset: 2 * Math.PI * 116 }}
+                              animate={{ strokeDashoffset: (2 * Math.PI * 116) * (1 - roundedGlobal / 100) }}
+                              transition={{ duration: 2, ease: "easeOut" }}
+                              className="drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <div className="absolute flex flex-col items-center justify-center">
+                            <span className="text-[5rem] lg:text-[7rem] font-black tracking-tighter leading-none" style={{ color: scoreColor }}>{roundedGlobal}</span>
+                            <span className="text-xl uppercase font-bold text-white/40 mt-2">Pontos</span>
+                          </div>
                         </div>
                       </div>
+                    );
+                  })()}
+
+                  {/* Macro View: Global Evolution Chart */}
+                  <div className="flex-1 flex flex-col p-8 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl">
+                    <div className="flex items-center gap-4 text-white/50 mb-6">
+                      <TrendingUp className="w-6 h-6" />
+                      <span className="text-xl font-bold uppercase tracking-widest">EvoluÃ§Ã£o Global</span>
                     </div>
-                  );
-                })()}
+                    <div className="flex-1 min-h-[220px]">
+                      {(() => {
+                        const todayScore = avgScoreInt(leads);
+                        const chartData = dailyScores.map(ds => {
+                          const totalScore = ds.unit_breakdown?.reduce((acc: number, ub: any) => acc + ub.score, 0) || 0;
+                          const avgSc = ds.unit_breakdown?.length ? Math.round(totalScore / ds.unit_breakdown.length) : null;
+                          return {
+                            date: ds.snapshot_date,
+                            displayDate: format(parseISO(ds.snapshot_date), "dd/MM", { locale: ptBR }),
+                            score: avgSc
+                          };
+                        }).reverse();
 
-                {/* Macro View: Global Evolution Chart */}
-                <div className="flex-1 flex flex-col p-8 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl">
-                  <div className="flex items-center gap-4 text-white/50 mb-6">
-                    <TrendingUp className="w-6 h-6" />
-                    <span className="text-xl font-bold uppercase tracking-widest">Evolução Global</span>
-                  </div>
-                  <div className="flex-1 min-h-[300px]">
-                    {(() => {
-                      const todayScore = avgScoreInt(leads);
-                      const chartData = dailyScores.map(ds => {
-                        const totalScore = ds.unit_breakdown?.reduce((acc: number, ub: any) => acc + ub.score, 0) || 0;
-                        const avgSc = ds.unit_breakdown?.length ? Math.round(totalScore / ds.unit_breakdown.length) : 0;
-                        return {
-                          date: ds.snapshot_date,
-                          displayDate: format(parseISO(ds.snapshot_date), "dd/MM", { locale: ptBR }),
-                          score: avgSc
-                        };
-                      }).reverse();
+                        chartData.push({
+                          date: new Date().toISOString(),
+                          displayDate: "Hoje",
+                          score: todayScore !== null ? todayScore : null
+                        });
 
-                      chartData.push({
-                        date: new Date().toISOString(),
-                        displayDate: "Hoje",
-                        score: todayScore || 0
-                      });
+                        // Backfill logic
+                        let validPoints = chartData.filter(d => d.score !== null).length;
+                        if (validPoints > 0) {
+                          let lastValid = chartData.find(s => s.score !== null)?.score ?? null;
+                          for (let i = 0; i < chartData.length; i++) {
+                            if (chartData[i].score === null && lastValid !== null) {
+                              chartData[i].score = lastValid;
+                            } else if (chartData[i].score !== null) {
+                              lastValid = chartData[i].score;
+                            }
+                          }
+                          let firstValid = [...chartData].reverse().find(s => s.score !== null)?.score ?? null;
+                          for (let i = chartData.length - 1; i >= 0; i--) {
+                            if (chartData[i].score === null && firstValid !== null) {
+                              chartData[i].score = firstValid;
+                            } else if (chartData[i].score !== null) {
+                              firstValid = chartData[i].score;
+                            }
+                          }
+                        }
 
-                      return chartData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                            <defs>
-                              <linearGradient id="globalScoreColor" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#34d399" stopOpacity={0.3}/>
-                                <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <XAxis 
-                              dataKey="displayDate" 
-                              stroke="rgba(255,255,255,0.2)" 
-                              tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 'bold' }} 
-                              axisLine={false}
-                              tickLine={false}
-                            />
-                            <YAxis 
-                              stroke="rgba(255,255,255,0.2)" 
-                              tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }} 
-                              axisLine={false}
-                              tickLine={false}
-                              domain={[0, 100]}
-                            />
-                            <Tooltip 
-                              contentStyle={{ backgroundColor: '#000', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                              itemStyle={{ color: '#34d399', fontWeight: 'bold' }}
-                            />
-                            <Area 
-                              type="monotone" 
-                              dataKey="score" 
-                              stroke="#34d399" 
-                              strokeWidth={3}
-                              fillOpacity={1} 
-                              fill="url(#globalScoreColor)" 
-                              animationDuration={1500}
-                            >
-                              <LabelList dataKey="score" position="top" fill="rgba(255,255,255,0.8)" fontSize={12} fontWeight="bold" offset={10} />
-                            </Area>
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/30 font-medium">Sem dados históricos</div>
-                      );
-                    })()}
+                        return validPoints > 0 ? (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                              <defs>
+                                <linearGradient id="globalScoreColor" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#34d399" stopOpacity={0.3}/>
+                                  <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
+                              <XAxis 
+                                dataKey="displayDate" 
+                                stroke="rgba(255,255,255,0.2)" 
+                                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 'bold' }} 
+                                axisLine={false}
+                                tickLine={false}
+                              />
+                              <YAxis 
+                                stroke="rgba(255,255,255,0.2)" 
+                                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }} 
+                                axisLine={false}
+                                tickLine={false}
+                                domain={[0, 100]}
+                              />
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: '#000', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                itemStyle={{ color: '#34d399', fontWeight: 'bold' }}
+                              />
+                              <Area 
+                                type="monotone" 
+                                dataKey="score" 
+                                stroke="#34d399" 
+                                strokeWidth={3}
+                                fillOpacity={1} 
+                                fill="url(#globalScoreColor)" 
+                                animationDuration={1500}
+                                connectNulls
+                              >
+                                <LabelList dataKey="score" position="top" fill="rgba(255,255,255,0.8)" fontSize={12} fontWeight="bold" offset={10} />
+                              </Area>
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/30 font-medium">Sem auditorias nos Ãºltimos dias</div>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
 
-                {/* Macro View: Ranking Top 3 */}
-                <div className="flex-1 flex flex-col gap-6">
-                  <div className="flex items-center gap-4 text-white/50 mb-6 pl-4">
+                {/* DIREITA: Ranking Top 3 */}
+                <div className="lg:col-span-1 flex flex-col p-8 bg-white/[0.02] border border-white/10 rounded-[3rem] backdrop-blur-2xl h-full">
+                  <div className="flex items-center gap-4 text-white/50 mb-8">
                     <TrendingUp className="w-8 h-8" />
-                    <span className="text-2xl font-bold uppercase tracking-widest">Ranking Global</span>
+                    <span className="text-2xl font-bold uppercase tracking-widest">Ranking</span>
                   </div>
-                  {(() => {
-                    const managerScores = units.map(m => {
-                      const mLeads = leads.filter(l => l.unit_id === m.id);
-                      const mScore = avgScore(mLeads);
-                      return {
-                        id: m.id,
-                        name: m.name,
-                        score: mScore !== null ? Math.round(mScore) : 0,
-                        count: mLeads.filter(l => l.score !== null).length
-                      };
-                    }).filter(m => m.count > 0).sort((a, b) => b.score - a.score);
-                    
-                    const top3 = managerScores.slice(0, 3);
-                    
-                    if (top3.length === 0) return <div className="text-white/30 text-2xl p-10">Sem auditorias suficientes</div>;
+                  <div className="flex-1 flex flex-col justify-center gap-6">
+                    {(() => {
+                      const managerScores = units.map(m => {
+                        const mLeads = leads.filter(l => l.unit_id === m.id);
+                        const mScore = avgScore(mLeads);
+                        return {
+                          id: m.id,
+                          name: m.name,
+                          score: mScore !== null ? Math.round(mScore) : null,
+                          count: mLeads.filter(l => l.score !== null).length
+                        };
+                      }).filter(m => m.score !== null).sort((a, b) => (b.score as number) - (a.score as number));
+                      
+                      const top3 = managerScores.slice(0, 3);
+                      
+                      if (top3.length === 0) return <div className="text-white/30 text-lg flex items-center justify-center h-full">Sem auditorias suficientes</div>;
 
-                    return top3.map((manager, index) => (
-                      <motion.div key={manager.id} className="p-8 lg:p-10 rounded-[2rem] flex items-center justify-between bg-white/[0.02] border border-white/10 backdrop-blur-xl">
-                        <div className="flex items-center gap-6">
-                          <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-3xl bg-white/5 text-white/70">
-                            #{index + 1}
+                      return top3.map((manager, index) => (
+                        <motion.div key={manager.id} className="p-6 lg:p-8 rounded-3xl flex items-center justify-between bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] transition-colors">
+                          <div className="flex items-center gap-6">
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg
+                              ${index === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-amber-500/30' : 
+                                index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800' : 
+                                'bg-gradient-to-br from-amber-700 to-amber-900 text-white'}`}>
+                              #{index + 1}
+                            </div>
+                            <div>
+                              <h3 className="text-2xl lg:text-3xl font-bold text-white mb-1">{manager.name}</h3>
+                              <p className="text-sm font-medium text-white/50 uppercase tracking-widest">{manager.count} Audits</p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="text-3xl font-bold text-white mb-2">{manager.name}</h3>
-                            <p className="text-lg font-medium text-white/50 uppercase tracking-widest">{manager.count} Auditorias</p>
+                          <div className="text-right">
+                            <div className={`text-4xl lg:text-5xl font-black leading-none ${manager.score! >= 75 ? 'text-emerald-400' : manager.score! >= 50 ? 'text-indigo-400' : 'text-rose-400'}`}>
+                              {manager.score}
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-5xl lg:text-6xl font-black leading-none text-white">{manager.score}</div>
-                        </div>
-                      </motion.div>
-                    ));
-                  })()}
+                        </motion.div>
+                      ));
+                    })()}
+                  </div>
                 </div>
               </div>
             ) : visibleUnits.map((unit, i) => {
