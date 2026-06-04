@@ -700,7 +700,6 @@ serve(async (req) => {
     const { data: leadData } = await supabaseClient.from('leads').select('ticket_value, customer_vehicle, audit_checklist, audit_checklist_messages, funnel_stage, score, audit_reasons').eq('id', lead_id).single();
     const currentChecklist = leadData?.audit_checklist || {};
     const newMessagesMap = leadData?.audit_checklist_messages || {};
-
     const mergedChecklist = { ...currentChecklist };
     if (mockOutput.audit_checklist && sender_type !== 'contact') {
       for (const key of Object.keys(mockOutput.audit_checklist)) {
@@ -715,19 +714,6 @@ serve(async (req) => {
       }
     }
 
-    // 5.2 Calcular o Score Determinístico (Idêntico ao AuditPanel)
-    const auditStepsConfig = [
-      { id: 'step1', weight: 40, items: ['1a', '1b', '2d', '2b'] },
-      { id: 'step2', weight: 30, items: ['2a', '2c', '2e'] },
-      { id: 'step3', weight: 20, items: ['3a', '3b', '3c'] },
-      { id: 'step4', weight: 10, items: ['4a', '4b'] },
-    ];
-    let calculatedScore = 0;
-    auditStepsConfig.forEach(step => {
-      const done = step.items.filter(id => mergedChecklist[id]).length;
-      calculatedScore += (done / step.items.length) * step.weight;
-    });
-    calculatedScore = Math.round(calculatedScore);
     // ==========================================
     // ESTRITA PROGRESSÃO DE FUNIL (EVITAR REGRESSÕES BURRAS)
     // ==========================================
@@ -743,14 +729,52 @@ serve(async (req) => {
     let newFunnelStage = parsedData.funnel_stage;
 
     if (newFunnelStage && STAGE_ORDER[currentStage] !== undefined && STAGE_ORDER[newFunnelStage] !== undefined) {
-      // Se a IA sugerir uma etapa cujo valor é MENOR que o atual (ex: de closed_won (3) para negotiation (1)), REJEITE!
-      // A exceção é se ele for para closed_lost (que é 3 e pode ocorrer a partir de qualquer uma exceto won, mas vamos simplificar: só não pode voltar).
       if (STAGE_ORDER[newFunnelStage] < STAGE_ORDER[currentStage]) {
         console.log(`[AI-EVALUATOR] BLOQUEADO: IA tentou regredir o funil de ${currentStage} para ${newFunnelStage}. Mantendo ${currentStage}.`);
         newFunnelStage = currentStage;
       }
     } else {
       newFunnelStage = currentStage;
+    }
+
+    // 5.2 Calcular o Score Determinístico (Inteligente com Cutoff)
+    const auditStepsConfig = [
+      { id: 'step1', weight: 40, items: ['1a', '1b', '2d', '2b'] },
+      { id: 'step2', weight: 30, items: ['2a', '2c', '2e'] },
+      { id: 'step3', weight: 20, items: ['3a', '3b', '3c'] },
+      { id: 'step4', weight: 10, items: ['4a', '4b'] },
+    ];
+    
+    let calculatedScore: number | null = null;
+    
+    if (newFunnelStage === 'closed_lost') {
+      const ITEM_SEQUENCE = [
+        '1a', '1b', '2d', '2b',
+        '2a', '2c', '2e',
+        '3a', '3b', '3c',
+        '4a', '4b'
+      ];
+      let lastCheckedIndex = -1;
+      for (let i = ITEM_SEQUENCE.length - 1; i >= 0; i--) {
+        if (mergedChecklist[ITEM_SEQUENCE[i]]) {
+          lastCheckedIndex = i;
+          break;
+        }
+      }
+      if (lastCheckedIndex !== -1) {
+        const universe = ITEM_SEQUENCE.slice(0, lastCheckedIndex + 1);
+        const checked = universe.filter(id => mergedChecklist[id]).length;
+        calculatedScore = Math.round((checked / universe.length) * 100);
+      } else {
+        calculatedScore = 0; // Nenhum item foi marcado, zero.
+      }
+    } else {
+      let scoreAcc = 0;
+      auditStepsConfig.forEach(step => {
+        const done = step.items.filter(id => mergedChecklist[id]).length;
+        scoreAcc += (done / step.items.length) * step.weight;
+      });
+      calculatedScore = Math.round(scoreAcc);
     }
 
     // UPDATE DO LEAD

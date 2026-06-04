@@ -49,6 +49,8 @@ const Relatorios = () => {
   const prevPeriodStart = periodStart - periodDays * 86400000;
 
   const inRange = (l: typeof leads[number], from: number, to: number) => {
+    const isClosed = l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost';
+    if (!isClosed) return false;
     const t = new Date(l.last_message_at).getTime();
     return t >= from && t <= to;
   };
@@ -116,6 +118,8 @@ const Relatorios = () => {
   const hasData = currentLeads.length > 0;
   
   const filteredLeads = leads.filter(l => {
+    const isClosed = l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost';
+    if (!isClosed) return false;
     const lDate = startOfDay(new Date(l.created_at));
     const isWithinDate = lDate >= startOfDay(dateRange.from) && lDate <= startOfDay(dateRange.to);
     const isUnitMatch = selectedUnit === 'all' || l.unit_id === selectedUnit;

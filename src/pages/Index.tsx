@@ -10,6 +10,7 @@ import { useAppData, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
 import TvDashboard from '@/components/Dashboard/TvDashboard';
+import { filterDashboardLeads } from '@/utils/dashboardFilters';
 
 import { fadeUp } from '@/utils/motion';
 
@@ -39,8 +40,8 @@ const Index = () => {
   const today0 = startOfDay(now);
 
   // Global score (Últimos 30 dias) — usa APENAS leads auditados no denominador
-  const leads30Days = leads.filter(l => new Date(l.last_message_at).getTime() >= today0.getTime() - 29 * 86400000);
-  const globalScore = avgScore(leads30Days);
+  const dashLeads = filterDashboardLeads(leads, 30);
+  const globalScore = avgScore(dashLeads);
 
   // Score series — last 7 days (trailing 30-day average for each day to show true global evolution)
   const scoreHistory = useMemo(() => {
@@ -54,6 +55,7 @@ const Index = () => {
       const windowStart = new Date(day); windowStart.setDate(windowStart.getDate() - 29);
       
       const trailingLeads = leads.filter(l => {
+        if (l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost') return false;
         const t = new Date(l.last_message_at).getTime();
         return t >= windowStart.getTime() && t < next.getTime();
       });
@@ -80,10 +82,12 @@ const Index = () => {
   // Week-over-week trend
   const weekTrend = useMemo(() => {
     const lastWeek = leads.filter(l => {
+      if (l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost') return false;
       const t = new Date(l.last_message_at).getTime();
       return t >= today0.getTime() - 7 * 86400000 && t < today0.getTime() + 86400000;
     });
     const prevWeek = leads.filter(l => {
+      if (l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost') return false;
       const t = new Date(l.last_message_at).getTime();
       return t >= today0.getTime() - 14 * 86400000 && t < today0.getTime() - 7 * 86400000;
     });
@@ -97,8 +101,8 @@ const Index = () => {
 
   // Unit scores — usa apenas auditados no denominador
   const unitScores = units.map(u => {
-    const uLeadsAll = leads.filter(l => l.unit_id === u.id);
-    return { ...u, score: avgScoreInt(uLeadsAll) };
+    const uLeads = dashLeads.filter(l => l.unit_id === u.id);
+    return { ...u, score: avgScoreInt(uLeads) };
   });
 
   // Today metrics
@@ -118,12 +122,13 @@ const Index = () => {
   const managerRanking = managers.map(m => {
     const unit = units.find(u => u.id === m.unit_id);
     const mLeadsAll = leads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
+    const mLeadsDash = dashLeads.filter(l => l.manager_id === m.id || (!l.manager_id && l.unit_id === m.unit_id));
     const lastActiveAt = mLeadsAll.reduce((max, l) => {
       const time = new Date(l.last_message_at || l.created_at).getTime();
       return time > max ? time : max;
     }, 0);
     const isInactive = lastActiveAt === 0 || (Date.now() - lastActiveAt) > 24 * 60 * 60 * 1000;
-    return { ...m, score: avgScoreInt(mLeadsAll), unitName: unit?.name || 'N/A', isInactive };
+    return { ...m, score: avgScoreInt(mLeadsDash), unitName: unit?.name || 'N/A', isInactive };
   }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 
   const todayStr = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date());

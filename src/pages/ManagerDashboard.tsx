@@ -4,6 +4,7 @@ import { useAppData, Lead } from '@/context/AppDataContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTheme } from '@/context/ThemeContext';
 import { avgScore } from '@/utils/scoreUtils';
+import { filterDashboardLeads } from '@/utils/dashboardFilters';
 import { calculateDangerLeads } from '@/utils/metrics';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -22,7 +23,8 @@ const ManagerDashboard: React.FC = () => {
   const currentManager = managers.find(m => m.auth_user_id === user?.id);
   const managerLeads = leads.filter(l => currentManager ? l.manager_id === currentManager.id : true);
 
-  const score = avgScore(managerLeads);
+  const managerLeadsDash = filterDashboardLeads(managerLeads, 30);
+  const score = avgScore(managerLeadsDash);
   const displayScore = score !== null ? Math.round(score) : 0;
   const dangerLeads = calculateDangerLeads(managerLeads, businessHours);
   const todayLeads = managerLeads.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString());

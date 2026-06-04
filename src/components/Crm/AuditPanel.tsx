@@ -10,7 +10,7 @@ import ChatHistoryView, { ChatMessage } from './ChatHistoryView';
 import { supabase } from '@/integrations/supabase/client';
 
 import { useAppData } from '@/context/AppDataContext';
-import { auditStepsConfig } from '@/utils/scoreUtils';
+import { auditStepsConfig, calcLeadScore } from '@/utils/scoreUtils';
 
 interface Props { lead: Lead; onClose: () => void; }
 
@@ -74,13 +74,8 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     }
   };
 
-  // Fractional score
-  let score = 0;
-  auditStepsConfig.forEach(step => {
-    const done = step.items.filter(i => checked[i.id]).length;
-    score += (done / step.items.length) * step.weight;
-  });
-  const rounded = Math.round(score);
+  // Score: cutoff inteligente para perdidos, pesos por etapa para ganhos
+  const rounded = calcLeadScore(checked, lead.funnel_stage) ?? 0;
 
   const scoreColor = rounded >= 75 ? '#34d399' : rounded >= 50 ? '#818cf8' : '#f87171';
   const circumference = 2 * Math.PI * 38;

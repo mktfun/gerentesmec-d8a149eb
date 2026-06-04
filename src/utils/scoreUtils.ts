@@ -11,18 +11,53 @@ import { Lead } from '@/context/AppDataContext';
  *   10 leads, 4 auditados com scores [80, 70, 90, 60] → avgScore = 75
  *   (NÃO 30, que seria o erro de dividir por 10)
  */
-export const avgScore = (leads: Lead[]): number | null => {
-  const scored = leads.filter(l => l.score !== null && l.score !== undefined);
+export const avgScore = (
+  leads: Lead[],
+  options?: { statusFilter?: boolean; daysWindow?: number }
+): number | null => {
+  const { statusFilter = false, daysWindow = 0 } = options ?? {};
+
+  let filtered = leads;
+
+  if (statusFilter) {
+    filtered = filtered.filter(
+      l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost'
+    );
+  }
+
+  if (daysWindow > 0) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysWindow);
+    cutoffDate.setHours(0, 0, 0, 0);
+    filtered = filtered.filter(l => {
+      const d = new Date(l.last_message_at || l.created_at);
+      return d >= cutoffDate;
+    });
+  }
+
+  // Agora usamos calcLeadScore dinamicamente para garantir a justiça no Cutoff de leads perdidos.
+  // Ignoramos a nota estática do banco que pode ter vindo errada.
+  const scored = filtered.filter(l => {
+    const dynamicScore = calcLeadScore(l.audit_checklist || {}, l.funnel_stage);
+    return dynamicScore !== null && dynamicScore !== undefined;
+  });
+
   if (scored.length === 0) return null;
-  const sum = scored.reduce((acc, l) => acc + Number(l.score), 0);
+  const sum = scored.reduce((acc, l) => {
+    const dynamicScore = calcLeadScore(l.audit_checklist || {}, l.funnel_stage);
+    return acc + Number(dynamicScore);
+  }, 0);
   return Math.round((sum / scored.length) * 10) / 10;
 };
 
 /**
  * Versão inteira (sem decimal) para displays compactos (ranking, cards).
  */
-export const avgScoreInt = (leads: Lead[]): number | null => {
-  const s = avgScore(leads);
+export const avgScoreInt = (
+  leads: Lead[],
+  options?: { statusFilter?: boolean; daysWindow?: number }
+): number | null => {
+  const s = avgScore(leads, options);
   return s === null ? null : Math.round(s);
 };
 
@@ -60,6 +95,64 @@ export const auditStepsConfig = [
     ],
   },
 ];
+
+/**
+ * Ordem canônica dos itens do checklist de auditoria.
+ * Usada para determinar o cutoff em leads perdidos.
+ */
+export const ITEM_SEQUENCE = [
+  '1a', '1b', '2d', '2b',  // Etapa 1: Recebimento
+  '2a', '2c', '2e',        // Etapa 2: Orçamento
+  '3a', '3b', '3c',        // Etapa 3: Upsell
+  '4a', '4b'               // Etapa 4: Encerramento
+] as const;
+
+/**
+ * Calcula score para leads PERDIDOS usando cutoff inteligente.
+ * Só considera itens até o último item marcado na sequência.
+ * Cada item vale peso igual (1 ponto).
+ */
+export function calcLostScore(checklist: Record<string, boolean>): number | null {
+  let lastCheckedIndex = -1;
+  for (let i = ITEM_SEQUENCE.length - 1; i >= 0; i--) {
+    if (checklist[ITEM_SEQUENCE[i]]) {
+      lastCheckedIndex = i;
+      break;
+    }
+  }
+  if (lastCheckedIndex === -1) return null;
+  const universe = ITEM_SEQUENCE.slice(0, lastCheckedIndex + 1);
+  const checked = universe.filter(id => checklist[id]).length;
+  return Math.round((checked / universe.length) * 100);
+}
+
+/**
+ * Calcula score para leads GANHOS usando sistema de pesos por etapa.
+ * Mantém lógica existente (40/30/20/10).
+ */
+export function calcWonScore(checklist: Record<string, boolean>): number {
+  let score = 0;
+  auditStepsConfig.forEach(step => {
+    const done = step.items.filter(i => checklist[i.id]).length;
+    score += (done / step.items.length) * step.weight;
+  });
+  return Math.round(score);
+}
+
+/**
+ * Calcula o score de um lead baseado no status do funil.
+ * - closed_lost → cutoff inteligente (flat)
+ * - closed_won/outros → pesos por etapa (40/30/20/10)
+ */
+export function calcLeadScore(
+  checklist: Record<string, boolean>,
+  funnelStage: string
+): number | null {
+  if (funnelStage === 'closed_lost') {
+    return calcLostScore(checklist);
+  }
+  return calcWonScore(checklist);
+}
 
 /**
  * Maps an audit checklist item ID to a human-readable quality feedback message.

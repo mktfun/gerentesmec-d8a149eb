@@ -4,6 +4,7 @@ import { AlertTriangle, TrendingUp, TrendingDown, Target, Clock, XCircle, Calend
 import { useAppData } from '@/context/AppDataContext';
 import { calculateTmr, isLeadDanger } from '@/utils/metrics';
 import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
+import { filterDashboardLeads } from '@/utils/dashboardFilters';
 import { supabase } from '@/integrations/supabase/client';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, YAxis, LabelList } from 'recharts';
 import { parseISO, format } from 'date-fns';
@@ -94,16 +95,14 @@ const TvDashboard: React.FC = () => {
     const startDate = getDateRange();
     const endDate = getEndDate();
     
-    const unitLeads = leads.filter(l => l.unit_id === unitId);
-    
     // Filter by selected date
-    const periodLeads = unitLeads.filter(l => {
-      // Fallback to created_at if last_message_at is missing
+    const periodLeads = leads.filter(l => {
       const t = new Date(l.last_message_at || l.created_at).getTime();
-      return t >= startDate && t < endDate;
+      return t >= startDate && t < endDate && l.unit_id === unitId;
     });
 
-    const score = avgScore(periodLeads);
+    const closedPeriodLeads = periodLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
+    const score = avgScore(closedPeriodLeads);
 
     // Trend vs previous identical period
     const periodDuration = dateFilter === 'today' || dateFilter === 'yesterday' ? 86400000 
@@ -112,11 +111,12 @@ const TvDashboard: React.FC = () => {
     const prevStart = startDate - periodDuration;
     const prevEnd = startDate;
     
-    const prevLeads = unitLeads.filter(l => {
+    const prevLeads = leads.filter(l => {
       const t = new Date(l.last_message_at || l.created_at).getTime();
-      return t >= prevStart && t < prevEnd;
+      return t >= prevStart && t < prevEnd && l.unit_id === unitId;
     });
-    const prevScored = prevLeads.filter(l => l.score !== null);
+    const closedPrevLeads = prevLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
+    const prevScored = closedPrevLeads.filter(l => l.score !== null);
 
     let diff: number | null = null;
     if (prevScored.length > 0 && score !== null) {
@@ -217,7 +217,8 @@ const TvDashboard: React.FC = () => {
                   
                   {/* Macro View: Global Score */}
                   {(() => {
-                    const globalScore = avgScore(leads);
+                    const dashLeads = filterDashboardLeads(leads, 30);
+                    const globalScore = avgScore(dashLeads);
                     const roundedGlobal = globalScore !== null ? Math.round(globalScore) : 0;
                     const scoreColor = roundedGlobal >= 75 ? '#34d399' : roundedGlobal >= 50 ? '#818cf8' : '#f87171';
                     
@@ -260,7 +261,8 @@ const TvDashboard: React.FC = () => {
                     </div>
                     <div className="flex-1 min-h-[220px]">
                       {(() => {
-                        const todayScore = avgScoreInt(leads);
+                        const dashLeads = filterDashboardLeads(leads, 30);
+                        const todayScore = avgScoreInt(dashLeads);
                         const chartData = dailyScores.map(ds => {
                           const totalScore = ds.unit_breakdown?.reduce((acc: number, ub: any) => acc + ub.score, 0) || 0;
                           const avgSc = ds.unit_breakdown?.length ? Math.round(totalScore / ds.unit_breakdown.length) : null;
@@ -355,14 +357,15 @@ const TvDashboard: React.FC = () => {
                   </div>
                   <div className="flex-1 flex flex-col justify-center gap-6">
                     {(() => {
+                      const dashLeads = filterDashboardLeads(leads, 30);
                       const managerScores = units.map(m => {
-                        const mLeads = leads.filter(l => l.unit_id === m.id);
-                        const mScore = avgScore(mLeads);
+                        const mLeadsDash = dashLeads.filter(l => l.unit_id === m.id);
+                        const mScore = avgScore(mLeadsDash);
                         return {
                           id: m.id,
                           name: m.name,
                           score: mScore !== null ? Math.round(mScore) : null,
-                          count: mLeads.filter(l => l.score !== null).length
+                          count: mLeadsDash.filter(l => l.score !== null).length
                         };
                       }).filter(m => m.score !== null).sort((a, b) => (b.score as number) - (a.score as number));
                       
