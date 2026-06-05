@@ -8,6 +8,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import ChatHistoryView, { ChatMessage } from './ChatHistoryView';
 import { supabase } from '@/integrations/supabase/client';
+import { AuditFeedbackModal } from '../Manager/AuditFeedbackModal';
 
 import { useAppData } from '@/context/AppDataContext';
 import { auditStepsConfig, calcLeadScore } from '@/utils/scoreUtils';
@@ -21,6 +22,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   const [ticketValueStr, setTicketValueStr] = useState('');
   const [vehicleStr, setVehicleStr] = useState('');
   const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   useEffect(() => {
     const checklist = (lead as any).audit_checklist;
@@ -350,18 +352,13 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                 <AccordionContent className="pt-1 pb-4 pl-7">
                   <div className="space-y-2.5">
                     {step.items.map(item => (
-                      <div key={item.id} className="flex items-start gap-3 group cursor-pointer"
-                        onClick={() => setChecked(p => ({ ...p, [item.id]: !p[item.id] }))}>
-                        <Checkbox
-                          id={item.id}
-                          checked={checked[item.id] || false}
-                          onCheckedChange={() => setChecked(p => ({ ...p, [item.id]: !p[item.id] }))}
-                          className="mt-0.5 border-border dark:border-white/20 data-[state=checked]:bg-indigo-500
-                            data-[state=checked]:border-indigo-500"
-                        />
+                      <div key={item.id} className="flex items-start gap-3 group">
+                        <div className={`mt-0.5 flex items-center justify-center w-4 h-4 rounded border ${checked[item.id] ? 'bg-indigo-500 border-indigo-500' : 'border-border dark:border-white/20'}`}>
+                          {checked[item.id] && <CheckCircle2 className="w-3 h-3 text-white" />}
+                        </div>
                         <div className="flex-1 flex flex-col">
                           <label htmlFor={item.id}
-                            className={`text-xs leading-relaxed cursor-pointer transition-colors ${
+                            className={`text-xs leading-relaxed transition-colors ${
                               checked[item.id] ? 'text-foreground font-medium' : 'text-muted-foreground'
                             }`}>
                             {item.text}
@@ -450,18 +447,32 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border shrink-0 bg-black/5 dark:bg-white/[0.01]">
+      <div className="p-4 border-t border-border shrink-0 bg-black/5 dark:bg-white/[0.01] flex flex-col gap-2">
         <button 
           onClick={() => {
             saveLeadAudit(lead.id, rounded, notes, checked);
             onClose();
           }}
           className="w-full py-3 rounded-xl text-sm font-bold text-white
-          bg-indigo-600 hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]
-          hover:shadow-[0_0_30px_rgba(99,102,241,0.45)] focus-visible:outline-indigo-300">
-          Salvar AuditorSistema ({rounded}%)
+          bg-emerald-600 hover:bg-emerald-500 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]
+          hover:shadow-[0_0_30px_rgba(16,185,129,0.45)] focus-visible:outline-emerald-300">
+          Aprovar Avaliação ({rounded}%)
+        </button>
+        <button 
+          onClick={() => setIsFeedbackOpen(true)}
+          className="w-full py-3 rounded-xl text-sm font-bold text-rose-500
+          bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
+          Corrigir via Feedback
         </button>
       </div>
+
+      <AuditFeedbackModal 
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        mechanicId={lead.unit_id}
+        leadId={lead.id}
+        auditReasons={JSON.stringify((lead as any).audit_reasons || {})}
+      />
 
       </div>{/* End Right Column */}
     </div>

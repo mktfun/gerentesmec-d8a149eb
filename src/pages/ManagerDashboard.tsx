@@ -21,7 +21,8 @@ const ManagerDashboard: React.FC = () => {
   const [filter, setFilter] = useState<'todos' | 'hoje' | 'atraso'>('todos');
 
   const currentManager = managers.find(m => m.auth_user_id === user?.id);
-  const managerLeads = leads.filter(l => currentManager ? l.manager_id === currentManager.id : true);
+  const isAdmin = !currentManager;
+  const managerLeads = leads.filter(l => currentManager ? l.manager_id === currentManager.id : (l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost'));
 
   const managerLeadsDash = filterDashboardLeads(managerLeads, 30);
   const score = avgScore(managerLeadsDash);
@@ -46,8 +47,12 @@ const ManagerDashboard: React.FC = () => {
 
       {/* Greetings */}
       <div className="pt-12 px-6">
-        <h2 className="text-xl font-medium opacity-60">Olá, {currentManager?.name?.split(' ')[0] || 'Gerente'}</h2>
-        <h1 className="text-4xl font-black tracking-tight mt-1">Sua Oficina</h1>
+        <h2 className="text-xl font-medium opacity-60">
+          {isAdmin ? 'Olá, Administrador' : `Olá, ${currentManager?.name?.split(' ')[0] || 'Gerente'}`}
+        </h2>
+        <h1 className="text-4xl font-black tracking-tight mt-1">
+          {isAdmin ? 'Visão Global de Auditoria' : 'Sua Oficina'}
+        </h1>
       </div>
 
       {/* Segmented Control */}
@@ -79,30 +84,38 @@ const ManagerDashboard: React.FC = () => {
             className="mt-6 space-y-6"
           >
             {/* Massive Score Card */}
-            <div
-              className="mx-6 rounded-[3rem] bg-[#212529] overflow-hidden relative p-8 shadow-xl border border-white/5"
-            >
-              <div className="absolute inset-0">
-                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cars" className="w-full h-full object-cover opacity-20 mix-blend-overlay" />
-                <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? 'from-[#111] to-transparent' : 'from-[#212529] to-transparent'}`} />
-              </div>
-              
-              <div className="relative z-10 flex flex-col items-center mt-4">
-                <span className="text-[6rem] font-black leading-none tracking-tighter text-white">{score !== null ? displayScore : '—'}</span>
-                <span className="text-xs font-bold mt-2 text-white/60 uppercase tracking-[0.2em]">Score Geral</span>
-              </div>
-              
-              <div className="relative z-10 flex justify-between mt-10 gap-4">
-                <div className="flex-1 text-center bg-white/10 px-6 py-4 rounded-3xl backdrop-blur-md border border-white/10">
-                  <div className="text-2xl font-black text-white">{todayLeads.length}</div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Hoje</div>
-                </div>
-                <div className={`flex-1 text-center px-6 py-4 rounded-3xl backdrop-blur-md border ${dangerLeads.length > 0 ? 'bg-rose-500/80 border-rose-400' : 'bg-white/10 border-white/10'}`}>
-                  <div className="text-2xl font-black text-white">{dangerLeads.length}</div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Atrasos</div>
+            {isAdmin ? (
+              <div className="mx-6 rounded-[3rem] bg-indigo-600 overflow-hidden relative p-8 shadow-xl border border-white/10">
+                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/50 to-transparent pointer-events-none" />
+                <div className="relative z-10 flex flex-col items-center mt-4 pb-4">
+                  <span className="text-[6rem] font-black leading-none tracking-tighter text-white">{managerLeads.length}</span>
+                  <span className="text-xs font-bold mt-2 text-white/80 uppercase tracking-[0.2em]">Atendimentos Finalizados</span>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="mx-6 rounded-[3rem] bg-[#212529] overflow-hidden relative p-8 shadow-xl border border-white/5">
+                <div className="absolute inset-0">
+                  <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cars" className="w-full h-full object-cover opacity-20 mix-blend-overlay" />
+                  <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? 'from-[#111] to-transparent' : 'from-[#212529] to-transparent'}`} />
+                </div>
+                
+                <div className="relative z-10 flex flex-col items-center mt-4">
+                  <span className="text-[6rem] font-black leading-none tracking-tighter text-white">{score !== null ? displayScore : '—'}</span>
+                  <span className="text-xs font-bold mt-2 text-white/60 uppercase tracking-[0.2em]">Score Geral</span>
+                </div>
+                
+                <div className="relative z-10 flex justify-between mt-10 gap-4">
+                  <div className="flex-1 text-center bg-white/10 px-6 py-4 rounded-3xl backdrop-blur-md border border-white/10">
+                    <div className="text-2xl font-black text-white">{todayLeads.length}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Hoje</div>
+                  </div>
+                  <div className={`flex-1 text-center px-6 py-4 rounded-3xl backdrop-blur-md border ${dangerLeads.length > 0 ? 'bg-rose-500/80 border-rose-400' : 'bg-white/10 border-white/10'}`}>
+                    <div className="text-2xl font-black text-white">{dangerLeads.length}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Atrasos</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div

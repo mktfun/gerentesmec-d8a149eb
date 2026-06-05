@@ -175,7 +175,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                 </motion.div>
               ) : null;
 
-              if (isSystem) {
+              if (isSystem || isBot) {
                 const isAudit = msg.content.startsWith('Auditado e pontuado:');
                 const isExpanded = expandedAudit === msg.id;
 
@@ -261,8 +261,9 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                           </AnimatePresence>
                         </div>
                       ) : (
-                        <div className="px-3 py-1 rounded-full bg-black/5 dark:bg-white/[0.04] border border-border text-[10px] font-semibold text-emerald-500 dark:text-emerald-400/80 backdrop-blur-sm shadow-sm flex items-center justify-center">
-                          {msg.content}
+                        <div className="max-w-[80%] px-4 py-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/[0.05] border border-amber-500/20 text-[11px] font-medium text-amber-600 dark:text-amber-400/90 backdrop-blur-sm shadow-sm flex gap-2 items-start text-center">
+                          <Wrench className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-60" />
+                          <span className="leading-relaxed">{msg.content}</span>
                         </div>
                       )}
                     </motion.div>
@@ -363,10 +364,10 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                             boxShadow: ['0 0 0 0 rgba(99,102,241,0)', '0 0 24px 4px rgba(99,102,241,0.4)', '0 0 0 0 rgba(99,102,241,0)']
                           } : {}}
                           transition={{ duration: 1.5, repeat: 1 }}
-                          className={`px-4 py-3 text-[13px] leading-relaxed shadow-lg backdrop-blur-md relative
+                          className={`px-4 py-3 text-[13px] leading-relaxed shadow-md relative
                           ${isUser 
                             ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white rounded-2xl rounded-br-sm shadow-[0_8px_30px_rgba(99,102,241,0.2)]' 
-                            : 'bg-black/5 dark:bg-white/[0.04] border border-border text-foreground/80 rounded-2xl rounded-bl-sm'
+                            : 'bg-[#f0f2f5] dark:bg-[#20202a] text-foreground/90 rounded-2xl rounded-bl-sm border border-black/5 dark:border-white/5'
                           }
                           ${isHighlighted ? 'ring-2 ring-indigo-400/60 shadow-[0_0_24px_rgba(99,102,241,0.25)]' : ''}
                           transition-all duration-500
