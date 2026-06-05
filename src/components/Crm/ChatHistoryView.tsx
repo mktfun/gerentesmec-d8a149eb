@@ -385,6 +385,16 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                           {timeStr}
                         </div>
                       )}
+                      
+                      {msg.ai_insight && (
+                        <div className={`mt-2 text-xs text-indigo-400 bg-indigo-500/10 px-3 py-2.5 rounded-xl border border-indigo-500/20 shadow-[0_0_10px_rgba(99,102,241,0.1)] backdrop-blur-sm max-w-[85%] ${isUser ? 'self-end' : 'self-start'}`}>
+                          <div className="flex items-center gap-1.5 opacity-80 mb-1">
+                            <CheckCircle2 className="w-3 h-3 text-indigo-400" />
+                            <span className="text-[9px] uppercase tracking-widest font-black text-indigo-400">Registro de Auditoria</span>
+                          </div>
+                          <span className="leading-relaxed font-medium text-indigo-300/90">{msg.ai_insight}</span>
+                        </div>
+                      )}
                     
                     {/* (Removido: Auditoria Inline) */}
                     

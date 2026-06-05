@@ -34,7 +34,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
 
   const score = lead.score as number | null;
   const customerName = (lead as any).name || lead.customer_name || 'Cliente';
-  const checklist = (lead.audit_checklist as Record<string, boolean>) ?? {};
+  const [localChecklist, setLocalChecklist] = useState<Record<string, boolean>>((lead.audit_checklist as Record<string, boolean>) ?? {});
   const checklistMessages = (lead.audit_checklist_messages as Record<string, string>) ?? {};
 
   let scoreBg = isDark ? 'bg-white/5' : 'bg-black/5';
@@ -79,7 +79,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const hitsByMessageId: Record<string, { id: string, label: string, detail: string, pass: boolean }[]> = {};
   auditStepsConfig.forEach(step => {
     step.items.forEach(item => {
-      const pass = !!checklist[item.id];
+      const pass = !!localChecklist[item.id];
       let msgId = checklistMessages[item.id];
 
       // Heuristic fallback if backend didn't provide message ID
@@ -126,6 +126,16 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
       }
     }, 150);
   }, []);
+
+  const toggleChecklistItem = async (itemId: string, currentPass: boolean) => {
+    const newChecklist = { ...localChecklist, [itemId]: !currentPass };
+    setLocalChecklist(newChecklist);
+    try {
+      await supabase.from('leads').update({ audit_checklist: newChecklist }).eq('id', lead.id);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <motion.div
@@ -278,32 +288,29 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                         {step.title}
                       </p>
                       {step.items.map(item => {
-                        const pass = !!checklist[item.id];
+                        const pass = !!localChecklist[item.id];
                         let iconColor = pass ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : (isDark ? 'text-rose-400' : 'text-rose-600');
                         
                         return (
                           <div key={item.id} className="w-full flex flex-col items-start px-6 py-3.5 transition-colors border-b border-transparent">
-                            <button
-                              onClick={() => {
-                                if (pass && checklistMessages[item.id]) {
-                                  scrollToEvent(`quality-${item.id}`);
+                            <div className="w-full flex items-center gap-4 text-left">
+                              <button onClick={() => toggleChecklistItem(item.id, pass)} className="shrink-0">
+                                {pass
+                                  ? <CheckCircle2 className={`w-5 h-5 ${iconColor} hover:scale-110 transition-transform`} />
+                                  : <div className={`w-4 h-4 rounded-full border-2 ${iconColor} opacity-50 hover:opacity-100 transition-opacity`} />
                                 }
-                              }}
-                              className={`w-full flex items-center gap-4 text-left ${pass && checklistMessages[item.id] ? (isDark ? 'hover:bg-white/5 cursor-pointer' : 'hover:bg-black/5 cursor-pointer') : 'cursor-default'}`}
-                            >
-                              {pass
-                                ? <CheckCircle2 className={`w-5 h-5 shrink-0 ${iconColor}`} />
-                                : <AlertTriangle className={`w-5 h-5 shrink-0 ${iconColor}`} />
-                              }
-                              <span className="flex-1 text-sm font-bold leading-tight">
-                                {qualityFeedbackMap[item.id]?.label ?? item.text}
-                              </span>
-                              {pass && checklistMessages[item.id] && (
-                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border flex items-center gap-1 ${isDark ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-indigo-50 text-indigo-600 border-indigo-200'}`}>
-                                  🔍 Ver Evidência
+                              </button>
+                              <div className="flex-1 flex flex-col cursor-pointer" onClick={() => { if (pass && checklistMessages[item.id]) scrollToEvent(`quality-${item.id}`); }}>
+                                <span className="text-sm font-bold leading-tight">
+                                  {qualityFeedbackMap[item.id]?.label ?? item.text}
                                 </span>
+                              </div>
+                              {pass && checklistMessages[item.id] && (
+                                <button onClick={() => scrollToEvent(`quality-${item.id}`)} className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border flex items-center gap-1 ${isDark ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500/20' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'}`}>
+                                  🔍 Ver Evidência
+                                </button>
                               )}
-                            </button>
+                            </div>
                             
                             {!pass && (lead.audit_reasons as any)?.[item.id] && (
                               <div className="mt-2 pl-9 pr-2">

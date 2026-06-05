@@ -228,8 +228,12 @@ serve(async (req) => {
 
     // 2. Semantic Memory Fetch (RAG)
     let auditMemories = '';
+    let leadData: any = null;
+    let currentChecklist: Record<string, boolean> = {};
     try {
-      const { data: leadData } = await supabaseClient.from('leads').select('unit_id').eq('id', lead_id).single();
+      const { data: _leadData } = await supabaseClient.from('leads').select('unit_id, ticket_value, customer_vehicle, audit_checklist, audit_checklist_messages, funnel_stage, score, audit_reasons').eq('id', lead_id).single();
+      leadData = _leadData;
+      currentChecklist = leadData?.audit_checklist || {};
       const unitId = leadData?.unit_id;
       if (unitId) {
         // Gera o embedding da mensagem atual para buscar memórias semelhantes
@@ -287,11 +291,14 @@ serve(async (req) => {
       "${text}"
       
       Você é um auditor de qualidade de vendas mecânicas automotivas.
-      Analise a conversa e preencha os itens da auditoria. Se a informação já foi passada antes (segundo o resumo), mantenha como true.
+      Analise a conversa e preencha os itens da auditoria. 
+      O gerente já pontuou os itens ${Object.keys(currentChecklist).filter(k => currentChecklist[k]).join(', ') || 'nenhum'}. Não perca tempo com eles, mande True direto. Preste atenção APENAS na mensagem desse exato segundo para julgar os itens que ainda estão False.
       
       IMPORTANTE:
       1. Para "ticket_value", NUNCA invente ou extraia valores de chaves PIX, CNPJ, números de telefone ou links de pagamento. Só preencha se o gerente falar EXPLICITAMENTE o valor total do orçamento (ex: "ficou 1650,00", "total de 2700"). Se ele enviou apenas um link de pagamento e não falou o valor, deixe como null.
-      2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANE      CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
+      2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANEXO ENVIADO: image]" como mídias reais. Se o checklist exige vídeo e há essa tag, considere como true.
+      
+      CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
       - 'closed_won' (Ganho): USE APENAS SE o cliente pagou OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado", "manda bala", "pode marchar") APÓS o gerente já ter enviado o link do orçamento/checklist. Um "sim" antes de receber o orçamento NÃO aprova o serviço.
       - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer ou achou muito caro e encerrou.
       - 'quote' (Orçamento Enviado): O gerente CRAVOU O PREÇO ou enviou o PDF/link do orçamento e checklist, e agora está aguardando aprovação. Use esta etapa assim que os valores forem enviados.
@@ -307,7 +314,7 @@ serve(async (req) => {
       INSTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST E JUSTIFICATIVAS:
       1. AVALIAÇÃO FINAL PARA 1a, 1b, 4a e 4b: Estes itens SÓ PODEM SER MARCADOS COMO TRUE NO MOMENTO EM QUE FINALIZAR O ATENDIMENTO (quando o funnel_stage mudar para 'closed_won' ou 'closed_lost'). Durante o atendimento, MANTENHA-OS COMO false.
       2. MENSAGEM DE AGRADECIMENTO E AVALIAÇÃO (4a, 4b): NEGATIVE CONSTRAINT: Um simples "Valeu" ou "Obrigado" do gerente NO MEIO do atendimento NÃO é mensagem de finalização. Só pontue se a conversa realmente chegou ao fim e o serviço foi aprovado/recusado.
-      3. CHAIN-OF-THOUGHT (OBRIGATÓRIO): A PRIMEIRA CHAVE do seu JSON de resposta DEVE ser "internal_monologue". Você deve pensar alto e justificar como interpretou gírias e intenções cruzando com o histórico ANTES de preencher o checklist e a etapa do funil. Se for um áudio ou link, resuma o que ele contém nesta etapa.
+      3. CHAIN-OF-THOUGHT (OBRIGATÓRIO): A PRIMEIRA CHAVE do seu JSON de resposta DEVE ser "internal_monologue". Você deve pensar alto e justificar como interpretou gírias e intenções cruzando com o histórico ANTES de preencher o checklist e a etapa do funil. Se houver anexo de imagem, áudio, vídeo ou link, descreva com o MÁXIMO DE DETALHES possível o que é visto e/ou ouvido na mídia nesta etapa.
 
       [SISTEMA DE BLINDAGEM DE MEMÓRIA (MANDATÓRIO)]
       Sempre que houver conteúdo lido de um link (Checklist/Orçamento), você É OBRIGADO a extrair peças e valores e SALVÁ-LAS em texto corrido no campo \`new_compressed_history\`.
@@ -351,8 +358,8 @@ serve(async (req) => {
            // Se o item ainda não faz sentido na etapa atual (ex: 4a/4b durante negotiation), NÃO inclua.
         },
         "media_summaries": {
-           // (Dicionário Opcional) Se houver mídia anexa e você a analisou (áudio/vídeo/imagem), insira o ID da mensagem como chave e o resumo da transcrição como valor. O ID atual é: ${message_id}.
-           // Ex: "${message_id}": "Áudio: Gerente justifica a troca da correia dentada por conta do desgaste prematuro."
+           // (Dicionário) OBRIGATÓRIO se houver mídia anexa (áudio/vídeo/imagem). Insira o ID da mensagem como chave e um Resumo Descritivo detalhado do conteúdo visual e auditivo como valor. O ID atual é: ${message_id}.
+           // Ex: "${message_id}": "Vídeo: O mecânico filma a parte inferior do veículo, apontando para um vazamento escuro próximo ao cárter. A suspensão aparece íntegra."
         },
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
         "closing_summary": (Resumo descritivo narrando a evolução e histórico geral),
@@ -761,8 +768,8 @@ serve(async (req) => {
     const parsedData = mockOutput;
 
     // 5. Rastreabilidade de Auditoria: descobrir quais checks viraram true agora
-    const { data: leadData } = await supabaseClient.from('leads').select('ticket_value, customer_vehicle, audit_checklist, audit_checklist_messages, funnel_stage, score, audit_reasons').eq('id', lead_id).single();
-    const currentChecklist = leadData?.audit_checklist || {};
+    // leadData já foi buscado no passo 2
+    // const currentChecklist já foi populado no passo 2
     const newMessagesMap = leadData?.audit_checklist_messages || {};
     const mergedChecklist = { ...currentChecklist };
     if (mockOutput.audit_checklist && sender_type !== 'contact') {
