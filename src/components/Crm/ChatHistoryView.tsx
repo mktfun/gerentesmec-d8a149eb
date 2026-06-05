@@ -386,51 +386,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                         </div>
                       )}
                     
-                    {/* Renderiza AI Insight (Auditoria Inline - Minimalista) */}
-                    {(() => {
-                      const checklistMsgs = (lead as any).audit_checklist_messages || {};
-                      const auditReasons = (lead as any).audit_reasons || {};
-                      
-                      // Encontra se esta mensagem ativou algum item do checklist
-                      const activatedItems = Object.entries(checklistMsgs)
-                        .filter(([_, msgId]) => msgId === msg.id || (msg.chatwoot_message_id && msgId === msg.chatwoot_message_id))
-                        .map(([key, _]) => {
-                          const reason = auditReasons[key] || msg.ai_insight;
-                          return { key, reason };
-                        });
-
-                      if (activatedItems.length === 0 && !msg.ai_insight) return null;
-
-                      return (
-                        <div className={`mt-1.5 flex flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
-                          {activatedItems.length > 0 ? (
-                            activatedItems.map(({ key, reason }) => (
-                              <div key={key} className={`px-2 py-1.5 max-w-[85%] rounded-lg bg-emerald-500/5 dark:bg-emerald-500/10 border-l-2 border-emerald-500/40 flex flex-col gap-0.5 text-left`}>
-                                <div className="flex items-center gap-1.5 opacity-80">
-                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
-                                  <span className="text-[9px] uppercase tracking-widest font-bold text-emerald-600 dark:text-emerald-400">Ponto Auditoria ({key})</span>
-                                </div>
-                                {reason && (
-                                  <span className="text-[10px] font-mono leading-tight text-muted-foreground/80">
-                                    {reason}
-                                  </span>
-                                )}
-                              </div>
-                            ))
-                          ) : msg.ai_insight ? (
-                            <div className={`px-2 py-1.5 max-w-[85%] rounded-lg bg-black/5 dark:bg-white/5 border-l-2 border-border/50 flex flex-col gap-0.5 text-left`}>
-                                <div className="flex items-center gap-1.5 opacity-60">
-                                  <CheckCircle2 className="w-2.5 h-2.5" />
-                                  <span className="text-[9px] uppercase tracking-widest font-bold">Nota do Sistema</span>
-                                </div>
-                                <span className="text-[10px] font-mono leading-tight text-muted-foreground/80">
-                                  {msg.ai_insight}
-                                </span>
-                            </div>
-                          ) : null}
-                        </div>
-                      );
-                    })()}
+                    {/* (Removido: Auditoria Inline) */}
                     
                     </div>
                     

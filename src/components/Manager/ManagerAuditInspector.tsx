@@ -9,7 +9,7 @@ import { ptBR } from 'date-fns/locale';
 import { useTheme } from '@/context/ThemeContext';
 import { CustomAudioPlayer } from '../Crm/CustomAudioPlayer';
 import { ExpandableMedia } from '../Crm/ExpandableMedia';
-import { AIXrayModal } from './AIXrayModal';
+import ChatHistoryView, { ChatMessage } from '../Crm/ChatHistoryView';
 import { AuditFeedbackModal } from './AuditFeedbackModal';
 
 interface Props { lead: Lead; onClose: () => void; }
@@ -28,9 +28,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [showIndex, setShowIndex] = useState(false);
-  const [showXray, setShowXray] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const chatRef = useRef<HTMLDivElement>(null);
   
   const { isDark } = useTheme();
 
@@ -95,6 +93,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
         if (!msgId) msgId = [...messages].reverse().find(m => !isClientMsg(m) && !isSystemMsg(m))?.id;
       }
 
+      // ... hits logic can stay for the quality index panel, but not mapped to messages anymore ...
       if (pass && msgId) {
         if (!hitsByMessageId[msgId]) hitsByMessageId[msgId] = [];
         hitsByMessageId[msgId].push({
@@ -165,15 +164,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
           </div>
         )}
 
-        {/* AI X-Ray Button -> Detalhes da Auditoria */}
-        <button
-          onClick={() => setShowXray(true)}
-          className={`relative px-3 h-10 flex items-center justify-center gap-2 rounded-xl transition-all border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20' : 'bg-indigo-50 border-indigo-200 text-indigo-600 hover:bg-indigo-100'}`}
-          aria-label="Detalhes da Auditoria"
-        >
-          <Sparkles className="w-4 h-4" />
-          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Detalhes da Auditoria</span>
-        </button>
+        {/* Remover botão Detalhes da Auditoria */}
 
         {/* Audit Feedback Button */}
         <button
@@ -222,109 +213,9 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
           </div>
         )}
 
-        {/* Chat timeline */}
-        <div ref={chatRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
-          {loading && (
-            <div className="flex items-center justify-center h-full">
-              <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-
-          {!loading && messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full gap-3 opacity-40">
-              <Clock className="w-12 h-12 mb-2" />
-              <p className="text-lg font-bold">Nenhuma mensagem registrada.</p>
-            </div>
-          )}
-
-          {!loading && messages.map((msg) => {
-            const isClient = isClientMsg(msg);
-            const isSystem = isSystemMsg(msg);
-            
-            let displayContent = msg.content || '';
-            const isAudio = msg.media_type?.startsWith('audio/');
-            const isImage = msg.media_type?.startsWith('image/');
-            const isVideo = msg.media_type?.startsWith('video/');
-
-            // Clean up the "[ANEXO ENVIADO: audio]" raw string if present
-            displayContent = displayContent.replace(/\[ANEXO ENVIADO:[^\]]+\]/gi, '').trim();
-
-            if (isSystem) {
-              return (
-                <motion.div layout key={msg.id} className="flex justify-center my-4">
-                  <span className={`text-xs font-semibold px-4 py-2 rounded-full ${isDark ? 'bg-white/10 text-white/60' : 'bg-black/5 text-black/60'}`}>
-                    {msg.content}
-                  </span>
-                </motion.div>
-              );
-            }
-
-            const msgHits = hitsByMessageId[msg.id];
-
-            return (
-              <motion.div
-                key={msg.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", bounce: 0.2 }}
-                className={`flex flex-col w-full my-3 ${isClient ? 'items-start' : 'items-end'}`}
-              >
-                <div
-                  className={`max-w-[85%] px-5 py-3.5 text-base leading-relaxed shadow-sm ${
-                    isClient 
-                      ? (isDark ? 'bg-[#1a1a1a] rounded-[1.5rem_1.5rem_1.5rem_0.25rem] border border-white/5' : 'bg-white rounded-[1.5rem_1.5rem_1.5rem_0.25rem] border border-black/5')
-                      : ('bg-indigo-600 text-white rounded-[1.5rem_1.5rem_0.25rem_1.5rem]')
-                  }`}
-                >
-                  {displayContent && <p className="whitespace-pre-wrap break-words font-medium">{displayContent}</p>}
-                  
-                  {isAudio && msg.media_url && (
-                    <div className={`mt-2 ${displayContent ? 'pt-2' : ''}`}>
-                      <CustomAudioPlayer src={msg.media_url} />
-                    </div>
-                  )}
-                  {isImage && msg.media_url && (
-                    <div className={`mt-2 ${displayContent ? 'pt-2' : ''}`}>
-                      <ExpandableMedia src={msg.media_url} type="image" />
-                    </div>
-                  )}
-                  {isVideo && msg.media_url && (
-                    <div className={`mt-2 ${displayContent ? 'pt-2' : ''}`}>
-                      <ExpandableMedia src={msg.media_url} type="video" />
-                    </div>
-                  )}
-
-                  <p className={`text-[10px] mt-2 font-bold tracking-wider ${isClient ? 'text-right' : 'text-right'} ${isClient ? (isDark ? 'opacity-40' : 'opacity-40') : 'text-indigo-200'}`}>
-                    {format(new Date(msg.created_at), "HH:mm", { locale: ptBR })}
-                  </p>
-                </div>
-                
-                {/* AI Notes (Sub-bubbles) */}
-                {msgHits && msgHits.length > 0 && (
-                  <div className={`flex flex-col gap-1.5 mt-2 max-w-[85%] ${isClient ? 'items-start pl-3' : 'items-end pr-3'}`}>
-                    {msgHits.map(hit => (
-                      <motion.div 
-                        id={`quality-${hit.id}`}
-                        layout
-                        initial={{ opacity: 0, scale: 0.9, y: -10 }} 
-                        animate={{ opacity: 1, scale: 1, y: 0 }} 
-                        transition={{ type: 'spring', bounce: 0.3 }}
-                        key={hit.id} 
-                        className={`flex items-start gap-3 p-3 rounded-2xl shadow-sm border ${isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100'}`}
-                      >
-                        <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
-                        <div>
-                          <p className={`text-xs font-black leading-tight ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>{hit.label}</p>
-                          <p className={`text-[10px] leading-tight mt-1 font-semibold opacity-80 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>{hit.detail}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
+        {/* Uso unificado do ChatHistoryView para manter consistência visual */}
+        <div className="flex-1 min-h-0 relative">
+          <ChatHistoryView lead={lead} messages={messages} isLoading={loading} />
         </div>
 
         {/* ── Quality Index Drawer ───────────────────────────────── */}
@@ -439,12 +330,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
         </AnimatePresence>
       </div>
 
-      {/* AI X-Ray Modal */}
-      <AIXrayModal 
-        isOpen={showXray} 
-        onClose={() => setShowXray(false)} 
-        lead={lead} 
-      />
+      {/* Remover AIXrayModal component */}
 
       <AuditFeedbackModal 
         isOpen={showFeedback}
