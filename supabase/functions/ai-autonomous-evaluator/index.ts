@@ -345,7 +345,7 @@ serve(async (req) => {
     try {
       if (provider === 'Google Vertex AI') {
         const gcpCreds = aiSettings.gcp_credentials;
-        const gcpProject = aiSettings.gcp_project_id;
+        const gcpProject = aiSettings.gcp_project_id || (gcpCreds && gcpCreds.project_id);
         const gcpRegion = aiSettings.gcp_region || 'us-central1';
         
         if (!gcpCreds || !gcpProject) throw new Error("Vertex AI: Credenciais ou Project ID faltando na configuração.");

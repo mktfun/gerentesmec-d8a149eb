@@ -69,7 +69,18 @@ const availableModels: Record<string, string[]> = {
     'google/gemma-2-27b-it'
   ],
   'Google Vertex AI': [
-    'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'
+    'gemini-3.5-flash',
+    'gemini-3.5-pro',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
+    'gemini-2.0-flash-exp',
+    'gemini-2.0-flash-lite',
+    'gemini-2.0-pro-exp',
+    'gemini-1.5-pro-002',
+    'gemini-1.5-flash-002',
+    'gemini-1.5-pro',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-8b'
   ],
   'Local AI Proxy (CLI Tunnel)': [
     'gemini-3.5-flash', 'gemini-2.5-flash', 'gemma-4-31b-it', 'llama3'
@@ -96,6 +107,7 @@ export const AiRouterConfig: React.FC = () => {
   const [recommendation, setRecommendation] = useState<{ model: string; reason: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'config' | 'telemetry' | 'digests'>('config');
   const [offHoursBatching, setOffHoursBatching] = useState(true);
+  const [showAdvancedGcp, setShowAdvancedGcp] = useState(false);
 
   const settingsInitialized = React.useRef(false);
 
@@ -121,7 +133,23 @@ export const AiRouterConfig: React.FC = () => {
   }, [aiSettings]);
 
   const handleTest = async () => {
-    if (provider === 'Google Vertex AI' && (!gcpCredentials || !gcpProjectId)) return;
+    // Para o Vertex AI, se não houver JSON colado, rejeitamos o teste. O Project ID pode ser preenchido manual ou vindo do JSON.
+    if (provider === 'Google Vertex AI' && !gcpCredentials) return;
+    
+    // Tenta analisar o JSON antes do teste para ver se salva o project_id
+    let resolvedProjectId = gcpProjectId;
+    if (provider === 'Google Vertex AI' && gcpCredentials) {
+      try {
+        const parsed = JSON.parse(gcpCredentials);
+        if (parsed && parsed.project_id) {
+          resolvedProjectId = parsed.project_id;
+          if (!gcpProjectId) setGcpProjectId(resolvedProjectId);
+        }
+      } catch (e) {
+        // Ignora erro de parse aqui, deixamos falhar na requisição
+      }
+    }
+    
     if (provider === 'Local AI Proxy (CLI Tunnel)' && !apiUrl) return;
     if (provider !== 'Google Vertex AI' && !apiKey && provider !== 'Local AI Proxy (CLI Tunnel)') return;
     
@@ -244,9 +272,22 @@ export const AiRouterConfig: React.FC = () => {
       provider, model: recommendedModel, api_key: apiKey,
       off_hours_batching: offHoursBatching,
       gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
-      gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? JSON.parse(gcpCredentials) : null,
+      gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? (() => { try { return JSON.parse(gcpCredentials) } catch { return gcpCredentials } })() : null,
       ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } : {})
     });
+  };
+
+  const handleGcpJsonPaste = (val: string) => {
+    setGcpCredentials(val);
+    if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
+    try {
+      const parsed = JSON.parse(val);
+      if (parsed && parsed.project_id) {
+        setGcpProjectId(parsed.project_id);
+      }
+    } catch (e) {
+      // JSON inválido, apenas ignora
+    }
   };
 
   return (
@@ -370,62 +411,98 @@ export const AiRouterConfig: React.FC = () => {
 
           {provider === 'Google Vertex AI' ? (
             <div className="space-y-4 border-t border-border pt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-                    GCP Project ID
-                  </label>
-                  <input
-                    type="text"
-                    value={gcpProjectId}
-                    onChange={e => {
-                      setGcpProjectId(e.target.value);
-                      if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
-                    }}
-                    placeholder="Ex: meu-projeto-123"
-                    className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-                    GCP Region
-                  </label>
-                  <input
-                    type="text"
-                    value={gcpRegion}
-                    onChange={e => {
-                      setGcpRegion(e.target.value);
-                      if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
-                    }}
-                    placeholder="Ex: us-central1"
-                    className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                  />
-                </div>
-              </div>
+              
+              {/* Painel Zero-Click */}
               <div>
                 <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-                  Service Account JSON
+                  Service Account JSON (Google Cloud)
                 </label>
-                <div className="flex items-start gap-2">
+                <div className="flex flex-col gap-3">
                   <textarea
                     value={gcpCredentials}
-                    onChange={e => {
-                      setGcpCredentials(e.target.value);
-                      if (testStatus !== 'idle' && testStatus !== 'testing') setTestStatus('idle');
-                    }}
-                    placeholder='{ "type": "service_account", ... }'
-                    className="w-full h-24 px-3 py-2.5 rounded-xl bg-muted border border-border text-xs font-mono text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                    onChange={e => handleGcpJsonPaste(e.target.value)}
+                    placeholder='Cole aqui todo o conteúdo do seu arquivo credentials.json baixado do GCP...'
+                    className="w-full h-32 px-4 py-3 rounded-xl bg-muted/50 border border-border text-xs font-mono text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 transition-colors resize-none"
                   />
+                  
+                  {/* Liquid Glass Feedback para Project ID Encontrado */}
+                  <AnimatePresence>
+                    {gcpProjectId && gcpCredentials.includes(gcpProjectId) && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                        exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                        className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 flex items-center gap-3 backdrop-blur-sm"
+                      >
+                        <div className="bg-emerald-500/20 p-1.5 rounded-full">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-emerald-500">Projeto Reconhecido Automáticamente</p>
+                          <p className="text-[11px] font-mono text-emerald-500/80 mt-0.5">{gcpProjectId}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <button 
                     onClick={handleTest} 
-                    disabled={!gcpCredentials || !gcpProjectId || testStatus === 'testing'}
-                    className="shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    disabled={!gcpCredentials || testStatus === 'testing'}
+                    className="w-full px-4 py-3 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {testStatus === 'testing' ? (
-                      <><RefreshCw className="w-4 h-4 animate-spin" /> Diagnosticando...</>
-                    ) : 'Diagnóstico Inteligente'}
+                      <><RefreshCw className="w-4 h-4 animate-spin" /> Conectando ao GCP...</>
+                    ) : 'Diagnóstico Inteligente & Salvar'}
                   </button>
                 </div>
+              </div>
+
+              {/* Advanced Options Accordion */}
+              <div className="border border-border rounded-xl overflow-hidden mt-4">
+                <button
+                  onClick={() => setShowAdvancedGcp(!showAdvancedGcp)}
+                  className="w-full px-4 py-3 bg-muted/30 text-left flex items-center justify-between hover:bg-muted/50 transition-colors"
+                >
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Opções Avançadas (Vertex)</span>
+                  <span className="text-muted-foreground">{showAdvancedGcp ? '▼' : '▶'}</span>
+                </button>
+                <AnimatePresence>
+                  {showAdvancedGcp && (
+                    <motion.div 
+                      initial={{ height: 0 }} 
+                      animate={{ height: 'auto' }} 
+                      exit={{ height: 0 }} 
+                      className="overflow-hidden bg-card"
+                    >
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border">
+                        <div>
+                          <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                            Sobrescrever Project ID
+                          </label>
+                          <input
+                            type="text"
+                            value={gcpProjectId}
+                            onChange={e => setGcpProjectId(e.target.value)}
+                            placeholder="Opcional (Lido do JSON)"
+                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
+                            GCP Region
+                          </label>
+                          <input
+                            type="text"
+                            value={gcpRegion}
+                            onChange={e => setGcpRegion(e.target.value)}
+                            placeholder="Ex: us-central1"
+                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-sm font-mono text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           ) : (

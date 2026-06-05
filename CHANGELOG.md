@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-06-04]
+### Added
+- **012-vertex-ai**: Otimização profunda da configuração do Google Vertex AI. Implementação de "Zero-Click Config" com extração automática do `project_id` a partir da Service Account colada. Adição das séries LTS 1.5 e experimentais 2.0/3.5 de modelos Gemini na UI. Backend refatorado para resiliência na busca do Project ID.
+- **011-score-rules**: Atualização do corte lógico (Cutoff) de Lead Perdidos nos relatórios gerenciais e cálculo de bônus, permitindo reter avaliação 100% positiva se o corretor seguiu o processo até o ponto da perda documentada.
+- **010-encoding-fix**: Correção massiva de Mojibake (Encoding ANSI para UTF-8) em múltiplos arquivos de front-end, restaurando a visualização correta de acentuação e ícones.
+
 ## [2026-06-01]
 ### Added
 - **011-local-ai-proxy-provider**: Implementado suporte nativo para o "Local AI Proxy (CLI Tunnel)". Adicionado bypass e roteamento na edge function `ai-autonomous-evaluator` direcionando as chamadas para a máquina local do usuário via Cloudflare/Ngrok. Adicionado campo `API URL` na interface.
