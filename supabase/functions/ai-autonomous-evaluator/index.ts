@@ -388,7 +388,8 @@ serve(async (req) => {
         : sender_type === 'mixed'
         ? `⚠️ ATENÇÃO: Este lote contém mensagens TANTO do gerente QUANTO do cliente.
           Avalie as ações do gerente (itens 1a a 2d, 3a a 4b) com base no que ele falou.
-          E avalie a resposta do cliente para verificar se houve a aprovação explícita (item 2e).`
+          E avalie a resposta do cliente para verificar se houve a aprovação explícita (item 2e).
+          ⚠️ REGRA PARA LOTES MISTOS: Se houver mensagem do cliente no meio do lote dizendo "aprovado/pode fazer", VOCÊ DEVE OBRIGATORIAMENTE marcar o item "2e" como true na chave audit_checklist, independentemente do que o gerente disse depois.`
         : `✅ Esta mensagem foi enviada pelo GERENTE. Avalie os critérios de auditoria (exceto 2e que é aprovação do cliente) normalmente baseando-se nesta ação do gerente.`}
       
       NOVA MENSAGEM:
@@ -418,10 +419,12 @@ serve(async (req) => {
       Atenção: O "sim" ou "ok" DEVE vir DEPOIS do preço/orçamento ter sido apresentado.
       
       CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
-      - 'closed_won' (Ganho): USE APENAS SE o cliente pagou OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado", "manda bala", "pode marchar") APÓS o gerente já ter enviado o link do orçamento/checklist. Um "sim" antes de receber o orçamento NÃO aprova o serviço.
       - 'closed_lost' (Perdido): USE APENAS SE o cliente disse explicitamente que não vai fazer ou achou muito caro e encerrou.
-      - 'quote' (Orçamento Enviado): O gerente CRAVOU O PREÇO ou enviou o PDF/link do orçamento e checklist, e agora está aguardando aprovação. Use esta etapa assim que os valores forem enviados.
-      - 'negotiation' (Em Atendimento): O gerente respondeu ao cliente e INICIOU o atendimento. Eles estão conversando, diagnosticando ou agendando, mas o orçamento final/preço AINDA NÃO FOI ENVIADO. 
+      - 'closed_won' (Ganho / Finalizado): USE **EXCLUSIVAMENTE** NO FIM DO FIM DA OFICINA. Apenas quando o carro já foi entregue, o serviço está concluído/pago, e o gerente se despede (ex: enviando o link de avaliação do Google ou Termo de Garantia). NÃO use esta etapa se o cliente apenas aprovar o orçamento!
+      - 'quote' (Orçamento Enviado): O gerente CRAVOU O PREÇO ou enviou o PDF/link do orçamento e checklist, e agora está aguardando a aprovação do cliente.
+      - 'negotiation' (Em Atendimento / Em Execução): Use esta etapa para as seguintes situações:
+          1. O gerente respondeu ao cliente e está diagnosticando ou agendando (antes do orçamento).
+          2. O cliente **APROVOU** o serviço (ex: "Pode fazer", "Aprovado"). Neste momento, o carro vai começar a ser consertado na oficina. Portanto, se o cliente aprovar ou o gerente estiver mandando fotos da peça em execução, a etapa correta é ESTA (negotiation).
       - 'lead_new' (Novo Lead): O cliente mandou a 1ª mensagem e o gerente AINDA NÃO RESPONDEU. SE O GERENTE ENVIOU MENSAGEM AGORA, É PROIBIDO MANTER EM 'lead_new'. Mude IMEDIATAMENTE para 'negotiation' ou 'quote'.
 
       [EXEMPLO DE ATENDIMENTO 100% - LOJA CARIJÓS (PADRÃO OURO)]
