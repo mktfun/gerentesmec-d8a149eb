@@ -1,8 +1,8 @@
+- 2026-06-05: Implementa√ß√£o 014-auditor-global-view finalizada.
 
-- 2026-06-05: ImplementaÁ„o 014-auditor-global-view finalizada.
+- 2026-06-05: Implementa√ß√£o 015-manager-audit-cleanup finalizada.
 
-- 2026-06-05: ImplementaÁ„o 015-manager-audit-cleanup finalizada.
-
-- 2026-06-05: ImplementaÁ„o de 017-ai-consciousness-refactor finalizada e arquivada.
-- 2026-06-05: Finalizada a implementaÁ„o 019-ai-debounce (Debounce de IA para lotes).
-- 2026-06-05: Finalizada a implementaÁ„o 020-crm-filters-manager-view (Limpeza do Manager e Filtros AvanÁados CRM).
+- 2026-06-05: Implementa√ß√£o de 017-ai-consciousness-refactor finalizada e arquivada.
+- 2026-06-05: Finalizada a implementa√ß√£o 019-ai-debounce (Debounce de IA para lotes).
+- 2026-06-05: Finalizada a implementa√ß√£o 020-crm-filters-manager-view (Limpeza do Manager e Filtros Avan√ßados CRM).
+- 2026-06-05: Finalizada a implementa√ß√£o 021-ai-evaluator-logic-fix (Corre√ß√£o da l√≥gica do avaliador).
