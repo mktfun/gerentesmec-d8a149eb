@@ -38,7 +38,7 @@ const Crm = () => {
   const [createdPeriod, setCreatedPeriod] = useState<CreatedPeriod>('30d');
   const [customDateRange, setCustomDateRange] = useState<CustomDateRange>({ start: '', end: '' });
   const [unansweredOnly, setUnansweredOnly] = useState(false);
-  const [inactiveOnly, setInactiveOnly] = useState(false);
+  const [hideInactive, setHideInactive] = useState(false);
 
   // Lead CRUD
   const [formLead, setFormLead] = useState<Lead | null>(null);
@@ -94,10 +94,10 @@ const Crm = () => {
 
     if (unansweredOnly && !isUnanswered) return false;
 
-    if (inactiveOnly) {
+    if (hideInactive) {
       const lastMsgTime = new Date(l.last_message_at).getTime();
       const inactiveHours = (now.getTime() - lastMsgTime) / (1000 * 60 * 60);
-      if (inactiveHours < 24) return false;
+      if (inactiveHours >= 24) return false;
     }
 
     return true;
@@ -326,7 +326,7 @@ const Crm = () => {
             createdPeriod={createdPeriod} setCreatedPeriod={setCreatedPeriod}
             customDateRange={customDateRange} setCustomDateRange={setCustomDateRange}
             unansweredOnly={unansweredOnly} setUnansweredOnly={setUnansweredOnly}
-            inactiveOnly={inactiveOnly} setInactiveOnly={setInactiveOnly}
+            hideInactive={hideInactive} setHideInactive={setHideInactive}
           />
 
           <button

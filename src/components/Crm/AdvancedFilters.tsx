@@ -13,15 +13,15 @@ interface Props {
   setCustomDateRange: (r: CustomDateRange) => void;
   unansweredOnly: boolean;
   setUnansweredOnly: (v: boolean) => void;
-  inactiveOnly: boolean;
-  setInactiveOnly: (v: boolean) => void;
+  hideInactive: boolean;
+  setHideInactive: (v: boolean) => void;
 }
 
 const AdvancedFilters: React.FC<Props> = ({
   createdPeriod, setCreatedPeriod,
   customDateRange, setCustomDateRange,
   unansweredOnly, setUnansweredOnly,
-  inactiveOnly, setInactiveOnly
+  hideInactive, setHideInactive
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isDark } = useTheme();
@@ -38,7 +38,7 @@ const AdvancedFilters: React.FC<Props> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const hasActiveFilters = createdPeriod !== 'all' || unansweredOnly || inactiveOnly;
+  const hasActiveFilters = createdPeriod !== '30d' || unansweredOnly || hideInactive;
 
   return (
     <div className="relative font-instrument" ref={popoverRef}>
@@ -133,30 +133,30 @@ const AdvancedFilters: React.FC<Props> = ({
                   {unansweredOnly && <Check className="w-3.5 h-3.5 text-white" />}
                 </div>
                 <div>
-                  <p className="text-xs font-bold leading-none mb-0.5">Sem Resposta do Agente</p>
+                  <p className="text-xs font-bold leading-none mb-0.5">Aguardando Minha Resposta</p>
                   <p className="text-[10px] font-semibold opacity-50 leading-tight">Cliente foi o último a falar.</p>
                 </div>
               </button>
 
               <button 
-                onClick={() => setInactiveOnly(!inactiveOnly)}
+                onClick={() => setHideInactive(!hideInactive)}
                 className="flex items-center gap-3 text-left group"
               >
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${inactiveOnly ? 'bg-indigo-500 border-indigo-500' : 'border-border group-hover:border-indigo-500/50'}`}>
-                  {inactiveOnly && <Check className="w-3.5 h-3.5 text-white" />}
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${hideInactive ? 'bg-rose-500 border-rose-500' : 'border-border group-hover:border-rose-500/50'}`}>
+                  {hideInactive && <Check className="w-3.5 h-3.5 text-white" />}
                 </div>
                 <div>
-                  <p className="text-xs font-bold leading-none mb-0.5">Inativo há mais de 24h</p>
-                  <p className="text-[10px] font-semibold opacity-50 leading-tight">Nenhuma mensagem trocada ontem/hoje.</p>
+                  <p className="text-xs font-bold leading-none mb-0.5">Ocultar Inativos {`>`} 24h</p>
+                  <p className="text-[10px] font-semibold opacity-50 leading-tight">Limpa conversas abandonadas da tela.</p>
                 </div>
               </button>
             </div>
 
             <button 
               onClick={() => {
-                setCreatedPeriod('all');
+                setCreatedPeriod('30d');
                 setUnansweredOnly(false);
-                setInactiveOnly(false);
+                setHideInactive(false);
               }}
               className="mt-2 text-[10px] font-bold uppercase tracking-widest text-indigo-500 opacity-60 hover:opacity-100 text-center py-2 transition-opacity"
             >
