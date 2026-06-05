@@ -381,7 +381,9 @@ serve(async (req) => {
         if (finalModel === 'Gemini Free-Tier Ensemble (Auto-Routing)' || finalModel.includes('ensemble')) {
           finalModel = 'gemini-2.5-flash';
         }
-        const vertexUrl = `https://${gcpRegion}-aiplatform.googleapis.com/v1/projects/${gcpProject}/locations/${gcpRegion}/publishers/google/models/${finalModel}:generateContent`;
+        
+        const host = gcpRegion === 'global' ? 'aiplatform.googleapis.com' : `${gcpRegion}-aiplatform.googleapis.com`;
+        const vertexUrl = `https://${host}/v1/projects/${gcpProject}/locations/${gcpRegion}/publishers/google/models/${finalModel}:generateContent`;
         
         const res = await fetch(vertexUrl, {
           method: 'POST',
