@@ -1,63 +1,19 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, AlertTriangle, Clock, List, ChevronRight, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { X, Sparkles } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
-import { qualityFeedbackMap, auditStepsConfig } from '@/utils/scoreUtils';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { useTheme } from '@/context/ThemeContext';
-import { CustomAudioPlayer } from '../Crm/CustomAudioPlayer';
-import { ExpandableMedia } from '../Crm/ExpandableMedia';
 import ChatHistoryView, { ChatMessage } from '../Crm/ChatHistoryView';
-import { AuditFeedbackModal } from './AuditFeedbackModal';
 
 interface Props { lead: Lead; onClose: () => void; }
 
-interface ChatMessage {
-  id: string; 
-  content: string; 
-  sender: string; 
-  created_at: string;
-  media_url?: string;
-  media_type?: string;
-}
-
-// ─── Component ────────────────────────────────────────────────────────────
 const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showIndex, setShowIndex] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  
   const { isDark } = useTheme();
 
-  const score = lead.score as number | null;
   const customerName = (lead as any).name || lead.customer_name || 'Cliente';
-  const [localChecklist, setLocalChecklist] = useState<Record<string, boolean>>((lead.audit_checklist as Record<string, boolean>) ?? {});
-  const checklistMessages = (lead.audit_checklist_messages as Record<string, string>) ?? {};
-
-  let scoreBg = isDark ? 'bg-white/5' : 'bg-black/5';
-  let scoreText = isDark ? 'text-white' : 'text-black';
-  let scoreBorder = isDark ? 'border-white/10' : 'border-black/10';
-  
-  if (score !== null) {
-    if (score >= 75) { scoreBg = isDark ? 'bg-emerald-500/20' : 'bg-emerald-100'; scoreText = isDark ? 'text-emerald-400' : 'text-emerald-600'; scoreBorder = isDark ? 'border-emerald-500/30' : 'border-emerald-200'; }
-    else if (score >= 50) { scoreBg = isDark ? 'bg-indigo-500/20' : 'bg-indigo-100'; scoreText = isDark ? 'text-indigo-400' : 'text-indigo-600'; scoreBorder = isDark ? 'border-indigo-500/30' : 'border-indigo-200'; }
-    else { scoreBg = isDark ? 'bg-rose-500/20' : 'bg-rose-100'; scoreText = isDark ? 'text-rose-400' : 'text-rose-600'; scoreBorder = isDark ? 'border-rose-500/30' : 'border-rose-200'; }
-  }
-
-  // All quality items for the index panel
-  const allQualityItems = auditStepsConfig.flatMap(step =>
-    step.items.map(item => ({
-      id: item.id,
-      label: qualityFeedbackMap[item.id]?.label ?? item.text,
-      pass: !!checklist[item.id],
-      eventId: `quality-${item.id}`,
-    }))
-  );
-
-  const passingCount = allQualityItems.filter(i => i.pass).length;
 
   useEffect(() => {
     const fetch = async () => {
@@ -71,71 +27,11 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
     fetch();
   }, [lead.id]);
 
-  // Helper to identify client messages
-  const isClientMsg = (msg: ChatMessage) => msg.sender === 'client' || msg.sender === 'contact' || msg.sender === 'customer';
-  const isSystemMsg = (msg: ChatMessage) => msg.sender === 'system' || msg.sender === 'bot';
-
-  // Group quality hits by message ID
-  const hitsByMessageId: Record<string, { id: string, label: string, detail: string, pass: boolean }[]> = {};
-  auditStepsConfig.forEach(step => {
-    step.items.forEach(item => {
-      const pass = !!localChecklist[item.id];
-      let msgId = checklistMessages[item.id];
-
-      // Heuristic fallback if backend didn't provide message ID
-      if (pass && !msgId && messages.length > 0) {
-        if (item.id === 'audio') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && m.media_type?.startsWith('audio/'))?.id;
-        else if (item.id === 'video') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && m.media_type?.startsWith('video/'))?.id;
-        else if (item.id === 'image') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && m.media_type?.startsWith('image/'))?.id;
-        else if (item.id === 'budget' || item.id === 'price') msgId = messages.find(m => !isClientMsg(m) && !isSystemMsg(m) && (m.content.includes('R$') || m.content.toLowerCase().includes('orçamento')))?.id;
-        
-        // Final fallback: just attach to the last attendant message
-        if (!msgId) msgId = [...messages].reverse().find(m => !isClientMsg(m) && !isSystemMsg(m))?.id;
-      }
-
-      // ... hits logic can stay for the quality index panel, but not mapped to messages anymore ...
-      if (pass && msgId) {
-        if (!hitsByMessageId[msgId]) hitsByMessageId[msgId] = [];
-        hitsByMessageId[msgId].push({
-          id: item.id,
-          label: qualityFeedbackMap[item.id]?.label ?? item.text,
-          detail: qualityFeedbackMap[item.id]?.detail ?? '',
-          pass,
-        });
-      }
-    });
-  });
-
   // Lock body scroll while inspector is open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
-
-  const scrollToEvent = useCallback((eventId: string) => {
-    setShowIndex(false);
-    setTimeout(() => {
-      const el = document.getElementById(eventId);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Pulse effect
-        el.classList.add('animate-pulse', 'ring-2', 'ring-indigo-500', 'shadow-[0_0_15px_rgba(99,102,241,0.5)]');
-        setTimeout(() => {
-          el.classList.remove('animate-pulse', 'ring-2', 'ring-indigo-500', 'shadow-[0_0_15px_rgba(99,102,241,0.5)]');
-        }, 3000);
-      }
-    }, 150);
-  }, []);
-
-  const toggleChecklistItem = async (itemId: string, currentPass: boolean) => {
-    const newChecklist = { ...localChecklist, [itemId]: !currentPass };
-    setLocalChecklist(newChecklist);
-    try {
-      await supabase.from('leads').update({ audit_checklist: newChecklist }).eq('id', lead.id);
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   return (
     <motion.div
@@ -156,7 +52,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
         </button>
 
         {/* Avatar */}
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-sm shrink-0 border ${scoreBg} ${scoreText} ${scoreBorder}`}>
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-sm shrink-0 border ${isDark ? 'bg-white/5 text-white border-white/10' : 'bg-black/5 text-black border-black/10'}`}>
           {customerName.substring(0, 2).toUpperCase()}
         </div>
 
@@ -165,46 +61,10 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
           <p className="text-base font-black truncate leading-tight">{customerName}</p>
           <p className={`text-xs mt-0.5 truncate ${isDark ? 'opacity-60' : 'opacity-60'}`}>{(lead as any).phone || lead.customer_phone || ''}</p>
         </div>
-
-        {/* Score badge */}
-        {score !== null && (
-          <div className={`shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl border ${scoreBg} ${scoreBorder}`}>
-            <span className={`text-xl font-black leading-none ${scoreText}`}>{score}</span>
-            <span className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${scoreText} opacity-80`}>Score</span>
-          </div>
-        )}
-
-        {/* Remover botão Detalhes da Auditoria */}
-
-        {/* Audit Feedback Button */}
-        <button
-          onClick={() => setShowFeedback(true)}
-          className={`relative px-3 h-10 flex items-center justify-center gap-2 rounded-xl transition-all border ${isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20' : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'}`}
-          aria-label="Corrigir"
-        >
-          <CheckCircle2 className="w-4 h-4" />
-          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Corrigir</span>
-        </button>
-
-        {/* Index toggle */}
-        <button
-          onClick={() => setShowIndex(v => !v)}
-          className={`relative w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}
-          aria-label="Índice de Qualidade"
-        >
-          <List className="w-6 h-6" />
-          {/* mini badge with fail count */}
-          {allQualityItems.filter(i => !i.pass).length > 0 && (
-            <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-500 text-[10px] font-black text-white flex items-center justify-center border-2 border-white dark:border-[#1a1a1a]">
-              {allQualityItems.filter(i => !i.pass).length}
-            </span>
-          )}
-        </button>
       </div>
 
-      {/* ── Body: chat + index overlay ─────────────────────────── */}
+      {/* ── Body: chat ─────────────────────────── */}
       <div className="flex-1 relative overflow-hidden flex flex-col">
-
         {/* Funnel Stage Reason Banner */}
         {lead.funnel_stage_reason && (lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost') && (
           <div className={`shrink-0 w-full px-5 py-3 border-b flex flex-col gap-1 z-10 shadow-sm
@@ -223,129 +83,10 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
           </div>
         )}
 
-        {/* Uso unificado do ChatHistoryView para manter consistência visual */}
         <div className="flex-1 min-h-0 relative">
           <ChatHistoryView lead={lead} messages={messages} isLoading={loading} />
         </div>
-
-        {/* ── Quality Index Drawer ───────────────────────────────── */}
-        <AnimatePresence>
-          {showIndex && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className={`absolute inset-0 z-10 ${isDark ? 'bg-black/60' : 'bg-[#212529]/40 backdrop-blur-sm'}`}
-                onClick={() => setShowIndex(false)}
-              />
-
-              {/* Drawer */}
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', stiffness: 280, damping: 30 }}
-                className={`absolute inset-y-0 right-0 w-[85%] max-w-sm z-20 flex flex-col shadow-2xl ${isDark ? 'bg-[#1a1a1a] border-l border-white/5' : 'bg-white border-l border-black/5'}`}
-              >
-                {/* Drawer header */}
-                <div className={`flex items-center justify-between px-6 py-5 border-b shrink-0 ${isDark ? 'border-white/5' : 'border-black/5'}`}>
-                  <div>
-                    <p className="text-lg font-black">Vistoria de Qualidade</p>
-                    <p className={`text-xs font-semibold mt-1 ${isDark ? 'opacity-60' : 'opacity-60'}`}>
-                      {passingCount} de {allQualityItems.length} critérios cumpridos
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowIndex(false)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-black/5'}`}
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Acertos e Erros Cards */}
-                {score !== null && (
-                  <div className={`px-6 py-5 border-b shrink-0 grid grid-cols-2 gap-4 ${isDark ? 'border-white/5' : 'border-black/5'}`}>
-                    <div className={`p-4 rounded-3xl border flex flex-col items-center justify-center gap-1 shadow-sm ${isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100'}`}>
-                      <span className={`text-4xl font-black ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{passingCount}</span>
-                      <span className={`text-[10px] font-bold uppercase tracking-widest text-center ${isDark ? 'text-emerald-500/60' : 'text-emerald-600/60'}`}>Acertos</span>
-                    </div>
-                    <div className={`p-4 rounded-3xl border flex flex-col items-center justify-center gap-1 shadow-sm ${isDark ? 'bg-rose-500/10 border-rose-500/20' : 'bg-rose-50 border-rose-100'}`}>
-                      <span className={`text-4xl font-black ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>{allQualityItems.length - passingCount}</span>
-                      <span className={`text-[10px] font-bold uppercase tracking-widest text-center ${isDark ? 'text-rose-500/60' : 'text-rose-600/60'}`}>Erros</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Items list */}
-                <div className="flex-1 overflow-y-auto py-4">
-                  {auditStepsConfig.map(step => (
-                    <div key={step.id} className="mb-4">
-                      <p className={`text-xs font-black uppercase tracking-widest px-6 py-2 ${isDark ? 'opacity-40' : 'opacity-40'}`}>
-                        {step.title}
-                      </p>
-                      {step.items.map(item => {
-                        const pass = !!localChecklist[item.id];
-                        let iconColor = pass ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : (isDark ? 'text-rose-400' : 'text-rose-600');
-                        
-                        return (
-                          <div key={item.id} className="w-full flex flex-col items-start px-6 py-3.5 transition-colors border-b border-transparent">
-                            <div className="w-full flex items-center gap-4 text-left">
-                              <button onClick={() => toggleChecklistItem(item.id, pass)} className="shrink-0">
-                                {pass
-                                  ? <CheckCircle2 className={`w-5 h-5 ${iconColor} hover:scale-110 transition-transform`} />
-                                  : <div className={`w-4 h-4 rounded-full border-2 ${iconColor} opacity-50 hover:opacity-100 transition-opacity`} />
-                                }
-                              </button>
-                              <div className="flex-1 flex flex-col cursor-pointer" onClick={() => { if (pass && checklistMessages[item.id]) scrollToEvent(`quality-${item.id}`); }}>
-                                <span className="text-sm font-bold leading-tight">
-                                  {qualityFeedbackMap[item.id]?.label ?? item.text}
-                                </span>
-                              </div>
-                              {pass && checklistMessages[item.id] && (
-                                <button onClick={() => scrollToEvent(`quality-${item.id}`)} className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border flex items-center gap-1 ${isDark ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500/20' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'}`}>
-                                  🔍 Ver Evidência
-                                </button>
-                              )}
-                            </div>
-                            
-                            {!pass && (lead.audit_reasons as any)?.[item.id] && (
-                              <div className="mt-2 pl-9 pr-2">
-                                <div className={`relative px-4 py-3 rounded-xl border flex flex-col gap-1.5 ${isDark ? 'bg-rose-950/30 border-rose-900/50' : 'bg-rose-50 border-rose-100'}`}>
-                                  <div className="flex items-center gap-1.5 opacity-80">
-                                    <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-rose-400' : 'text-rose-600'}`} />
-                                    <span className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>Análise Contextual</span>
-                                  </div>
-                                  <p className={`text-xs leading-relaxed font-semibold ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>
-                                    {(lead.audit_reasons as any)[item.id]}
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </div>
-
-      {/* Remover AIXrayModal component */}
-
-      <AuditFeedbackModal 
-        isOpen={showFeedback}
-        onClose={() => setShowFeedback(false)}
-        mechanicId={lead.user_id || 'unknown'}
-        leadId={lead.id}
-        auditReasons={JSON.stringify(lead.audit_reasons || {})}
-      />
     </motion.div>
   );
 };

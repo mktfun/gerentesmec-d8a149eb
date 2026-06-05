@@ -12,6 +12,7 @@ import UnitSwitcher from '@/components/Crm/UnitSwitcher';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useBackgroundAuditor } from '@/context/BackgroundAuditorContext';
 import { useNavigate } from 'react-router-dom';
+import AdvancedFilters, { CreatedPeriod, CustomDateRange } from '@/components/Crm/AdvancedFilters';
 
 type ViewMode = 'list' | 'kanban';
 
@@ -33,6 +34,12 @@ const Crm = () => {
   const selectedLead = selectedLeadId ? leads.find(l => l.id === selectedLeadId) ?? null : null;
   const [closedOpen, setClosedOpen] = useState(false);
   
+  // Advanced Filters
+  const [createdPeriod, setCreatedPeriod] = useState<CreatedPeriod>('30d');
+  const [customDateRange, setCustomDateRange] = useState<CustomDateRange>({ start: '', end: '' });
+  const [unansweredOnly, setUnansweredOnly] = useState(false);
+  const [inactiveOnly, setInactiveOnly] = useState(false);
+
   // Lead CRUD
   const [formLead, setFormLead] = useState<Lead | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -58,7 +65,43 @@ const Crm = () => {
       })
     : filteredLeads;
 
-  const displayLeads = searchedLeads.filter(l => slaFilter ? isLeadDanger(l, undefined, 20) : true);
+  const displayLeads = searchedLeads.filter(l => {
+    // SLA Filter
+    if (slaFilter && !isLeadDanger(l, undefined, 20)) return false;
+
+    // Advanced Filters: Creation Date
+    const createdDate = new Date(l.created_at);
+    const now = new Date();
+    if (createdPeriod === '7d') {
+      if (now.getTime() - createdDate.getTime() > 7 * 24 * 60 * 60 * 1000) return false;
+    } else if (createdPeriod === '30d') {
+      if (now.getTime() - createdDate.getTime() > 30 * 24 * 60 * 60 * 1000) return false;
+    } else if (createdPeriod === '90d') {
+      if (now.getTime() - createdDate.getTime() > 90 * 24 * 60 * 60 * 1000) return false;
+    } else if (createdPeriod === 'custom' && customDateRange.start && customDateRange.end) {
+      const start = new Date(customDateRange.start);
+      const end = new Date(customDateRange.end);
+      end.setHours(23, 59, 59, 999);
+      if (createdDate < start || createdDate > end) return false;
+    }
+
+    // Advanced Filters: Interaction
+    // @ts-ignore
+    const cTime = l.last_client_message_at ? new Date(l.last_client_message_at).getTime() : 0;
+    // @ts-ignore
+    const aTime = l.last_agent_message_at ? new Date(l.last_agent_message_at).getTime() : 0;
+    const isUnanswered = cTime > aTime;
+
+    if (unansweredOnly && !isUnanswered) return false;
+
+    if (inactiveOnly) {
+      const lastMsgTime = new Date(l.last_message_at).getTime();
+      const inactiveHours = (now.getTime() - lastMsgTime) / (1000 * 60 * 60);
+      if (inactiveHours < 24) return false;
+    }
+
+    return true;
+  });
 
   const danger  = displayLeads.filter(l => isLeadDanger(l, undefined, 20));
   const active  = displayLeads.filter(l => !isLeadDanger(l, undefined, 20) && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
@@ -278,6 +321,13 @@ const Crm = () => {
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
             )}
           </button>
+
+          <AdvancedFilters 
+            createdPeriod={createdPeriod} setCreatedPeriod={setCreatedPeriod}
+            customDateRange={customDateRange} setCustomDateRange={setCustomDateRange}
+            unansweredOnly={unansweredOnly} setUnansweredOnly={setUnansweredOnly}
+            inactiveOnly={inactiveOnly} setInactiveOnly={setInactiveOnly}
+          />
 
           <button
             onClick={() => setSlaFilter(!slaFilter)}

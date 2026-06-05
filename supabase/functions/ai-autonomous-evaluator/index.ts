@@ -85,6 +85,73 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// ─── RETRY COM BACKOFF EXPONENCIAL ──────────────────────────────────────────
+const RETRYABLE_CODES = [429, 500, 502, 503, 529];
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3
+): Promise<Response> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url, options);
+    if (res.ok || !RETRYABLE_CODES.includes(res.status)) {
+      return res;
+    }
+    if (attempt < maxRetries) {
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`[RETRY] Tentativa ${attempt + 1}/${maxRetries} falhou (HTTP ${res.status}). Aguardando ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
+    } else {
+      return res;
+    }
+  }
+  throw new Error('fetchWithRetry: unreachable');
+}
+
+// ─── PARSER JSON MULTI-ESTRATÉGIA ───────────────────────────────────────────
+function extractJSON(raw: string): any {
+  // Estratégia 1: Parse direto
+  try { return JSON.parse(raw); } catch {}
+
+  // Estratégia 2: Limpar markdown wrappers
+  let cleaned = raw
+    .replace(/^[\s\S]*?```(?:json)?\s*\n?/i, '')
+    .replace(/\n?\s*```[\s\S]*$/i, '')
+    .trim();
+  try { return JSON.parse(cleaned); } catch {}
+
+  // Estratégia 3: Contagem de chaves balanceada (encontra o primeiro JSON completo)
+  const start = raw.indexOf('{');
+  if (start !== -1) {
+    let depth = 0;
+    let inString = false;
+    let escape = false;
+    for (let i = start; i < raw.length; i++) {
+      const ch = raw[i];
+      if (escape) { escape = false; continue; }
+      if (ch === '\\') { escape = true; continue; }
+      if (ch === '"') { inString = !inString; continue; }
+      if (inString) continue;
+      if (ch === '{') depth++;
+      if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          try { return JSON.parse(raw.substring(start, i + 1)); } catch { break; }
+        }
+      }
+    }
+  }
+
+  // Estratégia 4: Regex gananciosa (fallback final)
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) {
+    try { return JSON.parse(match[0]); } catch {}
+  }
+
+  throw new Error(`Resposta da IA não contém JSON válido. Início: "${raw.substring(0, 120)}..."`);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -122,7 +189,40 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Missing lead_id' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 });
     }
 
-    // Garante que message_content sempre tenha um valor (para áudios/imagens sem texto)
+    if (!message_id && !message_content && !message_ids) {
+      // 🚨 Chamada de Lote pelo CRON 🚨
+      const { data: pendingMsgs, error: msgsErr } = await supabaseClient
+        .from('chat_messages')
+        .select('*')
+        .eq('lead_id', lead_id)
+        .eq('ai_audited', false)
+        .order('created_at', { ascending: true });
+
+      if (msgsErr) throw new Error("Erro ao buscar mensagens: " + msgsErr.message);
+      
+      if (!pendingMsgs || pendingMsgs.length === 0) {
+        return new Response(JSON.stringify({ success: true, message: "Nothing to audit" }), { headers: corsHeaders });
+      }
+
+      message_ids = pendingMsgs.map((m: any) => m.id);
+      message_id = pendingMsgs[pendingMsgs.length - 1].id;
+      
+      const senders = new Set(pendingMsgs.map((m: any) => m.sender_type));
+      if (senders.has('user') && senders.has('contact')) {
+        sender_type = 'mixed';
+      } else {
+        sender_type = pendingMsgs[pendingMsgs.length - 1].sender_type;
+      }
+
+      // Constrói o texto aglomerado
+      message_content = pendingMsgs.map((m: any) => {
+        const text = m.content || (m.media_url ? `[MEDIA ENVIADA: ${m.media_type || 'desconhecida'}]` : "[VAZIA]");
+        const senderLabel = m.sender_type === 'contact' ? 'CLIENTE' : 'GERENTE';
+        return `[${senderLabel}]: ${text}`;
+      }).join('\n\n');
+    }
+
+    // Garante que message_content sempre tenha um valor (para áudios/imagens sem texto isoladas via webhook legado)
     if (!message_content) {
       message_content = media_url ? `[MEDIA ENVIADA: ${media_type || 'desconhecida'}]` : "[MENSAGEM VAZIA/SISTEMA]";
     }
@@ -282,10 +382,14 @@ serve(async (req) => {
       
       ${sender_type === 'contact' 
         ? `⚠️ ATENÇÃO: Esta mensagem foi enviada pelo CLIENTE (contact), NÃO pelo gerente.
-          REGRA DE OURO: Você NÃO DEVE pontuar NENHUM item de auditoria (1a a 4b). 
-          Todos os itens do checklist no JSON de saída DEVEM manter o valor atual do histórico (como true ou false). Nunca altere um item de false para true baseado em ação do cliente.
-          Você pode APENAS atualizar funnel_stage, customer_vehicle, ticket_value e new_compressed_history.` 
-        : `✅ Esta mensagem foi enviada pelo GERENTE. Avalie todos os critérios de auditoria (1a a 4b) normalmente baseando-se nesta ação do gerente.`}
+          REGRA DE OURO: Você NÃO DEVE pontuar itens de ação do gerente. O ÚNICO item que pode ser pontuado aqui é o '2e' (Aprovação do Cliente).
+          Se o cliente confirmou/aprovou o serviço nesta mensagem, marque 2e como true. Para todos os outros itens, mantenha o valor atual.
+          Você também pode atualizar funnel_stage, customer_vehicle, ticket_value e new_compressed_history.` 
+        : sender_type === 'mixed'
+        ? `⚠️ ATENÇÃO: Este lote contém mensagens TANTO do gerente QUANTO do cliente.
+          Avalie as ações do gerente (itens 1a a 2d, 3a a 4b) com base no que ele falou.
+          E avalie a resposta do cliente para verificar se houve a aprovação explícita (item 2e).`
+        : `✅ Esta mensagem foi enviada pelo GERENTE. Avalie os critérios de auditoria (exceto 2e que é aprovação do cliente) normalmente baseando-se nesta ação do gerente.`}
       
       NOVA MENSAGEM:
       "${text}"
@@ -297,6 +401,21 @@ serve(async (req) => {
       IMPORTANTE:
       1. Para "ticket_value", NUNCA invente ou extraia valores de chaves PIX, CNPJ, números de telefone ou links de pagamento. Só preencha se o gerente falar EXPLICITAMENTE o valor total do orçamento (ex: "ficou 1650,00", "total de 2700"). Se ele enviou apenas um link de pagamento e não falou o valor, deixe como null.
       2. Considere a tag "[ANEXO ENVIADO: video]" e "[ANEXO ENVIADO: image]" como mídias reais. Se o checklist exige vídeo e há essa tag, considere como true.
+
+      GUIA DETALHADO PARA AVALIAÇÃO DOS ITENS CRÍTICOS:
+
+      Item 2c (Consequências explicadas): Marque TRUE se o gerente explicou o que acontece se o cliente NÃO fizer o reparo. Exemplos que contam como TRUE:
+      - "Se não trocar agora, pode travar o motor"
+      - "Esse vazamento vai piorar e pode dar problema na estrada"
+      - "Se deixar assim, vai gastar o dobro depois"
+      Exemplos que NÃO contam: Apenas dizer o preço sem contexto.
+
+      Item 2d (Checklist do veículo enviado): Marque TRUE se o gerente enviou um link, PDF, ou documento com a lista detalhada dos defeitos/serviços E fotos. Uma simples foto avulsa NÃO é checklist. Precisa ser um documento organizado ou link do sistema.
+
+      Item 2e (Aprovação do cliente): Marque TRUE se o cliente deu qualquer confirmação APÓS receber o orçamento/valor. Exemplos:
+      - "pode fazer", "aprovado", "manda bala", "pode marchar", "blz", "ok faz"
+      - "ta sussa", "bora", "fechado", "sim", "pode meter marcha"
+      Atenção: O "sim" ou "ok" DEVE vir DEPOIS do preço/orçamento ter sido apresentado.
       
       CRITÉRIOS RÍGIDOS PARA MUDANÇA DE ETAPA (funnel_stage) - INTERPRETE O CONTEXTO COM EXTREMO RIGOR:
       - 'closed_won' (Ganho): USE APENAS SE o cliente pagou OU se ele deu uma confirmação EXPLÍCITA INEQUÍVOCA de que aprovou o serviço (ex: "Pode fazer", "Aprovado", "manda bala", "pode marchar") APÓS o gerente já ter enviado o link do orçamento/checklist. Um "sim" antes de receber o orçamento NÃO aprova o serviço.
@@ -332,13 +451,6 @@ serve(async (req) => {
           "2d": true ou false,
           "2e": true ou false,
           "3a": true ou false,
-          "3b": true ou false,
-          "3c": true ou false,
-          "4a": true ou false,
-          "4b": true ou false
-        },
-        "score": (número de 0 a 100),
-        "funnel_stage": (sugestão de nova etapa),ue ou false,
           "3b": true ou false,
           "3c": true ou false,
           "4a": true ou false,
@@ -441,7 +553,7 @@ serve(async (req) => {
         const host = gcpRegion === 'global' ? 'aiplatform.googleapis.com' : `${gcpRegion}-aiplatform.googleapis.com`;
         const vertexUrl = `https://${host}/v1/projects/${gcpProject}/locations/${gcpRegion}/publishers/google/models/${finalModel}:generateContent`;
         
-        const res = await fetch(vertexUrl, {
+        const res = await fetchWithRetry(vertexUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -514,7 +626,7 @@ serve(async (req) => {
             bodyPayload.generationConfig = { responseMimeType: "application/json" };
           }
 
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${apiKey}`, {
+          const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bodyPayload)
@@ -615,7 +727,7 @@ serve(async (req) => {
           
           let res;
           try {
-            res = await fetch(apiUrl, {
+            res = await fetchWithRetry(apiUrl, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -740,28 +852,11 @@ serve(async (req) => {
     console.log("=== LLM OUTPUT ===");
     console.log(llmOutputText);
 
-    // Limpa possível formatação markdown caso o Gemma tenha cuspido ```json
-    if (llmOutputText.startsWith('```')) {
-      llmOutputText = llmOutputText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    }
-
-    // Tenta extrair JSON de dentro do texto (proxy local pode retornar texto + JSON misturado)
     let mockOutput: any;
     try {
-      mockOutput = JSON.parse(llmOutputText);
-    } catch (_parseErr) {
-      // Tenta encontrar um bloco JSON {...} dentro do texto
-      const jsonMatch = llmOutputText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try {
-          mockOutput = JSON.parse(jsonMatch[0]);
-          console.log('[AI-EVALUATOR] JSON extraído de dentro do texto bruto do proxy.');
-        } catch (_innerErr) {
-          throw new Error(`Resposta da IA não é JSON válido. Início: "${llmOutputText.substring(0, 120)}..."`);
-        }
-      } else {
-        throw new Error(`Resposta da IA não contém JSON. Início: "${llmOutputText.substring(0, 120)}..."`);
-      }
+      mockOutput = extractJSON(llmOutputText);
+    } catch (err) {
+      throw err;
     }
 
     // Bridge: mockOutput → parsedData (used from line 740 onwards)
@@ -772,10 +867,13 @@ serve(async (req) => {
     // const currentChecklist já foi populado no passo 2
     const newMessagesMap = leadData?.audit_checklist_messages || {};
     const mergedChecklist = { ...currentChecklist };
-    if (mockOutput.audit_checklist && sender_type !== 'contact') {
+    if (mockOutput.audit_checklist) {
       for (const key of Object.keys(mockOutput.audit_checklist)) {
         const val = mockOutput.audit_checklist[key];
         if (val === true || val === "true") {
+          // Bloqueio de Segurança: contato só pode marcar o 2e
+          if (sender_type === 'contact' && key !== '2e') continue;
+          
           mergedChecklist[key] = true;
           if (!currentChecklist[key]) {
             // Este item do checklist ficou VERDE por conta desta mensagem!
@@ -880,17 +978,21 @@ serve(async (req) => {
     const targetIds = (message_ids && Array.isArray(message_ids) && message_ids.length > 0) ? message_ids : (message_id ? [message_id] : []);
     
     if (targetIds.length > 0) {
-      const payloadToUpdate: any = { ai_audited: true };
-      if (parsedData.message_insight) {
-        payloadToUpdate.ai_insight = parsedData.message_insight;
-      }
-      
-      const { error: msgErr } = await supabaseClient
+      // Marcar TODAS como auditadas
+      const { error: msgErr1 } = await supabaseClient
         .from('chat_messages')
-        .update(payloadToUpdate)
+        .update({ ai_audited: true })
         .in('id', targetIds); 
       
-      if (msgErr) console.error("[AI-EVALUATOR] Erro ao marcar mensagens como auditadas:", msgErr);
+      // Aplicar o insight APENAS na última mensagem do lote (a que causou a decisão)
+      if (parsedData.message_insight) {
+        const lastMsgId = targetIds[targetIds.length - 1];
+        await supabaseClient
+          .from('chat_messages')
+          .update({ ai_insight: parsedData.message_insight })
+          .eq('id', lastMsgId);
+      }
+      if (msgErr1) console.error("[AI-EVALUATOR] Erro ao marcar mensagens como auditadas:", msgErr1);
     }
     console.log(`[AI-EVALUATOR] Lead ${lead_id} auditado com sucesso. Novo Score: ${updatePayload.score}`);
 
