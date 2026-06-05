@@ -55,27 +55,39 @@ const ManagerDashboard: React.FC = () => {
         </h1>
       </div>
 
-      {/* Segmented Control */}
-      <div className="px-6 mt-8">
-        <div className={`flex p-1 rounded-full ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex-1 py-3 text-sm font-bold rounded-full transition-all ${activeTab === 'dashboard' ? (isDark ? 'bg-white text-black shadow-md' : 'bg-[#212529] text-white shadow-md') : 'text-current opacity-60'}`}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setActiveTab('inbox')}
-            className={`flex-1 py-3 text-sm font-bold rounded-full transition-all flex items-center justify-center gap-2 ${activeTab === 'inbox' ? (isDark ? 'bg-white text-black shadow-md' : 'bg-[#212529] text-white shadow-md') : 'text-current opacity-60'}`}
-          >
-            Inbox
-            {dangerLeads.length > 0 && <span className="w-2 h-2 rounded-full bg-rose-500" />}
-          </button>
+      {/* Segmented Control (Apenas para Gerentes) */}
+      {!isAdmin && (
+        <div className="px-6 mt-8">
+          <div className={`flex p-1 rounded-full ${isDark ? 'bg-white/5' : 'bg-black/5'}`}>
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`flex-1 py-3 text-sm font-bold rounded-full transition-all ${activeTab === 'dashboard' ? (isDark ? 'bg-white text-black shadow-md' : 'bg-[#212529] text-white shadow-md') : 'text-current opacity-60'}`}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => setActiveTab('inbox')}
+              className={`flex-1 py-3 text-sm font-bold rounded-full transition-all flex items-center justify-center gap-2 ${activeTab === 'inbox' ? (isDark ? 'bg-white text-black shadow-md' : 'bg-[#212529] text-white shadow-md') : 'text-current opacity-60'}`}
+            >
+              Inbox
+              {dangerLeads.length > 0 && <span className="w-2 h-2 rounded-full bg-rose-500" />}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {isAdmin && (
+        <div className="mt-8 mb-6 mx-6 rounded-[2rem] bg-indigo-600 overflow-hidden relative p-8 shadow-xl border border-white/10">
+          <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/50 to-transparent pointer-events-none" />
+          <div className="relative z-10 flex flex-col items-center">
+            <span className="text-[4rem] font-black leading-none tracking-tighter text-white">{managerLeads.length}</span>
+            <span className="text-xs font-bold mt-2 text-white/80 uppercase tracking-[0.2em]">Atendimentos Pendentes de Auditoria</span>
+          </div>
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
-        {activeTab === 'dashboard' ? (
+        {(!isAdmin && activeTab === 'dashboard') ? (
           <motion.div
             key="dashboard"
             initial={{ opacity: 0, y: 10 }}
@@ -83,39 +95,28 @@ const ManagerDashboard: React.FC = () => {
             exit={{ opacity: 0, y: -10 }}
             className="mt-6 space-y-6"
           >
-            {/* Massive Score Card */}
-            {isAdmin ? (
-              <div className="mx-6 rounded-[3rem] bg-indigo-600 overflow-hidden relative p-8 shadow-xl border border-white/10">
-                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/50 to-transparent pointer-events-none" />
-                <div className="relative z-10 flex flex-col items-center mt-4 pb-4">
-                  <span className="text-[6rem] font-black leading-none tracking-tighter text-white">{managerLeads.length}</span>
-                  <span className="text-xs font-bold mt-2 text-white/80 uppercase tracking-[0.2em]">Atendimentos Finalizados</span>
+            <div className="mx-6 rounded-[3rem] bg-[#212529] overflow-hidden relative p-8 shadow-xl border border-white/5">
+              <div className="absolute inset-0">
+                <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cars" className="w-full h-full object-cover opacity-20 mix-blend-overlay" />
+                <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? 'from-[#111] to-transparent' : 'from-[#212529] to-transparent'}`} />
+              </div>
+              
+              <div className="relative z-10 flex flex-col items-center mt-4">
+                <span className="text-[6rem] font-black leading-none tracking-tighter text-white">{score !== null ? displayScore : '—'}</span>
+                <span className="text-xs font-bold mt-2 text-white/60 uppercase tracking-[0.2em]">Score Geral</span>
+              </div>
+              
+              <div className="relative z-10 flex justify-between mt-10 gap-4">
+                <div className="flex-1 text-center bg-white/10 px-6 py-4 rounded-3xl backdrop-blur-md border border-white/10">
+                  <div className="text-2xl font-black text-white">{todayLeads.length}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Hoje</div>
+                </div>
+                <div className={`flex-1 text-center px-6 py-4 rounded-3xl backdrop-blur-md border ${dangerLeads.length > 0 ? 'bg-rose-500/80 border-rose-400' : 'bg-white/10 border-white/10'}`}>
+                  <div className="text-2xl font-black text-white">{dangerLeads.length}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Atrasos</div>
                 </div>
               </div>
-            ) : (
-              <div className="mx-6 rounded-[3rem] bg-[#212529] overflow-hidden relative p-8 shadow-xl border border-white/5">
-                <div className="absolute inset-0">
-                  <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cars" className="w-full h-full object-cover opacity-20 mix-blend-overlay" />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${isDark ? 'from-[#111] to-transparent' : 'from-[#212529] to-transparent'}`} />
-                </div>
-                
-                <div className="relative z-10 flex flex-col items-center mt-4">
-                  <span className="text-[6rem] font-black leading-none tracking-tighter text-white">{score !== null ? displayScore : '—'}</span>
-                  <span className="text-xs font-bold mt-2 text-white/60 uppercase tracking-[0.2em]">Score Geral</span>
-                </div>
-                
-                <div className="relative z-10 flex justify-between mt-10 gap-4">
-                  <div className="flex-1 text-center bg-white/10 px-6 py-4 rounded-3xl backdrop-blur-md border border-white/10">
-                    <div className="text-2xl font-black text-white">{todayLeads.length}</div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Hoje</div>
-                  </div>
-                  <div className={`flex-1 text-center px-6 py-4 rounded-3xl backdrop-blur-md border ${dangerLeads.length > 0 ? 'bg-rose-500/80 border-rose-400' : 'bg-white/10 border-white/10'}`}>
-                    <div className="text-2xl font-black text-white">{dangerLeads.length}</div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mt-1">Atrasos</div>
-                  </div>
-                </div>
-              </div>
-            )}
+            </div>
           </motion.div>
         ) : (
           <motion.div
@@ -123,29 +124,31 @@ const ManagerDashboard: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mt-6"
+            className={isAdmin ? "mt-2" : "mt-6"}
           >
-            {/* Pills Filter */}
-            <div className="flex gap-2 overflow-x-auto px-6 pb-2 no-scrollbar">
-              <button 
-                onClick={() => setFilter('todos')}
-                className={`px-5 py-2 text-xs rounded-full font-bold whitespace-nowrap transition-colors ${filter === 'todos' ? (isDark ? 'bg-white text-black' : 'bg-[#212529] text-white') : (isDark ? 'bg-white/5 text-white/60 hover:bg-white/10' : 'bg-black/5 text-black/60 hover:bg-black/10')}`}
-              >
-                Todos
-              </button>
-              <button 
-                onClick={() => setFilter('hoje')}
-                className={`px-5 py-2 text-xs rounded-full font-bold whitespace-nowrap transition-colors ${filter === 'hoje' ? (isDark ? 'bg-white text-black' : 'bg-[#212529] text-white') : (isDark ? 'bg-white/5 text-white/60 hover:bg-white/10' : 'bg-black/5 text-black/60 hover:bg-black/10')}`}
-              >
-                Hoje
-              </button>
-              <button 
-                onClick={() => setFilter('atraso')}
-                className={`px-5 py-2 text-xs rounded-full font-bold whitespace-nowrap transition-colors ${filter === 'atraso' ? (isDark ? 'bg-white text-black' : 'bg-[#212529] text-white') : (isDark ? 'bg-white/5 text-white/60 hover:bg-white/10' : 'bg-black/5 text-black/60 hover:bg-black/10')}`}
-              >
-                Em Atraso
-              </button>
-            </div>
+            {/* Pills Filter (Apenas para Gerentes) */}
+            {!isAdmin && (
+              <div className="flex gap-2 overflow-x-auto px-6 pb-2 no-scrollbar">
+                <button 
+                  onClick={() => setFilter('todos')}
+                  className={`px-5 py-2 text-xs rounded-full font-bold whitespace-nowrap transition-colors ${filter === 'todos' ? (isDark ? 'bg-white text-black' : 'bg-[#212529] text-white') : (isDark ? 'bg-white/5 text-white/60 hover:bg-white/10' : 'bg-black/5 text-black/60 hover:bg-black/10')}`}
+                >
+                  Todos
+                </button>
+                <button 
+                  onClick={() => setFilter('hoje')}
+                  className={`px-5 py-2 text-xs rounded-full font-bold whitespace-nowrap transition-colors ${filter === 'hoje' ? (isDark ? 'bg-white text-black' : 'bg-[#212529] text-white') : (isDark ? 'bg-white/5 text-white/60 hover:bg-white/10' : 'bg-black/5 text-black/60 hover:bg-black/10')}`}
+                >
+                  Hoje
+                </button>
+                <button 
+                  onClick={() => setFilter('atraso')}
+                  className={`px-5 py-2 text-xs rounded-full font-bold whitespace-nowrap transition-colors ${filter === 'atraso' ? (isDark ? 'bg-white text-black' : 'bg-[#212529] text-white') : (isDark ? 'bg-white/5 text-white/60 hover:bg-white/10' : 'bg-black/5 text-black/60 hover:bg-black/10')}`}
+                >
+                  Em Atraso
+                </button>
+              </div>
+            )}
 
             {/* Inbox List */}
             <div className={`mt-4 mx-4 rounded-[2.5rem] p-2 ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'} shadow-sm`}>
