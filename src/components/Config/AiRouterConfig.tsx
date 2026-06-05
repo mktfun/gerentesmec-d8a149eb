@@ -240,6 +240,24 @@ export const AiRouterConfig: React.FC = () => {
             setTestStatus('error');
           }
         }
+      } else if (provider === 'Google Vertex AI') {
+        addLog('Iniciando handshake com Google Vertex AI', 'ok');
+        let parsed = null;
+        try {
+          parsed = JSON.parse(gcpCredentials);
+        } catch (e) {
+          addLog('O JSON de credenciais GCP é inválido.', 'fail');
+          setTestStatus('error');
+        }
+
+        if (parsed && parsed.project_id && parsed.private_key) {
+          addLog('Estrutura de credenciais GCP validada', 'ok');
+          addLog('Configuração salva. O teste real de rede ocorrerá na Auditoria (Edge Function).', 'ok');
+          setTestStatus('success');
+        } else if (parsed) {
+          addLog('O JSON de credenciais GCP parece incompleto (faltando project_id ou private_key).', 'fail');
+          setTestStatus('error');
+        }
       } else {
         // Fallback genérico / mock para os que não implementamos teste real ainda
         addLog(`Mock Test: Provedor ${provider} não tem teste de rede nativo na UI`, 'warn');
