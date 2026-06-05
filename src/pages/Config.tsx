@@ -519,7 +519,7 @@ const Config = () => {
             {units.map((unit, i) => {
               const manager = managers.find(m => m.unit_id === unit.id);
               const unitLeads = leads.filter(l => l.unit_id === unit.id);
-              const unitScore = avgScoreInt(unitLeads) || 0;
+              const unitScore = avgScoreInt(unitLeads, { statusFilter: true }) || 0;
               return (
                 <motion.div key={unit.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -605,3 +605,4 @@ const Config = () => {
 };
 
 export default Config;
+

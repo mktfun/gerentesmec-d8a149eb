@@ -33,7 +33,7 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
   const waitingLeads = activeLeads.filter(l => l.funnel_stage === 'lead_new').length;
   const tmr = calculateTmr(unitLeads, businessHours);
   
-  const todayScore = avgScoreInt(unitLeads);
+  const todayScore = avgScoreInt(unitLeads, { statusFilter: true });
 
   // Formatar histórico para o gráfico (Top 14 dias)
   const chartData = dailyScores.map(ds => {
@@ -259,3 +259,4 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
     </motion.div>
   );
 };
+

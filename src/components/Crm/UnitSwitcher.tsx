@@ -37,7 +37,7 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect,
     const dangerCount = todayLeads.filter(l => isLeadDanger(l, undefined, 20)).length;
 
     // Score
-    const score = avgScore(unitLeads);
+    const score = avgScore(unitLeads, { statusFilter: true });
     
     const lastActiveAt = unitLeads.reduce((max, l) => {
       const time = new Date(l.last_message_at || l.created_at).getTime();
@@ -153,3 +153,4 @@ const UnitSwitcher: React.FC<Props> = ({ units, leads, selectedUnitId, onSelect,
 };
 
 export default UnitSwitcher;
+
