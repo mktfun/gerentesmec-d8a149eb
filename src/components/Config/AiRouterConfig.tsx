@@ -252,6 +252,8 @@ export const AiRouterConfig: React.FC = () => {
           model, 
           api_key: apiKey,
           off_hours_batching: offHoursBatching,
+          gcp_project_id: gcpProjectId, gcp_region: gcpRegion, 
+          gcp_credentials: provider === 'Google Vertex AI' && gcpCredentials ? (() => { try { return JSON.parse(gcpCredentials) } catch { return gcpCredentials } })() : null,
           ...(provider === 'Local AI Proxy (CLI Tunnel)' ? { api_url: apiUrl } : {})
         });
         addLog('Configuração salva na base de dados.', 'ok');
