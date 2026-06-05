@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.cycle_steps (
 -- 5. google_reviews_log
 CREATE TABLE IF NOT EXISTS public.google_reviews_log (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  unit_id uuid REFERENCES public.units(id) ON DELETE CASCADE,
+  unit_id text REFERENCES public.units(id) ON DELETE CASCADE,
   review_count_diff integer,
   logged_date date DEFAULT CURRENT_DATE
 );

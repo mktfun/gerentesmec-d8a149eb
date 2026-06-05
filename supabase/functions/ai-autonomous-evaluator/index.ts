@@ -41,6 +41,45 @@ async function getGoogleAccessToken(credentials: any): Promise<string> {
   return data.access_token;
 }
 
+async function getEmbedding(text: string, aiSettings: any): Promise<number[] | null> {
+  try {
+    const provider = aiSettings.provider || 'openai';
+    if (provider === 'Google Vertex AI') {
+      const gcpCreds = aiSettings.gcp_credentials;
+      const gcpProject = aiSettings.gcp_project_id || (gcpCreds && gcpCreds.project_id);
+      const gcpRegion = aiSettings.gcp_region || 'us-central1';
+      if (!gcpCreds || !gcpProject) return null;
+      
+      const accessToken = await getGoogleAccessToken(gcpCreds);
+      const host = gcpRegion === 'global' ? 'aiplatform.googleapis.com' : `${gcpRegion}-aiplatform.googleapis.com`;
+      const vertexUrl = `https://${host}/v1/projects/${gcpProject}/locations/${gcpRegion}/publishers/google/models/text-embedding-004:predict`;
+
+      const response = await fetch(vertexUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+        body: JSON.stringify({ instances: [{ content: text }] })
+      });
+      if (!response.ok) return null;
+      const result = await response.json();
+      return result.predictions?.[0]?.embeddings?.values || null;
+    } else {
+       const openAiToken = Deno.env.get('OPENAI_API_KEY') || aiSettings.api_key;
+       if (!openAiToken) return null;
+       const response = await fetch("https://api.openai.com/v1/embeddings", {
+         method: "POST",
+         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openAiToken}` },
+         body: JSON.stringify({ input: text, model: "text-embedding-3-small" })
+       });
+       if (!response.ok) return null;
+       const result = await response.json();
+       return result.data?.[0]?.embedding || null;
+    }
+  } catch (e) {
+    console.error('[AI-EVALUATOR] Erro ao gerar embedding:', e);
+    return null;
+  }
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -187,20 +226,30 @@ serve(async (req) => {
       console.log(`[AI-EVALUATOR] Links encontrados na mensagem do Cliente. Scraping ignorado para economizar tokens/tempo.`);
     }
 
-    // 2. Semantic Memory Fetch
+    // 2. Semantic Memory Fetch (RAG)
     let auditMemories = '';
     try {
-      const { data: leadData } = await supabaseClient.from('leads').select('user_id').eq('id', lead_id).single();
-      const mechanicId = leadData?.user_id;
-      if (mechanicId) {
-        const { data: memories } = await supabaseClient.from('audit_semantic_memory').select('content').eq('mechanic_id', mechanicId).order('created_at', { ascending: false }).limit(5);
-        if (memories && memories.length > 0) {
-          auditMemories = `\n[MEMÓRIA DE AUDITORIAS ANTERIORES DO GESTOR]\nATENÇÃO MÁXIMA: O gestor fez as seguintes correções/feedbacks sobre as auditorias deste gerente. Você DEVE usar isso para ajustar seu raciocínio e NÃO REPETIR O ERRO:\n`;
-          auditMemories += memories.map((m: any) => `- ${m.content}`).join('\n') + '\n';
+      const { data: leadData } = await supabaseClient.from('leads').select('unit_id').eq('id', lead_id).single();
+      const unitId = leadData?.unit_id;
+      if (unitId) {
+        // Gera o embedding da mensagem atual para buscar memórias semelhantes
+        const queryEmbedding = await getEmbedding(text, aiSettings);
+        if (queryEmbedding) {
+          const { data: memories, error } = await supabaseClient.rpc('match_ai_memories', {
+            query_embedding: queryEmbedding,
+            match_threshold: 0.7, // threshold de similaridade (ajustável)
+            match_count: 5,
+            p_unit_id: unitId
+          });
+          
+          if (memories && memories.length > 0) {
+            auditMemories = `\n[MEMÓRIA DE AUDITORIAS ANTERIORES DO GESTOR]\nATENÇÃO MÁXIMA: O gestor fez as seguintes correções/feedbacks sobre as auditorias que são semanticamente similares ao contexto atual. Você DEVE usar isso para ajustar seu raciocínio e NÃO REPETIR O ERRO:\n`;
+            auditMemories += memories.map((m: any) => `- ${m.context}`).join('\n') + '\n';
+          }
         }
       }
     } catch (e) {
-      console.log('[AI-EVALUATOR] Erro ao buscar memórias:', e);
+      console.log('[AI-EVALUATOR] Erro ao buscar memórias via RAG:', e);
     }
     
     // 3. Prompt Compression & Memoization
@@ -258,7 +307,7 @@ serve(async (req) => {
       INSTRUÇÕES CRÍTICAS DE AVALIAÇÃO DO CHECKLIST E JUSTIFICATIVAS:
       1. AVALIAÇÃO FINAL PARA 1a, 1b, 4a e 4b: Estes itens SÓ PODEM SER MARCADOS COMO TRUE NO MOMENTO EM QUE FINALIZAR O ATENDIMENTO (quando o funnel_stage mudar para 'closed_won' ou 'closed_lost'). Durante o atendimento, MANTENHA-OS COMO false.
       2. MENSAGEM DE AGRADECIMENTO E AVALIAÇÃO (4a, 4b): NEGATIVE CONSTRAINT: Um simples "Valeu" ou "Obrigado" do gerente NO MEIO do atendimento NÃO é mensagem de finalização. Só pontue se a conversa realmente chegou ao fim e o serviço foi aprovado/recusado.
-      3. CHAIN-OF-THOUGHT (OBRIGATÓRIO): A PRIMEIRA CHAVE do seu JSON de resposta DEVE ser "reasoning_step_by_step". Você deve pensar alto e justificar como interpretou gírias e intenções cruzando com o histórico ANTES de preencher o checklist e a etapa do funil. Se for um áudio ou link, resuma o que ele contém nesta etapa.
+      3. CHAIN-OF-THOUGHT (OBRIGATÓRIO): A PRIMEIRA CHAVE do seu JSON de resposta DEVE ser "internal_monologue". Você deve pensar alto e justificar como interpretou gírias e intenções cruzando com o histórico ANTES de preencher o checklist e a etapa do funil. Se for um áudio ou link, resuma o que ele contém nesta etapa.
 
       [SISTEMA DE BLINDAGEM DE MEMÓRIA (MANDATÓRIO)]
       Sempre que houver conteúdo lido de um link (Checklist/Orçamento), você É OBRIGADO a extrair peças e valores e SALVÁ-LAS em texto corrido no campo \`new_compressed_history\`.
@@ -266,7 +315,7 @@ serve(async (req) => {
       
       Retorne APENAS um JSON válido com a seguinte estrutura obrigatória:
       {
-        "reasoning_step_by_step": "String descrevendo passo a passo o raciocínio da sua avaliação, interpretando gírias e o histórico",
+        "internal_monologue": "String descrevendo passo a passo o raciocínio da sua avaliação, interpretando gírias e o histórico",
         "audit_checklist": {
           "1a": true ou false,
           "1b": true ou false,

@@ -25,10 +25,12 @@ export const AuditFeedbackModal: React.FC<Props> = ({ isOpen, onClose, mechanicI
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.from('audit_semantic_memory').insert({
-        mechanic_id: mechanicId,
-        lead_id: leadId,
-        content: `Feedback sobre a vistoria: ${feedback}. Contexto original: ${auditReasons}`
+      const { data, error } = await supabase.functions.invoke('ai-feedback-embedder', {
+        body: {
+          unit_id: mechanicId,
+          lead_id: leadId,
+          context: `Feedback sobre a vistoria: ${feedback}. Contexto original: ${auditReasons}`
+        }
       });
 
       if (error) throw error;
