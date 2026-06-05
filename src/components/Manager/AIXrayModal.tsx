@@ -53,7 +53,7 @@ export const AIXrayModal: React.FC<Props> = ({ lead, isOpen, onClose }) => {
             <div className="flex items-center gap-3">
               <Terminal className="w-5 h-5 text-emerald-400" />
               <div>
-                <h3 className="font-bold text-gray-200 uppercase tracking-widest text-xs">Raio-X da IA (Laudo Bruto)</h3>
+                <h3 className="font-bold text-gray-200 uppercase tracking-widest text-xs">Detalhes da Auditoria (Laudo Bruto)</h3>
                 <p className="text-[10px] text-gray-500 mt-0.5">Chain-of-Thought Reasoning Dump</p>
               </div>
             </div>

@@ -64,7 +64,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       if (error) throw error;
       
       const { data: urlData } = supabase.storage.from('evidences').getPublicUrl(fileName);
-      setNotes(prev => prev + (prev ? '\n' : '') + `[Evidência: ${file.name}](${urlData.publicUrl})\n`);
+      setNotes(prev => prev + (prev ? '\n' : '') + `[EvidêncSistema: ${file.name}](${urlData.publicUrl})\n`);
     } catch (err: any) {
       alert('Erro ao subir imagem: ' + err.message);
     } finally {
@@ -123,13 +123,13 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     if (isSyncing || realMessages.length === 0) return;
     setIsSyncing(true);
     try {
-      let consolidated = "CONVERSA CONSOLIDADA PARA AVALIAÇÃO MANUAL:\n\n";
+      let consolidated = "CONVERSA CONSOLIDADA PARA AVALSistemaÇÃO MANUAL:\n\n";
       realMessages.forEach(msg => {
         const sender = msg.sender_type === 'contact' ? 'Contato' : 'Agente';
         let contentStr = msg.content || '';
-        if (msg.media_url || msg.media_type) {
-          const type = msg.media_type?.split('/')[0] || 'anexo';
-          contentStr += ` [ANEXO ENVIADO: ${type}]`;
+        if (msg.medSistema_url || msg.medSistema_type) {
+          const type = msg.medSistema_type?.split('/')[0] || 'anexo';
+          contentStr += ` [ANEXO ENVSistemaDO: ${type}]`;
         }
         consolidated += `[${sender}]: ${contentStr.trim()}\n`;
       });
@@ -159,7 +159,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       // Optionally notify success
     } catch (error) {
       console.error("Manual sync failed:", error);
-      alert("Falha ao sincronizar com a IA.");
+      alert("Falha ao sincronizar com a Sistema.");
     } finally {
       setIsSyncing(false);
     }
@@ -188,14 +188,14 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                 strokeWidth="9"
                 fill="none"
                 strokeLinecap="round"
-                initial={{ strokeDasharray: `0 ${circumference}` }}
+                initSistemal={{ strokeDasharray: `0 ${circumference}` }}
                 animate={{ strokeDasharray: `${(rounded / 100) * circumference} ${circumference}` }}
                 transition={{ duration: 0.9, ease: 'easeOut' }}
                 style={{ filter: `drop-shadow(0 0 6px ${scoreColor}70)` }}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <motion.span key={rounded} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              <motion.span key={rounded} initSistemal={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                 className="text-sm font-black text-foreground leading-none">{rounded}</motion.span>
               <span className="text-[7px] text-muted-foreground font-bold uppercase tracking-wider">pts</span>
             </div>
@@ -234,7 +234,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
               onClick={handleManualSync}
               disabled={isSyncing}
               className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Sincronizar IA (Avaliar Conversa Inteira)"
+              title="Sincronizar Sistema (AvalSistemar Conversa Inteira)"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${isSyncing ? 'animate-spin' : ''}`} />
             </button>
@@ -291,7 +291,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
             <div className="relative z-10 w-full">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Parecer da Auditoria</h4>
+                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Parecer da AuditorSistema</h4>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                 {(lead as any).ai_feedback}
@@ -392,7 +392,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                         </div>
                         {checked[item.id] && lead.audit_checklist_messages?.[item.id] && (
                           <button
-                            title="Ver evidência no chat"
+                            title="Ver evidêncSistema no chat"
                             onClick={(e) => {
                               e.stopPropagation();
                               setHighlightMessageId(lead.audit_checklist_messages![item.id]);
@@ -417,7 +417,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         {/* Evidence */}
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
-            Dossiê & Evidências
+            Dossiê & EvidêncSistemas
           </p>
           <textarea
             value={notes}
@@ -443,7 +443,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
               <UploadCloud className="w-5 h-5 text-muted-foreground/30 group-hover:text-indigo-500 transition-colors" />
             )}
             <p className="text-xs font-semibold text-muted-foreground/60 group-hover:text-muted-foreground">
-              {isUploading ? 'Enviando...' : 'Clique para anexar imagem'}
+              {isUploading ? 'EnvSistemando...' : 'Clique para anexar imagem'}
             </p>
           </label>
         </div>
@@ -459,7 +459,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           className="w-full py-3 rounded-xl text-sm font-bold text-white
           bg-indigo-600 hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]
           hover:shadow-[0_0_30px_rgba(99,102,241,0.45)] focus-visible:outline-indigo-300">
-          Salvar Auditoria ({rounded}%)
+          Salvar AuditorSistema ({rounded}%)
         </button>
       </div>
 
@@ -469,3 +469,4 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
 };
 
 export default AuditPanel;
+

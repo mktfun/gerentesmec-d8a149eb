@@ -347,7 +347,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                           <div className="mb-2 w-full px-3 py-2.5 rounded-xl bg-white/5 dark:bg-white/[0.02] border border-white/10 backdrop-blur-md flex flex-col gap-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
                             <div className="flex items-center gap-1.5 opacity-80">
                               <Wrench className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
-                              <span className="text-[9px] uppercase tracking-widest font-black text-emerald-500 dark:text-emerald-400">Resumo da Mídia (IA)</span>
+                              <span className="text-[9px] uppercase tracking-widest font-black text-emerald-500 dark:text-emerald-400">Resumo da Mídia (Sistema)</span>
                             </div>
                             <p className="text-[11px] leading-relaxed font-medium text-foreground/90 italic">
                               {summaryText}
@@ -420,7 +420,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                             <div className={`px-2 py-1.5 max-w-[85%] rounded-lg bg-black/5 dark:bg-white/5 border-l-2 border-border/50 flex flex-col gap-0.5 text-left`}>
                                 <div className="flex items-center gap-1.5 opacity-60">
                                   <CheckCircle2 className="w-2.5 h-2.5" />
-                                  <span className="text-[9px] uppercase tracking-widest font-bold">Nota de IA</span>
+                                  <span className="text-[9px] uppercase tracking-widest font-bold">Nota do Sistema</span>
                                 </div>
                                 <span className="text-[10px] font-mono leading-tight text-muted-foreground/80">
                                   {msg.ai_insight}
@@ -454,3 +454,4 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
 };
 
 export default ChatHistoryView;
+

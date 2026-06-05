@@ -187,10 +187,21 @@ serve(async (req) => {
       console.log(`[AI-EVALUATOR] Links encontrados na mensagem do Cliente. Scraping ignorado para economizar tokens/tempo.`);
     }
 
-    // 2. Semantic Caching (Simulação da lógica RAG)
-    // Em produção, você usaria OpenAI Embeddings ou Gemini Embeddings aqui:
-    // const embedding = await generateEmbedding(text);
-    // const { data: cacheHit } = await supabaseClient.rpc('match_semantic_cache', { query_embedding: embedding, match_threshold: 0.95 });
+    // 2. Semantic Memory Fetch
+    let auditMemories = '';
+    try {
+      const { data: leadData } = await supabaseClient.from('leads').select('user_id').eq('id', lead_id).single();
+      const mechanicId = leadData?.user_id;
+      if (mechanicId) {
+        const { data: memories } = await supabaseClient.from('audit_semantic_memory').select('content').eq('mechanic_id', mechanicId).order('created_at', { ascending: false }).limit(5);
+        if (memories && memories.length > 0) {
+          auditMemories = `\n[MEMÓRIA DE AUDITORIAS ANTERIORES DO GESTOR]\nATENÇÃO MÁXIMA: O gestor fez as seguintes correções/feedbacks sobre as auditorias deste gerente. Você DEVE usar isso para ajustar seu raciocínio e NÃO REPETIR O ERRO:\n`;
+          auditMemories += memories.map((m: any) => `- ${m.content}`).join('\n') + '\n';
+        }
+      }
+    } catch (e) {
+      console.log('[AI-EVALUATOR] Erro ao buscar memórias:', e);
+    }
     
     // 3. Prompt Compression & Memoization
     // Busca o histórico resumido para poupar tokens do histórico raw enorme.
@@ -210,9 +221,11 @@ serve(async (req) => {
       
       CRITÉRIOS ATUAIS:
       ${JSON.stringify(aiSettings.evaluation_criteria)}
-      
+      ${auditMemories}
       HISTÓRICO DA NEGOCIAÇÃO ATÉ AGORA (Resumido):
       ${compressedHistory || "Nenhum histórico prévio."}
+      
+      ⚠️ REGRA DE IDENTIDADE: VOCÊ ESTÁ PROIBIDO DE USAR PALAVRAS COMO "IA", "Inteligência Artificial", "Robô" ou "Sistema". Aja como a "Auditoria". Nunca diga "A IA notou", diga "A Auditoria notou" ou vá direto ao ponto.
       
       ${sender_type === 'contact' 
         ? `⚠️ ATENÇÃO: Esta mensagem foi enviada pelo CLIENTE (contact), NÃO pelo gerente.

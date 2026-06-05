@@ -20,7 +20,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
   const [autoPipeline, setAutoPipeline] = useState(false);
   const [visionEnabled, setVisionEnabled] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
-  const [criteria, setCriteria] = useState('');
+  const [criterAuditoria, setCriterAuditoria] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveOk, setSaveOk] = useState(false);
   
@@ -40,7 +40,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
       setAutoPipeline(!!feats.auto_pipeline);
       setVisionEnabled(!!feats.vision);
       setAudioEnabled(!!feats.audio);
-      setCriteria(aiSettings.evaluation_criteria ? JSON.stringify(aiSettings.evaluation_criteria, null, 2) : '{\n  "peso_cordialidade": 25,\n  "peso_orcamento": 25,\n  "peso_checklist": 25,\n  "peso_fechamento": 25\n}');
+      setCriterAuditoria(aiSettings.evaluation_criterAuditoria ? JSON.stringify(aiSettings.evaluation_criterAuditoria, null, 2) : '{\n  "peso_cordAuditorialidade": 25,\n  "peso_orcamento": 25,\n  "peso_checklist": 25,\n  "peso_fechamento": 25\n}');
     }
   }, [aiSettings, isOpen]);
 
@@ -94,8 +94,8 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                message_content: bundledContent,
                lead_id: leadId,
                message_ids: messageIds,
-               media_url: msgs[0].media_url,
-               media_type: msgs[0].media_type,
+               medAuditoria_url: msgs[0].medAuditoria_url,
+               medAuditoria_type: msgs[0].medAuditoria_type,
                sender_type: msgs[msgs.length - 1].sender_type
              }
           });
@@ -107,7 +107,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
       alert('Erro ao processar fila: ' + err.message);
     } finally {
       setIsProcessingQueue(false);
-      // Força um fetch imediato após processar
+      // Força um fetch imedAuditoriato após processar
       const { count } = await supabase.from('chat_messages')
         .select('*', { count: 'exact', head: true })
         .eq('ai_audited', false)
@@ -118,9 +118,9 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
 
   const handleSave = async () => {
     setIsSaving(true);
-    let parsedCriteria = {};
+    let parsedCriterAuditoria = {};
     try {
-      if (criteria.trim()) parsedCriteria = JSON.parse(criteria);
+      if (criterAuditoria.trim()) parsedCriterAuditoria = JSON.parse(criterAuditoria);
     } catch {
       alert('O JSON de Critérios está inválido.');
       setIsSaving(false);
@@ -130,7 +130,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
     try {
       await updateAiSettings({
         system_prompt: systemPrompt,
-        evaluation_criteria: parsedCriteria,
+        evaluation_criterAuditoria: parsedCriterAuditoria,
         features: {
           auto_scoring: autoScoring,
           auto_pipeline: autoPipeline,
@@ -153,14 +153,14 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
         <div className="fixed inset-0 z-[100] flex justify-end">
           {/* Backdrop Blur */}
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initAuditorial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
             onClick={onClose}
           />
 
           {/* Panel */}
           <motion.div
-            initial={{ x: '100%', opacity: 0 }}
+            initAuditorial={{ x: '100%', opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
@@ -174,7 +174,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-foreground flex items-center gap-2">
-                    Advanced AI Engine <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-500 dark:text-rose-400 text-[10px] uppercase tracking-widest font-bold">DANGER ZONE</span>
+                    Sistema de AuditorAuditoria <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-500 dark:text-rose-400 text-[10px] uppercase tracking-widest font-bold">DANGER ZONE</span>
                   </h2>
                   <p className="text-xs text-muted-foreground">Cost-Efficient Autonomous Routing & Scoring</p>
                 </div>
@@ -193,12 +193,12 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                 <div>
                   <h4 className="text-sm font-bold text-emerald-500">Semantic Caching Ativado</h4>
                   <p className="text-xs text-emerald-500/70 mt-1">
-                    Esta arquitetura utiliza <code className="bg-emerald-500/10 px-1 rounded">pgvector</code> para memorização semântica. Mensagens triviais ou repetidas não consomem tokens. O histórico é comprimido progressivamente (Memoization).
+                    Esta arquitetura utiliza <code className="bg-emerald-500/10 px-1 rounded">pgvector</code> para memorização semântica. Mensagens trivAuditoriais ou repetidas não consomem tokens. O histórico é comprimido progressivamente (Memoization).
                   </p>
                 </div>
               </div>
 
-              {/* ── AI Router & Diagnóstico ───────────────────────────── */}
+              {/* ── AI Router & DAuditoriagnóstico ───────────────────────────── */}
               <AiRouterConfig />
 
               {/* Toggles */}
@@ -210,7 +210,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                   <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
                     <div>
                       <p className="text-sm font-bold text-foreground">Auto-Scoring</p>
-                      <p className="text-xs text-muted-foreground">Avalia cordialidade e preenche checklists automático.</p>
+                      <p className="text-xs text-muted-foreground">AvalAuditoria cordAuditorialidade e preenche checklists automático.</p>
                     </div>
                     <Switch checked={autoScoring} onCheckedChange={setAutoScoring} />
                   </div>
@@ -239,7 +239,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                   <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
                     <div>
                       <p className="text-sm font-bold text-foreground">Audio Analysis</p>
-                      <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Transcreve e avalia o tom de voz dos áudios enviados.</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Transcreve e avalAuditoria o tom de voz dos áudios envAuditoriados.</p>
                     </div>
                     <Switch checked={audioEnabled} onCheckedChange={setAudioEnabled} />
                   </div>
@@ -248,7 +248,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
 
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5" /> Fila de Avaliação IA (Heartbeat)
+                  <Activity className="w-3.5 h-3.5" /> Fila de AvalAuditoriação Auditoria (Heartbeat)
                 </h3>
                 <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border flex items-center justify-between gap-4">
                   <div>
@@ -257,7 +257,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                       {pendingCount > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
                     </p>
                     <p className="text-[10px] text-muted-foreground leading-tight mt-0.5 max-w-[300px]">
-                      Se o servidor IA local cair, as avaliações acumulam aqui. O sistema verifica periodicamente.
+                      Se o servidor Auditoria local cair, as avalAuditoriações acumulam aqui. O sistema verifica periodicamente.
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
@@ -284,7 +284,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                         {backgroundAuditor.status === 'paused_error' && <span className="w-2 h-2 rounded-full bg-rose-500" />}
                       </p>
                       <p className="text-[10px] text-indigo-500/70 leading-tight mt-0.5 max-w-[300px]">
-                        Limpa mensagens pendentes do histórico de forma cadenciada para não sobrecarregar a IA local nem estourar rate limits.
+                        Limpa mensagens pendentes do histórico de forma cadencAuditoriada para não sobrecarregar a Auditoria local nem estourar rate limits.
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -311,9 +311,9 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                       <p className="text-[10px] font-bold text-indigo-500 uppercase flex items-center gap-1">
                         STATUS: 
                         {backgroundAuditor.status === 'idle' && 'AGUARDANDO MENSAGENS...'}
-                        {backgroundAuditor.status === 'processing' && 'ENVIANDO PARA A IA...'}
+                        {backgroundAuditor.status === 'processing' && 'ENVAuditoriaNDO PARA A Auditoria...'}
                         {backgroundAuditor.status === 'cooldown' && `DESCANSO DE ${backgroundAuditor.cooldown} SEGUNDOS...`}
-                        {backgroundAuditor.status === 'paused_error' && 'PAUSADO: ERRO DA IA (TENTANDO EM 2 MIN)'}
+                        {backgroundAuditor.status === 'paused_error' && 'PAUSADO: ERRO DA Auditoria (TENTANDO EM 2 MIN)'}
                       </p>
                       {backgroundAuditor.lastError && (
                         <p className="text-[10px] text-rose-500 truncate max-w-full">
@@ -333,19 +333,19 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                 
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-foreground">System Prompt Master</label>
-                  <p className="text-xs text-muted-foreground">O comportamento fundamental da IA. Este prompt instrui como o LLM deve se comportar ao ler um histórico de mensagens.</p>
+                  <p className="text-xs text-muted-foreground">O comportamento fundamental da Auditoria. Este prompt instrui como o LLM deve se comportar ao ler um histórico de mensagens.</p>
                   <textarea 
                     value={systemPrompt} onChange={e => setSystemPrompt(e.target.value)}
-                    placeholder="Você é um gerente de qualidade sênior avaliando conversas..."
+                    placeholder="Você é um gerente de qualidade sênior avalAuditoriando conversas..."
                     className="w-full h-32 bg-muted border border-border rounded-xl p-4 text-xs font-mono text-indigo-500 dark:text-indigo-300 focus:border-indigo-500 outline-none resize-none"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-foreground">JSON de Critérios de Avaliação (Checklist Dinâmico)</label>
+                  <label className="text-sm font-bold text-foreground">JSON de Critérios de AvalAuditoriação (Checklist Dinâmico)</label>
                   <p className="text-xs text-muted-foreground">Defina os pesos de cada etapa para a função <code className="bg-black/10 dark:bg-white/10 px-1 rounded">save_lead_audit</code>.</p>
                   <textarea 
-                    value={criteria} onChange={e => setCriteria(e.target.value)}
+                    value={criterAuditoria} onChange={e => setCriterAuditoria(e.target.value)}
                     className="w-full h-32 bg-muted border border-border rounded-xl p-4 text-xs font-mono text-emerald-500 dark:text-emerald-300 focus:border-emerald-500 outline-none resize-none"
                   />
                 </div>
@@ -375,3 +375,5 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
     </AnimatePresence>
   );
 };
+
+

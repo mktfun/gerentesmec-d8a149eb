@@ -347,7 +347,7 @@ export const AiRouterConfig: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-                Provider AI
+                Provider Sistema
               </label>
               <select value={provider} onChange={(e) => {
                 const newProv = e.target.value;
@@ -740,3 +740,4 @@ export const AiRouterConfig: React.FC = () => {
     </div>
   );
 };
+

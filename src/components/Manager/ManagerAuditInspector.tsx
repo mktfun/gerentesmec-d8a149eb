@@ -10,6 +10,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { CustomAudioPlayer } from '../Crm/CustomAudioPlayer';
 import { ExpandableMedia } from '../Crm/ExpandableMedia';
 import { AIXrayModal } from './AIXrayModal';
+import { AuditFeedbackModal } from './AuditFeedbackModal';
 
 interface Props { lead: Lead; onClose: () => void; }
 
@@ -28,6 +29,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [showIndex, setShowIndex] = useState(false);
   const [showXray, setShowXray] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   
   const { isDark } = useTheme();
@@ -163,14 +165,24 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
           </div>
         )}
 
-        {/* AI X-Ray Button */}
+        {/* AI X-Ray Button -> Detalhes da Auditoria */}
         <button
           onClick={() => setShowXray(true)}
           className={`relative px-3 h-10 flex items-center justify-center gap-2 rounded-xl transition-all border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20' : 'bg-indigo-50 border-indigo-200 text-indigo-600 hover:bg-indigo-100'}`}
-          aria-label="Raio-X da IA"
+          aria-label="Detalhes da Auditoria"
         >
           <Sparkles className="w-4 h-4" />
-          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Raio-X IA</span>
+          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Detalhes da Auditoria</span>
+        </button>
+
+        {/* Audit Feedback Button */}
+        <button
+          onClick={() => setShowFeedback(true)}
+          className={`relative px-3 h-10 flex items-center justify-center gap-2 rounded-xl transition-all border ${isDark ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20' : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'}`}
+          aria-label="Corrigir"
+        >
+          <CheckCircle2 className="w-4 h-4" />
+          <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">Corrigir</span>
         </button>
 
         {/* Index toggle */}
@@ -201,7 +213,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
             <div className="flex items-center gap-2">
               <Sparkles className={`w-3.5 h-3.5 ${lead.funnel_stage === 'closed_won' ? 'text-emerald-500' : 'text-rose-500'}`} />
               <span className={`text-[10px] font-black uppercase tracking-widest ${lead.funnel_stage === 'closed_won' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                Feedback da IA ({lead.funnel_stage === 'closed_won' ? 'Ganho' : 'Perdido'})
+                Feedback do Sistema ({lead.funnel_stage === 'closed_won' ? 'Ganho' : 'Perdido'})
               </span>
             </div>
             <p className={`text-xs font-semibold leading-relaxed pl-5 ${isDark ? 'text-white/80' : 'text-black/80'}`}>
@@ -407,7 +419,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
                                 <div className={`relative px-4 py-3 rounded-xl border flex flex-col gap-1.5 ${isDark ? 'bg-rose-950/30 border-rose-900/50' : 'bg-rose-50 border-rose-100'}`}>
                                   <div className="flex items-center gap-1.5 opacity-80">
                                     <Sparkles className={`w-3.5 h-3.5 ${isDark ? 'text-rose-400' : 'text-rose-600'}`} />
-                                    <span className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>Análise Contextual IA</span>
+                                    <span className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>Análise Contextual</span>
                                   </div>
                                   <p className={`text-xs leading-relaxed font-semibold ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>
                                     {(lead.audit_reasons as any)[item.id]}
@@ -432,6 +444,14 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
         isOpen={showXray} 
         onClose={() => setShowXray(false)} 
         lead={lead} 
+      />
+
+      <AuditFeedbackModal 
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
+        mechanicId={lead.user_id || 'unknown'}
+        leadId={lead.id}
+        auditReasons={JSON.stringify(lead.audit_reasons || {})}
       />
     </motion.div>
   );
