@@ -57,6 +57,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/config" element={<ErrorBoundary><Config /></ErrorBoundary>} />
             <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
             <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
+            <Route path="/manager" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />
           </Route>
 

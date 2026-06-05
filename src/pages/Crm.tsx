@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2, User as UserIcon, CheckCheck, Database } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, ChevronDown, ChevronRight, List, LayoutGrid, Plus, Wrench, Search, X, Check, Trash2, User as UserIcon, CheckCheck, Database, Eye } from 'lucide-react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { useAppData } from '@/context/AppDataContext';
 import { isLeadDanger } from '@/utils/metrics';
@@ -11,6 +11,7 @@ import LeadModalForm from '@/components/Crm/LeadModalForm';
 import UnitSwitcher from '@/components/Crm/UnitSwitcher';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useBackgroundAuditor } from '@/context/BackgroundAuditorContext';
+import { useNavigate } from 'react-router-dom';
 
 type ViewMode = 'list' | 'kanban';
 
@@ -19,6 +20,7 @@ const Crm = () => {
   const { user } = useAuth();
   
   const auditor = useBackgroundAuditor();
+  const navigate = useNavigate();
 
   const isUnitManager = user?.user_metadata?.role === 'unit_manager';
   const userUnitId = user?.user_metadata?.unit_id;
@@ -248,6 +250,14 @@ const Crm = () => {
 
         {/* Direita: SLA Filter + Novo Atendimento + Auditor de Fundo */}
         <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => navigate('/manager')}
+            title="Ir para o Manager Dashboard (Auditoria)"
+            className="flex items-center justify-center w-9 h-9 rounded-xl transition-all border bg-black/5 dark:bg-white/5 text-muted-foreground/50 border-border hover:border-muted-foreground/30 hover:text-indigo-500"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          
           <button
             onClick={() => auditor.setEnabled(!auditor.enabled)}
             title="Auto-Auditar Mensagens Antigas (2º Plano)"
