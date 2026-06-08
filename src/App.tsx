@@ -33,7 +33,17 @@ const queryClient = new QueryClient();
 // Inner app that can access auth+data context for routing decisions
 const AppRoutes: React.FC = () => {
   const { user } = useAuth();
-  const { managers } = useAppData();
+  const { managers, isLoading } = useAppData();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-4 border-white/10 border-t-primary animate-spin mb-4" />
+        <p className="text-white/50 text-sm font-semibold tracking-widest uppercase animate-pulse">Carregando Perfil...</p>
+      </div>
+    );
+  }
+
   const isUnitManager = managers.some(m => m.auth_user_id === user?.id);
 
   return (

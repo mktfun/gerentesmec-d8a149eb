@@ -54,6 +54,7 @@ interface AppDataContextType {
   updateAiSettings: (updates: Partial<AiSettings>) => Promise<void>;
   updateIntegrationSettings: (updates: Partial<IntegrationSettings> & { business_hours?: any }) => Promise<void>;
   businessHours: BusinessHoursConfig;
+  isLoading: boolean;
 }
 
 const AppDataContext = createContext<AppDataContextType | null>(null);
@@ -66,6 +67,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [integrationSettings, setIntegrationSettings] = useState<IntegrationSettings | null>(null);
   const [chatwootInsights, setChatwootInsights] = useState<ChatwootInsights | null>(null);
   const [isTvMode, setIsTvMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -147,6 +149,8 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (unitsRes.data) setUnits(unitsRes.data as Unit[]);
     if (aiRes.data) setAiSettings(aiRes.data as AiSettings);
     if (intRes.data) setIntegrationSettings(intRes.data as IntegrationSettings);
+    
+    setIsLoading(false);
   };
 
   const addManager = async (manager: Omit<Manager, 'id' | 'created_at'>) => {
@@ -378,7 +382,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       deleteLeads,
       moveLeadStage,
       isTvMode, setIsTvMode, updateAiSettings, updateIntegrationSettings,
-      businessHours,
+      businessHours, isLoading
     }}>
       {children}
     </AppDataContext.Provider>

@@ -9,8 +9,8 @@ interface Props {
 }
 
 export default function ChecklistItemCard({ item, onAnswer }: Props) {
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [showObservation, setShowObservation] = useState(false);
   const [observation, setObservation] = useState('');
   
@@ -19,28 +19,32 @@ export default function ChecklistItemCard({ item, onAnswer }: Props) {
   const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setPhoto(file);
-      setPhotoUrl(URL.createObjectURL(file));
+      setPhotos(prev => [...prev, file]);
+      setPhotoUrls(prev => [...prev, URL.createObjectURL(file)]);
     }
   };
 
   const submitAnswer = (isConform: boolean) => {
-    if (!photo) return;
-    onAnswer({ isConform, photoFile: photo, observation });
+    if (photos.length === 0) return;
+    onAnswer({ isConform, photoFiles: photos, observation });
   };
 
   return (
     <div className="w-full bg-[#111116] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative">
       {/* Imagem de Fundo (Blur) ou Placeholder */}
       <div className="h-64 w-full bg-black/50 relative overflow-hidden flex items-center justify-center">
-        {photoUrl ? (
-          <img src={photoUrl} alt="Evidência" className="w-full h-full object-cover opacity-80" />
+        {photoUrls.length > 0 ? (
+          <div className="w-full h-full flex overflow-x-auto snap-x snap-mandatory">
+            {photoUrls.map((url, idx) => (
+              <img key={idx} src={url} alt={`Evidência ${idx + 1}`} className="min-w-full h-full object-cover snap-center opacity-80" />
+            ))}
+          </div>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
         )}
         
-        {/* Botão de Câmera Centralizado (Glassmorphism) */}
-        {!photoUrl && (
+        {/* Botão de Câmera Centralizado (se vazio) */}
+        {photoUrls.length === 0 && (
           <button 
             onClick={() => fileInputRef.current?.click()}
             className="relative z-10 w-24 h-24 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-all shadow-xl"
@@ -50,14 +54,19 @@ export default function ChecklistItemCard({ item, onAnswer }: Props) {
           </button>
         )}
         
-        {/* Retirar Foto (Canto superior) */}
-        {photoUrl && (
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/20 rounded-full p-2"
-          >
-            <Camera className="w-5 h-5 text-white" />
-          </button>
+        {/* Adicionar Mais Fotos (Canto superior) */}
+        {photoUrls.length > 0 && (
+          <div className="absolute top-4 right-4 flex gap-2">
+            <div className="bg-black/50 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 flex items-center justify-center text-xs font-bold text-white">
+              {photoUrls.length} {photoUrls.length === 1 ? 'Foto' : 'Fotos'}
+            </div>
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-primary/80 hover:bg-primary backdrop-blur-md border border-white/20 rounded-full p-2 text-white shadow-lg transition-colors"
+            >
+              <Camera className="w-5 h-5" />
+            </button>
+          </div>
         )}
 
         <input 
@@ -77,7 +86,7 @@ export default function ChecklistItemCard({ item, onAnswer }: Props) {
         {/* Botões de Decisão */}
         <div className="flex items-center gap-4">
           <button
-            disabled={!photo}
+            disabled={photos.length === 0}
             onClick={() => {
               setShowObservation(true);
               // Pequeno delay para a pessoa digitar a observação se for Não Conforme
@@ -89,7 +98,7 @@ export default function ChecklistItemCard({ item, onAnswer }: Props) {
           </button>
 
           <button
-            disabled={!photo}
+            disabled={photos.length === 0}
             onClick={() => submitAnswer(true)}
             className="flex-1 py-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-bold flex flex-col items-center gap-2 disabled:opacity-30 disabled:grayscale transition-all hover:bg-emerald-500/20"
           >
@@ -102,7 +111,7 @@ export default function ChecklistItemCard({ item, onAnswer }: Props) {
         <div className="mt-6">
           {!showObservation ? (
             <button 
-              disabled={!photo}
+              disabled={photos.length === 0}
               onClick={() => setShowObservation(true)}
               className="w-full flex items-center justify-center gap-2 text-xs font-bold text-muted-foreground hover:text-white transition-colors disabled:opacity-30"
             >

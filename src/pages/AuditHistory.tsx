@@ -28,10 +28,10 @@ interface Audit {
 
 interface AuditAnswer {
   id: string;
-  item_id: string;
-  is_compliant: boolean;
-  photo_path: string | null;
-  comment: string | null;
+  item_name: string;
+  is_conform: boolean;
+  photo_url: string;
+  observation: string | null;
 }
 
 const AuditHistory = () => {
@@ -95,11 +95,7 @@ const AuditHistory = () => {
     return 'text-rose-500 bg-rose-500/10 border-rose-500/20';
   };
 
-  const getPublicPhotoUrl = (path: string | null) => {
-    if (!path) return null;
-    const { data } = supabase.storage.from('audit_evidences').getPublicUrl(path);
-    return data.publicUrl;
-  };
+  // getPublicPhotoUrl removido pois a URL já é completa e guardamos delimitado por vírgula
 
   return (
     <div className="flex-1 p-6 md:p-8 space-y-6 max-w-4xl mx-auto pb-32">
@@ -206,21 +202,25 @@ const AuditHistory = () => {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {answers.map((answer) => (
+                  {answers.map((answer) => {
+                    const photos = answer.photo_url ? answer.photo_url.split(',') : [];
+                    return (
                     <div key={answer.id} className="p-5 rounded-3xl bg-card/50 border border-border shadow-sm flex flex-col md:flex-row gap-5">
-                      {/* Foto da Evidência */}
-                      <div className="shrink-0">
-                        {answer.photo_path ? (
-                          <div className="w-24 h-24 rounded-2xl overflow-hidden border border-border bg-muted">
-                            <img 
-                              src={getPublicPhotoUrl(answer.photo_path) || ''} 
-                              alt="Evidência" 
-                              className="w-full h-full object-cover hover:scale-110 transition-transform duration-500 cursor-pointer"
-                              onClick={() => window.open(getPublicPhotoUrl(answer.photo_path) || '', '_blank')}
-                            />
-                          </div>
+                      {/* Fotos da Evidência */}
+                      <div className="shrink-0 flex gap-2 overflow-x-auto pb-2 custom-scrollbar max-w-full md:max-w-[200px]">
+                        {photos.length > 0 ? (
+                          photos.map((url, idx) => (
+                            <div key={idx} className="w-24 h-24 shrink-0 rounded-2xl overflow-hidden border border-border bg-muted">
+                              <img 
+                                src={url} 
+                                alt={`Evidência ${idx + 1}`} 
+                                className="w-full h-full object-cover hover:scale-110 transition-transform duration-500 cursor-pointer"
+                                onClick={() => window.open(url, '_blank')}
+                              />
+                            </div>
+                          ))
                         ) : (
-                          <div className="w-24 h-24 rounded-2xl border border-dashed border-border bg-muted/50 flex flex-col items-center justify-center text-muted-foreground">
+                          <div className="w-24 h-24 shrink-0 rounded-2xl border border-dashed border-border bg-muted/50 flex flex-col items-center justify-center text-muted-foreground">
                             <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
                             <span className="text-[10px] font-bold uppercase">Sem Foto</span>
                           </div>
@@ -229,8 +229,8 @@ const AuditHistory = () => {
 
                       {/* Informações */}
                       <div className="flex-1 flex flex-col justify-center">
-                        <div className="flex items-center gap-3 mb-2">
-                          {answer.is_compliant ? (
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
+                          {answer.is_conform ? (
                             <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20 flex items-center gap-1.5 px-2.5 py-1">
                               <CheckCircle2 className="w-3.5 h-3.5" /> Conforme
                             </Badge>
@@ -240,19 +240,19 @@ const AuditHistory = () => {
                             </Badge>
                           )}
                           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                            {answer.item_id.replace(/_/g, ' ')}
+                            {answer.item_name}
                           </span>
                         </div>
                         
-                        {answer.comment && (
+                        {answer.observation && (
                           <div className="mt-2 p-3 rounded-xl bg-background border border-border text-sm text-foreground/80">
                             <span className="font-bold text-xs text-muted-foreground block mb-1 uppercase">Observação</span>
-                            {answer.comment}
+                            {answer.observation}
                           </div>
                         )}
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </ScrollArea>

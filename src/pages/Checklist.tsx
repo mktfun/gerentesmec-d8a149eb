@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface AuditSession {
   unitId: string;
   auditorName: string;
-  answers: Record<string, { isConform: boolean; photoFile: File | Blob; photoUrl?: string; observation?: string }>;
+  answers: Record<string, { isConform: boolean; photoFiles: File[]; observation?: string }>;
 }
 
 export default function Checklist() {
@@ -26,7 +26,7 @@ export default function Checklist() {
     setFinished(false);
   };
 
-  const handleAnswer = (itemId: string, data: { isConform: boolean; photoFile: File | Blob; observation?: string }) => {
+  const handleAnswer = (itemId: string, data: { isConform: boolean; photoFiles: File[]; observation?: string }) => {
     if (!session) return;
     setSession(prev => ({
       ...prev!,
@@ -65,25 +65,30 @@ export default function Checklist() {
       // 2. Upload fotos em background e preparar answers
       const answerPromises = CHECKLIST_TEMPLATE.map(async (item) => {
         const answer = session.answers[item.id];
-        if (!answer) return null;
+        if (!answer || !answer.photoFiles || answer.photoFiles.length === 0) return null;
 
-        const fileExt = answer.photoFile.type.split('/')[1] || 'jpeg';
-        const fileName = `${auditId}/${item.id}_${Date.now()}.${fileExt}`;
+        const uploadPromises = answer.photoFiles.map(async (file, idx) => {
+          const fileExt = file.type.split('/')[1] || 'jpeg';
+          const fileName = `${auditId}/${item.id}_${Date.now()}_${idx}.${fileExt}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('audit_evidences')
-          .upload(fileName, answer.photoFile, { contentType: answer.photoFile.type });
+          const { error: uploadError } = await supabase.storage
+            .from('audit_evidences')
+            .upload(fileName, file, { contentType: file.type });
 
-        if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage.from('audit_evidences').getPublicUrl(fileName);
+          const { data: { publicUrl } } = supabase.storage.from('audit_evidences').getPublicUrl(fileName);
+          return publicUrl;
+        });
+
+        const urls = await Promise.all(uploadPromises);
 
         return {
           audit_id: auditId,
           category: item.category,
           item_name: item.name,
           is_conform: answer.isConform,
-          photo_url: publicUrl,
+          photo_url: urls.join(','),
           observation: answer.observation || null
         };
       });
