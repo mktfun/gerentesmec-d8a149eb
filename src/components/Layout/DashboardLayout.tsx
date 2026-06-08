@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen, LogOut
+  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen, LogOut, ClipboardCheck
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAppData } from '@/context/AppDataContext';
@@ -83,6 +83,16 @@ const DashboardLayout: React.FC = () => {
             </NavLink>
             );
           })}
+          <NavLink
+            to="/checklist"
+            className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-300 group relative
+              ${isActive 
+                ? 'bg-primary text-primary-foreground shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
+                : 'text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`}
+          >
+            <ClipboardCheck className="w-4 h-4 transition-transform group-hover:scale-110" />
+            <span>Auditoria Presencial</span>
+          </NavLink>
         </nav>
 
         {/* Footer actions */}

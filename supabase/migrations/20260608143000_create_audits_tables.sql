@@ -3,7 +3,7 @@
 -- 1. Create Audits Table
 CREATE TABLE IF NOT EXISTS public.audits (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  unit_id UUID REFERENCES public.units(id) ON DELETE CASCADE NOT NULL,
+  unit_id TEXT REFERENCES public.units(id) ON DELETE CASCADE NOT NULL,
   auditor_name TEXT,
   started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   completed_at TIMESTAMP WITH TIME ZONE,
