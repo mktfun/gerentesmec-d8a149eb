@@ -12,21 +12,21 @@ export default function ChecklistOnboarding({ units, onStart }: Props) {
   const [auditorName, setAuditorName] = useState('');
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-background text-foreground p-6 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Background glow global */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
       <motion.div 
         initial={{ opacity: 0, y: 30 }} 
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-[#0a0a0f] border border-white/10 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden"
+        className="w-full max-w-md bg-card/80 backdrop-blur-xl border border-border p-8 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)] relative overflow-hidden"
       >
-        {/* Glow de fundo */}
-        <div className="absolute -top-32 -left-32 w-64 h-64 bg-primary/30 blur-[100px] rounded-full"></div>
-        <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-violet-500/20 blur-[100px] rounded-full"></div>
-
         <div className="relative z-10 text-center mb-10">
-          <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-md border border-primary/30">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-md border border-primary/20 shadow-inner">
             <ClipboardCheck className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-black tracking-tight">Vistoria Padrão Ouro</h1>
+          <h1 className="text-3xl font-black tracking-tight text-foreground">Vistoria Padrão Ouro</h1>
           <p className="text-muted-foreground mt-3 text-sm">Preencha as informações para iniciar uma nova auditoria presencial na unidade.</p>
         </div>
 
@@ -40,7 +40,7 @@ export default function ChecklistOnboarding({ units, onStart }: Props) {
               value={auditorName}
               onChange={(e) => setAuditorName(e.target.value)}
               placeholder="Ex: Carlos Silva"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-sm font-semibold focus:outline-none focus:border-primary focus:bg-primary/5 transition-all"
+              className="w-full bg-black/5 dark:bg-white/5 border border-border rounded-xl px-4 py-4 text-sm font-semibold text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:bg-primary/5 transition-all"
             />
           </div>
 
@@ -51,11 +51,11 @@ export default function ChecklistOnboarding({ units, onStart }: Props) {
             <select 
               value={selectedUnit}
               onChange={(e) => setSelectedUnit(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-sm font-semibold appearance-none focus:outline-none focus:border-primary focus:bg-primary/5 transition-all"
+              className="w-full bg-black/5 dark:bg-white/5 border border-border rounded-xl px-4 py-4 text-sm font-semibold text-foreground appearance-none focus:outline-none focus:border-primary focus:bg-primary/5 transition-all"
             >
-              <option value="" disabled>Selecione a Unidade</option>
+              <option value="" disabled className="text-black dark:text-white">Selecione a Unidade</option>
               {units.map(u => (
-                <option key={u.id} value={u.id}>{u.name}</option>
+                <option key={u.id} value={u.id} className="text-black dark:text-white">{u.name}</option>
               ))}
             </select>
           </div>
