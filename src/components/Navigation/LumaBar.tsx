@@ -39,13 +39,13 @@ const LumaBar: React.FC<LumaBarProps> = ({ items, className = "" }) => {
   };
 
   return (
-    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 ${className}`}>
-      <div className="relative flex items-center justify-center gap-6 bg-white/40 dark:bg-black/40 backdrop-blur-3xl rounded-full px-6 py-3 shadow-2xl border border-white/20 dark:border-white/10 overflow-hidden">
+    <div className={`fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92vw] sm:w-auto max-w-[420px] sm:max-w-none ${className}`}>
+      <div className="relative flex items-center justify-evenly sm:justify-center gap-1 sm:gap-4 md:gap-6 bg-white/40 dark:bg-black/40 backdrop-blur-3xl rounded-[2rem] sm:rounded-full px-2 sm:px-6 py-2 sm:py-3 shadow-2xl border border-white/20 dark:border-white/10 overflow-hidden">
         
         {/* Active Indicator Glow */}
         <motion.div
           layoutId="active-indicator"
-          className="absolute w-16 h-16 bg-gradient-to-r from-blue-400 to-primary rounded-full blur-[20px] -z-10"
+          className="absolute w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-400 to-primary rounded-full blur-[20px] -z-10"
           animate={{
             left: `calc(${activeIndex * (100 / items.length)}% + ${100 / items.length / 2}%)`,
             translateX: "-50%",
@@ -56,20 +56,20 @@ const LumaBar: React.FC<LumaBarProps> = ({ items, className = "" }) => {
         {items.map((item, index) => {
           const isActive = index === activeIndex;
           return (
-            <motion.div key={item.id} className="relative flex flex-col items-center group">
+            <motion.div key={item.id} className="relative flex flex-col items-center group w-full sm:w-auto">
               {/* Button */}
               <motion.button
                 onClick={() => handleItemClick(item, index)}
                 whileHover={{ scale: 1.15 }}
                 whileTap={{ scale: 0.9 }}
-                animate={{ scale: isActive ? 1.25 : 1 }}
-                className={`flex items-center justify-center w-12 h-12 transition-colors relative z-10 
+                animate={{ scale: isActive ? 1.15 : 1 }}
+                className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 transition-colors relative z-10 
                   ${isActive 
                     ? 'text-primary-foreground dark:text-white drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]' 
                     : 'text-foreground/60 hover:text-foreground'
                   }`}
               >
-                {item.icon}
+                <div className="scale-90 sm:scale-100">{item.icon}</div>
               </motion.button>
 
               {/* Tooltip */}

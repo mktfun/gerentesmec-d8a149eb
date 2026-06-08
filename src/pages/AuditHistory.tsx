@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAppData } from '@/context/AppDataContext';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Search, ChevronRight, CheckCircle2, XCircle, ImageIcon } from 'lucide-react';
+import { Calendar, MapPin, Search, ChevronRight, CheckCircle2, XCircle, ImageIcon, ClipboardCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
