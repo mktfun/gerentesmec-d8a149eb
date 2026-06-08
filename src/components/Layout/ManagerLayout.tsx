@@ -33,13 +33,6 @@ const ManagerLayout: React.FC = () => {
           </button>
 
           <button 
-            onClick={() => navigate('/checklist')}
-            className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-black/5' : 'hover:bg-white/10'}`}
-          >
-            <ClipboardCheck className="w-6 h-6" />
-          </button>
-
-          <button 
             onClick={toggle}
             className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-black/5' : 'hover:bg-white/10'}`}
           >
