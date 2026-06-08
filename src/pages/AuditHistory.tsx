@@ -112,6 +112,13 @@ const AuditHistory = () => {
             Resultados das auditorias presenciais realizadas.
           </p>
         </div>
+        <button 
+          onClick={() => window.location.href = '/checklist'}
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-black text-sm rounded-xl shadow-[0_0_20px_rgba(var(--primary),0.2)] hover:bg-primary/90 transition-all shrink-0"
+        >
+          <ClipboardCheck className="w-4 h-4" />
+          Nova Vistoria
+        </button>
       </div>
 
       {loading ? (
@@ -121,10 +128,17 @@ const AuditHistory = () => {
           ))}
         </div>
       ) : audits.length === 0 ? (
-        <div className="text-center py-12 px-4 rounded-3xl border border-dashed border-border bg-card/30">
-          <ClipboardCheck className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+        <div className="text-center py-12 px-4 rounded-3xl border border-dashed border-border bg-card/30 flex flex-col items-center justify-center">
+          <ClipboardCheck className="w-12 h-12 text-muted-foreground/30 mb-4" />
           <h3 className="text-lg font-bold text-foreground">Nenhuma vistoria encontrada</h3>
-          <p className="text-sm text-muted-foreground">As vistorias realizadas aparecerão aqui.</p>
+          <p className="text-sm text-muted-foreground mb-6">As vistorias realizadas aparecerão aqui.</p>
+          <button 
+            onClick={() => window.location.href = '/checklist'}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary/10 text-primary font-black text-sm rounded-xl hover:bg-primary hover:text-white transition-all"
+          >
+            <ClipboardCheck className="w-4 h-4" />
+            Iniciar Primeira Vistoria
+          </button>
         </div>
       ) : (
         <div className="space-y-4">
