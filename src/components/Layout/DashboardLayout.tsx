@@ -9,6 +9,7 @@ import { useAppData } from '@/context/AppDataContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { calculateDangerLeads } from '@/utils/metrics';
 import { supabase } from '@/integrations/supabase/client';
+import LumaBar from '../Navigation/LumaBar';
 
 const navItems = [
   { to: '/',         label: 'Dashboard',      icon: LayoutDashboard, end: true },
@@ -162,6 +163,24 @@ const DashboardLayout: React.FC = () => {
           <Outlet />
         </div>
       </main>
+
+      {/* LumaBar for Mobile (Dashboard) */}
+      {!isTvMode && (
+        <LumaBar
+          className="md:hidden"
+          items={[
+            { id: 'home', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard', path: '/' },
+            { id: 'crm', icon: <MessageSquare className="w-5 h-5" />, label: 'CRM', path: '/crm' },
+            { id: 'checklist', icon: <ClipboardCheck className="w-5 h-5" />, label: 'Checklist', path: '/checklist' },
+            { id: 'history', icon: <BookOpen className="w-5 h-5" />, label: 'Histórico', path: '/historico-auditorias' },
+            { id: 'settings', icon: <Settings className="w-5 h-5" />, label: 'Config', path: '/config' },
+          ].filter(item => {
+            // Se for gerente, esconde Config (e no DashboardLayout não acessam Gerentes mesmo no nav)
+            if (isUnitManager && item.id === 'settings') return false;
+            return true;
+          })}
+        />
+      )}
     </div>
   );
 };
