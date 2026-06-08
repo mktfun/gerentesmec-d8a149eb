@@ -20,6 +20,7 @@ import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
 import TvOperacional from "./pages/tv/TvOperacional";
 import TvDashboard from "./components/Dashboard/TvDashboard";
+import Checklist from "./pages/Checklist";
 import NotFound from "./pages/NotFound";
 import { useAppData } from "./context/AppDataContext";
 import { useAuth } from "./features/auth/hooks/useAuth";
@@ -58,6 +59,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
             <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
             <Route path="/manager" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
+            <Route path="/checklist" element={<ErrorBoundary><Checklist /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />
           </Route>
 
