@@ -134,24 +134,24 @@ const Index = () => {
   const todayStr = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date());
 
   return (
-    <div className="p-8 pb-20 min-h-screen">
+    <div className="p-4 md:p-8 pb-32 min-h-screen">
       
       {/* ── HERO CARD: SCORE GLOBAL ── */}
-      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-border p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
-        <div className="flex-1">
+      <motion.div {...fadeUp(0.05)} className="mb-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-border p-5 md:p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
+        <div className="flex-1 w-full text-center lg:text-left">
           <p className="text-xs font-bold uppercase tracking-[0.1em] text-indigo-500/70 dark:text-indigo-300/70 mb-4">Score Global da Rede</p>
-          <div className="flex items-end gap-6 mb-2">
-            <h2 className="text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
-              {globalScore !== null ? <>{globalScore}<span className="text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
+          <div className="flex flex-col lg:flex-row items-center lg:items-end gap-4 lg:gap-6 mb-2">
+            <h2 className="text-6xl md:text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-none">
+              {globalScore !== null ? <>{globalScore}<span className="text-3xl md:text-4xl text-muted-foreground">%</span></> : <span className="text-muted-foreground/50">—</span>}
             </h2>
             {weekTrend !== null && (
-              <div className={`mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                <TrendingUp className={`w-4 h-4 ${weekTrend < 0 ? 'rotate-180' : ''}`} />
+              <div className={`mb-0 lg:mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-xs md:text-sm ${weekTrend >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                <TrendingUp className={`w-3 h-3 md:w-4 md:h-4 ${weekTrend < 0 ? 'rotate-180' : ''}`} />
                 {weekTrend >= 0 ? '+' : ''}{weekTrend}% vs semana anterior
               </div>
             )}
           </div>
-          <p className="text-sm text-slate-400 mt-4">
+          <p className="text-xs md:text-sm text-slate-400 mt-4">
             {globalScore !== null ? `Média dos últimos 30 dias · Atualizado hoje, ${todayStr}` : 'Aguardando primeiras auditorias'}
           </p>
         </div>

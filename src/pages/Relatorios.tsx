@@ -276,10 +276,10 @@ const Relatorios = () => {
   };
 
   return (
-    <div className="p-8 pb-20">
+    <div className="p-4 md:p-8 pb-32">
       
       {/* ── Header & Filters ── */}
-      <motion.div {...fadeUp(0)} className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
+      <motion.div {...fadeUp(0)} className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
         <div>
           <p className="label-caps text-indigo-400/70 mb-1">Analytics Premium</p>
           <h1 className="text-2xl font-black text-foreground">Saúde do Atendimento</h1>

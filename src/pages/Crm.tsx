@@ -213,13 +213,13 @@ const Crm = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
       {/* ── Topbar: View Toggle + Search + New ───────────── */}
-      <div className="px-5 py-3 border-b border-border bg-background flex items-center gap-3 shrink-0">
+      <div className="px-4 md:px-5 py-3 border-b border-border bg-background flex flex-col md:flex-row items-stretch md:items-center gap-3 shrink-0 overflow-x-auto custom-scrollbar">
         {/* Esquerda: Unit Switcher + View Toggle */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center justify-between md:justify-start gap-2 shrink-0">
           <UnitSwitcher units={units} leads={leads} selectedUnitId={unitFilter} onSelect={setUnitFilter} disabled={isUnitManager} />
-          <div className="h-6 w-px bg-border mx-1" />
+          <div className="h-6 w-px bg-border mx-1 hidden md:block" />
           <div className="flex items-center gap-1 p-1 bg-muted rounded-xl">
             <button onClick={() => setView('list')}
               className={`p-2 rounded-lg transition-all ${view === 'list' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
