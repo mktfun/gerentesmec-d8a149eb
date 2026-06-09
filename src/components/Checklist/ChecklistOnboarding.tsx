@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck, X } from 'lucide-react';
 
 interface Props {
   units: any[];
@@ -16,6 +16,13 @@ export default function ChecklistOnboarding({ units, onStart }: Props) {
       {/* Background glow global */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+      <button 
+        onClick={() => window.location.href = '/historico-auditorias'}
+        className="fixed top-6 right-6 z-50 w-10 h-10 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-black/40 transition-all shadow-lg"
+      >
+        <X className="w-5 h-5" />
+      </button>
 
       <motion.div 
         initial={{ opacity: 0, y: 30 }} 

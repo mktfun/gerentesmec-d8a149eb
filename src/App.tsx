@@ -71,10 +71,12 @@ const AppRoutes: React.FC = () => {
             <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
             <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
             <Route path="/manager" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
-            <Route path="/checklist" element={<ErrorBoundary><Checklist /></ErrorBoundary>} />
             <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />
           </Route>
+
+          {/* Full Screen Routes */}
+          <Route path="/checklist" element={<ErrorBoundary><Checklist /></ErrorBoundary>} />
 
           {/* TV Routes (admin only) */}
           <Route element={<TvLayout />}>

@@ -4,7 +4,7 @@ import { useAppData } from '@/context/AppDataContext';
 import { CHECKLIST_TEMPLATE, ChecklistItem } from '@/data/checklist_template';
 import ChecklistOnboarding from '@/components/Checklist/ChecklistOnboarding';
 import ChecklistItemCard from '@/components/Checklist/ChecklistItemCard';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AuditSession {
@@ -154,6 +154,13 @@ export default function Checklist() {
           <span className="text-sm font-black">{currentIndex + 1} / {CHECKLIST_TEMPLATE.length}</span>
         </div>
       </div>
+
+      <button 
+        onClick={() => window.location.href = '/historico-auditorias'}
+        className="fixed top-6 right-6 z-50 w-10 h-10 bg-black/20 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-black/40 transition-all shadow-lg"
+      >
+        <X className="w-5 h-5" />
+      </button>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 pt-24 pb-8">
         <AnimatePresence mode="wait">
