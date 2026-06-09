@@ -399,7 +399,7 @@ serve(async (req) => {
       Analise a conversa e identifique A ETAPA atual do funil.
       
       ⚠️ ATENÇÃO - REDUÇÃO DE CUSTOS E OTIMIZAÇÃO:
-      Se a nova etapa que você vai sugerir NÃO FOR 'closed_won' nem 'closed_lost', ENTÃO você está PROIBIDO de processar e avaliar o checklist de auditoria. Você deve retornar o dicionário "audit_checklist" e "audit_justifications" VAZIOS {}, e o "score" como null. Foque todo seu processamento apenas na mudança de "funnel_stage", extração do "ticket_value", "customer_vehicle", "new_compressed_history", e "closing_summary" se houver.
+      Se a nova etapa que você vai sugerir NÃO FOR 'closed_won' nem 'closed_lost', ENTÃO você está PROIBIDO de processar e avaliar o checklist de auditoria. Você deve retornar o dicionário "audit_checklist" e "audit_justifications" VAZIOS {}, e o "score" como null. Foque todo seu processamento apenas na mudança de "funnel_stage", preenchimento OBRIGATÓRIO de "media_summaries" (transcrição de vídeos/áudios) e "message_insight" (nota/resumo da ação), além da extração de "ticket_value", "customer_vehicle", e "new_compressed_history".
       
       APENAS se a conversa for ENCERRADA e a nova etapa for OBRIGATORIAMENTE 'closed_won' ou 'closed_lost', ENTÃO você DEVE avaliar e retornar todos os 12 itens do "audit_checklist", suas "audit_justifications", o "score" (0 a 100), e o "closing_summary".
       
