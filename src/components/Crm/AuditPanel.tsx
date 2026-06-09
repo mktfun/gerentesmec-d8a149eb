@@ -352,14 +352,18 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                 <AccordionContent className="pt-1 pb-4 pl-7">
                   <div className="space-y-2.5">
                     {step.items.map(item => (
-                      <div key={item.id} className="flex items-start gap-3 group">
-                        <div className={`mt-0.5 flex items-center justify-center w-4 h-4 rounded border ${checked[item.id] ? 'bg-indigo-500 border-indigo-500' : 'border-border dark:border-white/20'}`}>
+                      <div 
+                        key={item.id} 
+                        className="flex items-start gap-3 group cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 p-2 -ml-2 rounded-lg transition-colors"
+                        onClick={() => setChecked(prev => ({ ...prev, [item.id]: !prev[item.id] }))}
+                      >
+                        <div className={`mt-0.5 flex items-center justify-center w-4 h-4 shrink-0 rounded border transition-colors ${checked[item.id] ? 'bg-indigo-500 border-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 'border-border dark:border-white/20 group-hover:border-indigo-500/50'}`}>
                           {checked[item.id] && <CheckCircle2 className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 flex flex-col">
                           <label htmlFor={item.id}
-                            className={`text-xs leading-relaxed transition-colors ${
-                              checked[item.id] ? 'text-foreground font-medium' : 'text-muted-foreground'
+                            className={`text-xs leading-relaxed transition-colors cursor-pointer select-none ${
+                              checked[item.id] ? 'text-foreground font-medium' : 'text-muted-foreground group-hover:text-foreground/80'
                             }`}>
                             {item.text}
                           </label>

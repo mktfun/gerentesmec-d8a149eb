@@ -396,8 +396,14 @@ serve(async (req) => {
       "${text}"
       
       Você é um auditor de qualidade de vendas mecânicas automotivas.
-      Analise a conversa e preencha os itens da auditoria. 
-      O gerente já pontuou os itens ${Object.keys(currentChecklist).filter(k => currentChecklist[k]).join(', ') || 'nenhum'}. Não perca tempo com eles, mande True direto. Preste atenção APENAS na mensagem desse exato segundo para julgar os itens que ainda estão False.
+      Analise a conversa e identifique A ETAPA atual do funil.
+      
+      ⚠️ ATENÇÃO - REDUÇÃO DE CUSTOS E OTIMIZAÇÃO:
+      Se a nova etapa que você vai sugerir NÃO FOR 'closed_won' nem 'closed_lost', ENTÃO você está PROIBIDO de processar e avaliar o checklist de auditoria. Você deve retornar o dicionário "audit_checklist" e "audit_justifications" VAZIOS {}, e o "score" como null. Foque todo seu processamento apenas na mudança de "funnel_stage", extração do "ticket_value", "customer_vehicle", "new_compressed_history", e "closing_summary" se houver.
+      
+      APENAS se a conversa for ENCERRADA e a nova etapa for OBRIGATORIAMENTE 'closed_won' ou 'closed_lost', ENTÃO você DEVE avaliar e retornar todos os 12 itens do "audit_checklist", suas "audit_justifications", o "score" (0 a 100), e o "closing_summary".
+      
+      O gerente já pontuou os itens ${Object.keys(currentChecklist).filter(k => currentChecklist[k]).join(', ') || 'nenhum'} (Apenas mantenha esses como TRUE no checklist final se for etapa de fechamento).
       
       IMPORTANTE:
       1. Para "ticket_value", NUNCA invente ou extraia valores de chaves PIX, CNPJ, números de telefone ou links de pagamento. Só preencha se o gerente falar EXPLICITAMENTE o valor total do orçamento (ex: "ficou 1650,00", "total de 2700"). Se ele enviou apenas um link de pagamento e não falou o valor, deixe como null.
@@ -477,7 +483,7 @@ serve(async (req) => {
            // Ex: "${message_id}": "Vídeo: O mecânico filma a parte inferior do veículo, apontando para um vazamento escuro próximo ao cárter. A suspensão aparece íntegra."
         },
         "new_compressed_history": (novo histórico resumido somando a mensagem atual),
-        "closing_summary": (Resumo descritivo narrando a evolução e histórico geral),
+        "closing_summary": (Resumo descritivo narrando a evolução e histórico geral, OBRIGATÓRIO se a etapa for closed_won ou closed_lost, senão pode ser null),
         "message_insight": (String curta justificando uma ação crítica ou null se foi uma mensagem comum. Ver regra 9),
         "ticket_value": (número decimal ou null),
         "customer_vehicle": (string ou null)
@@ -855,30 +861,52 @@ serve(async (req) => {
     console.log("=== LLM OUTPUT ===");
     console.log(llmOutputText);
 
-    let mockOutput: any;
+    let parsedData: any;
     try {
-      mockOutput = extractJSON(llmOutputText);
+      parsedData = extractJSON(llmOutputText);
     } catch (err) {
       throw err;
     }
 
-    // Bridge: mockOutput → parsedData (used from line 740 onwards)
-    const parsedData = mockOutput;
+    // ─── TRAVA ANTIRREGRESSÃO DO FUNIL ──────────────────────────────────────────
+    const currentStage = leadData?.funnel_stage || 'lead_new';
+    let suggestedStage = parsedData.funnel_stage;
+    
+    if (suggestedStage) {
+      const stageRank: Record<string, number> = {
+        'lead_new': 1,
+        'quote': 2,
+        'negotiation': 3,
+        'closed_lost': 4,
+        'closed_won': 4
+      };
 
-    // 5. Rastreabilidade de Auditoria: descobrir quais checks viraram true agora
-    // leadData já foi buscado no passo 2
-    // const currentChecklist já foi populado no passo 2
+      const currentRank = stageRank[currentStage] || 1;
+      const suggestedRank = stageRank[suggestedStage] || 0;
+
+      // Se a IA sugerir uma etapa de rank INFERIOR à atual, negamos a regressão e forçamos a etapa atual
+      if (suggestedRank < currentRank) {
+        console.log(`[AI-EVALUATOR] ⚠️ Bloqueando Regressão de Funil: IA tentou mover de ${currentStage} (rank ${currentRank}) para ${suggestedStage} (rank ${suggestedRank}). Mantendo em ${currentStage}.`);
+        suggestedStage = currentStage;
+        parsedData.funnel_stage = currentStage; // Atualiza o JSON parseado para refletir a correção
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────────
+
+    // Mesclar checklists e lidar com preenchimento parcial
+    const existingChecklist = currentChecklist || {};
     const newMessagesMap = leadData?.audit_checklist_messages || {};
-    const mergedChecklist = { ...currentChecklist };
-    if (mockOutput.audit_checklist) {
-      for (const key of Object.keys(mockOutput.audit_checklist)) {
-        const val = mockOutput.audit_checklist[key];
+    
+    const mergedChecklist = { ...existingChecklist };
+    if (parsedData.audit_checklist) {
+      for (const key of Object.keys(parsedData.audit_checklist)) {
+        const val = parsedData.audit_checklist[key];
         if (val === true || val === "true") {
           // Bloqueio de Segurança: contato só pode marcar o 2e
           if (sender_type === 'contact' && key !== '2e') continue;
           
           mergedChecklist[key] = true;
-          if (!currentChecklist[key]) {
+          if (!existingChecklist[key]) {
             // Este item do checklist ficou VERDE por conta desta mensagem!
             newMessagesMap[key] = message_id;
           }
@@ -886,28 +914,7 @@ serve(async (req) => {
       }
     }
 
-    // ==========================================
-    // ESTRITA PROGRESSÃO DE FUNIL (EVITAR REGRESSÕES BURRAS)
-    // ==========================================
-    const STAGE_ORDER: Record<string, number> = {
-      'lead_new': 0,
-      'negotiation': 1,
-      'quote': 2,
-      'closed_won': 3,
-      'closed_lost': 3
-    };
-
-    const currentStage = leadData?.funnel_stage || 'lead_new';
-    let newFunnelStage = parsedData.funnel_stage;
-
-    if (newFunnelStage && STAGE_ORDER[currentStage] !== undefined && STAGE_ORDER[newFunnelStage] !== undefined) {
-      if (STAGE_ORDER[newFunnelStage] < STAGE_ORDER[currentStage]) {
-        console.log(`[AI-EVALUATOR] BLOQUEADO: IA tentou regredir o funil de ${currentStage} para ${newFunnelStage}. Mantendo ${currentStage}.`);
-        newFunnelStage = currentStage;
-      }
-    } else {
-      newFunnelStage = currentStage;
-    }
+    let newFunnelStage = parsedData.funnel_stage || currentStage;
 
     // 5.2 Calcular o Score Determinístico (Inteligente com Cutoff)
     const auditStepsConfig = [
@@ -919,34 +926,42 @@ serve(async (req) => {
     
     let calculatedScore: number | null = null;
     
-    if (newFunnelStage === 'closed_lost') {
-      const ITEM_SEQUENCE = [
-        '1a', '1b', '2d', '2b',
-        '2a', '2c', '2e',
-        '3a', '3b', '3c',
-        '4a', '4b'
-      ];
-      let lastCheckedIndex = -1;
-      for (let i = ITEM_SEQUENCE.length - 1; i >= 0; i--) {
-        if (mergedChecklist[ITEM_SEQUENCE[i]]) {
-          lastCheckedIndex = i;
-          break;
+    // Calcula o score somente se a etapa for final e a IA sugeriu o score
+    if (newFunnelStage === 'closed_won' || newFunnelStage === 'closed_lost') {
+      if (parsedData.score !== null && parsedData.score !== undefined) {
+        calculatedScore = parsedData.score;
+      } else {
+        // Fallback para cálculo hardcoded se a IA esqueceu
+        if (newFunnelStage === 'closed_lost') {
+          const ITEM_SEQUENCE = [
+            '1a', '1b', '2d', '2b',
+            '2a', '2c', '2e',
+            '3a', '3b', '3c',
+            '4a', '4b'
+          ];
+          let lastCheckedIndex = -1;
+          for (let i = ITEM_SEQUENCE.length - 1; i >= 0; i--) {
+            if (mergedChecklist[ITEM_SEQUENCE[i]]) {
+              lastCheckedIndex = i;
+              break;
+            }
+          }
+          if (lastCheckedIndex !== -1) {
+            const universe = ITEM_SEQUENCE.slice(0, lastCheckedIndex + 1);
+            const checkedCount = universe.filter(id => mergedChecklist[id]).length;
+            calculatedScore = Math.round((checkedCount / universe.length) * 100);
+          } else {
+            calculatedScore = 0;
+          }
+        } else {
+          let scoreAcc = 0;
+          auditStepsConfig.forEach(step => {
+            const done = step.items.filter(id => mergedChecklist[id]).length;
+            scoreAcc += (done / step.items.length) * step.weight;
+          });
+          calculatedScore = Math.round(scoreAcc);
         }
       }
-      if (lastCheckedIndex !== -1) {
-        const universe = ITEM_SEQUENCE.slice(0, lastCheckedIndex + 1);
-        const checked = universe.filter(id => mergedChecklist[id]).length;
-        calculatedScore = Math.round((checked / universe.length) * 100);
-      } else {
-        calculatedScore = 0; // Nenhum item foi marcado, zero.
-      }
-    } else {
-      let scoreAcc = 0;
-      auditStepsConfig.forEach(step => {
-        const done = step.items.filter(id => mergedChecklist[id]).length;
-        scoreAcc += (done / step.items.length) * step.weight;
-      });
-      calculatedScore = Math.round(scoreAcc);
     }
 
     // UPDATE DO LEAD

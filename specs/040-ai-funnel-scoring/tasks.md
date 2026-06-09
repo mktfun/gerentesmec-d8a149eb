@@ -1,0 +1,6 @@
+- [x] 1. Alterar `AuditPanel.tsx` para tornar os componentes visuais `Circle` e `CheckCircle2` clicáveis.
+- [x] 2. Adicionar o tratador de evento `onClick` no item do checklist chamando `setChecked` para inverter o estado do item clicado.
+- [x] 3. Garantir que a alteração manual do checklist reflete em tempo real na animação e valor do "Score Ring" (chamando o utilitário `calcLeadScore`).
+- [x] 4. Atualizar o prompt em `ai-autonomous-evaluator/index.ts` indicando que a IA só deve calcular o `audit_checklist` e o `score` quando decidir que a etapa final (`closed_won` ou `closed_lost`) foi alcançada, devolvendo um checklist vazio caso contrário.
+- [x] 5. Incluir validação no bloco principal em `ai-autonomous-evaluator/index.ts` após o JSON Parse para comparar a nova `funnel_stage` gerada com a atual armazenada no banco (`leadData.funnel_stage`).
+- [x] 6. Rejeitar a mudança de `funnel_stage` se a IA tiver tentado uma regressão (rank numérico de `lead_new`=1, `quote`=2, `negotiation`=3, `closed`=4).
