@@ -17,10 +17,10 @@ export default function ChecklistItemCard({ item, onAnswer }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setPhotos(prev => [...prev, file]);
-      setPhotoUrls(prev => [...prev, URL.createObjectURL(file)]);
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setPhotos(prev => [...prev, ...newFiles]);
+      setPhotoUrls(prev => [...prev, ...newFiles.map(file => URL.createObjectURL(file))]);
     }
   };
 
@@ -72,7 +72,8 @@ export default function ChecklistItemCard({ item, onAnswer }: Props) {
         <input 
           type="file" 
           accept="image/*" 
-          capture="environment" 
+          capture="environment"
+          multiple
           className="hidden" 
           ref={fileInputRef}
           onChange={handlePhotoCapture}

@@ -20,10 +20,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface Audit {
   id: string;
   unit_id: string;
-  auditor_id: string;
-  total_score: number;
+  auditor_name: string;
+  score_percentage: number;
   status: string;
-  created_at: string;
+  completed_at: string;
 }
 
 interface AuditAnswer {
@@ -55,7 +55,7 @@ const AuditHistory = () => {
       let query = supabase
         .from('audits')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('completed_at', { ascending: false });
 
       if (isUnitManager && managerUnitId) {
         query = query.eq('unit_id', managerUnitId);
@@ -161,13 +161,13 @@ const AuditHistory = () => {
                   </div>
                   <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
-                    {format(new Date(audit.created_at), "dd 'de' MMM, yyyy 'às' HH:mm", { locale: ptBR })}
+                    {format(new Date(audit.completed_at), "dd 'de' MMM, yyyy 'às' HH:mm", { locale: ptBR })}
                   </div>
                 </div>
 
                 <div className="relative z-10 flex items-center gap-4">
-                  <div className={`px-3 py-1.5 rounded-xl border text-lg font-black ${getScoreColor(audit.total_score)}`}>
-                    {Math.round(audit.total_score)}%
+                  <div className={`px-3 py-1.5 rounded-xl border text-lg font-black ${getScoreColor(audit.score_percentage)}`}>
+                    {Math.round(audit.score_percentage)}%
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </div>
@@ -188,12 +188,12 @@ const AuditHistory = () => {
                     Detalhes da Vistoria
                   </DrawerTitle>
                   <DrawerDescription className="text-sm mt-1">
-                    {selectedAudit && format(new Date(selectedAudit.created_at), "dd 'de' MMMM, yyyy", { locale: ptBR })}
+                    {selectedAudit && format(new Date(selectedAudit.completed_at), "dd 'de' MMMM, yyyy", { locale: ptBR })}
                   </DrawerDescription>
                 </div>
                 {selectedAudit && (
-                  <div className={`px-4 py-2 rounded-2xl border text-2xl font-black ${getScoreColor(selectedAudit.total_score)}`}>
-                    {Math.round(selectedAudit.total_score)}%
+                  <div className={`px-4 py-2 rounded-2xl border text-2xl font-black ${getScoreColor(selectedAudit.score_percentage)}`}>
+                    {Math.round(selectedAudit.score_percentage)}%
                   </div>
                 )}
               </div>
