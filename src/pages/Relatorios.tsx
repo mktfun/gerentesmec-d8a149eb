@@ -33,6 +33,63 @@ const Relatorios = () => {
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // PDF Export State
+  const [isPreparingPDF, setIsPreparingPDF] = useState(false);
+  const [pdfData, setPdfData] = useState<{ leads: typeof leads, messagesByLead: Record<string, any[]> } | null>(null);
+
+  const handleExportPDF = async () => {
+    setIsPreparingPDF(true);
+    try {
+      // 1. Filtrar leads
+      const sevenDaysAgo = Date.now() - 7 * 86400000;
+      const reportTargetLeads = leads.filter(l => {
+        const isClosed = l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost';
+        if (!isClosed) return false;
+        const lDate = new Date(l.created_at).getTime();
+        if (lDate < sevenDaysAgo) return false;
+        
+        if (l.funnel_stage === 'closed_lost') return true;
+        if (l.funnel_stage === 'closed_won' && l.score !== null && l.score < 60) return true;
+        
+        return false;
+      });
+
+      if (reportTargetLeads.length === 0) {
+        alert("Nenhum lead elegível para o relatório nesta semana.");
+        setIsPreparingPDF(false);
+        return;
+      }
+
+      // 2. Buscar transcrições
+      const { data: messages } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .in('lead_id', reportTargetLeads.map(l => l.id))
+        .order('created_at', { ascending: true });
+
+      const messagesByLead: Record<string, any[]> = {};
+      if (messages) {
+        messages.forEach(m => {
+          if (!messagesByLead[m.lead_id]) messagesByLead[m.lead_id] = [];
+          messagesByLead[m.lead_id].push(m);
+        });
+      }
+
+      setPdfData({ leads: reportTargetLeads, messagesByLead });
+      
+      // Aguardar o DOM renderizar o PDF oculto
+      setTimeout(() => {
+        window.print();
+        setIsPreparingPDF(false);
+      }, 1000);
+      
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao preparar PDF");
+      setIsPreparingPDF(false);
+    }
+  };
+
   // Novos Filtros
   const [selectedUnit, setSelectedUnit] = useState<string>(isUnitManager && userUnitId ? userUnitId : 'all');
   const [scoreOrder, setScoreOrder] = useState<string>('none');
@@ -276,7 +333,8 @@ const Relatorios = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 pb-32">
+    <>
+    <div className="p-4 md:p-8 pb-32 print:hidden">
       
       {/* ── Header & Filters ── */}
       <motion.div {...fadeUp(0)} className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
@@ -333,6 +391,14 @@ const Relatorios = () => {
             <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
               <Download className="w-4 h-4" />
               Exportar XLS
+            </button>
+            <button 
+              onClick={handleExportPDF}
+              disabled={isPreparingPDF}
+              className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-xl text-xs font-bold hover:bg-foreground/90 transition-colors disabled:opacity-50"
+            >
+              <Download className="w-4 h-4" />
+              {isPreparingPDF ? "Gerando..." : "Exportar PDF de Auditorias (Semanal)"}
             </button>
           </div>
         </div>
@@ -649,6 +715,88 @@ const Relatorios = () => {
       </AnimatePresence>
 
     </div>
+
+    {/* Printable PDF Report (Hidden in UI) */}
+    {pdfData && (
+      <div className="hidden print:block print:absolute print:inset-0 print:bg-white print:text-black print:z-[9999] p-8">
+        <div className="text-center mb-8 border-b border-gray-200 pb-4">
+          <h1 className="text-3xl font-black text-black tracking-tight">Relatório de Auditoria</h1>
+          <p className="text-gray-500 mt-2 font-medium">Leads Perdidos ou Críticos (Últimos 7 dias)</p>
+        </div>
+
+        <div className="space-y-12">
+          {pdfData.leads.map((lead) => (
+            <div key={lead.id} className="break-inside-avoid border border-gray-300 rounded-2xl p-6 bg-white shadow-sm">
+              
+              {/* Cabeçalho do Lead */}
+              <div className="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-black">{lead.customer_name || 'Cliente'}</h2>
+                  <p className="text-sm font-semibold text-gray-600 mt-1">Veículo: {lead.customer_vehicle || 'Não informado'}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Status: {lead.funnel_stage === 'closed_lost' ? 'Perdido' : 'Ganho'} | Data: {new Date(lead.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-bold uppercase text-gray-400 tracking-widest mb-1">Nota de Qualidade</div>
+                  <div className={`text-2xl font-black ${(lead.score || 0) < 60 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                    {lead.score !== null ? `${Math.round(lead.score)}/100` : 'S/ Nota'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Link Chatwoot e Parecer */}
+              <div className="mb-6">
+                {/* Chatwoot Link */}
+                {(lead as any).chatwoot_conversation_id && (
+                  <a 
+                    href={`https://app.chatwoot.com/app/accounts/1/conversations/${(lead as any).chatwoot_conversation_id}`}
+                    target="_blank" rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-indigo-600 font-bold mb-4 underline"
+                  >
+                    Abrir no Chatwoot
+                  </a>
+                )}
+
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Parecer da Auditoria</h3>
+                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                    {lead.closing_summary || 'Nenhum parecer gerado.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Transcrição Limpa */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 border-b border-gray-100 pb-2">Evidências (Transcrição)</h3>
+                <div className="space-y-3 text-sm">
+                  {(pdfData.messagesByLead[lead.id] || []).map(msg => {
+                    if (msg.sender_type === 'system') return null; // Ignorar logs de sistema
+                    const isManager = msg.sender_type === 'user' || msg.sender_type === 'bot';
+                    return (
+                      <div key={msg.id} className={`flex ${isManager ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[80%] rounded-lg px-3 py-2 ${isManager ? 'bg-indigo-50 text-indigo-900 border border-indigo-100' : 'bg-gray-100 text-gray-900 border border-gray-200'}`}>
+                          <div className="text-[10px] font-bold text-gray-500 mb-1">
+                            {isManager ? 'Gerente' : 'Cliente'}
+                          </div>
+                          <div className="whitespace-pre-wrap">{msg.content}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {!(pdfData.messagesByLead[lead.id] && pdfData.messagesByLead[lead.id].some(m => m.sender_type !== 'system')) && (
+                    <p className="text-gray-400 italic text-xs">Nenhuma mensagem registrada.</p>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    </>
   );
 };
 

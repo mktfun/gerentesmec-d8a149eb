@@ -187,11 +187,11 @@ const ReadOnlyAuditPanel: React.FC<Props> = ({ lead, onClose }) => {
             </Accordion>
           </div>
 
-          {/* Dossiê IA */}
+          {/* Parecer da Auditoria */}
           {lead.closing_summary && (
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                Dossiê da Inteligência Artificial
+                Parecer da Auditoria
               </p>
               <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20 text-xs leading-relaxed text-indigo-700 dark:text-indigo-200">
                 {lead.closing_summary}
