@@ -45,7 +45,7 @@ interface AppDataContextType {
   deleteUnit: (id: string) => Promise<void>;
   addLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_message_at'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
-  saveLeadAudit: (id: string, score: number, summary: string, checklist: Record<string, boolean>) => Promise<void>;
+  saveLeadAudit: (id: string, score: number | null, summary: string, checklist: Record<string, boolean>) => Promise<void>;
   deleteLead: (id: string) => Promise<void>;
   deleteLeads: (ids: string[]) => Promise<void>;
   moveLeadStage: (id: string, stage: FunnelStage) => Promise<void>;
@@ -221,7 +221,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const saveLeadAudit = async (id: string, score: number, summary: string, checklist: Record<string, boolean>) => {
+  const saveLeadAudit = async (id: string, score: number | null, summary: string, checklist: Record<string, boolean>) => {
     
     const etapa_scores: Record<string, number> = {};
     const auditStepsConfig = [
@@ -261,7 +261,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Apenas insere na timeline de chat se o RPC foi salvo com sucesso no banco.
     await (supabase as any).from('chat_messages').insert([{
       lead_id: id,
-      content: `Auditado e pontuado: ${score}%`,
+      content: score !== null ? `Auditado e pontuado: ${score}%` : `Vistoria pausada: ${summary}`,
       sender_type: 'system',
     }]);
   };

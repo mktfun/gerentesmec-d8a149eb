@@ -462,12 +462,25 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           hover:shadow-[0_0_30px_rgba(16,185,129,0.45)] focus-visible:outline-emerald-300">
           Aprovar Avaliação ({rounded}%)
         </button>
-        <button 
-          onClick={() => setIsFeedbackOpen(true)}
-          className="w-full py-3 rounded-xl text-sm font-bold text-rose-500
-          bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
-          Corrigir via Feedback
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={() => setIsFeedbackOpen(true)}
+            className="w-full py-3 rounded-xl text-[11px] uppercase tracking-widest font-black text-rose-500
+            bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
+            Corrigir IA
+          </button>
+          <button 
+            onClick={() => {
+              saveLeadAudit(lead.id, null, '⏳ Aguardando contexto do gerente (Vistoria pausada por falta de histórico físico)', checked);
+              onClose();
+            }}
+            className="w-full py-3 rounded-xl text-[11px] uppercase tracking-widest font-black text-amber-500
+            bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
+            title="A conversa pulou etapas? O cliente foi na loja? Pause a vistoria."
+          >
+            Pedir Contexto
+          </button>
+        </div>
       </div>
 
       <AuditFeedbackModal 
