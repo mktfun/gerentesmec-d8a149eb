@@ -215,7 +215,7 @@ const Crm = () => {
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
       {/* ── Topbar: View Toggle + Search + New ───────────── */}
-      <div className="px-4 md:px-5 py-3 border-b border-border bg-background flex flex-col md:flex-row items-stretch md:items-center gap-3 shrink-0 overflow-x-auto custom-scrollbar">
+      <div className="px-4 md:px-5 py-3 border-b border-border bg-background flex flex-col md:flex-row flex-wrap items-stretch md:items-center gap-3 shrink-0 relative z-50">
         {/* Esquerda: Unit Switcher + View Toggle */}
         <div className="flex items-center justify-between md:justify-start gap-2 shrink-0">
           <UnitSwitcher units={units} leads={leads} selectedUnitId={unitFilter} onSelect={setUnitFilter} disabled={isUnitManager} />
