@@ -10,3 +10,4 @@
 - 2026-06-05: Finalizada a implementaÃ§Ã£o 021-ai-evaluator-logic-fix (CorreÃ§Ã£o da lÃ³gica do avaliador).
 - **2026-06-08**: Concluída a implementação da spec  23-mobile-first-history (Mobile First Responsiveness & Checklist Múltiplas Fotos).
 - **2026-06-11**: Concluída a implementação da spec 24-minimalist-pdf-report (Relatório Semanal Automático em PDF).
+- **2026-06-11**: Concluída a implementação da spec 025-pdf-report-v2 (Agrupamento por Unidade e Paginação do PDF).

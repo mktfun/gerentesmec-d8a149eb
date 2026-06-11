@@ -725,73 +725,92 @@ const Relatorios = () => {
         </div>
 
         <div className="space-y-12">
-          {pdfData.leads.map((lead) => (
-            <div key={lead.id} className="break-inside-avoid border border-gray-300 rounded-2xl p-6 bg-white shadow-sm">
-              
-              {/* Cabeçalho do Lead */}
-              <div className="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
-                <div>
-                  <h2 className="text-xl font-bold text-black">{lead.customer_name || 'Cliente'}</h2>
-                  <p className="text-sm font-semibold text-gray-600 mt-1">Veículo: {lead.customer_vehicle || 'Não informado'}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Status: {lead.funnel_stage === 'closed_lost' ? 'Perdido' : 'Ganho'} | Data: {new Date(lead.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold uppercase text-gray-400 tracking-widest mb-1">Nota de Qualidade</div>
-                  <div className={`text-2xl font-black ${(lead.score || 0) < 60 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                    {lead.score !== null ? `${Math.round(lead.score)}/100` : 'S/ Nota'}
-                  </div>
-                </div>
-              </div>
+          {Array.from(new Set(pdfData.leads.map(l => l.unit_id))).map(unitId => {
+            const unitLeads = pdfData.leads.filter(l => l.unit_id === unitId);
+            const unitName = units.find(u => u.id === unitId)?.name || unitId || 'Unidade Desconhecida';
 
-              {/* Link Chatwoot e Parecer */}
-              <div className="mb-6">
-                {/* Chatwoot Link */}
-                {(lead as any).chatwoot_conversation_id && (
-                  <a 
-                    href={`https://app.chatwoot.com/app/accounts/1/conversations/${(lead as any).chatwoot_conversation_id}`}
-                    target="_blank" rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-indigo-600 font-bold mb-4 underline"
-                  >
-                    Abrir no Chatwoot
-                  </a>
-                )}
-
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Parecer da Auditoria</h3>
-                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                    {lead.closing_summary || 'Nenhum parecer gerado.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Transcrição Limpa */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 border-b border-gray-100 pb-2">Evidências (Transcrição)</h3>
-                <div className="space-y-3 text-sm">
-                  {(pdfData.messagesByLead[lead.id] || []).map(msg => {
-                    if (msg.sender_type === 'system') return null; // Ignorar logs de sistema
-                    const isManager = msg.sender_type === 'user' || msg.sender_type === 'bot';
+            return (
+              <div key={unitId} className="mb-12 page-break-before-auto break-inside-avoid print:break-inside-avoid">
+                <h2 className="text-2xl font-black border-b-2 border-black pb-2 mb-6">{unitName}</h2>
+                <div className="space-y-12">
+                  {unitLeads.map((lead) => {
+                    const managerName = managers.find(m => m.id === lead.manager_id)?.name || 'Gerente Não Atribuído';
+                    
                     return (
-                      <div key={msg.id} className={`flex ${isManager ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-lg px-3 py-2 ${isManager ? 'bg-indigo-50 text-indigo-900 border border-indigo-100' : 'bg-gray-100 text-gray-900 border border-gray-200'}`}>
-                          <div className="text-[10px] font-bold text-gray-500 mb-1">
-                            {isManager ? 'Gerente' : 'Cliente'}
+                      <div key={lead.id} className="break-inside-avoid print:break-inside-avoid border border-gray-300 rounded-2xl p-6 bg-white shadow-sm">
+                        
+                        {/* Cabeçalho do Lead */}
+                        <div className="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-black">{lead.customer_name || 'Cliente'}</h3>
+                            <p className="text-sm font-semibold text-gray-600 mt-1">Veículo: {lead.customer_vehicle || 'Não informado'}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Status: {lead.funnel_stage === 'closed_lost' ? 'Perdido' : 'Ganho'} | Data: {new Date(lead.created_at).toLocaleDateString()}
+                            </p>
+                            <p className="text-xs font-bold text-indigo-600 mt-1">
+                              Gerente Responsável: {managerName}
+                            </p>
                           </div>
-                          <div className="whitespace-pre-wrap">{msg.content}</div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold uppercase text-gray-400 tracking-widest mb-1">Nota de Qualidade</div>
+                            <div className={`text-2xl font-black ${(lead.score || 0) < 60 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                              {lead.score !== null ? `${Math.round(lead.score)}/100` : 'S/ Nota'}
+                            </div>
+                          </div>
                         </div>
+
+                        {/* Link Chatwoot e Parecer */}
+                        <div className="mb-6">
+                          {/* Chatwoot Link */}
+                          {(lead as any).chatwoot_conversation_id && (
+                            <a 
+                              href={`https://app.chatwoot.com/app/accounts/1/conversations/${(lead as any).chatwoot_conversation_id}`}
+                              target="_blank" rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-sm text-indigo-600 font-bold mb-4 underline"
+                            >
+                              Abrir no Chatwoot
+                            </a>
+                          )}
+
+                          <div className="bg-zinc-50 rounded-xl p-4 border border-gray-200">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Parecer da Auditoria</h3>
+                            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-inside-avoid print:break-inside-avoid">
+                              {lead.closing_summary || 'Nenhum parecer gerado.'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Transcrição Limpa */}
+                        <div>
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 border-b border-gray-100 pb-2">Evidências (Transcrição)</h3>
+                          <div className="space-y-3 text-sm">
+                            {(pdfData.messagesByLead[lead.id] || []).map(msg => {
+                              if (msg.sender_type === 'system') return null; // Ignorar logs de sistema
+                              const isManager = msg.sender_type === 'user' || msg.sender_type === 'bot';
+                              return (
+                                <div key={msg.id} className={`flex ${isManager ? 'justify-end' : 'justify-start'} break-inside-avoid print:break-inside-avoid`}>
+                                  <div className={`max-w-[80%] rounded-lg px-3 py-2 ${isManager ? 'bg-transparent border-l-4 border-indigo-400 text-gray-900' : 'bg-transparent border-l-4 border-gray-300 text-gray-900'} break-inside-avoid print:break-inside-avoid`}>
+                                    <div className="text-[10px] font-bold text-gray-500 mb-1">
+                                      {isManager ? 'Gerente' : 'Cliente'}
+                                    </div>
+                                    <div className="whitespace-pre-wrap break-inside-avoid print:break-inside-avoid">{msg.content}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {!(pdfData.messagesByLead[lead.id] && pdfData.messagesByLead[lead.id].some(m => m.sender_type !== 'system')) && (
+                              <p className="text-gray-400 italic text-xs">Nenhuma mensagem registrada.</p>
+                            )}
+                          </div>
+                        </div>
+
                       </div>
                     );
                   })}
-                  {!(pdfData.messagesByLead[lead.id] && pdfData.messagesByLead[lead.id].some(m => m.sender_type !== 'system')) && (
-                    <p className="text-gray-400 italic text-xs">Nenhuma mensagem registrada.</p>
-                  )}
                 </div>
               </div>
-
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     )}
