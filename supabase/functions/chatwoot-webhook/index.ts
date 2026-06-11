@@ -244,6 +244,11 @@ serve(async (req) => {
       } else {
         updateData.last_agent_message_at = now;
         
+        // GATILHO: Se está em "Novo Lead" e o gerente respondeu, move direto para "Em Atendimento"
+        if (existingLead.funnel_stage === 'lead_new') {
+          updateData.funnel_stage = 'negotiation';
+        }
+
         // CALCULO DO TMR HISTÓRICO
         // Apenas soma o TMR se o lead estiver no estágio 'lead_new'
         if (existingLead.last_client_message_at && existingLead.funnel_stage === 'lead_new') {

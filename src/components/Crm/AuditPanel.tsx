@@ -472,6 +472,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           <button 
             onClick={() => {
               saveLeadAudit(lead.id, null, '⏳ Aguardando contexto do gerente (Vistoria pausada por falta de histórico físico)', checked);
+              moveLeadStage(lead.id, 'parking_lot' as any);
               onClose();
             }}
             className="w-full py-3 rounded-xl text-[11px] uppercase tracking-widest font-black text-amber-500

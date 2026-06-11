@@ -103,8 +103,9 @@ const Crm = () => {
     return true;
   });
 
-  const danger  = displayLeads.filter(l => isLeadDanger(l, undefined, 20));
-  const active  = displayLeads.filter(l => !isLeadDanger(l, undefined, 20) && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost');
+  const danger  = displayLeads.filter(l => isLeadDanger(l, undefined, 20) && l.funnel_stage !== 'parking_lot');
+  const active  = displayLeads.filter(l => !isLeadDanger(l, undefined, 20) && l.funnel_stage !== 'closed_won' && l.funnel_stage !== 'closed_lost' && l.funnel_stage !== 'parking_lot');
+  const paused  = displayLeads.filter(l => l.funnel_stage === 'parking_lot');
   const closed  = displayLeads.filter(l => l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost');
 
   const isAllSelected = displayLeads.length > 0 && selectedForDeletion.length === displayLeads.length;
@@ -406,12 +407,22 @@ const Crm = () => {
                   )}
                   {active.length > 0 && (
                     <div>
-                      <div className="flex items-center gap-2 mb-2 px-1">
+                      <div className="flex items-center gap-2 mb-2 px-1 mt-4">
                         <Clock className="w-3.5 h-3.5 text-amber-500" />
                         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Em Andamento</span>
                         <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">{active.length}</span>
                       </div>
                       <div className="space-y-1">{active.map((l, i) => <LeadListCard key={l.id} lead={l} i={i} />)}</div>
+                    </div>
+                  )}
+                  {paused.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 px-1 mt-4">
+                        <AlertTriangle className="w-3.5 h-3.5 text-orange-500" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Pausados (S/ Contexto)</span>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400">{paused.length}</span>
+                      </div>
+                      <div className="space-y-1">{paused.map((l, i) => <LeadListCard key={l.id} lead={l} i={i} />)}</div>
                     </div>
                   )}
                   {closed.length > 0 && (

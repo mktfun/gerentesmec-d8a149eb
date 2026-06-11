@@ -312,7 +312,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     await (supabase as any).from('leads').update({ funnel_stage: stage }).eq('id', id);
     const STAGE_LABELS: Record<string, string> = {
-      lead_new: 'Novo Lead', quote: 'Em Orçamento', negotiation: 'Em Negociação', closed_won: 'Encerrado', closed_lost: 'Perdido'
+      lead_new: 'Novo Lead', quote: 'Em Orçamento', negotiation: 'Em Atendimento', closed_won: 'Encerrado', closed_lost: 'Perdido', parking_lot: 'Pausado (S/ Contexto)'
     };
     await (supabase as any).from('chat_messages').insert([{
       lead_id: id,
