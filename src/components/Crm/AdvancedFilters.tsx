@@ -15,13 +15,16 @@ interface Props {
   setUnansweredOnly: (v: boolean) => void;
   hideInactive: boolean;
   setHideInactive: (v: boolean) => void;
+  activeYesterday: boolean;
+  setActiveYesterday: (v: boolean) => void;
 }
 
 const AdvancedFilters: React.FC<Props> = ({
   createdPeriod, setCreatedPeriod,
   customDateRange, setCustomDateRange,
   unansweredOnly, setUnansweredOnly,
-  hideInactive, setHideInactive
+  hideInactive, setHideInactive,
+  activeYesterday, setActiveYesterday
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isDark } = useTheme();
@@ -38,7 +41,7 @@ const AdvancedFilters: React.FC<Props> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const hasActiveFilters = createdPeriod !== '30d' || unansweredOnly || hideInactive;
+  const hasActiveFilters = createdPeriod !== '30d' || unansweredOnly || hideInactive || activeYesterday;
 
   return (
     <div className="relative font-instrument" ref={popoverRef}>
@@ -150,6 +153,19 @@ const AdvancedFilters: React.FC<Props> = ({
                   <p className="text-[10px] font-semibold opacity-50 leading-tight">Limpa conversas abandonadas da tela.</p>
                 </div>
               </button>
+
+              <button 
+                onClick={() => setActiveYesterday(!activeYesterday)}
+                className="flex items-center gap-3 text-left group"
+              >
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${activeYesterday ? 'bg-sky-500 border-sky-500' : 'border-border group-hover:border-sky-500/50'}`}>
+                  {activeYesterday && <Check className="w-3.5 h-3.5 text-white" />}
+                </div>
+                <div>
+                  <p className="text-xs font-bold leading-none mb-0.5">Apenas Ativos Ontem</p>
+                  <p className="text-[10px] font-semibold opacity-50 leading-tight">Mostra apenas conversas que rolaram ontem.</p>
+                </div>
+              </button>
             </div>
 
             <button 
@@ -157,6 +173,7 @@ const AdvancedFilters: React.FC<Props> = ({
                 setCreatedPeriod('30d');
                 setUnansweredOnly(false);
                 setHideInactive(false);
+                setActiveYesterday(false);
               }}
               className="mt-2 text-[10px] font-bold uppercase tracking-widest text-indigo-500 opacity-60 hover:opacity-100 text-center py-2 transition-opacity"
             >
