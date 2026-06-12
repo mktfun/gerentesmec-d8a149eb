@@ -11,6 +11,8 @@ import ReadOnlyAuditPanel from '@/components/Crm/ReadOnlyAuditPanel';
 import { AnimatePresence } from 'framer-motion';
 
 import { fadeUp } from '@/utils/motion';
+import { ExportOptionsModal } from '@/components/ExportOptionsModal';
+import html2pdf from 'html2pdf.js';
 
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
@@ -35,9 +37,10 @@ const Relatorios = () => {
 
   // PDF Export State
   const [isPreparingPDF, setIsPreparingPDF] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [pdfData, setPdfData] = useState<{ leads: typeof leads, messagesByLead: Record<string, any[]> } | null>(null);
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = async (filters: { funnel: string; checklistScore: number }) => {
     setIsPreparingPDF(true);
     try {
       // 1. Filtrar leads
@@ -48,14 +51,19 @@ const Relatorios = () => {
         const lDate = new Date(l.created_at).getTime();
         if (lDate < sevenDaysAgo) return false;
         
-        if (l.funnel_stage === 'closed_lost') return true;
-        if (l.funnel_stage === 'closed_won' && l.score !== null && l.score < 60) return true;
+        // Filtros
+        if (filters.funnel !== 'all' && l.funnel_stage !== filters.funnel) return false;
         
-        return false;
+        const score = l.score !== null ? l.score : 0;
+        if (score < filters.checklistScore) return false;
+        
+        if (selectedUnit !== 'all' && l.unit_id !== selectedUnit) return false;
+        
+        return true;
       });
 
       if (reportTargetLeads.length === 0) {
-        alert("Nenhum lead elegível para o relatório nesta semana.");
+        alert("Nenhum lead elegível para o relatório com os filtros selecionados.");
         setIsPreparingPDF(false);
         return;
       }
@@ -77,10 +85,27 @@ const Relatorios = () => {
 
       setPdfData({ leads: reportTargetLeads, messagesByLead });
       
-      // Aguardar o DOM renderizar o PDF oculto
-      setTimeout(() => {
-        window.print();
+      // Renderizar o PDF por loja em background
+      setTimeout(async () => {
+        const uniqueUnits = Array.from(new Set(reportTargetLeads.map(l => l.unit_id)));
+        
+        for (const unitId of uniqueUnits) {
+          const unitNode = document.getElementById(`pdf-unit-${unitId}`);
+          if (unitNode) {
+            const unitName = units.find(u => u.id === unitId)?.name || unitId || 'Unidade_Desconhecida';
+            const opt = {
+              margin:       10,
+              filename:     `Relatorio_${unitName.replace(/\s+/g, '_')}.pdf`,
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2 },
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+              pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+            await html2pdf().from(unitNode).set(opt).save();
+          }
+        }
         setIsPreparingPDF(false);
+        setPdfData(null);
       }, 1000);
       
     } catch (err) {
@@ -393,7 +418,7 @@ const Relatorios = () => {
               Exportar XLS
             </button>
             <button 
-              onClick={handleExportPDF}
+              onClick={() => setIsExportModalOpen(true)}
               disabled={isPreparingPDF}
               className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-xl text-xs font-bold hover:bg-foreground/90 transition-colors disabled:opacity-50"
             >
@@ -716,13 +741,9 @@ const Relatorios = () => {
 
     </div>
 
-    {/* Printable PDF Report (Hidden in UI) */}
+    {/* Printable PDF Report (Hidden in UI mas acessível para o html2pdf) */}
     {pdfData && (
-      <div className="hidden print:block print:absolute print:inset-0 print:bg-white print:text-black print:z-[9999] p-8">
-        <div className="text-center mb-8 border-b border-gray-200 pb-4">
-          <h1 className="text-3xl font-black text-black tracking-tight">Relatório de Auditoria</h1>
-          <p className="text-gray-500 mt-2 font-medium">Leads Perdidos ou Críticos (Últimos 7 dias)</p>
-        </div>
+      <div className="absolute opacity-0 pointer-events-none -z-50 w-[800px] p-8">
 
         <div className="space-y-12">
           {Array.from(new Set(pdfData.leads.map(l => l.unit_id))).map(unitId => {
@@ -730,7 +751,11 @@ const Relatorios = () => {
             const unitName = units.find(u => u.id === unitId)?.name || unitId || 'Unidade Desconhecida';
 
             return (
-              <div key={unitId} className="mb-12 page-break-before-auto break-inside-avoid print:break-inside-avoid">
+              <div key={unitId} id={`pdf-unit-${unitId}`} className="mb-12 bg-white text-black p-8">
+                <div className="text-center mb-8 border-b border-gray-200 pb-4">
+                  <h1 className="text-3xl font-black text-black tracking-tight">Relatório de Auditoria</h1>
+                  <p className="text-gray-500 mt-2 font-medium">Filtros aplicados</p>
+                </div>
                 <h2 className="text-2xl font-black border-b-2 border-black pb-2 mb-6">{unitName}</h2>
                 <div className="space-y-12">
                   {unitLeads.map((lead) => {
@@ -814,7 +839,11 @@ const Relatorios = () => {
         </div>
       </div>
     )}
-
+    <ExportOptionsModal 
+      isOpen={isExportModalOpen} 
+      onClose={() => setIsExportModalOpen(false)} 
+      onExport={handleExportPDF} 
+    />
     </>
   );
 };
