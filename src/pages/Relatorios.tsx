@@ -446,7 +446,7 @@ const Relatorios = () => {
               className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl text-xs font-bold hover:bg-rose-500/20 transition-colors disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
-              {isCleaningDB ? "Limpando..." : "Limpar Mídias Antigas (>7d)"}
+              {isCleaningDB ? "Limpando..." : "Limpar Banco (Mídias e Logs >7d)"}
             </button>
             <button 
               onClick={() => setIsExportModalOpen(true)}
