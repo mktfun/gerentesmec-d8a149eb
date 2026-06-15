@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target, RefreshCw, AlertCircle } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
@@ -434,6 +434,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           })}
         </Accordion>
         </div>
+        )}
 
         {/* Evidence */}
         <div>
