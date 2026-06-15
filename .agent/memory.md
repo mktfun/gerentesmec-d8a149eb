@@ -13,6 +13,8 @@
 - **Regra da Nota Probatória (Zero Hallucination):** IA avaliadora não pode apenas dar score ou "checked: true". Todo JSON de auditoria DEVE exigir o campo `evidence` contendo o trecho exato (texto/descrição) para justificar a pontuação.
 - **Válvula de Escape (Needs Context):** Nunca force a IA a deduzir contexto corrompido ou ininteligível. Crie sempre estados como "Sem Contexto" (`parking_lot`) que exigem que o humano intervenha antes da IA continuar.
 - **Roteamento de "Otimização Máxima":** Em vez de hardcodar modelos (ex: GPT-4o), crie abstrações que batem nas APIs mais robustas do momento baseado no provider configurado (ex: Claude 3.7 Sonnet, Gemini 2.0 Pro).
+- **Paradigma do Contexto Zero (Gêmeo Local):** Para agentes CLI locais, JAMAIS exija que a IA leia arquivos ou "tente descobrir" a arquitetura do projeto. Forneça "Mega Prompts" maciços que já contêm o schema do banco completo mastigado, as chaves de API injetadas e o passo-a-passo algorítmico.
+- **Trabalhadores Autônomos (Batch):** Evite que o humano precise alimentar IDs manualmente. Modele os agentes CLI para baterem no banco com uma "Query Mágica", vasculharem a fila de trabalho pendente (ex: leads sem nota) e iterarem em um laço `while/for` até limparem toda a fila sozinhos.
 
 ## Erros Passados
 - IA Monolítica pesava no banco e esgotava tokens rápido avaliando 12 pontos a cada mensagem. (Resolvido pela divisão Tracker/Auditor).

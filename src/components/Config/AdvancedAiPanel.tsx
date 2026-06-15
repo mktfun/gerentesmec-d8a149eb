@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { AiRouterConfig } from '@/components/Config/AiRouterConfig';
 import { useBackgroundAuditor } from '@/context/BackgroundAuditorContext';
 import { supabase } from '@/integrations/supabase/client';
+import rawRunnerPrompt from '../../../scripts/ai-cli-runner.md?raw';
 
 interface Props {
   isOpen: boolean;
@@ -354,31 +355,40 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
               {/* Local Twin / CLI Runner */}
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                  <Cpu className="w-3.5 h-3.5" /> Gêmeo Local (CLI Runner)
+                  <Cpu className="w-3.5 h-3.5" /> Gêmeo Local (Zero Contexto / Batch Worker)
                 </h3>
                 <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border">
                   <p className="text-sm font-bold text-foreground mb-1">Auditoria via Terminal (Agy / Gemini CLI)</p>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Para ignorar a Edge Function na nuvem e rodar a IA 100% no seu terminal local (poupando custos e ganhando velocidade de debug), copie o Super Prompt abaixo e cole no seu CLI.
+                    Cole esse Mega-Prompt no seu terminal (Agy, Gemini CLI, Cursor, ChatGPT). A IA fará tudo sozinha: vai varrer os leads sem nota, conectar no seu banco e processar a fila inteira. <strong>As credenciais locais já foram magicamente injetadas no texto.</strong>
                   </p>
                   
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <textarea 
-                      readOnly
-                      value={`Você é o Agente Auditor Final. A partir de agora, você atua diretamente no banco de dados do meu projeto para avaliar Leads que acabaram de ser fechados ('closed_won' ou 'closed_lost').\n\nSua missão é rodar o ciclo de vida completo do Lead através da API REST do Supabase. Consulte scripts/ai-cli-runner.md para ler a documentação completa, as queries exatas e o schema JSON para fazer o update do lead.`}
-                      className="relative w-full h-24 bg-black/90 dark:bg-black/40 border border-border rounded-xl p-4 text-xs font-mono text-emerald-400 focus:outline-none resize-none"
-                    />
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText("Você é o Agente Auditor Final. A partir de agora, você atua diretamente no banco de dados do meu projeto para avaliar Leads que acabaram de ser fechados ('closed_won' ou 'closed_lost').\n\nSua missão é rodar o ciclo de vida completo do Lead através da API REST do Supabase. Consulte scripts/ai-cli-runner.md para ler a documentação completa, as queries exatas e o schema JSON para fazer o update do lead.");
-                        alert("Super Prompt copiado para a área de transferência!");
-                      }}
-                      className="absolute top-2 right-2 px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-[10px] font-bold uppercase tracking-wider transition-colors"
-                    >
-                      Copiar Prompt
-                    </button>
-                  </div>
+                  {(() => {
+                    // Substitui dinamicamente os placeholders pelas chaves do .env
+                    const finalPrompt = (rawRunnerPrompt || '')
+                      .replace(/\{\{SUPABASE_URL\}\}/g, import.meta.env.VITE_SUPABASE_URL || 'URL_AQUI')
+                      .replace(/\{\{SUPABASE_KEY\}\}/g, import.meta.env.VITE_SUPABASE_ANON_KEY || 'KEY_AQUI');
+
+                    return (
+                      <div className="relative group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-indigo-500/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <textarea 
+                          readOnly
+                          value={finalPrompt}
+                          className="relative w-full h-40 bg-black/90 dark:bg-black/60 border border-border rounded-xl p-4 text-[10px] leading-relaxed font-mono text-emerald-400 focus:outline-none resize-none"
+                        />
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(finalPrompt);
+                            alert("Mega Prompt de Lote autônomo copiado para a área de transferência! Cole no seu Agy/Gemini CLI.");
+                          }}
+                          className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)] rounded text-[10px] font-black uppercase tracking-wider transition-colors"
+                        >
+                          Copiar Prompt
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
