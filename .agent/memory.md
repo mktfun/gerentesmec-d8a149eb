@@ -8,8 +8,15 @@
 - Limites do BD: Atenção ao armazenamento de mídia (`media_url`) direto no Supabase free tier. Sempre criar botões/cron de limpeza (limite de 7 dias) se houver anexos/base64 pesando.
 - Configuração Vite: Variáveis de ambiente prefixadas com `VITE_`.
 
+## Preferências de Arquitetura AI (Agentes)
+- **Hierarchical Swarm / Tracker vs Auditor:** Não use modelos grandes e caros a cada mensagem. Use um modelo barato e rápido (Rastreador) rodando em background (cron) com um `ai_scratchpad` (memória viva) só para ditar se o funil avança. Use um modelo Top Tier (Auditor) *apenas* nos gatilhos de fechamento (Ganho/Perdido) com acesso ao contexto de ponta a ponta.
+- **Regra da Nota Probatória (Zero Hallucination):** IA avaliadora não pode apenas dar score ou "checked: true". Todo JSON de auditoria DEVE exigir o campo `evidence` contendo o trecho exato (texto/descrição) para justificar a pontuação.
+- **Válvula de Escape (Needs Context):** Nunca force a IA a deduzir contexto corrompido ou ininteligível. Crie sempre estados como "Sem Contexto" (`parking_lot`) que exigem que o humano intervenha antes da IA continuar.
+- **Roteamento de "Otimização Máxima":** Em vez de hardcodar modelos (ex: GPT-4o), crie abstrações que batem nas APIs mais robustas do momento baseado no provider configurado (ex: Claude 3.7 Sonnet, Gemini 2.0 Pro).
+
 ## Erros Passados
-- (Nenhum registrado até o momento)
+- IA Monolítica pesava no banco e esgotava tokens rápido avaliando 12 pontos a cada mensagem. (Resolvido pela divisão Tracker/Auditor).
 
 ## Persona do Usuário
-- (Nenhuma característica registrada até o momento)
+- Exige altíssima qualidade de UI, mas com lógica pragmática e custo de infraestrutura extremamente otimizado (preocupação pesada com tokens e storage). Gosta de arquitetura descentralizada, provando que a IA realmente leu a mensagem (Evidências) e não adivinhou.
+- Adora usar CLI local (`Agy`/`Gemini CLI`) usando Mega Prompts locais ("Gêmeo Local") em vez de depender 100% da nuvem, garantindo fallback e testes sem gastar build.

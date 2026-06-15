@@ -181,27 +181,33 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         {/* Header — score ring inline com título */}
         <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0 gap-3">
           {/* Score ring compacto */}
-          <div className="relative w-[56px] h-[56px] shrink-0">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="38" stroke="rgba(255,255,255,0.06)" strokeWidth="9" fill="none" />
-              <motion.circle
-                cx="50" cy="50" r="38"
-                stroke={scoreColor}
-                strokeWidth="9"
-                fill="none"
-                strokeLinecap="round"
-                initSistemal={{ strokeDasharray: `0 ${circumference}` }}
-                animate={{ strokeDasharray: `${(rounded / 100) * circumference} ${circumference}` }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
-                style={{ filter: `drop-shadow(0 0 6px ${scoreColor}70)` }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <motion.span key={rounded} initSistemal={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                className="text-sm font-black text-foreground leading-none">{rounded}</motion.span>
-              <span className="text-[7px] text-muted-foreground font-bold uppercase tracking-wider">pts</span>
+          {(lead.funnel_stage === 'closed_won' || lead.funnel_stage === 'closed_lost') ? (
+            <div className="relative w-[56px] h-[56px] shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="38" stroke="rgba(255,255,255,0.06)" strokeWidth="9" fill="none" />
+                <motion.circle
+                  cx="50" cy="50" r="38"
+                  stroke={scoreColor}
+                  strokeWidth="9"
+                  fill="none"
+                  strokeLinecap="round"
+                  initSistemal={{ strokeDasharray: `0 ${circumference}` }}
+                  animate={{ strokeDasharray: `${(rounded / 100) * circumference} ${circumference}` }}
+                  transition={{ duration: 0.9, ease: 'easeOut' }}
+                  style={{ filter: `drop-shadow(0 0 6px ${scoreColor}70)` }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <motion.span key={rounded} initSistemal={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  className="text-sm font-black text-foreground leading-none">{rounded}</motion.span>
+                <span className="text-[7px] text-muted-foreground font-bold uppercase tracking-wider">pts</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="relative w-[56px] h-[56px] shrink-0 flex items-center justify-center bg-primary/10 rounded-full border border-primary/20">
+              <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+            </div>
+          )}
 
           {/* Nome + telefone */}
           <div className="flex-1 min-w-0">
@@ -235,10 +241,11 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
             <button 
               onClick={handleManualSync}
               disabled={isSyncing}
-              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Sincronizar Sistema (AvalSistemar Conversa Inteira)"
+              className="px-2 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/5"
+              title="Forçar Auditoria Imediata"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${isSyncing ? 'animate-spin' : ''}`} />
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Forçar Aud.</span>
             </button>
             <button onClick={onClose}
               className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.10] flex items-center justify-center transition-colors">
@@ -326,10 +333,23 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         )}
 
         {/* Checklist */}
-        <div className="">
-          <Accordion type="multiple" defaultValue={['step1', 'step2']} className="space-y-2">
-          {auditStepsConfig.map(step => {
-            const doneCount = step.items.filter(i => checked[i.id]).length;
+        {lead.funnel_stage === 'parking_lot' ? (
+          <div className="p-5 flex flex-col items-center justify-center text-center space-y-3 bg-amber-500/5 border border-amber-500/20 rounded-xl mt-4">
+             <AlertCircle className="w-8 h-8 text-amber-500" />
+             <h4 className="font-bold text-sm text-foreground">Aguardando Contexto</h4>
+             <p className="text-xs text-muted-foreground">A conversa não forneceu informações suficientes para a IA auditar o desfecho com segurança. Intervenha na negociação.</p>
+          </div>
+        ) : (lead.funnel_stage !== 'closed_won' && lead.funnel_stage !== 'closed_lost') ? (
+          <div className="p-5 flex flex-col items-center justify-center text-center space-y-3 bg-primary/5 border border-primary/20 rounded-xl mt-4">
+             <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+             <h4 className="font-bold text-sm text-foreground">Acompanhamento Ativo</h4>
+             <p className="text-xs text-muted-foreground">A IA está acompanhando a conversa de perto. O Checklist Final com a auditoria completa será gerado quando o lead for Fechado ou Perdido.</p>
+          </div>
+        ) : (
+          <div className="">
+            <Accordion type="multiple" defaultValue={['step1', 'step2']} className="space-y-2">
+            {auditStepsConfig.map(step => {
+              const doneCount = step.items.filter(i => checked[i.id]).length;
             const isFull = doneCount === step.items.length;
 
             return (
