@@ -16,7 +16,7 @@ import { auditStepsConfig, calcLeadScore } from '@/utils/scoreUtils';
 interface Props { lead: Lead; onClose: () => void; }
 
 const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
-  const { updateLead, saveLeadAudit, integrationSettings, aiSettings } = useAppData();
+  const { updateLead, saveLeadAudit, integrationSettings, aiSettings, moveLeadStage } = useAppData();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState('');
   const [ticketValueStr, setTicketValueStr] = useState('');
