@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, Filter } from 'lucide-react';
+import { X, Download, Filter, Check } from 'lucide-react';
+import { auditStepsConfig } from '@/utils/scoreUtils';
 
 interface ExportOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (filters: { funnel: string; checklistScore: number }) => void;
+  onExport: (filters: { funnel: string; unmarkedChecks: string[] }) => void;
 }
 
 export const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({ isOpen, onClose, onExport }) => {
   const [funnelFilter, setFunnelFilter] = useState('all');
-  const [checklistScore, setChecklistScore] = useState(0);
+  const [unmarkedChecks, setUnmarkedChecks] = useState<string[]>([]);
 
   if (!isOpen) return null;
+
+  const toggleCheck = (id: string) => {
+    setUnmarkedChecks(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+  };
+
+  const allChecks = auditStepsConfig.flatMap(step => step.items);
 
   return (
     <AnimatePresence>
@@ -62,24 +71,42 @@ export const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({ isOpen, 
               </div>
             </div>
 
-            {/* Checklist Filter */}
+            {/* Unmarked Checks Filter */}
             <div className="space-y-3">
-              <label className="text-sm font-bold text-foreground/80 flex items-center gap-2">
-                Score Mínimo do Checklist
+              <label className="text-sm font-bold text-foreground/80 flex items-center justify-between gap-2">
+                <span>Checks não marcados (Filtro OR)</span>
+                {unmarkedChecks.length > 0 && (
+                  <button onClick={() => setUnmarkedChecks([])} className="text-xs text-indigo-400 hover:text-indigo-300">
+                    Limpar
+                  </button>
+                )}
               </label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="10"
-                value={checklistScore}
-                onChange={(e) => setChecklistScore(Number(e.target.value))}
-                className="w-full accent-indigo-500"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground font-medium">
-                <span>0%</span>
-                <span className="text-indigo-400 font-bold">{checklistScore}%</span>
-                <span>100%</span>
+              <div className="max-h-56 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                {allChecks.map((item) => {
+                  const isSelected = unmarkedChecks.includes(item.id);
+                  return (
+                    <motion.button
+                      key={item.id}
+                      onClick={() => toggleCheck(item.id)}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      className={`w-full flex items-start gap-3 p-3 rounded-xl border text-left transition-colors ${
+                        isSelected 
+                          ? 'bg-rose-500/10 border-rose-500/30 text-rose-50' 
+                          : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10'
+                      }`}
+                    >
+                      <div className={`mt-0.5 shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                        isSelected ? 'bg-rose-500 border-rose-500' : 'border-muted-foreground/50'
+                      }`}>
+                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <span className="text-xs font-medium leading-tight">
+                        {item.text}
+                      </span>
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
 
@@ -87,7 +114,7 @@ export const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({ isOpen, 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
-                onExport({ funnel: funnelFilter, checklistScore });
+                onExport({ funnel: funnelFilter, unmarkedChecks });
                 onClose();
               }}
               className="w-full mt-4 flex items-center justify-center gap-2 px-6 py-4 bg-foreground text-background rounded-2xl text-sm font-black hover:bg-foreground/90 transition-colors shadow-xl"

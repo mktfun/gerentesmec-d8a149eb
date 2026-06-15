@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,7 +18,7 @@ import html2pdf from 'html2pdf.js';
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 
 const Relatorios = () => {
-  // Paginação
+  // PaginaÃ§Ã£o
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -40,25 +40,7 @@ const Relatorios = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [pdfData, setPdfData] = useState<{ leads: typeof leads, messagesByLead: Record<string, any[]> } | null>(null);
 
-  const [isCleaningDB, setIsCleaningDB] = useState(false);
-
-  const handleCleanDB = async () => {
-    if (!window.confirm("Atenção: Isso irá remover os arquivos de mídia (vídeos, áudios e imagens) de mensagens com mais de 7 dias para liberar espaço no banco de dados. Essa ação não pode ser desfeita. Deseja continuar?")) return;
-    
-    setIsCleaningDB(true);
-    try {
-      const { error } = await supabase.rpc('clean_old_media');
-      if (error) throw error;
-      alert("Limpeza concluída com sucesso! Espaço liberado.");
-    } catch (err: any) {
-      console.error(err);
-      alert("Erro ao limpar mídias: " + err.message);
-    } finally {
-      setIsCleaningDB(false);
-    }
-  };
-
-  const handleExportPDF = async (filters: { funnel: string; unmarkedChecks: string[] }) => {
+  const handleExportPDF = async (filters: { funnel: string; checklistScore: number }) => {
     setIsPreparingPDF(true);
     try {
       // 1. Filtrar leads
@@ -72,13 +54,8 @@ const Relatorios = () => {
         // Filtros
         if (filters.funnel !== 'all' && l.funnel_stage !== filters.funnel) return false;
         
-        // Apenas leads auditados
-        if (l.score === null) return false;
-
-        if (filters.unmarkedChecks.length > 0) {
-          const hasSelectedFailures = filters.unmarkedChecks.some(id => !(l.audit_checklist as Record<string, any>)?.[id]);
-          if (!hasSelectedFailures) return false;
-        }
+        const score = l.score !== null ? l.score : 0;
+        if (score < filters.checklistScore) return false;
         
         if (selectedUnit !== 'all' && l.unit_id !== selectedUnit) return false;
         
@@ -86,12 +63,12 @@ const Relatorios = () => {
       });
 
       if (reportTargetLeads.length === 0) {
-        alert("Nenhum lead elegível para o relatório com os filtros selecionados.");
+        alert("Nenhum lead elegÃ­vel para o relatÃ³rio com os filtros selecionados.");
         setIsPreparingPDF(false);
         return;
       }
 
-      // 2. Buscar transcrições
+      // 2. Buscar transcriÃ§Ãµes
       const { data: messages } = await supabase
         .from('chat_messages')
         .select('*')
@@ -200,7 +177,7 @@ const Relatorios = () => {
   const currentLeads = baseCurrentLeads;
   const prevLeads = basePrevLeads;
 
-  // Score global do período — usa apenas leads auditados (lead.score da IA)
+  // Score global do perÃ­odo â€” usa apenas leads auditados (lead.score da IA)
   const currentLeadsWithScore = currentLeads.filter(l => l.score !== null);
   const prevLeadsWithScore    = prevLeads.filter(l => l.score !== null);
 
@@ -237,7 +214,7 @@ const Relatorios = () => {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
-  // Estado derivado da Paginação
+  // Estado derivado da PaginaÃ§Ã£o
   const totalPages = Math.ceil(auditedLeads.length / ITEMS_PER_PAGE);
   const paginatedLeads = auditedLeads.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -281,11 +258,11 @@ const Relatorios = () => {
       let e1Val = ((isTrue(checklist['1a']) ? 1 : 0) + (isTrue(checklist['1b']) ? 1 : 0)) / 2 * 100;
       mp.e1.push(e1Val);
 
-      // E2: Orçamento + Vídeo (2a, 2b, 2c)
+      // E2: OrÃ§amento + VÃ­deo (2a, 2b, 2c)
       let e2Val = ((isTrue(checklist['2a']) ? 1 : 0) + (isTrue(checklist['2b']) ? 1 : 0) + (isTrue(checklist['2c']) ? 1 : 0)) / 3 * 100;
       mp.e2.push(e2Val);
 
-      // E3: Upsell Mecânico (3a, 3b, 3c)
+      // E3: Upsell MecÃ¢nico (3a, 3b, 3c)
       let e3Val = ((isTrue(checklist['3a']) ? 1 : 0) + (isTrue(checklist['3b']) ? 1 : 0) + (isTrue(checklist['3c']) ? 1 : 0)) / 3 * 100;
       mp.e3.push(e3Val);
 
@@ -294,7 +271,7 @@ const Relatorios = () => {
       mp.e4.push(e4Val);
     }
     // Sempre acumula lead.score (se auditado) para o Score Geral
-    // (independente de ter checklist ou não)
+    // (independente de ter checklist ou nÃ£o)
   });
 
   const customAvg = (nums: number[]) => (nums.length > 0) ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
@@ -306,7 +283,7 @@ const Relatorios = () => {
       itemAvgs[key] = round((customAvg(mp.items[key]) || 0) * 100);
     });
 
-    // Score Geral = média do lead.score (fonte da IA), apenas auditados
+    // Score Geral = mÃ©dia do lead.score (fonte da IA), apenas auditados
     const mLeads = currentLeads.filter(l => (l.manager_id || 'sem_gerente') === mId);
     
     return {
@@ -322,7 +299,7 @@ const Relatorios = () => {
   }).sort((a, b) => (b.score || 0) - (a.score || 0));
 
   const ScoreBadge = ({ score }: { score: number | null }) => {
-    if (score === null) return <span className="text-white/20">—</span>;
+    if (score === null) return <span className="text-white/20">â€”</span>;
     return (
       <span className={`inline-flex items-center justify-center font-bold px-2 py-0.5 rounded text-[11px] border ${
         score >= 75 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
@@ -340,7 +317,7 @@ const Relatorios = () => {
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-foreground/70">{label}</span>
-            <span className="text-muted-foreground/30 font-medium">—</span>
+            <span className="text-muted-foreground/30 font-medium">â€”</span>
           </div>
           <div className="w-full h-1.5 rounded-full bg-black/5 dark:bg-white/5" />
         </div>
@@ -384,13 +361,13 @@ const Relatorios = () => {
     <>
     <div className="p-4 md:p-8 pb-32 print:hidden">
       
-      {/* ── Header & Filters ── */}
+      {/* â”€â”€ Header & Filters â”€â”€ */}
       <motion.div {...fadeUp(0)} className="mb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
         <div>
           <p className="label-caps text-indigo-400/70 mb-1">Analytics Premium</p>
-          <h1 className="text-2xl font-black text-foreground">Saúde do Atendimento</h1>
+          <h1 className="text-2xl font-black text-foreground">SaÃºde do Atendimento</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Métricas de qualidade, tempo de resposta e gargalos de SLA da rede.
+            MÃ©tricas de qualidade, tempo de resposta e gargalos de SLA da rede.
           </p>
         </div>
 
@@ -410,7 +387,7 @@ const Relatorios = () => {
               onChange={(e) => { setIsUpdating(true); setScoreOrder(e.target.value); setTimeout(() => setIsUpdating(false), 300); }}
               className="px-3 py-2 bg-card border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500"
             >
-              <option value="none">Ordenação (Score)</option>
+              <option value="none">OrdenaÃ§Ã£o (Score)</option>
               <option value="desc">Melhor Score</option>
               <option value="asc">Pior Score</option>
             </select>
@@ -421,7 +398,7 @@ const Relatorios = () => {
               className="px-3 py-2 bg-card border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-indigo-500"
             >
               <option value="none">Filtro de SLA</option>
-              <option value="critical">Risco/Críticos Topo</option>
+              <option value="critical">Risco/CrÃ­ticos Topo</option>
               <option value="ok">Atendidos Topo</option>
             </select>
           </div>
@@ -432,21 +409,13 @@ const Relatorios = () => {
               onChange={(d) => {
                 setIsUpdating(true);
                 setDateRange(d);
-                setCurrentPage(1); // Reseta paginação ao mudar filtro
+                setCurrentPage(1); // Reseta paginaÃ§Ã£o ao mudar filtro
                 setTimeout(() => setIsUpdating(false), 300);
               }} 
             />
             <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors shadow-[0_0_20px_rgba(99,102,241,0.25)]">
               <Download className="w-4 h-4" />
               Exportar XLS
-            </button>
-            <button 
-              onClick={handleCleanDB}
-              disabled={isCleaningDB}
-              className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl text-xs font-bold hover:bg-rose-500/20 transition-colors disabled:opacity-50"
-            >
-              <Trash2 className="w-4 h-4" />
-              {isCleaningDB ? "Limpando..." : "Limpar Mídias Antigas (>7d)"}
             </button>
             <button 
               onClick={() => setIsExportModalOpen(true)}
@@ -460,7 +429,7 @@ const Relatorios = () => {
         </div>
       </motion.div>
 
-      {/* ── KPI Cards Premium ── */}
+      {/* â”€â”€ KPI Cards Premium â”€â”€ */}
       <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'}`}>
         
         {/* Score Geral */}
@@ -475,7 +444,7 @@ const Relatorios = () => {
                 <>{metrics.score}<span className="text-3xl text-muted-foreground/60">%</span></>
               ) : (
                 <>
-                  <span className="text-muted-foreground/30 leading-none">—</span>
+                  <span className="text-muted-foreground/30 leading-none">â€”</span>
                   <span className="text-xs font-bold text-indigo-500/80 uppercase tracking-widest mt-2 bg-indigo-500/10 px-2 py-1 rounded-md">Pendente Processamento Lote</span>
                 </>
               )}
@@ -500,10 +469,10 @@ const Relatorios = () => {
                   {metrics.scoreChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {metrics.scoreChange >= 0 ? '+' : ''}{metrics.scoreChange}%
                 </span>
-                <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
+                <span className="text-xs text-muted-foreground font-medium">vs perÃ­odo anterior</span>
               </div>
             ) : (
-              <span className="text-xs text-muted-foreground/50 font-medium">Sem comparativo disponível</span>
+              <span className="text-xs text-muted-foreground/50 font-medium">Sem comparativo disponÃ­vel</span>
             )}
           </div>
         </motion.div>
@@ -514,9 +483,9 @@ const Relatorios = () => {
           <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.12)_0%,transparent_70%)] pointer-events-none group-hover:opacity-100 opacity-60 transition-opacity duration-500" />
           
           <div className="relative z-10">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 mb-4 opacity-80">Tempo Médio de Resposta (TMR)</p>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 mb-4 opacity-80">Tempo MÃ©dio de Resposta (TMR)</p>
             <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500">
-              {metrics.tmr !== null ? <>{metrics.tmr}<span className="text-3xl text-muted-foreground/60">m</span></> : <span className="text-muted-foreground/30">—</span>}
+              {metrics.tmr !== null ? <>{metrics.tmr}<span className="text-3xl text-muted-foreground/60">m</span></> : <span className="text-muted-foreground/30">â€”</span>}
             </h2>
             {metrics.tmrChange !== null ? (
               <div className="flex items-center gap-2">
@@ -524,10 +493,10 @@ const Relatorios = () => {
                   {metrics.tmrChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
                   {metrics.tmrChange <= 0 ? '' : '+'}{metrics.tmrChange}m {metrics.tmrChange <= 0 ? '(Melhoria)' : ''}
                 </span>
-                <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
+                <span className="text-xs text-muted-foreground font-medium">vs perÃ­odo anterior</span>
               </div>
             ) : (
-              <span className="text-xs text-muted-foreground/50 font-medium">Sem comparativo disponível</span>
+              <span className="text-xs text-muted-foreground/50 font-medium">Sem comparativo disponÃ­vel</span>
             )}
           </div>
         </motion.div>
@@ -538,7 +507,7 @@ const Relatorios = () => {
           <div className="absolute -left-1/4 -top-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.12)_0%,transparent_70%)] pointer-events-none group-hover:opacity-100 opacity-60 transition-opacity duration-500" />
           
           <div className="relative z-10">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400 mb-4 opacity-80">Orçamentos em Risco (SLA)</p>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-rose-600 dark:text-rose-400 mb-4 opacity-80">OrÃ§amentos em Risco (SLA)</p>
             <h2 className="text-6xl font-black text-foreground mb-6 tracking-tighter drop-shadow-sm group-hover:scale-[1.02] origin-left transition-transform duration-500">{metrics.slasRisk}</h2>
             {(metrics.slasChange !== 0 || hasData) ? (
               <div className="flex items-center gap-2">
@@ -546,17 +515,17 @@ const Relatorios = () => {
                   {metrics.slasChange <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
                   {metrics.slasChange >= 0 ? '+' : ''}{metrics.slasChange} leads
                 </span>
-                <span className="text-xs text-muted-foreground font-medium">vs período anterior</span>
+                <span className="text-xs text-muted-foreground font-medium">vs perÃ­odo anterior</span>
               </div>
             ) : (
-              <span className="text-xs text-muted-foreground/50 font-medium">Sem dados para o período</span>
+              <span className="text-xs text-muted-foreground/50 font-medium">Sem dados para o perÃ­odo</span>
             )}
           </div>
         </motion.div>
 
       </div>
 
-      {/* ── Performance por Etapa ── */}
+      {/* â”€â”€ Performance por Etapa â”€â”€ */}
       <motion.div {...fadeUp(0.25)} className={`mb-8 bg-card border border-border rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(0,0,0,0.02)]`}>
         <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-black/5 dark:bg-white/[0.02]">
           <div>
@@ -572,8 +541,8 @@ const Relatorios = () => {
                 <th className="px-8 py-4">Gerente</th>
                 <th className="px-8 py-4">Unidade</th>
                 <th className="px-8 py-4 text-center">E1. Cordialidade</th>
-                <th className="px-8 py-4 text-center">E2. Orçamento+Vídeo</th>
-                <th className="px-8 py-4 text-center">E3. Upsell Mecânico</th>
+                <th className="px-8 py-4 text-center">E2. OrÃ§amento+VÃ­deo</th>
+                <th className="px-8 py-4 text-center">E3. Upsell MecÃ¢nico</th>
                 <th className="px-8 py-4 text-center">E4. Encerramento</th>
                 <th className="px-8 py-4 text-center">Score Geral</th>
               </tr>
@@ -615,20 +584,20 @@ const Relatorios = () => {
 
                             {/* E2 */}
                             <div className="space-y-4">
-                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E2. Orçamento+Vídeo</h4>
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E2. OrÃ§amento+VÃ­deo</h4>
                               <div className="flex flex-col gap-4">
                                 <VisualMetricRow label="2a. Enviou link/valor claro" value={mp.itemAvgs['2a']} />
-                                <VisualMetricRow label="2b. Enviou evidência visual" value={mp.itemAvgs['2b']} />
-                                <VisualMetricRow label="2c. Explicou consequências" value={mp.itemAvgs['2c']} />
+                                <VisualMetricRow label="2b. Enviou evidÃªncia visual" value={mp.itemAvgs['2b']} />
+                                <VisualMetricRow label="2c. Explicou consequÃªncias" value={mp.itemAvgs['2c']} />
                               </div>
                             </div>
 
                             {/* E3 */}
                             <div className="space-y-4">
-                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E3. Upsell Mecânico</h4>
+                              <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">E3. Upsell MecÃ¢nico</h4>
                               <div className="flex flex-col gap-4">
                                 <VisualMetricRow label="3a. Ofereceu melhoria (Upsell)" value={mp.itemAvgs['3a']} />
-                                <VisualMetricRow label="3b. Enviou evidência extra" value={mp.itemAvgs['3b']} />
+                                <VisualMetricRow label="3b. Enviou evidÃªncia extra" value={mp.itemAvgs['3b']} />
                                 <VisualMetricRow label="3c. Explicou necessidade extra" value={mp.itemAvgs['3c']} />
                               </div>
                             </div>
@@ -650,7 +619,7 @@ const Relatorios = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-8 py-8 text-center text-muted-foreground/50">Sem dados de performance para este período.</td>
+                  <td colSpan={7} className="px-8 py-8 text-center text-muted-foreground/50">Sem dados de performance para este perÃ­odo.</td>
                 </tr>
               )}
             </tbody>
@@ -658,12 +627,12 @@ const Relatorios = () => {
         </div>
       </motion.div>
 
-      {/* ── Log de Auditoria ── */}
+      {/* â”€â”€ Log de Auditoria â”€â”€ */}
       <motion.div {...fadeUp(0.3)} className={`bg-card border border-border rounded-3xl overflow-hidden transition-opacity duration-300 ${isUpdating ? 'opacity-40' : 'opacity-100'} shadow-[0_0_80px_rgba(0,0,0,0.02)]`}>
         <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-black/5 dark:bg-white/[0.02]">
           <div>
             <h3 className="text-base font-black text-foreground">Log de Auditorias Recentes</h3>
-            <p className="text-xs font-medium text-muted-foreground mt-1">Transparência total nos apontamentos de qualidade.</p>
+            <p className="text-xs font-medium text-muted-foreground mt-1">TransparÃªncia total nos apontamentos de qualidade.</p>
           </div>
           <Target className="w-5 h-5 text-muted-foreground/30" />
         </div>
@@ -672,7 +641,7 @@ const Relatorios = () => {
           <table className="w-full text-left text-sm">
             <thead className="bg-black/5 dark:bg-white/[0.01] border-b border-border text-xs uppercase text-muted-foreground tracking-wider font-bold">
               <tr>
-                <th className="px-8 py-4">Cliente / Veículo</th>
+                <th className="px-8 py-4">Cliente / VeÃ­culo</th>
                 <th className="px-8 py-4">Unidade</th>
                 <th className="px-8 py-4">Status Funil</th>
                 <th className="px-8 py-4 text-right">Score Auditado</th>
@@ -710,14 +679,14 @@ const Relatorios = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-8 py-8 text-center text-muted-foreground/50">Nenhuma auditoria registrada neste período.</td>
+                  <td colSpan={4} className="px-8 py-8 text-center text-muted-foreground/50">Nenhuma auditoria registrada neste perÃ­odo.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
         
-        {/* Controles de Paginação */}
+        {/* Controles de PaginaÃ§Ã£o */}
         {totalPages > 1 && (
           <div className="px-8 py-4 border-t border-border flex items-center justify-between bg-black/[0.01] dark:bg-white/[0.01]">
             <p className="text-xs text-muted-foreground font-medium">
@@ -731,7 +700,7 @@ const Relatorios = () => {
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="text-xs font-bold text-foreground mx-2">Página {currentPage} de {totalPages}</span>
+              <span className="text-xs font-bold text-foreground mx-2">PÃ¡gina {currentPage} de {totalPages}</span>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
@@ -772,7 +741,7 @@ const Relatorios = () => {
 
     </div>
 
-    {/* Printable PDF Report (Hidden in UI mas acessível para o html2pdf) */}
+    {/* Printable PDF Report (Hidden in UI mas acessÃ­vel para o html2pdf) */}
     {pdfData && (
       <div className="absolute opacity-0 pointer-events-none -z-50 w-[800px] p-8">
 
@@ -784,27 +753,27 @@ const Relatorios = () => {
             return (
               <div key={unitId} id={`pdf-unit-${unitId}`} className="mb-12 bg-white text-black p-8">
                 <div className="text-center mb-8 border-b border-gray-200 pb-4">
-                  <h1 className="text-3xl font-black text-black tracking-tight">Relatório de Auditoria</h1>
+                  <h1 className="text-3xl font-black text-black tracking-tight">RelatÃ³rio de Auditoria</h1>
                   <p className="text-gray-500 mt-2 font-medium">Filtros aplicados</p>
                 </div>
                 <h2 className="text-2xl font-black border-b-2 border-black pb-2 mb-6">{unitName}</h2>
                 <div className="space-y-12">
                   {unitLeads.map((lead) => {
-                    const managerName = managers.find(m => m.id === lead.manager_id)?.name || 'Gerente Não Atribuído';
+                    const managerName = managers.find(m => m.id === lead.manager_id)?.name || 'Gerente NÃ£o AtribuÃ­do';
                     
                     return (
                       <div key={lead.id} className="break-inside-avoid print:break-inside-avoid border border-gray-300 rounded-2xl p-6 bg-white shadow-sm">
                         
-                        {/* Cabeçalho do Lead */}
+                        {/* CabeÃ§alho do Lead */}
                         <div className="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
                           <div>
                             <h3 className="text-xl font-bold text-black">{lead.customer_name || 'Cliente'}</h3>
-                            <p className="text-sm font-semibold text-gray-600 mt-1">Veículo: {lead.customer_vehicle || 'Não informado'}</p>
+                            <p className="text-sm font-semibold text-gray-600 mt-1">VeÃ­culo: {lead.customer_vehicle || 'NÃ£o informado'}</p>
                             <p className="text-xs text-gray-500 mt-1">
                               Status: {lead.funnel_stage === 'closed_lost' ? 'Perdido' : 'Ganho'} | Data: {new Date(lead.created_at).toLocaleDateString()}
                             </p>
                             <p className="text-xs font-bold text-indigo-600 mt-1">
-                              Gerente Responsável: {managerName}
+                              Gerente ResponsÃ¡vel: {managerName}
                             </p>
                           </div>
                           <div className="text-right">
@@ -836,9 +805,9 @@ const Relatorios = () => {
                           </div>
                         </div>
 
-                        {/* Transcrição Limpa */}
+                        {/* TranscriÃ§Ã£o Limpa */}
                         <div>
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 border-b border-gray-100 pb-2">Evidências (Transcrição)</h3>
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 border-b border-gray-100 pb-2">EvidÃªncias (TranscriÃ§Ã£o)</h3>
                           <div className="space-y-3 text-sm">
                             {(pdfData.messagesByLead[lead.id] || []).map(msg => {
                               if (msg.sender_type === 'system') return null; // Ignorar logs de sistema
