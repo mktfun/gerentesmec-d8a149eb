@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cpu, X, Save, Sparkles, AlertTriangle, Eye, Activity, Database, Check } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
@@ -342,12 +342,43 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-foreground">JSON de Critérios de AvalAuditoriação (Checklist Dinâmico)</label>
+                  <label className="text-sm font-bold text-foreground">JSON de Critérios de Auditoria (Checklist Dinâmico)</label>
                   <p className="text-xs text-muted-foreground">Defina os pesos de cada etapa para a função <code className="bg-black/10 dark:bg-white/10 px-1 rounded">save_lead_audit</code>.</p>
                   <textarea 
                     value={criterAuditoria} onChange={e => setCriterAuditoria(e.target.value)}
                     className="w-full h-32 bg-muted border border-border rounded-xl p-4 text-xs font-mono text-emerald-500 dark:text-emerald-300 focus:border-emerald-500 outline-none resize-none"
                   />
+                </div>
+              </div>
+
+              {/* Local Twin / CLI Runner */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <Cpu className="w-3.5 h-3.5" /> Gêmeo Local (CLI Runner)
+                </h3>
+                <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border">
+                  <p className="text-sm font-bold text-foreground mb-1">Auditoria via Terminal (Agy / Gemini CLI)</p>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Para ignorar a Edge Function na nuvem e rodar a IA 100% no seu terminal local (poupando custos e ganhando velocidade de debug), copie o Super Prompt abaixo e cole no seu CLI.
+                  </p>
+                  
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <textarea 
+                      readOnly
+                      value={`Você é o Agente Auditor Final. A partir de agora, você atua diretamente no banco de dados do meu projeto para avaliar Leads que acabaram de ser fechados ('closed_won' ou 'closed_lost').\n\nSua missão é rodar o ciclo de vida completo do Lead através da API REST do Supabase. Consulte scripts/ai-cli-runner.md para ler a documentação completa, as queries exatas e o schema JSON para fazer o update do lead.`}
+                      className="relative w-full h-24 bg-black/90 dark:bg-black/40 border border-border rounded-xl p-4 text-xs font-mono text-emerald-400 focus:outline-none resize-none"
+                    />
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText("Você é o Agente Auditor Final. A partir de agora, você atua diretamente no banco de dados do meu projeto para avaliar Leads que acabaram de ser fechados ('closed_won' ou 'closed_lost').\n\nSua missão é rodar o ciclo de vida completo do Lead através da API REST do Supabase. Consulte scripts/ai-cli-runner.md para ler a documentação completa, as queries exatas e o schema JSON para fazer o update do lead.");
+                        alert("Super Prompt copiado para a área de transferência!");
+                      }}
+                      className="absolute top-2 right-2 px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-[10px] font-bold uppercase tracking-wider transition-colors"
+                    >
+                      Copiar Prompt
+                    </button>
+                  </div>
                 </div>
               </div>
 
