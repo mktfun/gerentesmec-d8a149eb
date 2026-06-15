@@ -29,11 +29,11 @@ const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEn
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-4 h-full overflow-x-auto pb-4">
+      <div className="flex gap-4 h-full overflow-x-auto pb-4 scrollbar-thin">
         {COLUMNS.map(col => {
           const colLeads = getColumnLeads(col.id);
           return (
-            <div key={col.id} className="w-72 shrink-0 flex flex-col gap-3 bg-muted/20 p-2 rounded-2xl border border-border">
+            <div key={col.id} className="w-[260px] min-w-[250px] shrink-0 flex flex-col gap-3 bg-muted/20 p-2 rounded-2xl border border-border">
               {/* Column header */}
               <div className="flex items-center gap-2 px-2 py-1">
                 <div className={`w-2 h-2 rounded-full ${col.dot}`} />
@@ -67,7 +67,7 @@ const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEn
                               opacity: snapshot.isDragging ? 0.8 : 1,
                             }}
                           >
-                            <KanbanCard lead={lead} onClick={() => onSelectLead(lead)} />
+                            <KanbanCard lead={lead} isDragging={snapshot.isDragging} onClick={() => onSelectLead(lead)} />
                           </div>
                         )}
                       </Draggable>

@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen, LogOut, ClipboardCheck
+  LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen, LogOut, ClipboardCheck, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { useAppData } from '@/context/AppDataContext';
@@ -23,6 +23,17 @@ const DashboardLayout: React.FC = () => {
   const { isDark, toggle } = useTheme();
   const { user } = useAuth();
   const { isTvMode, setIsTvMode, leads, businessHours, managers } = useAppData();
+  const [isCollapsed, setIsCollapsed] = React.useState(() => {
+    return localStorage.getItem('sidebar_collapsed') === 'true';
+  });
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('sidebar_collapsed', String(next));
+      return next;
+    });
+  };
   
   const isUnitManager = user?.user_metadata?.role === 'unit_manager' || managers.some(m => m.auth_user_id === user?.id);
 
@@ -40,24 +51,28 @@ const DashboardLayout: React.FC = () => {
 
       {/* ── Sidebar ─────────────────────────────────────────── */}
       {!isTvMode && (
-        <aside className="w-[220px] shrink-0 fixed inset-y-0 left-0 z-20 hidden md:flex flex-col
-          bg-sidebar border-r border-sidebar-border">
+        <aside className={`${isCollapsed ? 'w-[72px]' : 'w-[220px]'} shrink-0 fixed inset-y-0 left-0 z-20 hidden md:flex flex-col
+          bg-sidebar border-r border-sidebar-border transition-all duration-300`}>
 
         {/* Logo */}
-        <div className="h-16 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
-          <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center">
+        <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-2.5 px-5'} border-b border-sidebar-border transition-all`}>
+          <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
             <Wrench className="w-4 h-4 text-primary" />
           </div>
-          <span className="font-black text-base text-sidebar-foreground tracking-tight">
-            GerentesMec
-          </span>
+          {!isCollapsed && (
+            <span className="font-black text-base text-sidebar-foreground tracking-tight whitespace-nowrap">
+              GerentesMec
+            </span>
+          )}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-5 flex flex-col gap-1">
-          <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30">
-            Menu
-          </p>
+        <nav className="flex-1 px-3 py-5 flex flex-col gap-1 overflow-x-hidden">
+          {!isCollapsed && (
+            <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30 whitespace-nowrap">
+              Menu
+            </p>
+          )}
           {navItems.map(({ to, label, icon: Icon, end }) => {
             if (isUnitManager && (to === '/config' || to === '/gerentes')) return null;
             return (
@@ -66,18 +81,19 @@ const DashboardLayout: React.FC = () => {
                 to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
-                 transition-all duration-200 focus-visible:outline-primary
+                `flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-xl text-sm font-semibold
+                 transition-all duration-200 focus-visible:outline-primary relative group
                  ${isActive
-                   ? 'bg-primary/15 text-primary border-l-2 border-primary pl-[10px]'
+                   ? isCollapsed ? 'bg-primary/15 text-primary' : 'bg-primary/15 text-primary border-l-2 border-primary pl-[10px]'
                    : 'text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent'
                  }`
               }
+              title={isCollapsed ? label : undefined}
             >
               <Icon className="w-4 h-4 shrink-0" />
-              <span className="flex-1 text-left">{label}</span>
+              {!isCollapsed && <span className="flex-1 text-left whitespace-nowrap">{label}</span>}
               {to === '/crm' && dangerCount > 0 && (
-                <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-[10px] font-black text-rose-500 shrink-0">
+                <span className={`flex items-center justify-center bg-rose-500/10 border border-rose-500/20 text-[10px] font-black text-rose-500 shrink-0 ${isCollapsed ? 'absolute -top-1 -right-1 min-w-4 h-4 rounded-full' : 'min-w-5 h-5 px-1.5 rounded-md'}`}>
                   {dangerCount}
                 </span>
               )}
@@ -86,13 +102,14 @@ const DashboardLayout: React.FC = () => {
           })}
           <NavLink
             to="/checklist"
-            className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-300 group relative
+            className={({ isActive }) => `flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 rounded-xl text-sm font-semibold transition-all duration-300 group relative
               ${isActive 
                 ? 'bg-primary text-primary-foreground shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
                 : 'text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`}
+            title={isCollapsed ? 'Auditoria Presencial' : undefined}
           >
-            <ClipboardCheck className="w-4 h-4 transition-transform group-hover:scale-110" />
-            <span>Auditoria Presencial</span>
+            <ClipboardCheck className="w-4 h-4 transition-transform group-hover:scale-110 shrink-0" />
+            {!isCollapsed && <span className="whitespace-nowrap">Auditoria Presencial</span>}
           </NavLink>
         </nav>
 
@@ -101,24 +118,29 @@ const DashboardLayout: React.FC = () => {
           <NavLink
             to="/apresentacao"
             className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors
+              `w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-xl text-sm font-semibold transition-colors
                ${isActive ? 'bg-primary/15 text-primary' : 'text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent'}`
             }
+            title={isCollapsed ? 'Como Funciona' : undefined}
           >
-            <BookOpen className="w-4 h-4" />
-            Como Funciona
+            <BookOpen className="w-4 h-4 shrink-0" />
+            {!isCollapsed && <span className="whitespace-nowrap">Como Funciona</span>}
           </NavLink>
 
-          <button onClick={async () => await supabase.auth.signOut()} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/10 transition-colors">
-            <LogOut className="w-4 h-4" />
-            Sair do Sistema
+          <button onClick={async () => await supabase.auth.signOut()} className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-xl text-sm font-semibold text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/10 transition-colors`} title={isCollapsed ? 'Sair do Sistema' : undefined}>
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!isCollapsed && <span className="whitespace-nowrap">Sair do Sistema</span>}
+          </button>
+          
+          <button onClick={toggleSidebar} className={`w-full flex items-center justify-center py-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors mt-2`}>
+            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
       </aside>
       )}
 
       {/* ── Main ──────────────────────────────────────────────── */}
-      <main className={`flex-1 flex flex-col ${isTvMode ? 'h-screen w-full' : 'md:ml-[220px] min-h-screen pb-24 md:pb-0'}`}>
+      <main className={`flex-1 flex flex-col transition-all duration-300 ${isTvMode ? 'h-screen w-full' : (isCollapsed ? 'md:ml-[72px]' : 'md:ml-[220px]') + ' min-h-screen pb-24 md:pb-0'}`}>
 
         {/* Topbar */}
         {!isTvMode && (

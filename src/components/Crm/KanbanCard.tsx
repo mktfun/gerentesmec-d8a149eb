@@ -6,6 +6,7 @@ import { isLeadDanger } from '@/utils/metrics';
 
 interface Props {
   lead: Lead;
+  isDragging?: boolean;
   onClick: () => void;
 }
 
@@ -21,7 +22,7 @@ const formatMoney = (val: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 };
 
-const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
+const KanbanCard: React.FC<Props> = ({ lead, isDragging, onClick }) => {
   const { managers, units, deleteLead } = useAppData();
   let manager = managers.find(m => m.id === lead.manager_id);
   if (!manager) manager = managers.find(m => m.unit_id === lead.unit_id);
@@ -61,11 +62,14 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
   }
 
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`rounded-xl border border-t-2 border-border bg-card cursor-pointer
-        p-3.5 space-y-2.5 ${stageColors[lead.funnel_stage]} shadow-sm
-        hover:border-primary/30 hover:shadow-md transition-shadow group relative`}
+      className={`rounded-xl border border-t-2 bg-card cursor-pointer
+        p-3 space-y-2 ${stageColors[lead.funnel_stage]} 
+        ${isDragging ? 'shadow-xl border-primary/50 rotate-1 z-50' : 'border-border shadow-sm hover:border-primary/30 hover:shadow-md'} 
+        transition-all duration-200 group relative`}
     >
       {/* Action Buttons (visible on hover) */}
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 items-center">
@@ -81,27 +85,28 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
         </button>
       </div>
 
-      {/* Header */}
+      {/* Header & Ticket Value */}
       <div className="flex items-start justify-between gap-2 pr-5">
-        <div>
-          <p className="text-sm font-bold text-foreground leading-tight">{lead.customer_name}</p>
-          <p className="text-xs text-muted-foreground font-medium">{lead.customer_vehicle}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-foreground leading-tight truncate">{lead.customer_name}</p>
+          <p className="text-[11px] text-muted-foreground font-medium truncate">{lead.customer_vehicle}</p>
         </div>
-        {lead.closing_summary && (
-          <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-muted-foreground
-            bg-muted border border-border px-1.5 py-0.5 rounded-full" title="Parecer disponível">
-            <FileText className="w-3 h-3" />
-          </span>
-        )}
+        
+        <div className="flex flex-col items-end shrink-0 gap-1">
+          {lead.ticket_value !== null && (
+            <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400
+              bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 whitespace-nowrap">
+              {formatMoney(lead.ticket_value)}
+            </div>
+          )}
+          {lead.closing_summary && (
+            <span className="flex items-center justify-center w-5 h-5 text-muted-foreground
+              bg-muted border border-border rounded-full" title="Parecer disponível">
+              <FileText className="w-3 h-3" />
+            </span>
+          )}
+        </div>
       </div>
-
-      {/* Ticket Value */}
-      {lead.ticket_value !== null && (
-        <div className="flex items-center gap-1 text-sm font-black text-emerald-600 dark:text-emerald-400
-          bg-emerald-500/5 px-2 py-1 rounded-md w-fit border border-emerald-500/10">
-          {formatMoney(lead.ticket_value)}
-        </div>
-      )}
 
       {/* Meta row */}
       <div className="flex items-center gap-2">
@@ -136,16 +141,16 @@ const KanbanCard: React.FC<Props> = ({ lead, onClick }) => {
 
       {/* Score */}
       {lead.score !== null && (
-        <div className="pt-1 border-t border-border">
+        <div className="pt-1.5 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Score</span>
-            <span className={`text-xs font-black ${
+            <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Score</span>
+            <span className={`text-[11px] font-black ${
               lead.score >= 75 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
             }`}>{Math.round(lead.score)}%</span>
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
