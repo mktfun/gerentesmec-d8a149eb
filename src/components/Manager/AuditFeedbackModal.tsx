@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,7 +19,7 @@ export const AuditFeedbackModal: React.FC<Props> = ({ isOpen, onClose, mechanicI
 
   const handleSave = async () => {
     if (!feedback.trim()) {
-      toast.error('Descreva o que o sistema avaliou errado ou certo.');
+      toast.error('Descreva o que o IA avaliou errado ou certo.');
       return;
     }
 
@@ -34,7 +34,7 @@ export const AuditFeedbackModal: React.FC<Props> = ({ isOpen, onClose, mechanicI
       });
 
       if (error) throw error;
-      toast.success('Feedback salvo! O sistema aprenderá com esta correção na próxima vez.');
+      toast.success('Feedback salvo! O IA aprenderá com esta correção na próxima vez.');
       onClose();
       setFeedback('');
     } catch (err: any) {
@@ -52,7 +52,7 @@ export const AuditFeedbackModal: React.FC<Props> = ({ isOpen, onClose, mechanicI
             Corrigir Auditoria
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Descreva o que o sistema errou nesta avaliação. Suas instruções guiarão o sistema no futuro com este mecânico.
+            Descreva o que o IA errou nesta avaliação. Suas instruções guiarão o IA no futuro com este mecânico.
           </DialogDescription>
         </DialogHeader>
 
@@ -60,7 +60,7 @@ export const AuditFeedbackModal: React.FC<Props> = ({ isOpen, onClose, mechanicI
           <Textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            placeholder="Ex: O sistema deduziu que a peça estava suja, mas era apenas a sombra do elevador..."
+            placeholder="Ex: O IA deduziu que a peça estava suja, mas era apenas a sombra do elevador..."
             className="min-h-[120px] bg-black/20 border-white/10 focus-visible:ring-emerald-500 text-sm"
           />
         </div>

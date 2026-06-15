@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
@@ -841,7 +841,7 @@ const Relatorios = () => {
                           <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 border-b border-gray-100 pb-2">Evidências (Transcrição)</h3>
                           <div className="space-y-3 text-sm">
                             {(pdfData.messagesByLead[lead.id] || []).map(msg => {
-                              if (msg.sender_type === 'system') return null; // Ignorar logs de sistema
+                              if (msg.sender_type === 'system') return null; // Ignorar logs de IA
                               const isManager = msg.sender_type === 'user' || msg.sender_type === 'bot';
                               return (
                                 <div key={msg.id} className={`flex ${isManager ? 'justify-end' : 'justify-start'} break-inside-avoid print:break-inside-avoid`}>

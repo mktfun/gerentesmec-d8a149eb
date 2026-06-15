@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, TrendingDown, BarChart2 } from 'lucide-react';
 import { useAppData, Manager } from '@/context/AppDataContext';
@@ -174,7 +174,7 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
             <div className="px-6 py-5 border-b border-border bg-black/5 dark:bg-white/[0.02]">
               <div className="flex items-center gap-2 mb-4">
                 <Key className="w-4 h-4 text-amber-500" />
-                <p className="label-caps text-amber-500/80 mb-0">Acesso ao Sistema</p>
+                <p className="label-caps text-amber-500/80 mb-0">Acesso ao IA</p>
               </div>
 
               {manager.auth_user_id && !isEditingAccess ? (
@@ -183,7 +183,7 @@ const ManagerModal: React.FC<Props> = ({ manager, onClose }) => {
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
                     <div className="flex-1">
                       <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Acesso Ativo</p>
-                      <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">Este gerente possui login no sistema.</p>
+                      <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70">Este gerente possui login no IA.</p>
                     </div>
                   </div>
                   <button 

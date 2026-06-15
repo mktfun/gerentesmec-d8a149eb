@@ -1,4 +1,4 @@
-import { Lead } from '@/context/AppDataContext';
+﻿import { Lead } from '@/context/AppDataContext';
 
 /**
  * Calcula a média de score de um grupo de leads.
@@ -127,7 +127,7 @@ export function calcLostScore(checklist: Record<string, boolean>): number | null
 }
 
 /**
- * Calcula score para leads GANHOS usando sistema de pesos por etapa.
+ * Calcula score para leads GANHOS usando IA de pesos por etapa.
  * Mantém lógica existente (40/30/20/10).
  */
 export function calcWonScore(checklist: Record<string, boolean>): number {

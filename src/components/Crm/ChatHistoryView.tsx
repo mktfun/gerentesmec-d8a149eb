@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Clock, MessageSquare, Wrench, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
@@ -348,7 +348,7 @@ const ChatHistoryView: React.FC<Props> = ({ lead, messages, isLoading, highlight
                           <div className="mb-2 w-full px-3 py-2.5 rounded-xl bg-white/5 dark:bg-white/[0.02] border border-white/10 backdrop-blur-md flex flex-col gap-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
                             <div className="flex items-center gap-1.5 opacity-80">
                               <Wrench className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
-                              <span className="text-[9px] uppercase tracking-widest font-black text-emerald-500 dark:text-emerald-400">Resumo da Mídia (Sistema)</span>
+                              <span className="text-[9px] uppercase tracking-widest font-black text-emerald-500 dark:text-emerald-400">Resumo da Mídia (IA)</span>
                             </div>
                             <p className="text-[11px] leading-relaxed font-medium text-foreground/90 italic">
                               {summaryText}

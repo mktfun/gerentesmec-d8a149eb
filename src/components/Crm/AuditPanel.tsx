@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target, RefreshCw, AlertCircle } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
@@ -66,7 +66,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       if (error) throw error;
       
       const { data: urlData } = supabase.storage.from('evidences').getPublicUrl(fileName);
-      setNotes(prev => prev + (prev ? '\n' : '') + `[EvidêncSistema: ${file.name}](${urlData.publicUrl})\n`);
+      setNotes(prev => prev + (prev ? '\n' : '') + `[Evidência: ${file.name}](${urlData.publicUrl})\n`);
     } catch (err: any) {
       alert('Erro ao subir imagem: ' + err.message);
     } finally {
@@ -125,13 +125,13 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
     if (isSyncing || realMessages.length === 0) return;
     setIsSyncing(true);
     try {
-      let consolidated = "CONVERSA CONSOLIDADA PARA AVALSistemaÇÃO MANUAL:\n\n";
+      let consolidated = "CONVERSA CONSOLIDADA PARA AvaliaÇÃO MANUAL:\n\n";
       realMessages.forEach(msg => {
         const sender = msg.sender_type === 'contact' ? 'Contato' : 'Agente';
         let contentStr = msg.content || '';
-        if (msg.medSistema_url || msg.medSistema_type) {
-          const type = msg.medSistema_type?.split('/')[0] || 'anexo';
-          contentStr += ` [ANEXO ENVSistemaDO: ${type}]`;
+        if (msg.media_url || msg.media_type) {
+          const type = msg.media_type?.split('/')[0] || 'anexo';
+          contentStr += ` [ANEXO ENVIADO: ${type}]`;
         }
         consolidated += `[${sender}]: ${contentStr.trim()}\n`;
       });
@@ -161,7 +161,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
       // Optionally notify success
     } catch (error) {
       console.error("Manual sync failed:", error);
-      alert("Falha ao sincronizar com a Sistema.");
+      alert("Falha ao sincronizar com a IA.");
     } finally {
       setIsSyncing(false);
     }
@@ -191,14 +191,14 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                   strokeWidth="9"
                   fill="none"
                   strokeLinecap="round"
-                  initSistemal={{ strokeDasharray: `0 ${circumference}` }}
+                  initial={{ strokeDasharray: `0 ${circumference}` }}
                   animate={{ strokeDasharray: `${(rounded / 100) * circumference} ${circumference}` }}
                   transition={{ duration: 0.9, ease: 'easeOut' }}
                   style={{ filter: `drop-shadow(0 0 6px ${scoreColor}70)` }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <motion.span key={rounded} initSistemal={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                <motion.span key={rounded} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                   className="text-sm font-black text-foreground leading-none">{rounded}</motion.span>
                 <span className="text-[7px] text-muted-foreground font-bold uppercase tracking-wider">pts</span>
               </div>
@@ -300,7 +300,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
             <div className="relative z-10 w-full">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Parecer da AuditorSistema</h4>
+                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Parecer da Auditoria</h4>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                 {(lead as any).ai_feedback}
@@ -413,7 +413,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
                         </div>
                         {checked[item.id] && lead.audit_checklist_messages?.[item.id] && (
                           <button
-                            title="Ver evidêncSistema no chat"
+                            title="Ver Evidência no chat"
                             onClick={(e) => {
                               e.stopPropagation();
                               setHighlightMessageId(lead.audit_checklist_messages![item.id]);
@@ -438,7 +438,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
         {/* Evidence */}
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
-            Dossiê & EvidêncSistemas
+            Dossiê & Evidências
           </p>
           <textarea
             value={notes}
@@ -464,7 +464,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
               <UploadCloud className="w-5 h-5 text-muted-foreground/30 group-hover:text-indigo-500 transition-colors" />
             )}
             <p className="text-xs font-semibold text-muted-foreground/60 group-hover:text-muted-foreground">
-              {isUploading ? 'EnvSistemando...' : 'Clique para anexar imagem'}
+              {isUploading ? 'Enviando...' : 'Clique para anexar imagem'}
             </p>
           </label>
         </div>

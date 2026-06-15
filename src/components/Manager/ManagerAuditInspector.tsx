@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
@@ -74,7 +74,7 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
             <div className="flex items-center gap-2">
               <Sparkles className={`w-3.5 h-3.5 ${lead.funnel_stage === 'closed_won' ? 'text-emerald-500' : 'text-rose-500'}`} />
               <span className={`text-[10px] font-black uppercase tracking-widest ${lead.funnel_stage === 'closed_won' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                Feedback do Sistema ({lead.funnel_stage === 'closed_won' ? 'Ganho' : 'Perdido'})
+                Feedback do IA ({lead.funnel_stage === 'closed_won' ? 'Ganho' : 'Perdido'})
               </span>
             </div>
             <p className={`text-xs font-semibold leading-relaxed pl-5 ${isDark ? 'text-white/80' : 'text-black/80'}`}>

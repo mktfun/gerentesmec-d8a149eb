@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -127,9 +127,9 @@ const DashboardLayout: React.FC = () => {
             {!isCollapsed && <span className="whitespace-nowrap">Como Funciona</span>}
           </NavLink>
 
-          <button onClick={async () => await supabase.auth.signOut()} className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-xl text-sm font-semibold text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/10 transition-colors`} title={isCollapsed ? 'Sair do Sistema' : undefined}>
+          <button onClick={async () => await supabase.auth.signOut()} className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-xl text-sm font-semibold text-rose-500/70 hover:text-rose-500 hover:bg-rose-500/10 transition-colors`} title={isCollapsed ? 'Sair do IA' : undefined}>
             <LogOut className="w-4 h-4 shrink-0" />
-            {!isCollapsed && <span className="whitespace-nowrap">Sair do Sistema</span>}
+            {!isCollapsed && <span className="whitespace-nowrap">Sair do IA</span>}
           </button>
           
           <button onClick={toggleSidebar} className={`w-full flex items-center justify-center py-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors mt-2`}>

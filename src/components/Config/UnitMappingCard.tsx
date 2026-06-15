@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, AlertCircle, ChevronDown, ExternalLink, Trash2 } from 'lucide-react';
 import { Unit, Manager } from '@/context/AppDataContext';
@@ -78,10 +78,10 @@ const UnitMappingCard: React.FC<Props> = ({ unit, manager, slaMinutes, unitScore
           <div className="p-3 rounded-xl bg-muted/50 border border-border">
             <p className="text-xs font-bold text-foreground mb-1.5 flex items-center gap-1.5">
               <ExternalLink className="w-3.5 h-3.5 text-primary" />
-              Como o sistema identifica esta unidade
+              Como o IA identifica esta unidade
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Quando uma conversa chega pelo Chatwoot, o sistema lê o campo{' '}
+              Quando uma conversa chega pelo Chatwoot, o IA lê o campo{' '}
               <code className="bg-muted px-1 py-0.5 rounded text-primary font-mono text-[11px]">inbox.name</code>.
               Se o valor for <span className="font-bold text-foreground">"{unit.name}"</span>,
               a conversa é atribuída a esta unidade e ao gerente{' '}

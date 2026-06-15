@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw, Copy, Check, AlertTriangle } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
@@ -127,7 +127,7 @@ const Config = () => {
 
       {/* Page header */}
       <motion.div {...fadeUp(0)} className="mb-8">
-        <p className="label-caps text-primary/70 mb-1">Sistema</p>
+        <p className="label-caps text-primary/70 mb-1">IA</p>
         <h1 className="text-2xl font-black text-foreground">Configurações</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Configure a integração com o canal de mensagens e defina as regras por unidade.

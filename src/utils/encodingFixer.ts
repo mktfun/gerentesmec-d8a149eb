@@ -1,4 +1,4 @@
-/**
+﻿/**
  * encodingFixer.ts
  * 
  * Utilitário para limpar textos corrompidos (mojibake) que possam 
@@ -36,7 +36,7 @@ export function sanitizeMojibake(text: string): string {
     .replace(/Ãƒ/g, 'Ã')
     .replace(/Ã•/g, 'Õ')
     .replace(/Ã‡/g, 'Ç')
-    // Outros casos comuns identificados no sistema
+    // Outros casos comuns identificados no IA
     .replace(/SÃ¡b/g, 'Sáb')
     .replace(/MÃ©dia/g, 'Média')
     .replace(/Ãšltimos/g, 'Últimos')

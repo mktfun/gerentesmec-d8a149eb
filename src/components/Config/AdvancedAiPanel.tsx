@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cpu, X, Save, Sparkles, AlertTriangle, Eye, Activity, Database, Check } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
@@ -174,7 +174,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-foreground flex items-center gap-2">
-                    Sistema de AuditorAuditoria <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-500 dark:text-rose-400 text-[10px] uppercase tracking-widest font-bold">DANGER ZONE</span>
+                    IA de AuditorAuditoria <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-500 dark:text-rose-400 text-[10px] uppercase tracking-widest font-bold">DANGER ZONE</span>
                   </h2>
                   <p className="text-xs text-muted-foreground">Cost-Efficient Autonomous Routing & Scoring</p>
                 </div>
@@ -257,7 +257,7 @@ export const AdvancedAiPanel: React.FC<Props> = ({ isOpen, onClose }) => {
                       {pendingCount > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />}
                     </p>
                     <p className="text-[10px] text-muted-foreground leading-tight mt-0.5 max-w-[300px]">
-                      Se o servidor Auditoria local cair, as avalAuditoriações acumulam aqui. O sistema verifica periodicamente.
+                      Se o servidor Auditoria local cair, as avalAuditoriações acumulam aqui. O IA verifica periodicamente.
                     </p>
                   </div>
                   <div className="flex items-center gap-4">

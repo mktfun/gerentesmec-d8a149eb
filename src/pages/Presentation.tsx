@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   ShieldCheck, Clock, MessageSquare, Target, 
@@ -33,7 +33,7 @@ const Presentation = () => {
         </motion.h1>
         
         <motion.p {...fadeUp(0.3)} className="text-lg md:text-xl text-muted-foreground max-w-2xl font-medium leading-relaxed mb-12">
-          Deixe o sistema trabalhar por você. Nossa plataforma monitora o WhatsApp da sua oficina em tempo real, organizando orçamentos e garantindo que nenhum cliente fique esperando.
+          Deixe o IA trabalhar por você. Nossa plataforma monitora o WhatsApp da sua oficina em tempo real, organizando orçamentos e garantindo que nenhum cliente fique esperando.
         </motion.p>
       </section>
 
@@ -41,7 +41,7 @@ const Presentation = () => {
       <section className="max-w-6xl mx-auto px-6 py-24">
         <motion.div {...fadeUp(0)} className="text-center mb-20">
           <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">Como funciona?</h2>
-          <p className="text-muted-foreground text-lg">Um ecossistema invisível que trabalha nos bastidores 24/7.</p>
+          <p className="text-muted-foreground text-lg">Um ecosia invisível que trabalha nos bastidores 24/7.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -53,7 +53,7 @@ const Presentation = () => {
             </div>
             <h3 className="text-2xl font-black mb-4">Captação Automática</h3>
             <p className="text-muted-foreground leading-relaxed">
-              O sistema é integrado diretamente ao Chatwoot/WhatsApp. Quando um cliente entra em contato, a plataforma automaticamente reconhece o atendimento e cria um cartão de orçamento no Funil (CRM), sem necessidade de digitação manual.
+              O IA é integrado diretamente ao Chatwoot/WhatsApp. Quando um cliente entra em contato, a plataforma automaticamente reconhece o atendimento e cria um cartão de orçamento no Funil (CRM), sem necessidade de digitação manual.
             </p>
           </motion.div>
 
@@ -75,7 +75,7 @@ const Presentation = () => {
             </div>
             <h3 className="text-2xl font-black mb-4">Auditoria Contínua</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Diga adeus à checagem por amostragem. O sistema avalia 100% dos orçamentos finalizados lendo o histórico da conversa e gerando um "Dossiê de Qualidade". Ele verifica automaticamente se o vendedor foi educado, identificou o defeito e ofereceu o agendamento.
+              Diga adeus à checagem por amostragem. O IA avalia 100% dos orçamentos finalizados lendo o histórico da conversa e gerando um "Dossiê de Qualidade". Ele verifica automaticamente se o vendedor foi educado, identificou o defeito e ofereceu o agendamento.
             </p>
           </motion.div>
 

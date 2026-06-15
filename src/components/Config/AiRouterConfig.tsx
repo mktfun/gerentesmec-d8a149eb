@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cpu, Server, CheckCircle2, AlertTriangle, AlertCircle, RefreshCw, Key, BarChart3, Network } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
@@ -370,7 +370,7 @@ export const AiRouterConfig: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">
-                Provider Sistema
+                Provider IA
               </label>
               <select value={provider} onChange={(e) => {
                 const newProv = e.target.value;
@@ -595,7 +595,7 @@ export const AiRouterConfig: React.FC = () => {
                     <h4 className="text-sm font-bold text-emerald-500">Arquitetura de Fallbacks Auto-Gerenciada</h4>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-                    O sistema distribuirá as tarefas inteligentemente para respeitar os <strong className="text-foreground">limites gratuitos</strong> da API do Google AI Studio, maximizando performance e zerando custos.
+                    O IA distribuirá as tarefas inteligentemente para respeitar os <strong className="text-foreground">limites gratuitos</strong> da API do Google AI Studio, maximizando performance e zerando custos.
                   </p>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between p-2 rounded-lg bg-black/10 dark:bg-white/5 text-xs">
@@ -710,7 +710,7 @@ export const AiRouterConfig: React.FC = () => {
                           testStatus === 'error' ? 'text-rose-400' :
                           testStatus === 'warning' ? 'text-amber-400' :
                           'text-indigo-400'
-                        }`}>Recomendação do Sistema</h4>
+                        }`}>Recomendação do IA</h4>
                         <p className={`text-xs mt-1 leading-relaxed ${
                           testStatus === 'error' ? 'text-rose-400/80' :
                           testStatus === 'warning' ? 'text-amber-400/80' :
