@@ -9,6 +9,9 @@ trigger: always_on
 - **Desconfie do Vibe Coding Puro**: Nenhuma feature grande deve ser iniciada escrevendo código direto. Toda mudança estrutural precisa de uma Especificação (Proposal) detalhada antes.
 - **Memória Contínua**: O agente deve aprender. Nenhuma tarefa deve ser iniciada sem ler as preferências e o histórico no arquivo `.agent/memory.md` (via skill `obsidian`). O que for aprendido em `/vibe-apply` deve ser consolidado em `/vibe-archive`.
 - **Headless CLI Enforcement**: JAMAIAS use comandos interativos que exijam browser ou input no terminal. Para autenticação no Github ou Supabase, use SOMENTE e EXCLUSIVAMENTE variáveis de ambiente (`GH_TOKEN` e `SUPABASE_ACCESS_TOKEN`).
+- **CLI Fallback Obrigatório**: Se o comando `git` não for encontrado no `PATH`, NÃO peça para o usuário fazer o commit manualmente. Você deve tentar executar `git` usando o caminho absoluto do MinGit: `C:\Users\admin\.gemini\antigravity\scratch\mingit\cmd\git.exe`.
+- **Regras Estritas de PowerShell**: NUNCA utilize o operador `&` para encadear comandos no PowerShell. Use `;` ou execute os comandos um por vez. Se houver erro de Execution Policy com scripts `.ps1` (como `npm.ps1`), envolva o comando em um subshell CMD: `cmd.exe /c "seu comando aqui"`.
+- **Git Identity Override**: Caso ocorra o erro "Author identity unknown" no momento do commit, configure imediatamente as propriedades locais antes de commitar: `git config user.email "ai@clawhub.com"` e `git config user.name "ClawHub Agent"`.
 
 ## 2. ⛔ Regra Anti-Alucinação e Repetição
 

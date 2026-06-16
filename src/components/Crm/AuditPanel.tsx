@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target, RefreshCw, AlertCircle } from 'lucide-react';
+import { X, CheckCircle2, Circle, UploadCloud, Link as LinkIcon, DollarSign, Loader2, Sparkles, ExternalLink, Target, RefreshCw, AlertCircle, Activity } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -337,13 +337,13 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           <div className="p-5 flex flex-col items-center justify-center text-center space-y-3 bg-amber-500/5 border border-amber-500/20 rounded-xl mt-4">
              <AlertCircle className="w-8 h-8 text-amber-500" />
              <h4 className="font-bold text-sm text-foreground">Aguardando Contexto</h4>
-             <p className="text-xs text-muted-foreground">A conversa não forneceu informações suficientes para a IA auditar o desfecho com segurança. Intervenha na negociação.</p>
+             <p className="text-xs text-muted-foreground">O histórico não possui dados suficientes para uma auditoria conclusiva. É necessária a intervenção do gerente na negociação.</p>
           </div>
         ) : (lead.funnel_stage !== 'closed_won' && lead.funnel_stage !== 'closed_lost') ? (
           <div className="p-5 flex flex-col items-center justify-center text-center space-y-3 bg-primary/5 border border-primary/20 rounded-xl mt-4">
-             <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+             <Activity className="w-8 h-8 text-primary animate-pulse" />
              <h4 className="font-bold text-sm text-foreground">Acompanhamento Ativo</h4>
-             <p className="text-xs text-muted-foreground">A IA está acompanhando a conversa de perto. O Checklist Final com a auditoria completa será gerado quando o lead for Fechado ou Perdido.</p>
+             <p className="text-xs text-muted-foreground">O atendimento está sendo monitorado. O laudo de auditoria e a nota final serão processados quando a negociação for encerrada.</p>
           </div>
         ) : (
           <div className="">
@@ -481,14 +481,14 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
           className="w-full py-3 rounded-xl text-sm font-bold text-white
           bg-emerald-600 hover:bg-emerald-500 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]
           hover:shadow-[0_0_30px_rgba(16,185,129,0.45)] focus-visible:outline-emerald-300">
-          Aprovar Avaliação ({rounded}%)
+          Salvar Avaliação ({rounded}%)
         </button>
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => setIsFeedbackOpen(true)}
             className="w-full py-3 rounded-xl text-[11px] uppercase tracking-widest font-black text-rose-500
             bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all">
-            Corrigir IA
+            Revisar Avaliação
           </button>
           <button 
             onClick={() => {
@@ -500,7 +500,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
             bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
             title="A conversa pulou etapas? O cliente foi na loja? Pause a vistoria."
           >
-            Pedir Contexto
+            Pausar Auditoria
           </button>
         </div>
       </div>
