@@ -116,11 +116,23 @@ const Relatorios = () => {
         });
       }
 
-      setPdfData({ leads: reportTargetLeads, messagesByLead });
+      // Remover leads vazios (sem nenhuma mensagem humana/bot)
+      const finalTargetLeads = reportTargetLeads.filter(l => {
+        const msgs = messagesByLead[l.id] || [];
+        return msgs.some(m => m.sender_type !== 'system');
+      });
+
+      if (finalTargetLeads.length === 0) {
+        alert("Nenhum lead com conversa encontrada para os filtros selecionados.");
+        setIsPreparingPDF(false);
+        return;
+      }
+
+      setPdfData({ leads: finalTargetLeads, messagesByLead });
       
       // Renderizar o PDF por loja em background
       setTimeout(async () => {
-        const uniqueUnits = Array.from(new Set(reportTargetLeads.map(l => l.unit_id)));
+        const uniqueUnits = Array.from(new Set(finalTargetLeads.map(l => l.unit_id)));
         
         for (const unitId of uniqueUnits) {
           const unitNode = document.getElementById(`pdf-unit-${unitId}`);
@@ -825,48 +837,60 @@ const Relatorios = () => {
                           </div>
                         </div>
 
-                        {/* Link Chatwoot e Parecer */}
-                        <div className="mb-6">
+                        {/* Link Chatwoot, Parecer e Evidências das Falhas */}
+                        <div className="mb-6 space-y-4">
                           {/* Chatwoot Link */}
                           {(lead as any).chatwoot_conversation_id && (
                             <a 
                               href={`https://app.chatwoot.com/app/accounts/1/conversations/${(lead as any).chatwoot_conversation_id}`}
                               target="_blank" rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-sm text-indigo-600 font-bold mb-4 underline"
+                              className="inline-flex items-center gap-1 text-sm text-indigo-600 font-bold underline"
                             >
                               Abrir no Chatwoot
                             </a>
                           )}
 
-                          <div className="bg-zinc-50 rounded-xl p-4 border border-gray-200">
+                          <div className="bg-zinc-50 rounded-xl p-4 border border-gray-200 break-inside-avoid print:break-inside-avoid">
                             <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Parecer da Auditoria</h3>
-                            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-inside-avoid print:break-inside-avoid">
+                            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
                               {lead.closing_summary || 'Nenhum parecer gerado.'}
                             </p>
                           </div>
+
+                          {/* Renderização das Evidências/Motivos de Falha */}
+                          {lead.audit_checklist && Array.isArray((lead.audit_checklist as any).audit_reasons) && (lead.audit_checklist as any).audit_reasons.length > 0 && (
+                            <div className="bg-rose-50/50 rounded-xl p-4 border border-rose-100 break-inside-avoid print:break-inside-avoid">
+                              <h3 className="text-xs font-bold uppercase tracking-widest text-rose-600 mb-3">Motivos da Nota (Falhas e Evidências)</h3>
+                              <div className="space-y-3">
+                                {((lead.audit_checklist as any).audit_reasons as any[]).map((reason, idx) => (
+                                  <div key={idx} className="bg-white border border-rose-100 rounded-lg p-3">
+                                    <p className="text-xs font-bold text-rose-700 mb-1">{reason.title}</p>
+                                    <p className="text-xs text-gray-700 italic">"{reason.evidence}"</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Transcrição Limpa */}
                         <div>
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 border-b border-gray-100 pb-2">Evidências (Transcrição)</h3>
-                          <div className="space-y-3 text-sm">
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4 border-b border-gray-100 pb-2">Transcrição da Conversa</h3>
+                          <div className="space-y-4 text-sm">
                             {(pdfData.messagesByLead[lead.id] || []).map(msg => {
                               if (msg.sender_type === 'system') return null; // Ignorar logs de IA
                               const isManager = msg.sender_type === 'user' || msg.sender_type === 'bot';
                               return (
                                 <div key={msg.id} className={`flex ${isManager ? 'justify-end' : 'justify-start'} break-inside-avoid print:break-inside-avoid`}>
-                                  <div className={`max-w-[80%] rounded-lg px-3 py-2 ${isManager ? 'bg-transparent border-l-4 border-indigo-400 text-gray-900' : 'bg-transparent border-l-4 border-gray-300 text-gray-900'} break-inside-avoid print:break-inside-avoid`}>
-                                    <div className="text-[10px] font-bold text-gray-500 mb-1">
-                                      {isManager ? 'Gerente' : 'Cliente'}
+                                  <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${isManager ? 'bg-indigo-50 border border-indigo-100 text-indigo-900 rounded-tr-sm' : 'bg-gray-100 border border-gray-200 text-gray-900 rounded-tl-sm'}`}>
+                                    <div className={`text-[10px] font-bold mb-1 ${isManager ? 'text-indigo-500' : 'text-gray-500'}`}>
+                                      {isManager ? 'Atendente / IA' : 'Cliente'}
                                     </div>
-                                    <div className="whitespace-pre-wrap break-inside-avoid print:break-inside-avoid">{msg.content}</div>
+                                    <div className="whitespace-pre-wrap leading-relaxed text-sm">{msg.content}</div>
                                   </div>
                                 </div>
                               );
                             })}
-                            {!(pdfData.messagesByLead[lead.id] && pdfData.messagesByLead[lead.id].some(m => m.sender_type !== 'system')) && (
-                              <p className="text-gray-400 italic text-xs">Nenhuma mensagem registrada.</p>
-                            )}
                           </div>
                         </div>
 
