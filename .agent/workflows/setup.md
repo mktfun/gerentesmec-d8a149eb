@@ -1,35 +1,43 @@
 ---
-description: Configura o ambiente inicial do projeto para uso do Antigravity com as skills do ClawHub.
+description: Configuração inicial do ambiente headless para garantir que a IA consiga usar ferramentas como Supabase e GitHub CLI sem interações manuais ou pop-ups.
 ---
 
-<!-- SETUP:START -->
+<!-- OPENSPEC:START -->
 
-**Objetivo**
-Instalar as dependências e criar a infraestrutura necessária para o uso das skills do ClawHub (frontend, backend, nextjs, supabase e obsidian) no projeto atual. Além de garantir a configuração segura de credenciais do Github e do Supabase.
+**Guardrails**
+
+- **OBRIGATÓRIO:** O agente deve operar EXCLUSIVAMENTE em modo "headless". Jamais tente executar comandos que requerem input interativo ou navegação no browser como `supabase login` ou `gh auth login` padrão sem os tokens por environment variable.
+- Nunca exiba os tokens abertamente no chat, apenas configure-os no background.
+- Lembre o usuário de nunca enviar o token em texto puro para repositórios públicos. Garanta que o `.env` esteja no `.gitignore`.
+
+**Skills a utilizar**
+- As skills `github` e `supabase` devem ser operadas estritamente sob este fluxo invisível de configuração.
 
 **Steps**
 
-1. **Configuração do Github (Segura)**:
-   - Peça ao usuário as informações (Email, Username e Token PAT) caso não estejam no ambiente.
-   - Configure o repositório local com:
-     - `git config user.name "USERNAME"`
-     - `git config user.email "EMAIL"`
-   - Defina o remote origin utilizando o token PAT de forma segura (apenas se for repositório privado ou CI): `git remote set-url origin https://USERNAME:TOKEN@github.com/USERNAME/REPO.git`.
-   - Lembre o usuário de nunca enviar o token em texto puro para arquivos públicos.
+1. **Validação de Credenciais Locais:**
+   - Verifique se existe um arquivo `.env` na raiz do projeto com as variáveis `GH_TOKEN` e `SUPABASE_ACCESS_TOKEN`.
+   - Se os tokens existirem, faça a leitura e injete as variáveis no terminal (export) sempre que for invocar a CLI dessas ferramentas.
 
-2. **Configuração do Supabase**:
-   - Verifique a existência de variáveis de ambiente (`SUPABASE_URL` e `SUPABASE_SERVICE_KEY`).
-   - Caso não existam, instrua o usuário a criá-las ou injetá-las no `.env.local`. Garanta que o `.env.local` esteja no `.gitignore`.
+2. **Solicitação e Armazenamento (Se ausente):**
+   - Se as variáveis não estiverem no `.env`, peça ao usuário para fornecer os tokens (Personal Access Token do GitHub e Access Token do Supabase).
+   - Assim que o usuário fornecer, escreva essas chaves de forma segura no arquivo `.env` (certificando-se do `.gitignore`).
 
-3. **Verificação de CLI**:
-   - Verifique se o `obsidian-cli` está instalado (necessário para a skill Obsidian). Se não, avise o usuário para instalá-lo.
+3. **Configuração Global Headless:**
+   - Configuração silenciosa do Git:
+     `git config --global user.name "Your Name"`
+     `git config --global user.email "your-email@example.com"`
+   - Para interagir com repositórios remotos sem pedir senha, o agente usará estritamente a variável de ambiente:
+     `$env:GH_TOKEN="<token>"` (Windows) ou `export GH_TOKEN="<token>"` (Linux/Mac) antes de executar comandos do GitHub CLI (`gh`).
+   - O mesmo se aplica ao Supabase:
+     `$env:SUPABASE_ACCESS_TOKEN="<token>"` ou `export SUPABASE_ACCESS_TOKEN="<token>"` antes de qualquer comando `supabase`.
 
-4. **Scaffolding do Antigravity**:
-   - Crie a pasta `.agent` na raiz do projeto atual.
-   - Crie o arquivo inicial de memória em `.agent/memory.md` com as seções base de "Preferências de Arquitetura", "Erros Passados" e "Persona do Usuário".
+4. **Scaffolding do Antigravity:**
+   - Crie a pasta `.agent` na raiz do projeto se não existir.
+   - Crie `.agent/memory.md` com "Preferências de Arquitetura", "Erros Passados" e "Persona do Usuário".
 
-5. **Validação**:
-   - Garanta que a infraestrutura do projeto (ex: Next.js + Tailwind) está inicializada e funcional.
-   - Emita uma mensagem de sucesso indicando que o ambiente está pronto para usar `/vibe-proposal`.
+5. **Confirmação Silenciosa:**
+   - Execute um teste rápido (ex: `gh auth status` ou `supabase projects list`) para garantir que o login via token funcionou perfeitamente.
+   - Informe ao usuário que o setup invisível foi concluído.
 
-<!-- SETUP:END -->
+<!-- OPENSPEC:END -->

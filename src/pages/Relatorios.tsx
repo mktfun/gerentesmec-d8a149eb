@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, TrendingDown, Clock, Target, AlertTriangle, ShieldCheck, Download, X, ChevronDown, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
@@ -58,16 +58,20 @@ const Relatorios = () => {
     }
   };
 
-  const handleExportPDF = async (filters: { funnel: string; unmarkedChecks: string[] }) => {
+  const handleExportPDF = async (filters: { funnel: string; unmarkedChecks: string[]; filterMode: 'OR' | 'AND' }) => {
     setIsPreparingPDF(true);
     try {
-      // 1. Filtrar leads
-      const sevenDaysAgo = Date.now() - 7 * 86400000;
+      // Função auxiliar para interpretar a falha do checklist
+      const isFailed = (val: any) => val === false || val === 'false' || val === null || val === undefined;
+
       const reportTargetLeads = leads.filter(l => {
         const isClosed = l.funnel_stage === 'closed_won' || l.funnel_stage === 'closed_lost';
         if (!isClosed) return false;
-        const lDate = new Date(l.created_at).getTime();
-        if (lDate < sevenDaysAgo) return false;
+        
+        // Aplica o filtro global de data (DateRangePicker)
+        const lDate = startOfDay(new Date(l.created_at));
+        const isWithinDate = lDate >= startOfDay(dateRange.from) && lDate <= startOfDay(dateRange.to);
+        if (!isWithinDate) return false;
         
         // Filtros
         if (filters.funnel !== 'all' && l.funnel_stage !== filters.funnel) return false;
@@ -76,8 +80,14 @@ const Relatorios = () => {
         if (l.score === null) return false;
 
         if (filters.unmarkedChecks.length > 0) {
-          const hasSelectedFailures = filters.unmarkedChecks.some(id => !(l.audit_checklist as Record<string, any>)?.[id]);
-          if (!hasSelectedFailures) return false;
+          const checklist = l.audit_checklist as Record<string, any>;
+          if (filters.filterMode === 'OR') {
+            const hasSelectedFailures = filters.unmarkedChecks.some(id => isFailed(checklist?.[id]));
+            if (!hasSelectedFailures) return false;
+          } else {
+            const hasAllSelectedFailures = filters.unmarkedChecks.every(id => isFailed(checklist?.[id]));
+            if (!hasAllSelectedFailures) return false;
+          }
         }
         
         if (selectedUnit !== 'all' && l.unit_id !== selectedUnit) return false;

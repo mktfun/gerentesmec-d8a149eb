@@ -6,12 +6,13 @@ import { auditStepsConfig } from '@/utils/scoreUtils';
 interface ExportOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (filters: { funnel: string; unmarkedChecks: string[] }) => void;
+  onExport: (filters: { funnel: string; unmarkedChecks: string[]; filterMode: 'OR' | 'AND' }) => void;
 }
 
 export const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({ isOpen, onClose, onExport }) => {
   const [funnelFilter, setFunnelFilter] = useState('all');
   const [unmarkedChecks, setUnmarkedChecks] = useState<string[]>([]);
+  const [filterMode, setFilterMode] = useState<'OR' | 'AND'>('OR');
 
   if (!isOpen) return null;
 
@@ -73,14 +74,32 @@ export const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({ isOpen, 
 
             {/* Unmarked Checks Filter */}
             <div className="space-y-3">
-              <label className="text-sm font-bold text-foreground/80 flex items-center justify-between gap-2">
-                <span>Checks não marcados (Filtro OR)</span>
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-sm font-bold text-foreground/80 flex items-center gap-2">
+                  Checks não marcados
+                </label>
                 {unmarkedChecks.length > 0 && (
                   <button onClick={() => setUnmarkedChecks([])} className="text-xs text-indigo-400 hover:text-indigo-300">
                     Limpar
                   </button>
                 )}
-              </label>
+              </div>
+              
+              {/* Toggle OR/AND */}
+              <div className="flex bg-black/5 dark:bg-white/5 rounded-xl p-1 border border-border">
+                <button
+                  onClick={() => setFilterMode('OR')}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${filterMode === 'OR' ? 'bg-indigo-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Qualquer falha (OR)
+                </button>
+                <button
+                  onClick={() => setFilterMode('AND')}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${filterMode === 'AND' ? 'bg-indigo-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Todas as falhas (AND)
+                </button>
+              </div>
               <div className="max-h-56 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                 {allChecks.map((item) => {
                   const isSelected = unmarkedChecks.includes(item.id);
@@ -114,7 +133,7 @@ export const ExportOptionsModal: React.FC<ExportOptionsModalProps> = ({ isOpen, 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
-                onExport({ funnel: funnelFilter, unmarkedChecks });
+                onExport({ funnel: funnelFilter, unmarkedChecks, filterMode });
                 onClose();
               }}
               className="w-full mt-4 flex items-center justify-center gap-2 px-6 py-4 bg-foreground text-background rounded-2xl text-sm font-black hover:bg-foreground/90 transition-colors shadow-xl"
