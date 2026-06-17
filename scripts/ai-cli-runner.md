@@ -64,6 +64,7 @@ Ao analisar o histórico de `chat_messages` de um lead, calcule uma Nota Global 
 - **PROIBIDO INFERIR**: Só marque 'true' no checklist se houver PROVA EXPLÍCITA no texto da transcrição. O que não está no texto, não aconteceu.
 - **MÍNGUA DE CONTEXTO**: Se a conversa for muito curta ou apenas um pós-venda (ex: "como ficou o carro?"), e não registrar as etapas comerciais obrigatórias, você DEVE definir o `funnel_stage` como `parking_lot`.
 - Ao acionar `parking_lot`, preencha o campo `closing_summary` com 2 perguntas curtas e diretas que o gerente humano deve fazer ao mecânico para descobrir o que aconteceu fora do WhatsApp (ex: "Foi feito diagnóstico presencial? Qual o valor aprovado?").
+- **AVALIAÇÃO SOMENTE NO FECHAMENTO**: Você está ESTRITAMENTE PROIBIDO de preencher o `audit_checklist` ou dar `score` se o estágio deduzido não for `closed_won` ou `closed_lost`. Enquanto o lead estiver rolando (em `lead_new`, `negotiation`, `quote` ou `parking_lot`), você DEVE retornar `audit_checklist: {}` e `score: null`. Nessas etapas intermediárias, seu trabalho é APENAS mover o funil e gerar as notinhas (`message_insights`).
 
 #### Parte 2: Estágio do Funil (Funnel Stage)
 Após avaliar, você deve determinar o estágio final.

@@ -140,7 +140,7 @@ const KanbanCard: React.FC<Props> = ({ lead, isDragging, onClick }) => {
       </div>
 
       {/* Score */}
-      {lead.score !== null && (
+      {(isClosed && lead.score !== null) && (
         <div className="pt-1.5 border-t border-border">
           <div className="flex items-center justify-between">
             <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Score</span>
