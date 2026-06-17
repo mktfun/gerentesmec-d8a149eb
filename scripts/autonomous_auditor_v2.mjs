@@ -122,7 +122,7 @@ Para cada mensagem ID acima, se for relevante, gere:
 
 REGRAS DE CONFIANÇA ZERO (ZERO TRUST):
 - PROIBIDO INFERIR: Só marque 'true' no checklist se houver PROVA EXPLÍCITA no texto da conversa. O que não está no texto, não aconteceu.
-- MÍNGUA DE CONTEXTO: Se a conversa for muito curta ou apenas um pós-venda (ex: "como ficou o carro?"), e não registrar as etapas comerciais, defina o funnel_stage OBRIGATORIAMENTE como 'parking_lot'.
+- MÍNGUA DE CONTEXTO: Se a conversa for muito curta, um pós-venda solto ou não mostrar a negociação do orçamento e do fechamento, OBRIGATORIAMENTE IGNORAR O ESTÁGIO ATUAL e retornar o estágio 'parking_lot' e score nulo. NENHUMA EXCEÇÃO. Mesmo se o lead estiver como Ganho, DERRUBE para 'parking_lot'.
 - Quando o funnel_stage for 'parking_lot', use o campo 'closing_summary' para gerar até 2 perguntas curtas e diretas que o auditor humano deve fazer ao mecânico para descobrir o que aconteceu fora do WhatsApp (ex: "Foi feito diagnóstico presencial? Qual o valor aprovado?").
 - AVALIAÇÃO SOMENTE NO FECHAMENTO: Você está ESTRITAMENTE PROIBIDO de preencher o `audit_checklist` ou dar `score` se o estágio deduzido não for `closed_won` ou `closed_lost`. Enquanto o lead estiver rolando (em `lead_new`, `negotiation`, `quote` ou `parking_lot`), você DEVE retornar `audit_checklist: {}` e `score: null`. Nessas etapas, seu trabalho é APENAS mover o funil e gerar as notinhas (`message_insights`).
 
@@ -134,7 +134,7 @@ REGRAS DE FUNIL:
 - 'lead_new': Contato inicial.
 - 'parking_lot': Aguardando contexto do gerente (falta histórico no WhatsApp).
 
-IMPORTANTE: NUNCA sugira um estágio inferior ao atual (${leadData.funnel_stage}), EXCETO se for 'parking_lot'.
+IMPORTANTE: NUNCA sugira um estágio inferior ao atual (${leadData.funnel_stage}). A ÚNICA EXCEÇÃO ABSOLUTA É O 'parking_lot'. Se faltar contexto, VOCÊ DEVE rebaixar para 'parking_lot' sem hesitar.
 
 RETORNE APENAS JSON:
 {

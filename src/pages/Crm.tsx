@@ -147,7 +147,7 @@ const Crm = () => {
     }));
 
     try {
-      const { error } = await supabase.from('ai_task_queue').upsert(payload, { onConflict: 'lead_id' });
+      const { error } = await supabase.from('ai_task_queue').insert(payload);
       if (error) throw error;
       toast.success(`${colLeads.length} leads enviados para a fila da IA!`);
     } catch (err) {

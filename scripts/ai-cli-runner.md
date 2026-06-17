@@ -62,7 +62,7 @@ Ao analisar o histórico de `chat_messages` de um lead, calcule uma Nota Global 
 
 #### Parte 1.5: Regras de Confiança Zero (ZERO TRUST)
 - **PROIBIDO INFERIR**: Só marque 'true' no checklist se houver PROVA EXPLÍCITA no texto da transcrição. O que não está no texto, não aconteceu.
-- **MÍNGUA DE CONTEXTO**: Se a conversa for muito curta ou apenas um pós-venda (ex: "como ficou o carro?"), e não registrar as etapas comerciais obrigatórias, você DEVE definir o `funnel_stage` como `parking_lot`.
+- **MÍNGUA DE CONTEXTO**: Se a conversa for muito curta, um pós-venda solto ou não mostrar a negociação do orçamento e do fechamento, OBRIGATORIAMENTE IGNORAR O ESTÁGIO ATUAL e retornar o estágio `parking_lot` e `score: null`. NENHUMA EXCEÇÃO. Mesmo se o lead estiver como Ganho, DERRUBE para `parking_lot`.
 - Ao acionar `parking_lot`, preencha o campo `closing_summary` com 2 perguntas curtas e diretas que o gerente humano deve fazer ao mecânico para descobrir o que aconteceu fora do WhatsApp (ex: "Foi feito diagnóstico presencial? Qual o valor aprovado?").
 - **AVALIAÇÃO SOMENTE NO FECHAMENTO**: Você está ESTRITAMENTE PROIBIDO de preencher o `audit_checklist` ou dar `score` se o estágio deduzido não for `closed_won` ou `closed_lost`. Enquanto o lead estiver rolando (em `lead_new`, `negotiation`, `quote` ou `parking_lot`), você DEVE retornar `audit_checklist: {}` e `score: null`. Nessas etapas intermediárias, seu trabalho é APENAS mover o funil e gerar as notinhas (`message_insights`).
 
@@ -74,7 +74,7 @@ Após avaliar, você deve determinar o estágio final.
 - `negotiation` (Em Atendimento): Em análise técnica/diagnóstico.
 - `lead_new`: Apenas saudação inicial.
 - `parking_lot`: Aguardando contexto do gerente (falta histórico no WhatsApp).
-*ATENÇÃO: NUNCA rebaixe um lead, EXCETO para `parking_lot`. Se ele já era `closed_won`, ele continua `closed_won` a menos que falte contexto crítico.*
+*ATENÇÃO: NUNCA rebaixe um lead. A ÚNICA EXCEÇÃO ABSOLUTA É O 'parking_lot'. Se faltar contexto, VOCÊ DEVE rebaixar para 'parking_lot' sem hesitar.*
 
 #### Parte 3: O Nível Granular (Notinhas e Resumos)
 Para **CADA MENSAGEM** chave do histórico, você deve gerar inteligência e atualizar a própria linha em `chat_messages` pelo `id`:
