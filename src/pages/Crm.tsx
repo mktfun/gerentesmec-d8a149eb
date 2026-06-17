@@ -137,6 +137,25 @@ const Crm = () => {
     moveLeadStage(draggableId, newStage);
   };
 
+  const handleReprocessColumn = async (stageId: FunnelStage, colLeads: Lead[]) => {
+    if (colLeads.length === 0) return;
+    if (!confirm(`Tem certeza que deseja re-enviar ${colLeads.length} leads desta coluna para reavaliação da IA?`)) return;
+
+    const payload = colLeads.map(l => ({
+      lead_id: l.id,
+      status: 'pending'
+    }));
+
+    try {
+      const { error } = await supabase.from('ai_task_queue').upsert(payload, { onConflict: 'lead_id' });
+      if (error) throw error;
+      toast.success(`${colLeads.length} leads enviados para a fila da IA!`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao reenfileirar leads');
+    }
+  };
+
   const handleNewLead = () => {
     setFormLead(null);
     setIsFormOpen(true);
@@ -379,7 +398,7 @@ const Crm = () => {
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}
               className="flex-1 p-5 overflow-hidden"
             >
-              <KanbanView leads={displayLeads} unitFilter={searchQuery ? 'all' : unitFilter} onSelectLead={(lead) => setSelectedLeadId(lead.id)} onDragEnd={onDragEnd} />
+              <KanbanView leads={displayLeads} unitFilter={searchQuery ? 'all' : unitFilter} onSelectLead={(lead) => setSelectedLeadId(lead.id)} onDragEnd={onDragEnd} onReprocessColumn={handleReprocessColumn} />
             </motion.div>
           ) : (
             /* ── LIST ── */

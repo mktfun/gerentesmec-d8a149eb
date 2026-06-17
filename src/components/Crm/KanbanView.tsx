@@ -1,6 +1,7 @@
 import React from 'react';
 import { Lead, FunnelStage } from '@/context/AppDataContext';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { RefreshCw } from 'lucide-react';
 import KanbanCard from './KanbanCard';
 
 const COLUMNS: { id: FunnelStage; label: string; color: string; dot: string }[] = [
@@ -17,9 +18,10 @@ interface Props {
   unitFilter: string;
   onSelectLead: (lead: Lead) => void;
   onDragEnd: (result: DropResult) => void;
+  onReprocessColumn?: (stageId: FunnelStage, colLeads: Lead[]) => void;
 }
 
-const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEnd }) => {
+const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEnd, onReprocessColumn }) => {
   const filtered = leads;
 
   const getColumnLeads = (stageId: FunnelStage) => {
@@ -40,8 +42,20 @@ const KanbanView: React.FC<Props> = ({ leads, unitFilter, onSelectLead, onDragEn
                 <span className={`text-xs font-bold uppercase tracking-wider ${col.color}`}>
                   {col.label}
                 </span>
-                <span className="text-xs font-bold text-muted-foreground bg-background border border-border
-                  px-2 py-0.5 rounded-full ml-auto shadow-sm">{colLeads.length}</span>
+                
+                <div className="ml-auto flex items-center gap-1.5">
+                  {onReprocessColumn && colLeads.length > 0 && (
+                    <button 
+                      onClick={() => onReprocessColumn(col.id, colLeads)}
+                      className="p-1 text-muted-foreground/50 hover:text-indigo-500 hover:bg-indigo-500/10 rounded transition-colors"
+                      title="Forçar Reavaliação da IA para esta coluna"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <span className="text-xs font-bold text-muted-foreground bg-background border border-border
+                    px-2 py-0.5 rounded-full shadow-sm">{colLeads.length}</span>
+                </div>
               </div>
 
               {/* Droppable Area */}
