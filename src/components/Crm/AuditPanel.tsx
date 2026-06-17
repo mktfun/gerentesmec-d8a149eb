@@ -338,6 +338,12 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
              <AlertCircle className="w-8 h-8 text-amber-500" />
              <h4 className="font-bold text-sm text-foreground">Aguardando Contexto</h4>
              <p className="text-xs text-muted-foreground">O histórico não possui dados suficientes para uma auditoria conclusiva. É necessária a intervenção do gerente na negociação.</p>
+             {lead.closing_summary && (
+               <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-left w-full shadow-inner">
+                 <h5 className="text-[11px] uppercase tracking-widest font-black text-amber-500 mb-2">Perguntas para o Mecânico</h5>
+                 <p className="text-xs text-amber-500/80 font-medium whitespace-pre-wrap">{lead.closing_summary}</p>
+               </div>
+             )}
           </div>
         ) : (lead.funnel_stage !== 'closed_won' && lead.funnel_stage !== 'closed_lost') ? (
           <div className="p-5 flex flex-col items-center justify-center text-center space-y-3 bg-primary/5 border border-primary/20 rounded-xl mt-4">

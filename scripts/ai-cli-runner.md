@@ -60,6 +60,11 @@ Ao analisar o histórico de `chat_messages` de um lead, calcule uma Nota Global 
 - **4a**: Agradeceu após finalizar atendimento? (Apenas se fechar ou perder)
 - **4b**: Enviou link de avaliação do Google? (Apenas se fechar ou perder)
 
+#### Parte 1.5: Regras de Confiança Zero (ZERO TRUST)
+- **PROIBIDO INFERIR**: Só marque 'true' no checklist se houver PROVA EXPLÍCITA no texto da transcrição. O que não está no texto, não aconteceu.
+- **MÍNGUA DE CONTEXTO**: Se a conversa for muito curta ou apenas um pós-venda (ex: "como ficou o carro?"), e não registrar as etapas comerciais obrigatórias, você DEVE definir o `funnel_stage` como `parking_lot`.
+- Ao acionar `parking_lot`, preencha o campo `closing_summary` com 2 perguntas curtas e diretas que o gerente humano deve fazer ao mecânico para descobrir o que aconteceu fora do WhatsApp (ex: "Foi feito diagnóstico presencial? Qual o valor aprovado?").
+
 #### Parte 2: Estágio do Funil (Funnel Stage)
 Após avaliar, você deve determinar o estágio final.
 - `closed_won` (Ganho): O cliente aprovou explicitamente o orçamento (ex: "Pode fazer", PIX enviado).
@@ -67,7 +72,8 @@ Após avaliar, você deve determinar o estágio final.
 - `quote` (Orçamento Enviado): Valores ou PDF enviados, mas sem fechamento.
 - `negotiation` (Em Atendimento): Em análise técnica/diagnóstico.
 - `lead_new`: Apenas saudação inicial.
-*ATENÇÃO: NUNCA rebaixe um lead. Se ele já era `closed_won`, ele continua `closed_won`.*
+- `parking_lot`: Aguardando contexto do gerente (falta histórico no WhatsApp).
+*ATENÇÃO: NUNCA rebaixe um lead, EXCETO para `parking_lot`. Se ele já era `closed_won`, ele continua `closed_won` a menos que falte contexto crítico.*
 
 #### Parte 3: O Nível Granular (Notinhas e Resumos)
 Para **CADA MENSAGEM** chave do histórico, você deve gerar inteligência e atualizar a própria linha em `chat_messages` pelo `id`:

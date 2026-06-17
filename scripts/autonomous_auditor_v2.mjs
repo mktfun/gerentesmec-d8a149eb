@@ -22,6 +22,7 @@ function extractJSON(text) {
 }
 
 const FUNNEL_RANK = {
+  'parking_lot': 0,
   'lead_new': 1,
   'negotiation': 2,
   'quote': 3,
@@ -119,14 +120,20 @@ Para cada mensagem ID acima, se for relevante, gere:
 - ai_insight: Insight de vendas ou observação de comportamento (ex: "Ancorou preço", "Objeção financeira forte").
 - ai_summary: Se houver MÍDIA (audio/video/image), resuma o conteúdo baseado no contexto da conversa.
 
+REGRAS DE CONFIANÇA ZERO (ZERO TRUST):
+- PROIBIDO INFERIR: Só marque 'true' no checklist se houver PROVA EXPLÍCITA no texto da conversa. O que não está no texto, não aconteceu.
+- MÍNGUA DE CONTEXTO: Se a conversa for muito curta ou apenas um pós-venda (ex: "como ficou o carro?"), e não registrar as etapas comerciais, defina o funnel_stage OBRIGATORIAMENTE como 'parking_lot'.
+- Quando o funnel_stage for 'parking_lot', use o campo 'closing_summary' para gerar até 2 perguntas curtas e diretas que o auditor humano deve fazer ao mecânico para descobrir o que aconteceu fora do WhatsApp (ex: "Foi feito diagnóstico presencial? Qual o valor aprovado?").
+
 REGRAS DE FUNIL:
 - 'closed_won': Aprovação explícita ("Pode fazer") após orçamento (2e).
 - 'closed_lost': Recusa ou parada definitiva após preço.
 - 'quote': Envio de valores ou PDF/link de orçamento.
 - 'negotiation': Em andamento, sem orçamento final.
 - 'lead_new': Contato inicial.
+- 'parking_lot': Aguardando contexto do gerente (falta histórico no WhatsApp).
 
-IMPORTANTE: NUNCA sugira um estágio inferior ao atual (${leadData.funnel_stage}).
+IMPORTANTE: NUNCA sugira um estágio inferior ao atual (${leadData.funnel_stage}), EXCETO se for 'parking_lot'.
 
 RETORNE APENAS JSON:
 {
@@ -134,6 +141,7 @@ RETORNE APENAS JSON:
   "audit_checklist": { "1a": true, "1b": false, "2a": true, "2b": false, "2c": true, "2d": false, "2e": true, "3a": false, "3b": false, "3c": true, "4a": false, "4b": false },
   "score": 85,
   "funnel_stage": "quote",
+  "closing_summary": "Parecer ou perguntas pro mecânico (se for parking_lot)",
   "customer_vehicle": "Modelo",
   "ticket_value": 0,
   "message_insights": [
@@ -165,18 +173,21 @@ RETORNE APENAS JSON:
 
     // 6. Persistence Logic - Leads
     let newStage = parsed.funnel_stage || leadData.funnel_stage;
-    if (FUNNEL_RANK[newStage] < FUNNEL_RANK[leadData.funnel_stage]) {
+    if (newStage !== 'parking_lot' && FUNNEL_RANK[newStage] < FUNNEL_RANK[leadData.funnel_stage]) {
       newStage = leadData.funnel_stage;
     }
 
     const updatePayload = {
       audit_checklist: { ...(leadData.audit_checklist || {}), ...parsed.audit_checklist },
-      score: parsed.score || leadData.score,
+      score: parsed.score !== undefined ? parsed.score : leadData.score,
       funnel_stage: newStage,
       customer_vehicle: parsed.customer_vehicle || leadData.customer_vehicle,
-      ticket_value: parsed.ticket_value || leadData.ticket_value,
-      last_audit_at: new Date().toISOString()
+      ticket_value: parsed.ticket_value || leadData.ticket_value
     };
+    
+    if (parsed.closing_summary) {
+      updatePayload.closing_summary = parsed.closing_summary;
+    }
 
     const { error: updErr } = await supabase.from('leads').update(updatePayload).eq('id', task.lead_id);
     if (updErr) throw new Error(`Lead update failed: ${updErr.message}`);
