@@ -22,6 +22,7 @@ import TvOperacional from "./pages/tv/TvOperacional";
 import TvDashboard from "./components/Dashboard/TvDashboard";
 import Checklist from "./pages/Checklist";
 import AuditHistory from "./pages/AuditHistory";
+import AuditoriaApp from "./pages/Auditoria";
 import NotFound from "./pages/NotFound";
 import { useAppData } from "./context/AppDataContext";
 import { useAuth } from "./features/auth/hooks/useAuth";
@@ -77,6 +78,7 @@ const AppRoutes: React.FC = () => {
 
           {/* Full Screen Routes */}
           <Route path="/checklist" element={<ErrorBoundary><Checklist /></ErrorBoundary>} />
+          <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
 
           {/* TV Routes (admin only) */}
           <Route element={<TvLayout />}>
