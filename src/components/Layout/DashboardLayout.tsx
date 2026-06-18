@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -101,7 +101,7 @@ const DashboardLayout: React.FC = () => {
             );
           })}
           <NavLink
-            to="/checklist"
+            to="/auditoria"
             className={({ isActive }) => `flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 rounded-xl text-sm font-semibold transition-all duration-300 group relative
               ${isActive 
                 ? 'bg-primary text-primary-foreground shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
@@ -193,8 +193,8 @@ const DashboardLayout: React.FC = () => {
           items={[
             { id: 'home', icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard', path: '/' },
             { id: 'crm', icon: <MessageSquare className="w-5 h-5" />, label: 'CRM', path: '/crm' },
-            { id: 'checklist', icon: <ClipboardCheck className="w-5 h-5" />, label: 'Checklist', path: '/checklist' },
-            { id: 'history', icon: <BookOpen className="w-5 h-5" />, label: 'Histórico', path: '/historico-auditorias' },
+            { id: 'auditoria', icon: <ClipboardCheck className="w-5 h-5" />, label: 'Nova Inspeção', path: '/auditoria' },
+            { id: 'historico-auditorias', icon: <History className="w-5 h-5" />, label: 'Histórico', path: '/historico-auditorias' },
             { id: 'settings', icon: <Settings className="w-5 h-5" />, label: 'Config', path: '/config' },
           ].filter(item => {
             // Se for gerente, esconde Config (e no DashboardLayout não acessam Gerentes mesmo no nav)

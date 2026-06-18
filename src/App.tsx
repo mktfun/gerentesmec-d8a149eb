@@ -20,7 +20,6 @@ import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
 import TvOperacional from "./pages/tv/TvOperacional";
 import TvDashboard from "./components/Dashboard/TvDashboard";
-import Checklist from "./pages/Checklist";
 import AuditHistory from "./pages/AuditHistory";
 import AuditoriaApp from "./pages/Auditoria";
 import NotFound from "./pages/NotFound";
@@ -77,7 +76,6 @@ const AppRoutes: React.FC = () => {
           </Route>
 
           {/* Full Screen Routes */}
-          <Route path="/checklist" element={<ErrorBoundary><Checklist /></ErrorBoundary>} />
           <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
 
           {/* TV Routes (admin only) */}
