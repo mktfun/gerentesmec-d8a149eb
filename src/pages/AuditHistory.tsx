@@ -2,68 +2,75 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAppData } from '@/context/AppDataContext';
-import { motion } from 'framer-motion';
-import { Calendar, MapPin, Search, ChevronRight, CheckCircle2, XCircle, ImageIcon, ClipboardCheck } from 'lucide-react';
+import { AuditPayload } from '@/hooks/useAuditStorage';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, MapPin, Search, ChevronRight, CheckCircle2, Slash, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
+
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 
-interface Audit {
+interface StoreInspection {
   id: string;
-  unit_id: string;
-  auditor_name: string;
-  score_percentage: number;
-  status: string;
+  store_id: string;
+  started_at: string;
   completed_at: string;
+  status: string;
+  raw_payload: AuditPayload;
 }
 
-interface AuditAnswer {
-  id: string;
-  item_name: string;
-  is_conform: boolean;
-  photo_url: string;
-  observation: string | null;
-}
-
-const AuditHistory = () => {
+export default function AuditHistory() {
   const { user } = useAuth();
   const { managers, units } = useAppData();
-  const [audits, setAudits] = useState<Audit[]>([]);
+  const [inspections, setInspections] = useState<StoreInspection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null);
-  const [answers, setAnswers] = useState<AuditAnswer[]>([]);
-  const [loadingAnswers, setLoadingAnswers] = useState(false);
+  const [selectedAudit, setSelectedAudit] = useState<StoreInspection | null>(null);
+
+  // Filters
+  const [filterStore, setFilterStore] = useState('');
+  const [filterDate, setFilterDate] = useState('');
 
   const isUnitManager = user?.user_metadata?.role === 'unit_manager' || managers.some(m => m.auth_user_id === user?.id);
   const managerUnitId = managers.find(m => m.auth_user_id === user?.id)?.unit_id;
 
   useEffect(() => {
-    fetchAudits();
-  }, [user]);
+    fetchInspections();
+  }, [user, filterStore, filterDate]);
 
-  const fetchAudits = async () => {
+  const fetchInspections = async () => {
     try {
       let query = supabase
-        .from('audits')
+        .from('store_inspections')
         .select('*')
+        .eq('status', 'synced')
         .order('completed_at', { ascending: false });
 
       if (isUnitManager && managerUnitId) {
-        query = query.eq('unit_id', managerUnitId);
+        query = query.eq('store_id', managerUnitId);
+      } else if (filterStore) {
+        query = query.eq('store_id', filterStore);
+      }
+
+      if (filterDate) {
+        // simple date filtering
+        const startOfDay = new Date(filterDate);
+        startOfDay.setHours(0,0,0,0);
+        const endOfDay = new Date(filterDate);
+        endOfDay.setHours(23,59,59,999);
+        query = query.gte('completed_at', startOfDay.toISOString()).lte('completed_at', endOfDay.toISOString());
       }
 
       const { data, error } = await query;
       if (error) throw error;
-      setAudits(data || []);
+      setInspections(data || []);
     } catch (err) {
       console.error('Error fetching audits', err);
     } finally {
@@ -71,200 +78,127 @@ const AuditHistory = () => {
     }
   };
 
-  const openAuditDetails = async (audit: Audit) => {
-    setSelectedAudit(audit);
-    setLoadingAnswers(true);
-    try {
-      const { data, error } = await supabase
-        .from('audit_answers')
-        .select('*')
-        .eq('audit_id', audit.id);
-      
-      if (error) throw error;
-      setAnswers(data || []);
-    } catch (err) {
-      console.error('Error fetching answers', err);
-    } finally {
-      setLoadingAnswers(false);
-    }
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-    if (score >= 60) return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-    return 'text-rose-500 bg-rose-500/10 border-rose-500/20';
-  };
-
-  // getPublicPhotoUrl removido pois a URL já é completa e guardamos delimitado por vírgula
-
   return (
-    <div className="flex-1 p-6 md:p-8 space-y-6 max-w-4xl mx-auto pb-32">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-foreground tracking-tight">
-            Histórico de Vistorias
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Resultados das auditorias presenciais realizadas.
-          </p>
+    <div className="flex flex-col h-screen bg-[#0a0a0f]">
+      {/* Header & Filters */}
+      <div className="bg-card border-b border-border p-6 sticky top-0 z-10">
+        <h1 className="text-2xl font-black text-white mb-4">Histórico de Auditorias</h1>
+        <div className="flex flex-col sm:flex-row gap-3">
+          {!isUnitManager && (
+            <select 
+              value={filterStore}
+              onChange={e => setFilterStore(e.target.value)}
+              className="bg-background border border-border text-white px-4 py-2 rounded-xl text-sm"
+            >
+              <option value="">Todas as Lojas</option>
+              {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </select>
+          )}
+          <input 
+            type="date" 
+            value={filterDate}
+            onChange={e => setFilterDate(e.target.value)}
+            className="bg-background border border-border text-white px-4 py-2 rounded-xl text-sm"
+          />
         </div>
-        {!isUnitManager && (
-          <button 
-            onClick={() => window.location.href = '/checklist'}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-black text-sm rounded-xl shadow-[0_0_20px_rgba(var(--primary),0.2)] hover:bg-primary/90 transition-all shrink-0"
-          >
-            <ClipboardCheck className="w-4 h-4" />
-            Nova Vistoria
-          </button>
-        )}
       </div>
 
-      {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-2xl" />
-          ))}
-        </div>
-      ) : audits.length === 0 ? (
-        <div className="text-center py-12 px-4 rounded-3xl border border-dashed border-border bg-card/30 flex flex-col items-center justify-center">
-          <ClipboardCheck className="w-12 h-12 text-muted-foreground/30 mb-4" />
-          <h3 className="text-lg font-bold text-foreground">Nenhuma vistoria encontrada</h3>
-          <p className="text-sm text-muted-foreground mb-6">As vistorias realizadas aparecerão aqui.</p>
-          {!isUnitManager && (
-            <button 
-              onClick={() => window.location.href = '/checklist'}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary/10 text-primary font-black text-sm rounded-xl hover:bg-primary hover:text-white transition-all"
-            >
-              <ClipboardCheck className="w-4 h-4" />
-              Iniciar Primeira Vistoria
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {audits.map((audit) => {
-            const unit = units.find(u => u.id === audit.unit_id);
-            return (
-              <motion.div
-                key={audit.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => openAuditDetails(audit)}
-                className="group relative flex items-center justify-between p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md cursor-pointer transition-all duration-300 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="relative z-10 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="font-bold text-foreground">{unit?.name || 'Unidade Desconhecida'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {format(new Date(audit.completed_at), "dd 'de' MMM, yyyy 'às' HH:mm", { locale: ptBR })}
-                  </div>
-                </div>
-
-                <div className="relative z-10 flex items-center gap-4">
-                  <div className={`px-3 py-1.5 rounded-xl border text-lg font-black ${getScoreColor(audit.score_percentage)}`}>
-                    {Math.round(audit.score_percentage)}%
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Detalhes da Auditoria */}
-      <Drawer open={!!selectedAudit} onOpenChange={(open) => !open && setSelectedAudit(null)}>
-        <DrawerContent className="h-[85vh] bg-background/80 backdrop-blur-3xl border-t border-white/20">
-          <div className="max-w-2xl mx-auto w-full h-full flex flex-col">
-            <DrawerHeader className="border-b border-border/50 pb-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <DrawerTitle className="text-2xl font-black">
-                    Detalhes da Vistoria
-                  </DrawerTitle>
-                  <DrawerDescription className="text-sm mt-1">
-                    {selectedAudit && format(new Date(selectedAudit.completed_at), "dd 'de' MMMM, yyyy", { locale: ptBR })}
-                  </DrawerDescription>
-                </div>
-                {selectedAudit && (
-                  <div className={`px-4 py-2 rounded-2xl border text-2xl font-black ${getScoreColor(selectedAudit.score_percentage)}`}>
-                    {Math.round(selectedAudit.score_percentage)}%
-                  </div>
-                )}
-              </div>
-            </DrawerHeader>
-
-            <ScrollArea className="flex-1 p-6">
-              {loadingAnswers ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 w-full rounded-2xl" />)}
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {answers.map((answer) => {
-                    const photos = answer.photo_url ? answer.photo_url.split(',') : [];
-                    return (
-                    <div key={answer.id} className="p-5 rounded-3xl bg-card/50 border border-border shadow-sm flex flex-col md:flex-row gap-5">
-                      {/* Fotos da Evidência */}
-                      <div className="shrink-0 flex gap-2 overflow-x-auto pb-2 custom-scrollbar max-w-full md:max-w-[200px]">
-                        {photos.length > 0 ? (
-                          photos.map((url, idx) => (
-                            <div key={idx} className="w-24 h-24 shrink-0 rounded-2xl overflow-hidden border border-border bg-muted">
-                              <img 
-                                src={url} 
-                                alt={`Evidência ${idx + 1}`} 
-                                className="w-full h-full object-cover hover:scale-110 transition-transform duration-500 cursor-pointer"
-                                onClick={() => window.open(url, '_blank')}
-                              />
-                            </div>
-                          ))
-                        ) : (
-                          <div className="w-24 h-24 shrink-0 rounded-2xl border border-dashed border-border bg-muted/50 flex flex-col items-center justify-center text-muted-foreground">
-                            <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
-                            <span className="text-[10px] font-bold uppercase">Sem Foto</span>
-                          </div>
-                        )}
+      <ScrollArea className="flex-1 p-6">
+        <div className="max-w-4xl mx-auto space-y-4 pb-20">
+          {loading ? (
+            <div className="text-white/50 animate-pulse text-sm">Carregando...</div>
+          ) : inspections.length === 0 ? (
+            <div className="text-white/50 text-sm">Nenhuma auditoria encontrada.</div>
+          ) : (
+            inspections.map((audit) => {
+              const unitName = units.find(u => u.id === audit.store_id)?.name || audit.store_id;
+              const dateObj = new Date(audit.completed_at);
+              const startDateObj = new Date(audit.started_at);
+              
+              return (
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  key={audit.id}
+                  onClick={() => setSelectedAudit(audit)}
+                  className="w-full bg-card hover:bg-card/80 border border-border rounded-2xl p-4 text-left transition-all group flex items-center justify-between"
+                >
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <MapPin className="w-4 h-4 text-indigo-500" />
+                      <h3 className="font-bold text-white text-lg">{unitName}</h3>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-white/50 font-medium">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {format(dateObj, "dd 'de' MMM, yyyy", { locale: ptBR })}
                       </div>
-
-                      {/* Informações */}
-                      <div className="flex-1 flex flex-col justify-center">
-                        <div className="flex flex-wrap items-center gap-3 mb-2">
-                          {answer.is_conform ? (
-                            <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20 flex items-center gap-1.5 px-2.5 py-1">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Conforme
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-rose-500/20 flex items-center gap-1.5 px-2.5 py-1">
-                              <XCircle className="w-3.5 h-3.5" /> Não Conforme
-                            </Badge>
-                          )}
-                          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                            {answer.item_name}
-                          </span>
-                        </div>
-                        
-                        {answer.observation && (
-                          <div className="mt-2 p-3 rounded-xl bg-background border border-border text-sm text-foreground/80">
-                            <span className="font-bold text-xs text-muted-foreground block mb-1 uppercase">Observação</span>
-                            {answer.observation}
-                          </div>
-                        )}
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        Início: {format(startDateObj, "HH:mm")}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Fim: {format(dateObj, "HH:mm")}
                       </div>
                     </div>
-                  )})}
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/80 transition-colors" />
+                </motion.button>
+              );
+            })
+          )}
+        </div>
+      </ScrollArea>
+
+      <Drawer open={!!selectedAudit} onOpenChange={(open) => !open && setSelectedAudit(null)}>
+        <DrawerContent className="bg-card border-border h-[90vh]">
+          <DrawerHeader className="border-b border-border pb-4">
+            <DrawerTitle className="text-white">Detalhes da Auditoria</DrawerTitle>
+          </DrawerHeader>
+          <ScrollArea className="flex-1 p-6">
+            <div className="max-w-2xl mx-auto space-y-8 pb-10">
+              {selectedAudit?.raw_payload?.categories.map(cat => (
+                <div key={cat.category_name} className="space-y-4">
+                  <h3 className="text-lg font-bold text-white border-b border-border pb-2">{cat.category_name}</h3>
+                  <div className="space-y-3">
+                    {cat.items.map(item => (
+                      <div key={item.item_name} className={`bg-background rounded-xl p-4 border ${item.status === 'na' ? 'border-border opacity-60' : 'border-border'}`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <p className="text-sm font-bold text-white flex items-center gap-2">
+                              {item.status === 'na' ? <Slash className="w-4 h-4 text-white/50" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                              {item.item_name}
+                            </p>
+                            {item.notes && <p className="text-xs text-white/70 mt-1 italic">"{item.notes}"</p>}
+                          </div>
+                        </div>
+                        
+                        {item.photos && item.photos.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                            {item.photos.map(p => (
+                              <div key={p.id} className="relative aspect-square rounded-lg overflow-hidden border border-border">
+                                <Zoom>
+                                  <img src={p.previewUrl} alt="Foto" className="w-full h-full object-cover" />
+                                </Zoom>
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2 text-[10px] text-white flex justify-between pointer-events-none">
+                                  <span>{format(new Date(p.timestamp), 'HH:mm:ss')}</span>
+                                  {p.lat && <span>GPS Ok</span>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </ScrollArea>
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         </DrawerContent>
       </Drawer>
+
     </div>
   );
-};
-
-export default AuditHistory;
+}

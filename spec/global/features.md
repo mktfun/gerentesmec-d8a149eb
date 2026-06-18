@@ -1,0 +1,16 @@
+# Features Mapeadas (GerentesMec)
+
+## Auditoria (PWA Antifraude)
+- Componente `AuditoriaApp` (`/auditoria`): Stepper direcional para inspeção de lojas offline-first.
+- Componente `AuditItem`: Controla as evidências e validação por quantidade mínima de fotos.
+- Componente `CameraCapture`: Bloqueia galeria e exige foto nativa com GPS.
+- Hook `useAuditStorage`: Grava drafts no IndexedDB (localforage) antes do upload final para garantir integridade.
+- Tabela Supabase: `store_inspections` (com `raw_payload`), `inspection_items`, `inspection_photos`.
+
+## Dashboards de Vistorias
+- Tela `AuditHistory` (`/historico-auditorias`): Lista vistorias finalizadas.
+
+## CRM e Kanban (IA)
+- Tela `Crm`: Kanban board integrado com LLM.
+- Componentes: `KanbanCard`, `KanbanView`.
+- Script: `autonomous_auditor_v2.mjs` (Zero Trust, Parking Lot para controle estrito de estágios).

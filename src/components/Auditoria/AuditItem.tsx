@@ -3,6 +3,8 @@ import { AuditItemData, AuditPhoto } from '@/hooks/useAuditStorage';
 import CameraCapture from './CameraCapture';
 import { CheckCircle2, XCircle, Slash, X, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
 
 interface Props {
   data: AuditItemData;
@@ -11,9 +13,12 @@ interface Props {
 }
 
 export default function AuditItem({ data, minPhotos, onChange }: Props) {
-  // If user marks N/A, they still need 1 photo to prove it's empty
-  const requiredPhotos = data.status === 'na' ? 1 : minPhotos;
-  const isComplete = data.status !== null && data.photos.length >= requiredPhotos;
+  // If user marks N/A, they need 0 photos.
+  const requiredPhotos = data.status === 'na' ? 0 : minPhotos;
+  
+  // Note: if N/A, we require notes
+  const isComplete = data.status !== null && 
+    (data.status === 'na' ? data.notes.trim().length > 0 : data.photos.length >= requiredPhotos);
 
   const handleStatusChange = (status: AuditItemData['status']) => {
     onChange({ ...data, status });
@@ -32,15 +37,18 @@ export default function AuditItem({ data, minPhotos, onChange }: Props) {
   };
 
   return (
-    <div className={`p-4 rounded-2xl border transition-colors ${isComplete ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-border bg-card'}`}>
+    <div className={`p-4 rounded-2xl border transition-colors ${
+      data.status === 'na' ? 'border-border bg-muted/30 opacity-70' : 
+      isComplete ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-border bg-card'
+    }`}>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h3 className="font-bold text-foreground flex items-center gap-2">
-            {data.item_name}
+            <span className={data.status === 'na' ? 'line-through text-muted-foreground' : ''}>{data.item_name}</span>
             {isComplete && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
           </h3>
           <p className="text-xs text-muted-foreground mt-1">
-            {requiredPhotos > 1 ? `Min. ${requiredPhotos} fotos` : '1 foto obrigatória'}
+            {data.status === 'na' ? 'N/A' : (requiredPhotos > 1 ? `Min. ${requiredPhotos} fotos` : '1 foto obrigatória')}
           </p>
         </div>
       </div>
@@ -86,36 +94,41 @@ export default function AuditItem({ data, minPhotos, onChange }: Props) {
         />
       )}
 
-      {/* Photos */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Evidências ({data.photos.length}/{requiredPhotos})</span>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3">
-          {data.photos.map(photo => (
-            <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden bg-black/5 group border border-border">
-              <img src={photo.previewUrl} alt="Evidência" className="w-full h-full object-cover" />
-              <button 
-                onClick={() => removePhoto(photo.id)}
-                className="absolute top-2 right-2 w-7 h-7 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6">
-                <div className="flex items-center gap-1 text-[9px] text-white/90">
-                  <MapPin className="w-3 h-3" />
-                  {photo.lat ? `${photo.lat.toFixed(4)}, ${photo.long?.toFixed(4)}` : 'S/ GPS'}
-                </div>
-                <div className="text-[9px] text-white/70 mt-0.5">
-                  {format(new Date(photo.timestamp), 'HH:mm:ss')}
+      {/* Photos (Hiden if N/A) */}
+      {data.status !== 'na' && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Evidências ({data.photos.length}/{requiredPhotos})</span>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {data.photos.map(photo => (
+              <div key={photo.id} className="relative aspect-square rounded-xl bg-black/5 group border border-border">
+                <Zoom>
+                  <img src={photo.previewUrl} alt="Evidência" className="w-full h-full object-cover rounded-xl" />
+                </Zoom>
+                <button 
+                  onClick={() => removePhoto(photo.id)}
+                  className="absolute top-2 right-2 w-7 h-7 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500 z-10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6 rounded-b-xl pointer-events-none">
+                  <div className="flex items-center gap-1 text-[9px] text-white/90">
+                    <MapPin className="w-3 h-3" />
+                    {photo.lat ? `${photo.lat.toFixed(4)}, ${photo.long?.toFixed(4)}` : 'S/ GPS'}
+                  </div>
+                  <div className="text-[9px] text-white/70 mt-0.5">
+                    {format(new Date(photo.timestamp), 'HH:mm:ss')}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-          <CameraCapture onPhotoCaptured={handlePhotoCaptured} />
+            ))}
+            <CameraCapture onPhotoCaptured={handlePhotoCaptured} />
+          </div>
         </div>
-      </div>
+      )}
+      
       
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuditStorage, AuditPayload, AuditItemData } from '@/hooks/useAuditStorage';
-import { AUDIT_CATEGORIES } from './constants';
+import { AUDIT_CATEGORIES, SCHEMA_VERSION } from './constants';
 import AuditItem from '@/components/Auditoria/AuditItem';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -29,6 +29,7 @@ export default function AuditoriaApp() {
     const initialPayload: AuditPayload = {
       inspection_id: crypto.randomUUID(),
       store_id: storeId,
+      schema_version: SCHEMA_VERSION,
       auditor_user_id: user?.id || null,
       started_at: new Date().toISOString(),
       completed_at: null,
@@ -89,8 +90,9 @@ export default function AuditoriaApp() {
   const isAuditComplete = draft.categories.every(cat => 
     cat.items.every((item) => {
       const templateItem = AUDIT_CATEGORIES.find(c => c.category_name === cat.category_name)?.items.find(i => i.name === item.item_name);
-      const reqPhotos = item.status === 'na' ? 1 : (templateItem?.min_photos || 1);
-      return item.status !== null && item.photos.length >= reqPhotos;
+      const reqPhotos = item.status === 'na' ? 0 : (templateItem?.min_photos || 1);
+      return item.status !== null && 
+        (item.status === 'na' ? item.notes.trim().length > 0 : item.photos.length >= reqPhotos);
     })
   );
 
@@ -192,8 +194,9 @@ export default function AuditoriaApp() {
           // Check if category is 100% complete
           const isCatComplete = cat.items.every(item => {
              const tItem = AUDIT_CATEGORIES.find(c => c.category_name === cat.category_name)?.items.find(i => i.name === item.item_name);
-             const reqPhotos = item.status === 'na' ? 1 : (tItem?.min_photos || 1);
-             return item.status !== null && item.photos.length >= reqPhotos;
+             const reqPhotos = item.status === 'na' ? 0 : (tItem?.min_photos || 1);
+             return item.status !== null && 
+               (item.status === 'na' ? item.notes.trim().length > 0 : item.photos.length >= reqPhotos);
           });
 
           return (

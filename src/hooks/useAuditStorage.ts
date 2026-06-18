@@ -21,6 +21,7 @@ export interface AuditItemData {
 export interface AuditPayload {
   inspection_id: string;
   store_id: string;
+  schema_version: string;
   auditor_user_id: string | null;
   started_at: string;
   completed_at: string | null;
@@ -42,7 +43,14 @@ export function useAuditStorage() {
       try {
         const saved = await localforage.getItem<AuditPayload>(STORE_KEY);
         if (saved) {
-          setDraft(saved);
+          // Check for schema conflicts
+          if (saved.schema_version !== 'v2_granular') {
+            console.warn('Audit schema changed, wiping outdated cache...');
+            await localforage.removeItem(STORE_KEY);
+            setDraft(null);
+          } else {
+            setDraft(saved);
+          }
         }
       } catch (err) {
         console.error('Error loading audit draft', err);
