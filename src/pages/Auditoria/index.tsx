@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuditStorage, AuditPayload, AuditItemData } from '@/hooks/useAuditStorage';
 import { AUDIT_CATEGORIES, SCHEMA_VERSION } from './constants';
 import AuditoriaItemCard from '@/components/Auditoria/AuditoriaItemCard';
@@ -21,6 +22,7 @@ function getFlattenedItems(draft: AuditPayload) {
 
 export default function AuditoriaApp() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { draft, loading, saveDraft, clearDraft } = useAuditStorage();
   
   const [storeId, setStoreId] = useState('');
@@ -28,12 +30,24 @@ export default function AuditoriaApp() {
   const [units, setUnits] = useState<{id: string, name: string}[]>([]);
   const [currentGlobalIndex, setCurrentGlobalIndex] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionTarget, setTransitionTarget] = useState('');
 
   useEffect(() => {
     supabase.from('units').select('id, name').then(({ data }) => {
       if (data) setUnits(data);
     });
   }, []);
+
+  useEffect(() => {
+    if (isSuccess) {
+      const timer = setTimeout(() => {
+        navigate('/historico-auditorias');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, navigate]);
 
   const handleStart = async () => {
     if (!auditorName.trim()) {
@@ -157,7 +171,22 @@ export default function AuditoriaApp() {
       toast.error('Responda ao item e adicione fotos se não for N/A.');
       return;
     }
-    if (currentGlobalIndex < totalItems) {
+    
+    if (currentGlobalIndex < totalItems - 1) {
+      const currentCat = flatItems[currentGlobalIndex].catName;
+      const nextCat = flatItems[currentGlobalIndex + 1].catName;
+      
+      if (currentCat !== nextCat) {
+        setTransitionTarget(nextCat);
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setIsTransitioning(false);
+          setCurrentGlobalIndex(prev => prev + 1);
+        }, 3500);
+      } else {
+        setCurrentGlobalIndex(prev => prev + 1);
+      }
+    } else {
       setCurrentGlobalIndex(prev => prev + 1);
     }
   };
@@ -239,6 +268,7 @@ export default function AuditoriaApp() {
 
       toast.success('Auditoria sincronizada com sucesso!', { id: 'sync' });
       await clearDraft();
+      setIsSuccess(true);
 
     } catch (err) {
       console.error(err);
@@ -283,6 +313,24 @@ export default function AuditoriaApp() {
               className="w-full max-w-lg"
             >
               {(() => {
+                if (isTransitioning) {
+                  return (
+                    <motion.div
+                      key="transition"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.1 }}
+                      className="w-full h-[60vh] flex flex-col items-center justify-center bg-[#111116] border border-white/10 rounded-[2rem] shadow-2xl relative overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 animate-pulse-slow"></div>
+                      <div className="relative z-10 text-center px-6">
+                        <p className="text-white/50 text-sm font-bold uppercase tracking-widest mb-4">Próximo Ambiente</p>
+                        <h2 className="text-3xl font-black text-white">{transitionTarget}</h2>
+                      </div>
+                    </motion.div>
+                  );
+                }
+
                 const flatItem = flatItems[currentGlobalIndex];
                 const templateItem = AUDIT_CATEGORIES.find(c => c.category_name === flatItem.catName)?.items.find(i => i.name === flatItem.data.item_name);
                 
@@ -291,6 +339,7 @@ export default function AuditoriaApp() {
                     data={flatItem.data}
                     minPhotos={templateItem?.min_photos || 1}
                     categoryName={flatItem.catName}
+                    instruction={templateItem?.instruction}
                     onChange={(newData) => handleItemChange(flatItem.categoryIdx, flatItem.itemIdx, newData)}
                   />
                 );
@@ -326,17 +375,33 @@ export default function AuditoriaApp() {
                     <UploadCloud className="w-10 h-10 text-emerald-400" />
                   </div>
                   <h2 className="text-3xl font-black text-white mb-2 relative z-10">Tudo Pronto!</h2>
-                  <p className="text-emerald-400/80 text-sm mb-8 font-medium relative z-10">
-                    100% dos itens verificados.
-                  </p>
                   
-                  <button 
-                    onClick={handleSync}
-                    disabled={isSyncing}
-                    className="w-full relative z-10 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {isSyncing ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Sincronizar Oficialmente'}
-                  </button>
+                  {isSuccess ? (
+                    <>
+                      <p className="text-emerald-400/80 text-sm mb-8 font-medium relative z-10 animate-pulse">
+                        Auditoria salva! Redirecionando em 5 segundos...
+                      </p>
+                      <button 
+                        onClick={() => navigate('/historico-auditorias')}
+                        className="w-full relative z-10 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2"
+                      >
+                        Ver Histórico Agora
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-emerald-400/80 text-sm mb-8 font-medium relative z-10">
+                        100% dos itens verificados.
+                      </p>
+                      <button 
+                        onClick={handleSync}
+                        disabled={isSyncing}
+                        className="w-full relative z-10 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isSyncing ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Sincronizar Oficialmente'}
+                      </button>
+                    </>
+                  )}
                 </>
               )}
             </motion.div>

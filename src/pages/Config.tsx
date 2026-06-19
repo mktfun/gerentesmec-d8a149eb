@@ -4,6 +4,7 @@ import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw, Copy,
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
 import { InboxMappingPanel } from '@/components/Config/InboxMappingPanel';
 import { AdvancedAiPanel } from '@/components/Config/AdvancedAiPanel';
+import { AuditorsPanel } from '@/components/Config/AuditorsPanel';
 import { useAppData } from '@/context/AppDataContext';
 import { supabase } from '@/integrations/supabase/client';
 import { avgScoreInt } from '@/utils/scoreUtils';
@@ -473,6 +474,11 @@ const Config = () => {
         </motion.section>
 
 
+
+        {/* ── Controle de Auditores ──────────────── */}
+        <motion.section {...fadeUp(0.1)} className="mb-6">
+          <AuditorsPanel />
+        </motion.section>
 
         {/* ── Unidades e Mapeamento de Canais ──────────────── */}
         <motion.section {...fadeUp(0.1)}>

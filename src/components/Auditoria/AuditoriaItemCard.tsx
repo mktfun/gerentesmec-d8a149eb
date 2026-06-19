@@ -9,10 +9,11 @@ interface Props {
   data: AuditItemData;
   minPhotos: number;
   categoryName: string;
+  instruction?: string;
   onChange: (newData: AuditItemData) => void;
 }
 
-export default function AuditoriaItemCard({ data, minPhotos, categoryName, onChange }: Props) {
+export default function AuditoriaItemCard({ data, minPhotos, categoryName, instruction, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const requiredPhotos = data.status === 'na' ? 0 : minPhotos;
@@ -131,11 +132,19 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, onCha
           {isComplete && <Check className="w-5 h-5 text-emerald-500" />}
         </h2>
         
-        <p className="text-sm text-white/50 mb-6">
+        <p className="text-sm text-white/50 mb-4">
           {data.status === 'na' 
             ? 'Item desabilitado (N/A).' 
             : `Evidências: ${data.photos.length} de ${requiredPhotos} min.`}
         </p>
+
+        {instruction && (
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-6">
+            <p className="text-zinc-400 text-sm font-medium leading-relaxed italic">
+              "{instruction}"
+            </p>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-3 mb-6">

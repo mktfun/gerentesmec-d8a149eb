@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AppDataProvider } from "./context/AppDataContext";
 import { AuthProvider } from "./features/auth/hooks/useAuth";
@@ -45,14 +45,22 @@ const AppRoutes: React.FC = () => {
   }
 
   const isUnitManager = managers.some(m => m.auth_user_id === user?.id);
+  const isAuditor = user?.app_metadata?.role === 'auditor';
 
   return (
     <Routes>
       {/* Public */}
       <Route path="/login" element={<Login />} />
 
-      {/* Unit Manager Routes */}
-      {isUnitManager ? (
+      {/* Auditor Routes */}
+      {isAuditor ? (
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Navigate to="/auditoria" replace />} />
+          <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
+          <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
+          <Route path="*" element={<Navigate to="/auditoria" replace />} />
+        </Route>
+      ) : isUnitManager ? (
         <Route element={<ProtectedRoute />}>
           <Route element={<ManagerLayout />}>
             <Route path="/" element={<ManagerDashboard />} />

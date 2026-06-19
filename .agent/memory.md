@@ -10,6 +10,7 @@
 ## Diretrizes de Backend e Banco de Dados (Supabase)
 - Tolerância zero no All-or-nothing: Salvar auditorias incompletas apenas localmente e subir payloads massivos com `raw_payload` em colunas JSONB pra redundância.
 - Restrições de Fila: Sempre usar `insert` ao invés de `upsert` com onConflict `lead_id` na `ai_task_queue` (a tabela loga eventos múltiplos por lead) (Spec 051).
+- **RBAC e Identidade Invisível**: Para gerenciar contas de acesso em dashboards internos de forma rápida (criar contas e mudar senhas sem confirmação de email), utilize o `supabaseAdmin` (Admin SDK) diretamente no frontend passando o `VITE_SUPABASE_SERVICE_ROLE_KEY` armazenado no `.env`. Utilize o `app_metadata` (`user.app_metadata.role`) para controle de bloqueio de rotas no cliente em vez de tabelas auxiliares pesadas (Spec 060).
 
 ## Lógica da IA e LLM (Zero Trust)
 - Confiança Zero: O LLM nunca deve inventar estágios ou assumir vitórias se não houver contexto na conversa do WhatsApp.
