@@ -3,8 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAppData } from '@/context/AppDataContext';
 import { AuditPayload } from '@/hooks/useAuditStorage';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin, Search, ChevronRight, CheckCircle2, Slash, Clock, XCircle } from 'lucide-react';
+import { Calendar, MapPin, ChevronRight, CheckCircle2, Slash, Clock, XCircle, Camera, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Zoom from 'react-medium-image-zoom';
@@ -76,6 +75,22 @@ export default function AuditHistory() {
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Resolve a photo to a displayable URL.
+   * blob: URLs are ephemeral and expire when the session closes.
+   * If a storage_path exists we use the Supabase public URL.
+   * Otherwise returns null so a placeholder can be shown.
+   */
+  const resolvePhotoUrl = (photo: any): string | null => {
+    if (photo.storage_path) {
+      return supabase.storage.from('audit-photos').getPublicUrl(photo.storage_path).data.publicUrl;
+    }
+    if (photo.previewUrl && !photo.previewUrl.startsWith('blob:')) {
+      return photo.previewUrl;
+    }
+    return null;
   };
 
   return (
@@ -174,39 +189,88 @@ export default function AuditHistory() {
             <div className="max-w-2xl mx-auto space-y-8 pb-10">
               {selectedAudit?.raw_payload?.categories.map(cat => (
                 <div key={cat.category_name} className="space-y-4">
-                  <h3 className="text-lg font-bold text-foreground border-b border-border pb-2">{cat.category_name}</h3>
+                  {/* Category header */}
+                  <div className="flex items-center gap-3 pb-2 border-b border-border">
+                    <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                    <h3 className="text-base font-bold text-foreground uppercase tracking-wider">{cat.category_name}</h3>
+                  </div>
+
                   <div className="space-y-3">
-                    {cat.items.map(item => {
+                    {cat.items.map((item: any) => {
                       const isNok = item.status === 'nao_conforme' || item.status === 'nok';
+                      const isNa = item.status === 'na';
+                      const hasNotes = item.notes && item.notes.trim().length > 0;
+
                       return (
-                      <div key={item.item_name} className={`bg-card rounded-xl p-4 border shadow-sm ${item.status === 'na' ? 'border-border opacity-60' : 'border-border'}`}>
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="text-sm font-bold text-foreground flex items-center gap-2">
-                              {item.status === 'na' ? <Slash className="w-4 h-4 text-muted-foreground" /> : isNok ? <XCircle className="w-4 h-4 text-rose-500" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-                              {item.item_name}
-                            </p>
-                            {item.notes && <p className="text-xs text-muted-foreground mt-1 italic">"{item.notes}"</p>}
+                        <div
+                          key={item.item_name}
+                          className={`rounded-2xl p-4 border shadow-sm transition-colors ${
+                            isNok
+                              ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20'
+                              : isNa
+                              ? 'bg-card border-border opacity-60'
+                              : 'bg-card border-border'
+                          }`}
+                        >
+                          {/* Item header */}
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className="shrink-0 mt-0.5">
+                              {isNa
+                                ? <Slash className="w-4 h-4 text-muted-foreground" />
+                                : isNok
+                                ? <XCircle className="w-4 h-4 text-rose-500" />
+                                : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                            </div>
+                            <p className="text-sm font-semibold text-foreground leading-snug">{item.item_name}</p>
                           </div>
-                        </div>
-                        
-                        {item.photos && item.photos.length > 0 && (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
-                            {item.photos.map(p => (
-                              <div key={p.id} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-zinc-100 dark:bg-black/50">
-                                <Zoom>
-                                  <img src={p.previewUrl} alt="Foto" className="w-full h-full object-cover" />
-                                </Zoom>
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2 text-[10px] text-white flex justify-between pointer-events-none">
-                                  <span>{format(new Date(p.timestamp), 'HH:mm:ss')}</span>
-                                  {p.lat && <span>GPS Ok</span>}
-                                </div>
+
+                          {/* Photo grid */}
+                          {item.photos && item.photos.length > 0 && (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                              {item.photos.map((p: any) => {
+                                const url = resolvePhotoUrl(p);
+                                return (
+                                  <div key={p.id} className="relative aspect-square rounded-xl overflow-hidden border border-border bg-zinc-100 dark:bg-black/50">
+                                    {url ? (
+                                      <Zoom>
+                                        <img
+                                          src={url}
+                                          alt="Foto de evidência"
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </Zoom>
+                                    ) : (
+                                      <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-zinc-400 dark:text-zinc-600 p-2">
+                                        <Camera className="w-6 h-6" />
+                                        <span className="text-[9px] font-medium text-center leading-tight">Foto não disponível</span>
+                                      </div>
+                                    )}
+                                    {url && (
+                                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 text-[9px] text-white flex justify-between pointer-events-none">
+                                        <span>{format(new Date(p.timestamp), 'HH:mm:ss')}</span>
+                                        {p.lat && <span className="font-semibold">GPS ✓</span>}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Notes — highlighted when non-conformant */}
+                          {hasNotes && (
+                            isNok ? (
+                              <div className="flex items-start gap-2 mt-3 bg-red-50 dark:bg-rose-500/10 border border-red-200 dark:border-rose-500/20 text-red-700 dark:text-rose-400 p-3 rounded-xl">
+                                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                                <p className="text-xs leading-relaxed"><span className="font-bold">Obs: </span>{item.notes}</p>
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )})}
+                            ) : (
+                              <p className="mt-3 text-xs text-muted-foreground italic px-1">"{item.notes}"</p>
+                            )
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
