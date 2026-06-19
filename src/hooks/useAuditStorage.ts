@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import localforage from 'localforage';
+import { SCHEMA_VERSION } from '@/pages/Auditoria/constants';
 
 export interface AuditPhoto {
   id: string;
@@ -44,7 +45,7 @@ export function useAuditStorage() {
         const saved = await localforage.getItem<AuditPayload>(STORE_KEY);
         if (saved) {
           // Check for schema conflicts
-          if (saved.schema_version !== 'v2_granular') {
+          if (saved.schema_version !== SCHEMA_VERSION) {
             console.warn('Audit schema changed, wiping outdated cache...');
             await localforage.removeItem(STORE_KEY);
             setDraft(null);
