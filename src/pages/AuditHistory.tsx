@@ -134,9 +134,9 @@ export default function AuditHistory() {
               let totalItems = 0;
               let conformItems = 0;
               audit.raw_payload?.categories?.forEach(cat => {
-                cat.items.forEach(item => {
-                  if (item.status === 'ok' || item.status === 'conforme') conformItems++;
-                  if (item.status !== 'na') totalItems++;
+                (cat?.items || []).filter(Boolean).forEach(item => {
+                  if (item?.status === 'ok' || item?.status === 'conforme') conformItems++;
+                  if (item?.status !== 'na' && item?.status !== null && item?.status !== undefined) totalItems++;
                 });
               });
               
@@ -197,8 +197,8 @@ export default function AuditHistory() {
 
                   <div className="space-y-3">
                     {(cat.items || []).filter(Boolean).map((item: any) => {
-                      const isNok = item.status === 'nao_conforme' || item.status === 'nok';
-                      const isNa = item.status === 'na';
+                      const isNok = item?.status === 'nao_conforme' || item?.status === 'nok';
+                      const isNa = item?.status === 'na';
                       const hasNotes = item.notes && item.notes.trim().length > 0;
 
                       return (
