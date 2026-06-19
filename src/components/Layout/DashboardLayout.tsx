@@ -144,7 +144,7 @@ const DashboardLayout: React.FC = () => {
 
         {/* Topbar */}
         {!isTvMode && (
-          <header className="h-auto min-h-16 py-3 md:py-0 sticky top-0 z-10 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 gap-4 md:gap-0
+          <header className="h-auto min-h-16 py-3 md:py-0 sticky top-0 z-50 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 gap-4 md:gap-0
             bg-background/80 backdrop-blur-xl border-b border-border">
           <div>
             <h2 className="text-lg md:text-xl font-black text-foreground">

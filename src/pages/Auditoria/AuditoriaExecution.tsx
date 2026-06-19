@@ -52,7 +52,7 @@ export default function AuditoriaExecution() {
   };
 
   if (loading || !draft) {
-    return <div className="flex h-screen items-center justify-center bg-[#0a0a0f]"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
+    return <div className="flex h-screen items-center justify-center bg-background dark:bg-[#0a0a0f]"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
   }
 
   // --- MODO EXECUÇÃO (STEPPER IMERSIVO) ---
@@ -79,41 +79,41 @@ export default function AuditoriaExecution() {
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col h-screen bg-[#0a0a0f] items-center justify-center p-6 text-center">
+      <div className="flex flex-col h-screen bg-background dark:bg-[#0a0a0f] items-center justify-center p-6 text-center">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-full mb-6">
           <UploadCloud className="w-16 h-16 text-emerald-500" />
         </motion.div>
-        <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Inspeção Concluída</h2>
-        <p className="text-zinc-400">Todos os dados e evidências foram sincronizados com sucesso.</p>
-        <p className="text-zinc-500 text-sm mt-8">Redirecionando para o histórico...</p>
+        <h2 className="text-3xl font-black text-foreground mb-2 tracking-tight">Inspeção Concluída</h2>
+        <p className="text-muted-foreground">Todos os dados e evidências foram sincronizados com sucesso.</p>
+        <p className="text-muted-foreground text-sm mt-8">Redirecionando para o histórico...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#0a0a0f] overflow-hidden fixed inset-0 z-[100]">
+    <div className="flex flex-col h-[100dvh] bg-background dark:bg-[#0a0a0f] overflow-hidden fixed inset-0 z-[100]">
       {/* HEADER SUPERIOR (Progresso e Categoria Atual) */}
-      <div className="shrink-0 bg-[#121214]/80 backdrop-blur-xl border-b border-zinc-800/50 p-4 pt-safe z-10 flex flex-col gap-3">
+      <div className="shrink-0 bg-card/80 dark:bg-[#121214]/80 backdrop-blur-xl border-b border-border dark:border-zinc-800/50 p-4 pt-safe z-10 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-0.5 block">
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-0.5 block">
               Categoria {currentItem.categoryIdx + 1} de {draft.categories.length}
             </span>
-            <h2 className="text-sm font-semibold text-white line-clamp-1">
+            <h2 className="text-sm font-semibold text-foreground line-clamp-1">
               {currentItem.catName}
             </h2>
           </div>
           
           <button 
             onClick={handleAbort}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800/50 text-zinc-400 hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-500 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Barra de Progresso Fina */}
-        <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+        <div className="h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -144,24 +144,24 @@ export default function AuditoriaExecution() {
       </div>
 
       {/* FOOTER INFERIOR (Navegação Rápida) */}
-      <div className="shrink-0 bg-[#121214]/90 backdrop-blur-xl border-t border-zinc-800/50 p-4 pb-safe absolute bottom-0 w-full z-10">
+      <div className="shrink-0 bg-card/90 dark:bg-[#121214]/90 backdrop-blur-xl border-t border-border dark:border-zinc-800/50 p-4 pb-safe absolute bottom-0 w-full z-10">
         <div className="flex items-center justify-between max-w-sm mx-auto">
           <button 
             onClick={handlePrev}
             disabled={currentGlobalIndex === 0}
-            className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-800/50 text-zinc-300 disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all"
+            className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-200 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          <span className="text-xs font-medium text-zinc-500">
+          <span className="text-xs font-medium text-muted-foreground">
             {currentGlobalIndex + 1} de {flatItems.length}
           </span>
 
           <button 
             onClick={handleNext}
             disabled={currentGlobalIndex === flatItems.length - 1}
-            className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-800/50 text-zinc-300 disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all"
+            className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-200 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all"
           >
             <ChevronRight className="w-6 h-6" />
           </button>

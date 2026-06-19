@@ -4,7 +4,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAppData } from '@/context/AppDataContext';
 import { AuditPayload } from '@/hooks/useAuditStorage';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin, Search, ChevronRight, CheckCircle2, Slash, Clock } from 'lucide-react';
+import { Calendar, MapPin, Search, ChevronRight, CheckCircle2, Slash, Clock, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Zoom from 'react-medium-image-zoom';
@@ -79,16 +79,16 @@ export default function AuditHistory() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#0a0a0f]">
+    <div className="flex flex-col h-screen bg-background">
       {/* Header & Filters */}
       <div className="bg-card border-b border-border p-6 sticky top-0 z-10">
-        <h1 className="text-2xl font-black text-white mb-4">Histórico de Auditorias</h1>
+        <h1 className="text-2xl font-black text-foreground mb-4">Histórico de Auditorias</h1>
         <div className="flex flex-col sm:flex-row gap-3">
           {!isUnitManager && (
             <select 
               value={filterStore}
               onChange={e => setFilterStore(e.target.value)}
-              className="bg-background border border-border text-white px-4 py-2 rounded-xl text-sm"
+              className="bg-background border border-input text-foreground px-4 py-2 rounded-xl text-sm"
             >
               <option value="">Todas as Lojas</option>
               {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -98,7 +98,7 @@ export default function AuditHistory() {
             type="date" 
             value={filterDate}
             onChange={e => setFilterDate(e.target.value)}
-            className="bg-background border border-border text-white px-4 py-2 rounded-xl text-sm"
+            className="bg-background border border-input text-foreground px-4 py-2 rounded-xl text-sm [color-scheme:light] dark:[color-scheme:dark]"
           />
         </div>
       </div>
@@ -106,45 +106,59 @@ export default function AuditHistory() {
       <ScrollArea className="flex-1 p-6">
         <div className="max-w-4xl mx-auto space-y-4 pb-20">
           {loading ? (
-            <div className="text-white/50 animate-pulse text-sm">Carregando...</div>
+            <div className="text-muted-foreground animate-pulse text-sm">Carregando...</div>
           ) : inspections.length === 0 ? (
-            <div className="text-white/50 text-sm">Nenhuma auditoria encontrada.</div>
+            <div className="text-muted-foreground text-sm">Nenhuma auditoria encontrada.</div>
           ) : (
-            inspections.map((audit) => {
-              const unitName = units.find(u => u.id === audit.store_id)?.name || audit.store_id;
+            inspections.map(audit => {
+              const storeName = units.find(u => u.id === audit.store_id)?.name || 'Unidade Desconhecida';
+              const auditorName = (audit.raw_payload as any)?.device_info ? JSON.parse((audit.raw_payload as any).device_info || '{}')?.auditorName : 'Auditor';
               const dateObj = new Date(audit.completed_at);
-              const startDateObj = new Date(audit.started_at);
               
+              // Cálculo de score dinâmico
+              let totalItems = 0;
+              let conformItems = 0;
+              audit.raw_payload?.categories?.forEach(cat => {
+                cat.items.forEach(item => {
+                  if (item.status === 'ok' || item.status === 'conforme') conformItems++;
+                  if (item.status !== 'na') totalItems++;
+                });
+              });
+              
+              const score = totalItems > 0 ? Math.round((conformItems / totalItems) * 100) : 0;
+              const scoreColor = score >= 75 ? 'text-emerald-700 dark:text-emerald-400' : score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
+              const bgScore = score >= 75 ? 'bg-emerald-500/20 dark:bg-emerald-400/10' : score >= 50 ? 'bg-amber-500/20 dark:bg-amber-400/10' : 'bg-rose-500/20 dark:bg-rose-400/10';
+
               return (
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <div 
                   key={audit.id}
                   onClick={() => setSelectedAudit(audit)}
-                  className="w-full bg-card hover:bg-card/80 border border-border rounded-2xl p-4 text-left transition-all group flex items-center justify-between"
+                  className="w-full bg-card hover:bg-card/80 border border-border rounded-2xl p-4 text-left transition-all group flex flex-col sm:flex-row sm:items-center justify-between cursor-pointer active:scale-[0.98] shadow-sm hover:shadow-md"
                 >
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin className="w-4 h-4 text-indigo-500" />
-                      <h3 className="font-bold text-white text-lg">{unitName}</h3>
+                      <h3 className="font-bold text-foreground text-lg">{storeName}</h3>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-white/50 font-medium">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />
                         {format(dateObj, "dd 'de' MMM, yyyy", { locale: ptBR })}
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
-                        Início: {format(startDateObj, "HH:mm")}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
                         Fim: {format(dateObj, "HH:mm")}
                       </div>
+                      <span className="opacity-70">Auditor: {auditorName}</span>
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/80 transition-colors" />
-                </motion.button>
+                  <div className="mt-4 sm:mt-0 flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                    <div className={`px-4 py-2 rounded-xl font-black ${scoreColor} ${bgScore}`}>
+                      {score}%
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </div>
+                </div>
               );
             })
           )}
@@ -154,30 +168,32 @@ export default function AuditHistory() {
       <Drawer open={!!selectedAudit} onOpenChange={(open) => !open && setSelectedAudit(null)}>
         <DrawerContent className="bg-card border-border h-[90vh]">
           <DrawerHeader className="border-b border-border pb-4">
-            <DrawerTitle className="text-white">Detalhes da Auditoria</DrawerTitle>
+            <DrawerTitle className="text-foreground">Detalhes da Auditoria</DrawerTitle>
           </DrawerHeader>
           <ScrollArea className="flex-1 p-6">
             <div className="max-w-2xl mx-auto space-y-8 pb-10">
               {selectedAudit?.raw_payload?.categories.map(cat => (
                 <div key={cat.category_name} className="space-y-4">
-                  <h3 className="text-lg font-bold text-white border-b border-border pb-2">{cat.category_name}</h3>
+                  <h3 className="text-lg font-bold text-foreground border-b border-border pb-2">{cat.category_name}</h3>
                   <div className="space-y-3">
-                    {cat.items.map(item => (
-                      <div key={item.item_name} className={`bg-background rounded-xl p-4 border ${item.status === 'na' ? 'border-border opacity-60' : 'border-border'}`}>
+                    {cat.items.map(item => {
+                      const isNok = item.status === 'nao_conforme' || item.status === 'nok';
+                      return (
+                      <div key={item.item_name} className={`bg-card rounded-xl p-4 border shadow-sm ${item.status === 'na' ? 'border-border opacity-60' : 'border-border'}`}>
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <p className="text-sm font-bold text-white flex items-center gap-2">
-                              {item.status === 'na' ? <Slash className="w-4 h-4 text-white/50" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                            <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                              {item.status === 'na' ? <Slash className="w-4 h-4 text-muted-foreground" /> : isNok ? <XCircle className="w-4 h-4 text-rose-500" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
                               {item.item_name}
                             </p>
-                            {item.notes && <p className="text-xs text-white/70 mt-1 italic">"{item.notes}"</p>}
+                            {item.notes && <p className="text-xs text-muted-foreground mt-1 italic">"{item.notes}"</p>}
                           </div>
                         </div>
                         
                         {item.photos && item.photos.length > 0 && (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
                             {item.photos.map(p => (
-                              <div key={p.id} className="relative aspect-square rounded-lg overflow-hidden border border-border">
+                              <div key={p.id} className="relative aspect-square rounded-lg overflow-hidden border border-border bg-zinc-100 dark:bg-black/50">
                                 <Zoom>
                                   <img src={p.previewUrl} alt="Foto" className="w-full h-full object-cover" />
                                 </Zoom>
@@ -190,7 +206,7 @@ export default function AuditHistory() {
                           </div>
                         )}
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
               ))}

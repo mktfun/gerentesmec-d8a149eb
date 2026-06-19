@@ -7,7 +7,8 @@
 - UX de Fotos (Lightbox): Não redirecione para novas rotas ao exibir mídias. Use componentes de Lightbox com zoom in-place (como `react-medium-image-zoom`) com fundo escuro (WhatsApp style) (Spec 053).
 - Layouts de Imersão: Sempre isole telas de alta imersão (como Steppers de Auditoria) em rotas próprias (ex: `/auditoria/execucao`) renderizadas FORA de layouts globais (sem Sidebars ou LumaBars) usando `100vw` e `100vh` fixos. Mantenha os Dashboards com grid divido (2 colunas) em layouts padrão de CRM.
 - Rastreabilidade de UI: Mídias antifraude devem ter o timestamp real (HH:MM:SS) e a tag de GPS estampadas diretamente na miniatura/modal para inibir fraude.
-
+- Solar Contrast (Light Mode): Nunca fixe cores (`bg-black`, `text-white`) em componentes de uso externo/rua. Use as variáveis do Tailwind (`bg-background dark:bg-[#0a0a0f]`) e garanta que botões de ação (ex: Conforme/Não Conforme) usem cores sólidas saturadas (`bg-emerald-600`, `bg-rose-600`) para legibilidade máxima sob a luz do sol no Light Mode (Spec 063).
+- Hierarquia Z-Index e Overlaps: Em layouts flutuantes (LumaBar) ou Dashboards com Sidebars, o `<Toaster position="bottom-right" />` deve ser isolado do centro. O cabeçalho (Header) principal deve ser selado com `z-50` para evitar "vazamento" de scroll ou modais (Spec 063).
 ## Diretrizes de Backend e Banco de Dados (Supabase)
 - Tolerância zero no All-or-nothing: Salvar auditorias incompletas apenas localmente e subir payloads massivos com `raw_payload` em colunas JSONB pra redundância.
 - Restrições de Fila: Sempre usar `insert` ao invés de `upsert` com onConflict `lead_id` na `ai_task_queue` (a tabela loga eventos múltiplos por lead) (Spec 051).

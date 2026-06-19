@@ -90,8 +90,8 @@ export default function AuditoriaApp() {
           <ClipboardList className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Auditoria de Qualidade</h1>
-          <p className="text-sm text-zinc-400 font-medium">Inspeção padronizada de lojas e pátios.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Auditoria de Qualidade</h1>
+          <p className="text-sm text-muted-foreground font-medium">Inspeção padronizada de lojas e pátios.</p>
         </div>
       </div>
       
@@ -99,18 +99,18 @@ export default function AuditoriaApp() {
         
         {/* LADO ESQUERDO: Card de Iniciar */}
         <div className="flex flex-col gap-6">
-          <div className="relative bg-[#121214] border border-zinc-800 rounded-3xl p-6 shadow-xl overflow-hidden">
+          <div className="relative bg-card dark:bg-[#121214] border border-border dark:border-zinc-800 rounded-3xl p-6 shadow-xl overflow-hidden">
             {/* Barra Animada no Topo */}
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-[length:200%_200%] animate-gradient-shift"></div>
 
             <div className="mb-6 mt-2">
-              <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center mb-4 shadow-inner">
-                <MapPin className="text-indigo-400 w-6 h-6" />
+              <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center justify-center mb-4 shadow-inner">
+                <MapPin className="text-indigo-500 dark:text-indigo-400 w-6 h-6" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">
+              <h2 className="text-xl font-bold text-foreground mb-2">
                 {draft ? 'Rascunho em Andamento' : 'Nova Auditoria'}
               </h2>
-              <p className="text-zinc-400 text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 {draft 
                   ? 'Você possui uma auditoria em andamento. Deseja continuar de onde parou?'
                   : 'Selecione a unidade para iniciar a inspeção rigorosa. Imersão total ativada.'}
@@ -120,7 +120,7 @@ export default function AuditoriaApp() {
             {!draft && (
               <div className="space-y-5">
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
                     Seu Nome (Auditor)
                   </label>
                   <input
@@ -128,18 +128,18 @@ export default function AuditoriaApp() {
                     placeholder="Ex: Carlos Silva"
                     value={auditorName}
                     onChange={(e) => setAuditorName(e.target.value)}
-                    className="w-full bg-black/50 border border-zinc-800 rounded-xl p-3 text-white placeholder-zinc-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full bg-background dark:bg-black/50 border border-input dark:border-zinc-800 rounded-xl p-3 text-foreground placeholder-muted-foreground dark:placeholder-zinc-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
                     Unidade Inspecionada
                   </label>
                   <select
                     value={storeId}
                     onChange={(e) => setStoreId(e.target.value)}
-                    className="w-full bg-black/50 border border-zinc-800 rounded-xl p-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none appearance-none transition-all"
+                    className="w-full bg-background dark:bg-black/50 border border-input dark:border-zinc-800 rounded-xl p-3 text-foreground focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none appearance-none transition-all"
                   >
                     <option value="">Selecione a Unidade...</option>
                     {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -152,8 +152,8 @@ export default function AuditoriaApp() {
               onClick={handleStart}
               className={`w-full font-bold rounded-xl p-3.5 mt-6 transition-all active:scale-95 shadow-lg
                 ${draft 
-                  ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-indigo-500/20' 
-                  : 'bg-white hover:bg-zinc-200 text-black shadow-white/10'}`}
+                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20' 
+                  : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 dark:text-black shadow-black/10 dark:shadow-white/10'}`}
             >
               {draft ? 'Continuar Inspeção' : 'Iniciar Inspeção'}
             </button>
@@ -161,15 +161,15 @@ export default function AuditoriaApp() {
         </div>
 
         {/* LADO DIREITO: Resumo Rápido */}
-        <div className="bg-[#121214] border border-zinc-800 rounded-3xl p-6 shadow-xl flex flex-col">
+        <div className="bg-card dark:bg-[#121214] border border-border dark:border-zinc-800 rounded-3xl p-6 shadow-xl flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-500" />
               Últimas Vistorias
             </h2>
             <button 
               onClick={() => navigate('/historico-auditorias')} 
-              className="text-xs font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-wide transition-colors"
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 uppercase tracking-wide transition-colors"
             >
               Ver Histórico
             </button>
@@ -177,22 +177,22 @@ export default function AuditoriaApp() {
           
           <div className="space-y-3 flex-1">
             {loadingRecent ? (
-              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-zinc-600" /></div>
+              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
             ) : recentAudits.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-zinc-500 text-center">
+              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground text-center">
                 <AlertCircle className="w-8 h-8 mb-3 opacity-20" />
                 <p className="text-sm">Nenhuma vistoria recente encontrada.</p>
               </div>
             ) : (
               recentAudits.map(audit => {
-                const scoreColor = audit.final_score >= 75 ? 'text-emerald-400' : audit.final_score >= 50 ? 'text-amber-400' : 'text-rose-400';
-                const bgScore = audit.final_score >= 75 ? 'bg-emerald-400/10' : audit.final_score >= 50 ? 'bg-amber-400/10' : 'bg-rose-400/10';
+                const scoreColor = audit.final_score >= 75 ? 'text-emerald-700 dark:text-emerald-400' : audit.final_score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
+                const bgScore = audit.final_score >= 75 ? 'bg-emerald-500/20 dark:bg-emerald-400/10' : audit.final_score >= 50 ? 'bg-amber-500/20 dark:bg-amber-400/10' : 'bg-rose-500/20 dark:bg-rose-400/10';
                 
                 return (
-                  <div key={audit.id} className="flex items-center justify-between p-4 rounded-2xl bg-black/40 border border-zinc-800/50 hover:bg-black/60 transition-colors">
+                  <div key={audit.id} className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-black/60 transition-colors">
                     <div>
-                      <p className="font-bold text-white text-sm mb-1">{audit.units?.name || 'Unidade Desconhecida'}</p>
-                      <p className="text-xs text-zinc-500 font-medium">
+                      <p className="font-bold text-foreground text-sm mb-1">{audit.units?.name || 'Unidade Desconhecida'}</p>
+                      <p className="text-xs text-muted-foreground font-medium">
                         {new Date(audit.completed_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
                       </p>
                     </div>

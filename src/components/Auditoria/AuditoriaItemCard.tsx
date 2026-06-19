@@ -64,7 +64,7 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-[#111116] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative flex flex-col mt-4">
+    <div className="w-full max-w-lg mx-auto bg-card dark:bg-[#111116] border border-border dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative flex flex-col mt-4">
       
       {/* Category Header Muted */}
       <div className="absolute top-4 left-4 z-20">
@@ -74,7 +74,7 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
       </div>
 
       {/* Hero Image Section (Blur or Photos) */}
-      <div className="h-[40vh] min-h-[300px] w-full bg-black/50 relative overflow-hidden flex items-center justify-center">
+      <div className="h-[40vh] min-h-[300px] w-full bg-zinc-100 dark:bg-black/50 relative overflow-hidden flex items-center justify-center">
         
         {/* Render Background Photos */}
         {data.photos.length > 0 ? (
@@ -90,7 +90,7 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
-                <div className="absolute bottom-4 left-4 z-20 bg-black/70 backdrop-blur p-2 rounded-lg text-[10px] text-white/80 flex items-center gap-2 pointer-events-none border border-white/10">
+                <div className="absolute bottom-4 left-4 z-20 bg-black/70 backdrop-blur p-2 rounded-lg text-[10px] text-white flex items-center gap-2 pointer-events-none border border-white/10">
                   <span>{format(new Date(photo.timestamp), 'HH:mm:ss')}</span>
                 </div>
               </div>
@@ -100,18 +100,17 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent"></div>
         )}
         
-        {/* Central Camera Button (Se não estiver N/A) */}
-        {data.status !== 'na' && (
-          <div className={`absolute inset-0 pointer-events-none flex items-center justify-center ${data.photos.length > 0 ? 'bg-black/40' : ''}`}>
-             <button 
-                onClick={() => fileInputRef.current?.click()}
-                className={`pointer-events-auto relative z-10 w-24 h-24 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-all shadow-2xl ${data.photos.length > 0 ? 'scale-75 opacity-80 hover:opacity-100' : 'animate-pulse-slow'}`}
-              >
-                <Camera className="w-8 h-8 text-white" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/90 shadow-black">
-                  {data.photos.length > 0 ? 'Mais' : 'Tirar Foto'}
-                </span>
-              </button>
+        {data.photos.length < requiredPhotos && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="pointer-events-auto relative z-10 w-24 h-24 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-all shadow-2xl animate-pulse-slow"
+            >
+              <Camera className="w-8 h-8 text-zinc-600 dark:text-white" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-white">
+                Tirar Foto
+              </span>
+            </button>
           </div>
         )}
         
@@ -125,81 +124,68 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
         />
       </div>
 
-      {/* Info & Actions Section */}
-      <div className="p-6 bg-[#111116] z-20 relative">
-        <h2 className="text-2xl font-black text-white mb-1 flex items-center gap-2">
-          {data.status === 'na' ? <span className="line-through text-white/40">{data.item_name}</span> : data.item_name}
+      <div className="p-6 flex-1 flex flex-col z-20 bg-background dark:bg-[#111116]">
+        <h2 className="text-2xl font-black text-foreground mb-4 flex items-center gap-2">
+          {data.status === 'na' ? <span className="line-through opacity-40">{data.item_name}</span> : data.item_name}
           {isComplete && <Check className="w-5 h-5 text-emerald-500" />}
         </h2>
         
-        <p className="text-sm text-white/50 mb-4">
-          {data.status === 'na' 
-            ? 'Item desabilitado (N/A).' 
-            : `Evidências: ${data.photos.length} de ${requiredPhotos} min.`}
-        </p>
-
         {instruction && (
-          <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-6">
-            <p className="text-zinc-400 text-sm font-medium leading-relaxed italic">
+          <div className="bg-muted border border-border rounded-lg p-3 mb-6">
+            <p className="text-muted-foreground text-sm font-medium leading-relaxed italic">
               "{instruction}"
             </p>
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <button
+        <div className="grid grid-cols-3 gap-3 mt-auto">
+          <button 
             onClick={() => handleStatusChange('ok')}
-            className={`flex flex-col items-center justify-center py-4 rounded-xl border transition-all ${
-              data.status === 'ok' 
-                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
-                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'
-            }`}
+            className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95
+              ${data.status === 'ok' 
+                ? 'bg-emerald-600 dark:bg-emerald-500/20 border-emerald-500 text-white dark:text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' 
+                : 'bg-zinc-100 dark:bg-black/30 border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-white/40 hover:bg-zinc-200 dark:hover:bg-white/5'}`}
           >
-            <Check className="w-6 h-6 mb-2" />
-            <span className="text-[10px] font-bold tracking-wider uppercase">Conforme</span>
+            <Check className="w-6 h-6 mb-1" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Conforme</span>
           </button>
           
-          <button
+          <button 
             onClick={() => handleStatusChange('nok')}
-            className={`flex flex-col items-center justify-center py-4 rounded-xl border transition-all ${
-              data.status === 'nok' 
-                ? 'bg-rose-500/20 border-rose-500 text-rose-400' 
-                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'
-            }`}
+            className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95
+              ${data.status === 'nok' 
+                ? 'bg-rose-600 dark:bg-rose-500/20 border-rose-500 text-white dark:text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.3)]' 
+                : 'bg-zinc-100 dark:bg-black/30 border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-white/40 hover:bg-zinc-200 dark:hover:bg-white/5'}`}
           >
-            <X className="w-6 h-6 mb-2" />
-            <span className="text-[10px] font-bold tracking-wider uppercase">Inconforme</span>
+            <X className="w-6 h-6 mb-1" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Não Conf</span>
           </button>
           
-          <button
+          <button 
             onClick={() => handleStatusChange('na')}
-            className={`flex flex-col items-center justify-center py-4 rounded-xl border transition-all ${
-              data.status === 'na' 
-                ? 'bg-amber-500/20 border-amber-500 text-amber-400' 
-                : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'
-            }`}
+            className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all active:scale-95
+              ${data.status === 'na' 
+                ? 'bg-zinc-600 dark:bg-zinc-500/20 border-zinc-500 text-white dark:text-zinc-400 shadow-[0_0_15px_rgba(161,161,170,0.3)]' 
+                : 'bg-zinc-100 dark:bg-black/30 border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-white/40 hover:bg-zinc-200 dark:hover:bg-white/5'}`}
           >
-            <Slash className="w-6 h-6 mb-2" />
-            <span className="text-[10px] font-bold tracking-wider uppercase">N/A</span>
+            <Slash className="w-6 h-6 mb-1" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">N/A</span>
           </button>
         </div>
 
-        {/* Observation Input (Obrigatório se N/A) */}
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-white/50 uppercase tracking-wider">
+        <div className="space-y-2 mt-6">
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Observação {data.status === 'na' && <span className="text-rose-500">* (Obrigatória)</span>}
           </label>
           <textarea
             value={data.notes}
             onChange={(e) => handleNotesChange(e.target.value)}
             placeholder="Adicione um comentário..."
-            className={`w-full bg-black/50 border rounded-xl p-3 text-sm text-white resize-none focus:outline-none focus:ring-1 transition-colors ${
+            className={`w-full bg-background dark:bg-black/30 border border-input dark:border-white/10 rounded-xl p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 outline-none resize-none h-24 transition-all ${
               data.status === 'na' && data.notes.trim().length === 0 
-                ? 'border-rose-500/50 focus:ring-rose-500 focus:border-rose-500' 
-                : 'border-white/10 focus:ring-indigo-500 focus:border-indigo-500'
+                ? 'border-rose-500' 
+                : ''
             }`}
-            rows={2}
           />
         </div>
       </div>

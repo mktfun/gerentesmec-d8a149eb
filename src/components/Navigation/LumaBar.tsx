@@ -56,7 +56,7 @@ const LumaBar: React.FC<LumaBarProps> = ({ items, className = "" }) => {
         {items.map((item, index) => {
           const isActive = index === activeIndex;
           return (
-            <motion.div key={item.id} className="relative flex flex-col items-center group w-full sm:w-auto">
+            <motion.div key={item.id} className="relative flex flex-col items-center justify-center group w-14 sm:w-16 shrink-0 h-14 sm:h-16">
               {/* Button */}
               <motion.button
                 onClick={() => handleItemClick(item, index)}
