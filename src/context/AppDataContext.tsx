@@ -129,11 +129,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let leadsRes;
     let unitsRes;
 
+    const leadsColumns = 'id, customer_name, customer_phone, customer_vehicle, unit_id, manager_id, last_message_at, funnel_stage, score, wait_time_minutes, sla_status, ticket_value, closing_summary, created_at, audit_checklist';
+
     if (isUnitManager && currentManager) {
-      leadsRes = await (supabase as any).from('leads').select('*').eq('manager_id', currentManager.id).order('created_at', { ascending: false });
+      leadsRes = await (supabase as any).from('leads').select(leadsColumns).eq('manager_id', currentManager.id).order('created_at', { ascending: false });
       unitsRes = await (supabase as any).from('units').select('*').eq('id', currentManager.unit_id).order('name');
     } else {
-      leadsRes = await (supabase as any).from('leads').select('*').order('created_at', { ascending: false });
+      leadsRes = await (supabase as any).from('leads').select(leadsColumns).order('created_at', { ascending: false });
       unitsRes = await (supabase as any).from('units').select('*').order('name');
     }
 

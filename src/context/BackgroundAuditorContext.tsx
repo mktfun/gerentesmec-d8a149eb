@@ -48,11 +48,9 @@ export const BackgroundAuditorProvider: React.FC<{ children: React.ReactNode }> 
     const processNext = async () => {
       setStatus('processing');
       try {
+        const msgColumns = 'id, lead_id, sender_type, content, created_at, ai_audited, message_type, content_type, private';
         const { data, error } = await supabase.from('chat_messages')
-          .select(`
-            *,
-            leads!inner(funnel_stage)
-          `)
+          .select(`${msgColumns}, leads!inner(funnel_stage)`)
           .or('ai_audited.eq.false,ai_audited.is.null')
           .eq('sender_type', 'user')
           .order('created_at', { ascending: true })

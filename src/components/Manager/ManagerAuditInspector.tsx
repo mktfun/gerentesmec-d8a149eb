@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles } from 'lucide-react';
 import { Lead } from '@/context/AppDataContext';
@@ -18,8 +18,9 @@ const ManagerAuditInspector: React.FC<Props> = ({ lead, onClose }) => {
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
+      const msgColumns = 'id, lead_id, sender_type, content, created_at, ai_audited, message_type, content_type, private';
       const { data } = await supabase
-        .from('chat_messages').select('*')
+        .from('chat_messages').select(msgColumns)
         .eq('lead_id', lead.id).order('created_at', { ascending: true });
       setMessages((data as unknown as ChatMessage[]) ?? []);
       setLoading(false);

@@ -29,9 +29,10 @@ const ReadOnlyAuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   useEffect(() => {
     const fetchMessages = async () => {
       setLoadingChat(true);
+      const msgColumns = 'id, lead_id, sender_type, content, created_at, ai_audited, message_type, content_type, private';
       const { data } = await supabase
         .from('chat_messages')
-        .select('*')
+        .select(msgColumns)
         .eq('lead_id', lead.id)
         .order('created_at', { ascending: true });
       if (data) setMessages(data);
