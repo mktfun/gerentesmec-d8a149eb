@@ -22,6 +22,7 @@ import TvOperacional from "./pages/tv/TvOperacional";
 import TvDashboard from "./components/Dashboard/TvDashboard";
 import AuditHistory from "./pages/AuditHistory";
 import AuditoriaApp from "./pages/Auditoria";
+import AuditoriaExecution from "./pages/Auditoria/AuditoriaExecution";
 import NotFound from "./pages/NotFound";
 import { useAppData } from "./context/AppDataContext";
 import { useAuth } from "./features/auth/hooks/useAuth";
@@ -55,18 +56,23 @@ const AppRoutes: React.FC = () => {
       {/* Auditor Routes */}
       {isAuditor ? (
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Navigate to="/auditoria" replace />} />
-          <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
-          <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
+          <Route element={<ManagerLayout />}>
+            <Route path="/" element={<Navigate to="/auditoria" replace />} />
+            <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
+            <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
+          </Route>
+          <Route path="/auditoria/execucao" element={<ErrorBoundary><AuditoriaExecution /></ErrorBoundary>} />
           <Route path="*" element={<Navigate to="/auditoria" replace />} />
         </Route>
       ) : isUnitManager ? (
         <Route element={<ProtectedRoute />}>
           <Route element={<ManagerLayout />}>
             <Route path="/" element={<ManagerDashboard />} />
+            <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
             <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
             <Route path="*" element={<ManagerDashboard />} />
           </Route>
+          <Route path="/auditoria/execucao" element={<ErrorBoundary><AuditoriaExecution /></ErrorBoundary>} />
         </Route>
       ) : (
         /* Admin Routes */
@@ -79,12 +85,13 @@ const AppRoutes: React.FC = () => {
             <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
             <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
             <Route path="/manager" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
+            <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
             <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />
           </Route>
 
           {/* Full Screen Routes */}
-          <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
+          <Route path="/auditoria/execucao" element={<ErrorBoundary><AuditoriaExecution /></ErrorBoundary>} />
 
           {/* TV Routes (admin only) */}
           <Route element={<TvLayout />}>
