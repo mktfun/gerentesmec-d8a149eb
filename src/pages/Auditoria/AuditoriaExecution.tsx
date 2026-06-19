@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuditStorage, AuditPayload, AuditItemData } from '@/hooks/useAuditStorage';
 import { SCHEMA_VERSION } from './constants';
 import AuditoriaItemCard from '@/components/Auditoria/AuditoriaItemCard';
-import { Loader2, UploadCloud, ChevronRight, ChevronLeft, X } from 'lucide-react';
+import { Loader2, UploadCloud, ChevronRight, ChevronLeft, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,7 +20,7 @@ function getFlattenedItems(draft: AuditPayload) {
 
 export default function AuditoriaExecution() {
   const navigate = useNavigate();
-  const { draft, loading, clearDraft } = useAuditStorage();
+  const { draft, loading, saveDraft, clearDraft } = useAuditStorage();
   
   const [currentGlobalIndex, setCurrentGlobalIndex] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -133,11 +133,15 @@ export default function AuditoriaExecution() {
             className="h-full flex items-center justify-center"
           >
             <AuditoriaItemCard 
-              categoryIdx={currentItem.categoryIdx} 
-              itemIdx={currentItem.itemIdx} 
-              onNext={handleNext}
-              isLast={currentGlobalIndex === flatItems.length - 1}
-              onFinish={() => setIsSuccess(true)}
+              data={currentItem.data}
+              minPhotos={1}
+              categoryName={currentItem.catName}
+              onChange={(newData) => {
+                if (!draft) return;
+                const newDraft = { ...draft };
+                newDraft.categories[currentItem.categoryIdx].items[currentItem.itemIdx] = newData;
+                saveDraft(newDraft);
+              }}
             />
           </motion.div>
         </AnimatePresence>
@@ -158,13 +162,21 @@ export default function AuditoriaExecution() {
             {currentGlobalIndex + 1} de {flatItems.length}
           </span>
 
-          <button 
-            onClick={handleNext}
-            disabled={currentGlobalIndex === flatItems.length - 1}
-            className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-200 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
+          {currentGlobalIndex === flatItems.length - 1 ? (
+            <button 
+              onClick={() => setIsSuccess(true)}
+              className="w-12 h-12 flex items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/20 text-white active:scale-95 transition-all"
+            >
+              <Check className="w-6 h-6" />
+            </button>
+          ) : (
+            <button 
+              onClick={handleNext}
+              className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-200 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 active:scale-95 transition-all"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
         </div>
       </div>
     </div>
