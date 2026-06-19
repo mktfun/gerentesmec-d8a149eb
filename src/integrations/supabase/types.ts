@@ -697,6 +697,47 @@ export type Database = {
         }
         Relationships: []
       }
+      store_inspections: {
+        Row: {
+          auditor_user_id: string | null
+          completed_at: string | null
+          device_info: string | null
+          id: string
+          raw_payload: Json | null
+          started_at: string
+          status: string | null
+          store_id: string
+        }
+        Insert: {
+          auditor_user_id?: string | null
+          completed_at?: string | null
+          device_info?: string | null
+          id?: string
+          raw_payload?: Json | null
+          started_at: string
+          status?: string | null
+          store_id: string
+        }
+        Update: {
+          auditor_user_id?: string | null
+          completed_at?: string | null
+          device_info?: string | null
+          id?: string
+          raw_payload?: Json | null
+          started_at?: string
+          status?: string | null
+          store_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_inspections_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_settings: {
         Row: {
           id: string
@@ -779,6 +820,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clean_old_media: { Args: never; Returns: undefined }
       cron_process_pending_ai_evaluations: { Args: never; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       match_ai_memories: {
