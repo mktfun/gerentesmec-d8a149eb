@@ -1,6 +1,7 @@
 # Memória do Projeto: GerentesMec
 ## Diretrizes de Frontend (UI/UX)
 - Interface escura, premium, "vibe coding".
+- Layouts de Auditoria/Checklist: O usuário prefere um **Layout Imersivo (Carousel de 1 item por tela)** em vez de Listas Verticais (Steppers longos). Fundo com blur das evidências, botões gigantes de câmera, e navegação (Próximo/Anterior) na parte inferior (Spec 055).
 - PWA antifraude: Sempre usar `<input capture="environment">` para forçar uso da câmera nativa e evitar upload de galeria (Spec 052).
 - Offline-first: Usar `localforage` para salvar dados parciais em IndexedDB antes de despachar payloads inteiros. Sempre use `schema_version` no payload local e aplique wipe automático no cache do cliente caso haja mismatch, evitando crashes de UI (Spec 053).
 - UX de Fotos (Lightbox): Não redirecione para novas rotas ao exibir mídias. Use componentes de Lightbox com zoom in-place (como `react-medium-image-zoom`) com fundo escuro (WhatsApp style) (Spec 053).

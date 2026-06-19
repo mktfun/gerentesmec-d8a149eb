@@ -1,11 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuditStorage, AuditPayload, AuditItemData } from '@/hooks/useAuditStorage';
 import { AUDIT_CATEGORIES, SCHEMA_VERSION } from './constants';
-import AuditItem from '@/components/Auditoria/AuditItem';
+import AuditoriaItemCard from '@/components/Auditoria/AuditoriaItemCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { Loader2, UploadCloud, ChevronRight, ChevronLeft, MapPin } from 'lucide-react';
+import { Loader2, UploadCloud, ChevronRight, ChevronLeft, MapPin, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Helper to flatten the categories
+function getFlattenedItems(draft: AuditPayload) {
+  const flat: { categoryIdx: number; itemIdx: number; data: AuditItemData; catName: string }[] = [];
+  draft.categories.forEach((cat, cIdx) => {
+    cat.items.forEach((item, iIdx) => {
+      flat.push({ categoryIdx: cIdx, itemIdx: iIdx, data: item, catName: cat.category_name });
+    });
+  });
+  return flat;
+}
 
 export default function AuditoriaApp() {
   const { user } = useAuth();
@@ -13,7 +25,7 @@ export default function AuditoriaApp() {
   
   const [storeId, setStoreId] = useState('');
   const [units, setUnits] = useState<{id: string, name: string}[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentGlobalIndex, setCurrentGlobalIndex] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
@@ -25,7 +37,6 @@ export default function AuditoriaApp() {
   const handleStart = async () => {
     if (!storeId) return toast.error('Selecione uma loja');
     
-    // Create skeleton based on constants
     const initialPayload: AuditPayload = {
       inspection_id: crypto.randomUUID(),
       store_id: storeId,
@@ -47,26 +58,34 @@ export default function AuditoriaApp() {
     };
     
     await saveDraft(initialPayload);
+    setCurrentGlobalIndex(0);
+  };
+
+  const handleAbort = async () => {
+    if (confirm('Tem certeza que deseja abortar a auditoria? Os dados locais serão apagados.')) {
+      await clearDraft();
+    }
   };
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
+    return <div className="flex h-screen items-center justify-center bg-[#0a0a0f]"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;
   }
 
   if (!draft) {
     return (
-      <div className="flex flex-col h-screen bg-background items-center justify-center p-6">
-        <div className="max-w-md w-full bg-card border border-border p-8 rounded-3xl shadow-xl">
-          <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6">
-            <MapPin className="w-6 h-6 text-indigo-500" />
+      <div className="flex flex-col h-screen bg-[#0a0a0f] items-center justify-center p-6">
+        <div className="max-w-md w-full bg-[#111116] border border-white/5 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+          <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/20">
+            <MapPin className="w-8 h-8 text-indigo-400" />
           </div>
-          <h1 className="text-2xl font-black mb-2 text-foreground">Nova Auditoria</h1>
-          <p className="text-muted-foreground text-sm mb-8">Tolerância Zero. Selecione a unidade para iniciar a inspeção rigorosa.</p>
+          <h1 className="text-3xl font-black mb-2 text-white tracking-tight">Nova Auditoria</h1>
+          <p className="text-white/50 text-sm mb-8 leading-relaxed">Selecione a unidade para iniciar a inspeção rigorosa. Imersão total ativada.</p>
           
           <select 
             value={storeId} 
             onChange={e => setStoreId(e.target.value)}
-            className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500 transition-colors mb-6"
+            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-indigo-500 transition-colors mb-6 font-medium appearance-none"
           >
             <option value="">Selecione a Unidade...</option>
             {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -74,7 +93,7 @@ export default function AuditoriaApp() {
           
           <button 
             onClick={handleStart}
-            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-indigo-500/25"
+            className="w-full bg-white text-black hover:bg-white/90 font-bold py-4 rounded-xl transition-colors shadow-[0_0_40px_rgba(255,255,255,0.1)] text-lg"
           >
             Iniciar Inspeção
           </button>
@@ -83,8 +102,21 @@ export default function AuditoriaApp() {
     );
   }
 
-  const category = draft.categories[currentStep];
-  const templateCategory = AUDIT_CATEGORIES.find(c => c.category_name === category.category_name);
+  const flatItems = getFlattenedItems(draft);
+  const totalItems = flatItems.length;
+  const isCheckoutPhase = currentGlobalIndex >= totalItems;
+
+  const handleNext = () => {
+    if (currentGlobalIndex < totalItems) {
+      setCurrentGlobalIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentGlobalIndex > 0) {
+      setCurrentGlobalIndex(prev => prev - 1);
+    }
+  };
 
   // Validation Check: all items in the ENTIRE payload must be complete
   const isAuditComplete = draft.categories.every(cat => 
@@ -96,9 +128,15 @@ export default function AuditoriaApp() {
     })
   );
 
-  const handleItemChange = (itemIdx: number, newData: AuditItemData) => {
+  const pendingCount = flatItems.filter(f => {
+    const tItem = AUDIT_CATEGORIES.find(c => c.category_name === f.catName)?.items.find(i => i.name === f.data.item_name);
+    const reqPhotos = f.data.status === 'na' ? 0 : (tItem?.min_photos || 1);
+    return f.data.status === null || (f.data.status === 'na' ? f.data.notes.trim().length === 0 : f.data.photos.length < reqPhotos);
+  }).length;
+
+  const handleItemChange = (cIdx: number, iIdx: number, newData: AuditItemData) => {
     const newDraft = { ...draft };
-    newDraft.categories[currentStep].items[itemIdx] = newData;
+    newDraft.categories[cIdx].items[iIdx] = newData;
     saveDraft(newDraft);
   };
 
@@ -114,12 +152,12 @@ export default function AuditoriaApp() {
     try {
       const payloadToSync = { ...draft, completed_at: new Date().toISOString() };
       
-      // 1. Upload photos to Storage sequentially or batch
+      // Upload photos
       for (const cat of payloadToSync.categories) {
         for (const item of cat.items) {
           for (let i = 0; i < item.photos.length; i++) {
             const photo = item.photos[i];
-            const fileExt = 'jpg'; // browser-image-compression outputs jpeg
+            const fileExt = 'jpg';
             const filePath = `${draft.store_id}/${draft.inspection_id}/${item.category_name.replace(/[^a-z0-9]/gi, '')}/${photo.id}.${fileExt}`;
             
             const { error: uploadError } = await supabase.storage
@@ -128,19 +166,14 @@ export default function AuditoriaApp() {
               
             if (uploadError) throw uploadError;
             
-            // Generate public URL
             const { data: publicUrl } = supabase.storage.from('audits').getPublicUrl(filePath);
-            
-            // Replace local blob preview URL with remote URL
             item.photos[i].previewUrl = publicUrl.publicUrl;
-            // Remove blob so it can be JSON serialized without issues
             // @ts-ignore
             delete item.photos[i].blob; 
           }
         }
       }
 
-      // 2. Save JSON Payload to DB
       const { error: dbError } = await supabase.from('store_inspections').insert({
         id: payloadToSync.inspection_id,
         store_id: payloadToSync.store_id,
@@ -166,94 +199,121 @@ export default function AuditoriaApp() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border p-4 sticky top-0 z-10 flex items-center justify-between">
-        <div>
-          <h1 className="font-black text-foreground">Auditoria em Andamento</h1>
-          <p className="text-xs text-muted-foreground">{draft.store_id} • Offline-First Mode</p>
+    <div className="flex flex-col h-screen bg-[#0a0a0f] overflow-hidden">
+      
+      {/* Top Navbar Minimalista */}
+      <div className="flex items-center justify-between p-4 z-50 absolute top-0 w-full bg-gradient-to-b from-black/80 to-transparent">
+        <div className="flex items-center gap-3">
+          <button onClick={handleAbort} className="w-10 h-10 bg-black/50 backdrop-blur border border-white/10 rounded-full flex items-center justify-center text-white/70 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+          <div className="text-white">
+            <p className="text-xs font-bold opacity-50 uppercase tracking-widest">{units.find(u => u.id === draft.store_id)?.name || draft.store_id}</p>
+          </div>
         </div>
         
-        <button 
-          onClick={handleSync}
-          disabled={!isAuditComplete || isSyncing}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            isAuditComplete && !isSyncing 
-              ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/25'
-              : 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
-          }`}
-        >
-          {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
-          <span className="hidden sm:inline">Sincronizar (All-or-Nothing)</span>
-        </button>
+        {/* Progress Dots */}
+        {!isCheckoutPhase && (
+          <div className="text-white/60 text-xs font-bold bg-black/50 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur">
+            {currentGlobalIndex + 1} / {totalItems}
+          </div>
+        )}
       </div>
 
-      {/* Stepper Tabs */}
-      <div className="overflow-x-auto border-b border-border bg-card/50 px-2 py-3 flex gap-2 no-scrollbar">
-        {draft.categories.map((cat, idx) => {
-          // Check if category is 100% complete
-          const isCatComplete = cat.items.every(item => {
-             const tItem = AUDIT_CATEGORIES.find(c => c.category_name === cat.category_name)?.items.find(i => i.name === item.item_name);
-             const reqPhotos = item.status === 'na' ? 0 : (tItem?.min_photos || 1);
-             return item.status !== null && 
-               (item.status === 'na' ? item.notes.trim().length > 0 : item.photos.length >= reqPhotos);
-          });
-
-          return (
-            <button 
-              key={cat.category_name}
-              onClick={() => setCurrentStep(idx)}
-              className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${
-                currentStep === idx 
-                  ? 'bg-indigo-500 text-white shadow-md' 
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-              }`}
+      {/* Main Viewport (Carousel or Checkout) */}
+      <div className="flex-1 flex items-center justify-center px-4 relative pt-16 pb-24 overflow-y-auto">
+        <AnimatePresence mode="wait">
+          {!isCheckoutPhase ? (
+            <motion.div
+              key={currentGlobalIndex}
+              initial={{ opacity: 0, x: 50, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -50, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="w-full max-w-lg"
             >
-              {isCatComplete && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-              {idx + 1}. {cat.category_name}
-            </button>
-          );
-        })}
+              {(() => {
+                const flatItem = flatItems[currentGlobalIndex];
+                const templateItem = AUDIT_CATEGORIES.find(c => c.category_name === flatItem.catName)?.items.find(i => i.name === flatItem.data.item_name);
+                
+                return (
+                  <AuditoriaItemCard 
+                    data={flatItem.data}
+                    minPhotos={templateItem?.min_photos || 1}
+                    categoryName={flatItem.catName}
+                    onChange={(newData) => handleItemChange(flatItem.categoryIdx, flatItem.itemIdx, newData)}
+                  />
+                );
+              })()}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="checkout"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-full max-w-md bg-[#111116] border border-white/10 p-8 rounded-[2rem] text-center shadow-2xl relative overflow-hidden"
+            >
+              {pendingCount > 0 ? (
+                <>
+                  <div className="w-20 h-20 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <XCircle className="w-10 h-10 text-rose-500" />
+                  </div>
+                  <h2 className="text-2xl font-black text-white mb-2">Auditoria Incompleta</h2>
+                  <p className="text-white/50 text-sm mb-8">
+                    Faltam <strong>{pendingCount}</strong> itens ou fotos obrigatórias. Volte e finalize tudo para liberar a sincronização.
+                  </p>
+                  <button 
+                    onClick={() => setCurrentGlobalIndex(0)}
+                    className="w-full py-4 rounded-xl border border-white/20 text-white font-bold hover:bg-white/5 transition-colors"
+                  >
+                    Revisar Itens
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-emerald-500/5"></div>
+                  <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10">
+                    <UploadCloud className="w-10 h-10 text-emerald-400" />
+                  </div>
+                  <h2 className="text-3xl font-black text-white mb-2 relative z-10">Tudo Pronto!</h2>
+                  <p className="text-emerald-400/80 text-sm mb-8 font-medium relative z-10">
+                    100% dos itens verificados.
+                  </p>
+                  
+                  <button 
+                    onClick={handleSync}
+                    disabled={isSyncing}
+                    className="w-full relative z-10 bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isSyncing ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Sincronizar Oficialmente'}
+                  </button>
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32">
-        <div className="max-w-2xl mx-auto space-y-4">
-          <h2 className="text-xl font-black text-foreground mb-6">{category.category_name}</h2>
+      {/* Footer Navigation */}
+      <div className="absolute bottom-0 w-full p-4 bg-gradient-to-t from-black via-black/80 to-transparent z-50">
+        <div className="max-w-lg mx-auto flex items-center justify-between gap-4">
+          <button
+            onClick={handlePrev}
+            disabled={currentGlobalIndex === 0 || isSyncing}
+            className="flex-1 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-white font-bold transition-all disabled:opacity-20 flex items-center justify-center border border-white/10"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
           
-          {category.items.map((item, idx) => {
-            const templateItem = templateCategory?.items.find(i => i.name === item.item_name);
-            return (
-              <AuditItem 
-                key={item.item_name}
-                data={item}
-                minPhotos={templateItem?.min_photos || 1}
-                onChange={(newData) => handleItemChange(idx, newData)}
-              />
-            );
-          })}
+          <button
+            onClick={handleNext}
+            disabled={isCheckoutPhase || isSyncing}
+            className="flex-[2] py-4 bg-white hover:bg-white/90 text-black rounded-2xl font-black transition-all disabled:opacity-20 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+          >
+            Próximo <ChevronRight className="w-5 h-5 ml-1" />
+          </button>
         </div>
       </div>
-
-      {/* Footer Nav */}
-      <div className="bg-card border-t border-border p-4 fixed bottom-0 left-0 right-0 z-10 flex justify-between items-center md:pl-[280px]">
-        <button 
-          onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
-          disabled={currentStep === 0}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-muted-foreground disabled:opacity-30"
-        >
-          <ChevronLeft className="w-4 h-4" /> Anterior
-        </button>
-        <span className="text-xs text-muted-foreground/50 font-medium">Etapa {currentStep + 1} de {draft.categories.length}</span>
-        <button 
-          onClick={() => setCurrentStep(prev => Math.min(draft.categories.length - 1, prev + 1))}
-          disabled={currentStep === draft.categories.length - 1}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-indigo-500 disabled:opacity-30"
-        >
-          Próximo <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
-
     </div>
   );
 }
