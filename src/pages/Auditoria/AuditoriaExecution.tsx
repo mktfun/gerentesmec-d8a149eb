@@ -147,34 +147,35 @@ export default function AuditoriaExecution() {
         </AnimatePresence>
       </div>
 
-      {/* FOOTER INFERIOR (Navegação Rápida) */}
+      {/* FOOTER INFERIOR (Navegação Rápida Otimizada para Polegar) */}
       <div className="shrink-0 bg-card/90 dark:bg-[#121214]/90 backdrop-blur-xl border-t border-border dark:border-zinc-800/50 p-4 pb-safe absolute bottom-0 w-full z-10">
-        <div className="flex items-center justify-between max-w-sm mx-auto">
+        <div className="flex items-center gap-3 max-w-md mx-auto">
+          {/* Botão Secundário: Voltar */}
           <button 
             onClick={handlePrev}
             disabled={currentGlobalIndex === 0}
-            className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-200 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all"
+            className="flex-shrink-0 flex items-center justify-center gap-1 px-4 py-3 h-14 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all font-semibold"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5" />
+            <span className="hidden sm:inline text-sm">Voltar</span>
           </button>
 
-          <span className="text-xs font-medium text-muted-foreground">
-            {currentGlobalIndex + 1} de {flatItems.length}
-          </span>
-
+          {/* Botão Primário: Próximo / Sincronizar (Wider for Thumb) */}
           {currentGlobalIndex === flatItems.length - 1 ? (
             <button 
               onClick={() => setIsSuccess(true)}
-              className="w-12 h-12 flex items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/20 text-white active:scale-95 transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 h-14 rounded-xl bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 text-white active:scale-95 transition-all font-bold text-[15px]"
             >
-              <Check className="w-6 h-6" />
+              Sincronizar
+              <Check className="w-5 h-5" />
             </button>
           ) : (
             <button 
               onClick={handleNext}
-              className="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-200 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 active:scale-95 transition-all"
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 h-14 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 text-white active:scale-95 transition-all font-bold text-[15px]"
             >
-              <ChevronRight className="w-6 h-6" />
+              Próximo Passo
+              <ChevronRight className="w-5 h-5" />
             </button>
           )}
         </div>
