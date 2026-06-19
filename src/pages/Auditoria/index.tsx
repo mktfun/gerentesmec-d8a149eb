@@ -10,9 +10,10 @@ import { toast } from 'sonner';
 interface RecentAudit {
   id: string;
   store_id: string;
-  final_score: number;
+  final_score?: number;
   completed_at: string;
-  units: { name: string } | null;
+  raw_payload?: any;
+  units?: { name: string } | null;
 }
 
 export default function AuditoriaApp() {
@@ -35,7 +36,7 @@ export default function AuditoriaApp() {
       setLoadingRecent(true);
       const { data } = await supabase
         .from('store_inspections')
-        .select('id, store_id, final_score, completed_at, units(name)')
+        .select('id, store_id, completed_at, raw_payload')
         .order('completed_at', { ascending: false })
         .limit(3);
       if (data) setRecentAudits(data as unknown as RecentAudit[]);
@@ -185,19 +186,32 @@ export default function AuditoriaApp() {
               </div>
             ) : (
               recentAudits.map(audit => {
-                const scoreColor = audit.final_score >= 75 ? 'text-emerald-700 dark:text-emerald-400' : audit.final_score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
-                const bgScore = audit.final_score >= 75 ? 'bg-emerald-500/20 dark:bg-emerald-400/10' : audit.final_score >= 50 ? 'bg-amber-500/20 dark:bg-amber-400/10' : 'bg-rose-500/20 dark:bg-rose-400/10';
+                // Calcular score a partir do raw_payload já que final_score não é uma coluna real
+                let totalItems = 0;
+                let conformItems = 0;
+                (audit.raw_payload as any)?.categories?.forEach((cat: any) => {
+                  cat?.items?.forEach((item: any) => {
+                    if (item?.status === 'ok' || item?.status === 'conforme') conformItems++;
+                    if (item?.status !== 'na' && item?.status !== null) totalItems++;
+                  });
+                });
+                const score = totalItems > 0 ? Math.round((conformItems / totalItems) * 100) : null;
+                const scoreColor = !score ? 'text-zinc-500' : score >= 75 ? 'text-emerald-700 dark:text-emerald-400' : score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
+                const bgScore = !score ? 'bg-zinc-100 dark:bg-zinc-800' : score >= 75 ? 'bg-emerald-500/20 dark:bg-emerald-400/10' : score >= 50 ? 'bg-amber-500/20 dark:bg-amber-400/10' : 'bg-rose-500/20 dark:bg-rose-400/10';
+                
+                // Nome da unidade via units (se disponível) ou via store_id matching
+                const unitName = units.find(u => u.id === audit.store_id)?.name || 'Unidade';
                 
                 return (
                   <div key={audit.id} className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-black/60 transition-colors">
                     <div>
-                      <p className="font-bold text-foreground text-sm mb-1">{audit.units?.name || 'Unidade Desconhecida'}</p>
+                      <p className="font-bold text-foreground text-sm mb-1">{unitName}</p>
                       <p className="text-xs text-muted-foreground font-medium">
                         {new Date(audit.completed_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}
                       </p>
                     </div>
                     <div className={`px-3 py-1.5 rounded-lg font-black text-sm ${scoreColor} ${bgScore}`}>
-                      {audit.final_score}%
+                      {score !== null ? `${score}%` : '—'}
                     </div>
                   </div>
                 );

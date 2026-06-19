@@ -187,7 +187,7 @@ export default function AuditHistory() {
           </DrawerHeader>
           <ScrollArea className="flex-1 p-6">
             <div className="max-w-2xl mx-auto space-y-8 pb-10">
-              {selectedAudit?.raw_payload?.categories.map(cat => (
+              {(selectedAudit?.raw_payload?.categories || []).filter(Boolean).map(cat => (
                 <div key={cat.category_name} className="space-y-4">
                   {/* Category header */}
                   <div className="flex items-center gap-3 pb-2 border-b border-border">
@@ -196,7 +196,7 @@ export default function AuditHistory() {
                   </div>
 
                   <div className="space-y-3">
-                    {cat.items.map((item: any) => {
+                    {(cat.items || []).filter(Boolean).map((item: any) => {
                       const isNok = item.status === 'nao_conforme' || item.status === 'nok';
                       const isNa = item.status === 'na';
                       const hasNotes = item.notes && item.notes.trim().length > 0;
