@@ -8,7 +8,12 @@ const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Admin client para gerenciar usuários (apenas para uso restrito em configs/admin)
 const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
+  auth: { 
+    autoRefreshToken: false, 
+    persistSession: false,
+    detectSessionInUrl: false,
+    storageKey: 'supabase-admin-auth-token'
+  }
 });
 
 interface Auditor {
