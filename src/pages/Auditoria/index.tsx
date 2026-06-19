@@ -141,7 +141,22 @@ export default function AuditoriaApp() {
   const totalItems = flatItems.length;
   const isCheckoutPhase = currentGlobalIndex >= totalItems;
 
+  const currentFlatItem = !isCheckoutPhase ? flatItems[currentGlobalIndex] : null;
+  let isCurrentItemComplete = false;
+  if (currentFlatItem) {
+    const tItem = AUDIT_CATEGORIES.find(c => c.category_name === currentFlatItem.catName)?.items.find(i => i.name === currentFlatItem.data.item_name);
+    const reqPhotos = currentFlatItem.data.status === 'na' ? 0 : (tItem?.min_photos || 1);
+    isCurrentItemComplete = currentFlatItem.data.status !== null && 
+      (currentFlatItem.data.status === 'na' 
+        ? currentFlatItem.data.notes.trim().length > 0 
+        : currentFlatItem.data.photos.length >= reqPhotos);
+  }
+
   const handleNext = () => {
+    if (!isCurrentItemComplete) {
+      toast.error('Responda ao item e adicione fotos se não for N/A.');
+      return;
+    }
     if (currentGlobalIndex < totalItems) {
       setCurrentGlobalIndex(prev => prev + 1);
     }
@@ -342,7 +357,7 @@ export default function AuditoriaApp() {
           
           <button
             onClick={handleNext}
-            disabled={isCheckoutPhase || isSyncing}
+            disabled={isCheckoutPhase || isSyncing || !isCurrentItemComplete}
             className="flex-[2] py-4 bg-white hover:bg-white/90 text-black rounded-2xl font-black transition-all disabled:opacity-20 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)]"
           >
             Próximo <ChevronRight className="w-5 h-5 ml-1" />
