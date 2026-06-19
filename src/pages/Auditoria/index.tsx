@@ -24,6 +24,7 @@ export default function AuditoriaApp() {
   const { draft, loading, saveDraft, clearDraft } = useAuditStorage();
   
   const [storeId, setStoreId] = useState('');
+  const [auditorName, setAuditorName] = useState('');
   const [units, setUnits] = useState<{id: string, name: string}[]>([]);
   const [currentGlobalIndex, setCurrentGlobalIndex] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -35,6 +36,9 @@ export default function AuditoriaApp() {
   }, []);
 
   const handleStart = async () => {
+    if (!auditorName.trim()) {
+      return toast.error('Por favor, preencha o seu nome antes de iniciar.');
+    }
     if (!storeId) return toast.error('Selecione uma loja');
     
     const initialPayload: AuditPayload = {
@@ -44,7 +48,7 @@ export default function AuditoriaApp() {
       auditor_user_id: user?.id || null,
       started_at: new Date().toISOString(),
       completed_at: null,
-      device_info: navigator.userAgent,
+      device_info: JSON.stringify({ userAgent: navigator.userAgent, auditorName: auditorName.trim() }),
       categories: AUDIT_CATEGORIES.map(cat => ({
         category_name: cat.category_name,
         items: cat.items.map(i => ({
@@ -74,29 +78,60 @@ export default function AuditoriaApp() {
   if (!draft) {
     return (
       <div className="flex flex-col h-screen bg-[#0a0a0f] items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#111116] border border-white/5 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-          <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/20">
-            <MapPin className="w-8 h-8 text-indigo-400" />
+        <div className="relative bg-[#121214] border border-zinc-800 rounded-2xl p-6 shadow-xl w-full max-w-sm overflow-hidden">
+          
+          {/* Barra Animada no Topo */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-[length:200%_200%] animate-gradient-shift"></div>
+
+          {/* Ícone e Título */}
+          <div className="mb-6 mt-2">
+            <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center mb-4">
+              <MapPin className="text-indigo-400 w-6 h-6" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Nova Auditoria</h2>
+            <p className="text-zinc-400 text-sm">
+              Selecione a unidade para iniciar a inspeção rigorosa. Imersão total ativada.
+            </p>
           </div>
-          <h1 className="text-3xl font-black mb-2 text-white tracking-tight">Nova Auditoria</h1>
-          <p className="text-white/50 text-sm mb-8 leading-relaxed">Selecione a unidade para iniciar a inspeção rigorosa. Imersão total ativada.</p>
-          
-          <select 
-            value={storeId} 
-            onChange={e => setStoreId(e.target.value)}
-            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-indigo-500 transition-colors mb-6 font-medium appearance-none"
-          >
-            <option value="">Selecione a Unidade...</option>
-            {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-          </select>
-          
-          <button 
-            onClick={handleStart}
-            className="w-full bg-white text-black hover:bg-white/90 font-bold py-4 rounded-xl transition-colors shadow-[0_0_40px_rgba(255,255,255,0.1)] text-lg"
-          >
-            Iniciar Inspeção
-          </button>
+
+          <div className="space-y-4">
+            {/* Input: Nome do Auditor */}
+            <div>
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                Seu Nome (Auditor)
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Carlos Silva"
+                value={auditorName}
+                onChange={(e) => setAuditorName(e.target.value)}
+                className="w-full bg-black border border-zinc-800 rounded-lg p-3 text-white placeholder-zinc-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all"
+              />
+            </div>
+
+            {/* Select: Unidade */}
+            <div>
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                Unidade Inspecionada
+              </label>
+              <select
+                value={storeId}
+                onChange={(e) => setStoreId(e.target.value)}
+                className="w-full bg-black border border-zinc-800 rounded-lg p-3 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none appearance-none transition-all"
+              >
+                <option value="">Selecione a Unidade...</option>
+                {units.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            </div>
+
+            {/* Botão de Iniciar */}
+            <button
+              onClick={handleStart}
+              className="w-full bg-white text-black font-semibold rounded-lg p-3 mt-4 hover:bg-zinc-200 transition-colors active:scale-95"
+            >
+              Iniciar Inspeção
+            </button>
+          </div>
         </div>
       </div>
     );
