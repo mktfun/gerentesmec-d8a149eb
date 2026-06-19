@@ -11,6 +11,7 @@
 - Tolerância zero no All-or-nothing: Salvar auditorias incompletas apenas localmente e subir payloads massivos com `raw_payload` em colunas JSONB pra redundância.
 - Restrições de Fila: Sempre usar `insert` ao invés de `upsert` com onConflict `lead_id` na `ai_task_queue` (a tabela loga eventos múltiplos por lead) (Spec 051).
 - **RBAC e Identidade Invisível**: Para gerenciar contas de acesso em dashboards internos de forma rápida (criar contas e mudar senhas sem confirmação de email), utilize o `supabaseAdmin` (Admin SDK) diretamente no frontend passando o `VITE_SUPABASE_SERVICE_ROLE_KEY` armazenado no `.env`. Utilize o `app_metadata` (`user.app_metadata.role`) para controle de bloqueio de rotas no cliente em vez de tabelas auxiliares pesadas (Spec 060).
+- **Prevenção de Supabase Egress Quota Exceeded (Tela Preta / Illegal Constructor)**: NUNCA use `select('*')` em componentes frontend para tabelas como `chat_messages` ou `leads` que possuam colunas de payload massivo (`raw_payload`, base64). Declare as colunas explicitamente `select('id, name, ...')`. O bloqueio de API do Supabase (por Egress) induz o cliente `GoTrue` a emitir broadcasts malformados, o que causa crash instantâneo (`TypeError: Illegal constructor`) em toda a árvore React (Spec 061).
 
 ## Lógica da IA e LLM (Zero Trust)
 - Confiança Zero: O LLM nunca deve inventar estágios ou assumir vitórias se não houver contexto na conversa do WhatsApp.
