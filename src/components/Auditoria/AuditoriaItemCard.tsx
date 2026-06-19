@@ -64,11 +64,11 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-card dark:bg-[#111116] border border-border dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative flex flex-col mt-4">
+    <div className="w-full h-full max-w-lg mx-auto bg-card dark:bg-[#111116] relative flex flex-col">
       
       {/* Category Header Muted */}
       <div className="absolute top-4 left-4 z-20">
-        <span className="bg-black/60 backdrop-blur text-white/70 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-white/10">
+        <span className="bg-black/60 backdrop-blur text-white/90 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/20 shadow-lg">
           {categoryName}
         </span>
       </div>
@@ -124,7 +124,7 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
         />
       </div>
 
-      <div className="p-6 flex-1 flex flex-col z-20 bg-background dark:bg-[#111116]">
+      <div className="px-6 py-8 pb-12 flex-1 flex flex-col z-20 bg-card dark:bg-[#111116]">
         <h2 className="text-2xl font-black text-foreground mb-4 flex items-center gap-2">
           {data.status === 'na' ? <span className="line-through opacity-40">{data.item_name}</span> : data.item_name}
           {isComplete && <Check className="w-5 h-5 text-emerald-500" />}

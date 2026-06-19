@@ -91,7 +91,7 @@ export default function AuditoriaExecution() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-background dark:bg-[#0a0a0f] overflow-hidden fixed inset-0 z-[100]">
+    <div className="flex flex-col h-[100dvh] bg-card dark:bg-[#111116] overflow-hidden fixed inset-0 z-[100]">
       {/* HEADER SUPERIOR (Progresso e Categoria Atual) */}
       <div className="shrink-0 bg-card/80 dark:bg-[#121214]/80 backdrop-blur-xl border-b border-border dark:border-zinc-800/50 p-4 pt-safe z-10 flex flex-col gap-3">
         <div className="flex items-center justify-between">
@@ -121,8 +121,8 @@ export default function AuditoriaExecution() {
         </div>
       </div>
 
-      {/* ÁREA CENTRAL (O Card Principal) */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24 snap-y snap-mandatory scroll-smooth">
+      {/* ÁREA CENTRAL (O Card Principal Edge-to-Edge) */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-32 snap-y snap-mandatory scroll-smooth">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentGlobalIndex}
