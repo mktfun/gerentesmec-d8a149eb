@@ -90,13 +90,24 @@ export class TemparioScraper {
         
         // Tentar extrair os dados do veículo renderizados na tela e CLICAR no card para habilitar a Tabela
         const modeloLocator = page.locator('span:has-text("Modelo:")');
-        if (await modeloLocator.first().isVisible().catch(() => false)) {
+        // Usar await page.waitForTimeout para garantir que todos os cards renderizaram
+        await page.waitForTimeout(1000);
+        
+        const count = await modeloLocator.count();
+        if (count > 1) {
+          console.log(`Múltiplos veículos encontrados (${count}). Lançando erro AMBIGUOUS_VEHICLE...`);
+          const options = [];
+          for (let i = 0; i < count; i++) {
+            options.push((await modeloLocator.nth(i).textContent()).replace('Modelo: ', '').trim());
+          }
+          throw new Error(JSON.stringify({ code: "AMBIGUOUS_VEHICLE", options }));
+        } else if (count === 1) {
           // Extrair modelo para devolver na API
           queryParams.marca = ""; 
           queryParams.modelo = (await modeloLocator.first().textContent()).replace('Modelo: ', '').trim();
           
           // O texto "Modelo:" está dentro do card do veículo. Vamos clicar no próprio span ou no pai dele
-          console.log('Veículo encontrado! Clicando no card...');
+          console.log('Único veículo encontrado! Clicando no card...');
           await modeloLocator.first().click({ force: true });
           await page.waitForTimeout(2000);
         } else {
@@ -238,14 +249,28 @@ export class TemparioScraper {
       }
 
       const isNotFound = err.message.includes("NOT_FOUND_PLATE");
+      let errorObj = {
+        code: isNotFound ? "NOT_FOUND" : "UI_INTERACTION_FAILED",
+        message: err.message
+      };
+      let statusStr = isNotFound ? "not_found" : "ui_error";
+
+      try {
+        const parsed = JSON.parse(err.message);
+        if (parsed.code) {
+          errorObj = parsed;
+          if (parsed.code === "AMBIGUOUS_VEHICLE" || parsed.code === "AMBIGUOUS_SERVICE") {
+             statusStr = "ambiguous";
+          }
+        }
+      } catch (e) {
+        // Ignorar, não é JSON
+      }
 
       return {
         request_id: requestId,
-        status: isNotFound ? "not_found" : "ui_error",
-        error: {
-          code: isNotFound ? "NOT_FOUND" : "UI_INTERACTION_FAILED",
-          message: err.message
-        },
+        status: statusStr,
+        error: errorObj,
         meta: {
           duration_ms: Date.now() - startTime,
           screenshot_path: screenshotPath

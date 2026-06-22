@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import QRCode from 'react-qr-code';
 import { AlertTriangle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -97,7 +96,7 @@ export default function TvRadarView({ leads, units }: Props) {
                   </p>
                 </div>
                 <div className="flex flex-col items-center gap-3 shrink-0 bg-white p-3 rounded-2xl">
-                  <QRCode value={waLink} size={100} level="M" />
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${waLink}`} alt="QR Code" className="w-[100px] h-[100px]" />
                   <span className="text-black text-sm font-bold uppercase tracking-wider">Cobrar Agora</span>
                 </div>
               </div>

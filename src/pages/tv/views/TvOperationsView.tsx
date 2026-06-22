@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import QRCode from 'react-qr-code';
 import { Camera, AlertTriangle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Unit } from '@/context/AppDataContext';
@@ -170,7 +169,7 @@ export default function TvOperationsView({ units }: Props) {
                     
                     {/* QR Code de Cobrança */}
                     <div className="bg-white p-3 rounded-xl shrink-0 flex flex-col items-center gap-2">
-                      <QRCode value={waLink} size={80} level="M" />
+                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${waLink}`} alt="QR Code" className="w-[80px] h-[80px]" />
                       <span className="text-black text-[10px] font-black uppercase">Cobrar</span>
                     </div>
                   </div>

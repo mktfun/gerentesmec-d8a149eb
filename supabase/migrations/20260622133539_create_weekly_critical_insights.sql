@@ -2,7 +2,7 @@
 
 CREATE TABLE IF NOT EXISTS public.weekly_critical_insights (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    store_id TEXT NOT NULL REFERENCES public.units(id) ON DELETE CASCADE,
+    store_id TEXT NOT NULL,
     week_start DATE NOT NULL,
     week_end DATE NOT NULL,
     critical_failure_found BOOLEAN NOT NULL DEFAULT false,
