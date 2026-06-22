@@ -2,14 +2,31 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { Camera, AlertTriangle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Unit } from '@/context/AppDataContext';
 
 interface Props {
-  units: any[];
+  units: Unit[];
+}
+
+interface LeaderboardItem extends Unit {
+  lastChecklist: Record<string, unknown> | null;
+  status: string;
+  hoursSince: number;
+  score: number;
+}
+
+interface Anomaly {
+  id: string;
+  unitName: string;
+  phone: string;
+  photoUrl: string;
+  itemName: string;
+  notes: string;
 }
 
 export default function TvOperationsView({ units }: Props) {
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [recentAnomalies, setRecentAnomalies] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+  const [recentAnomalies, setRecentAnomalies] = useState<Anomaly[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -52,10 +69,10 @@ export default function TvOperationsView({ units }: Props) {
 
       // Puxa as piores fotos (Anomalias)
       // O array de items tem { status: "not_ok", item_id, notes, evidences: ["url..."] }
-      const anomalies: any[] = [];
-      data.forEach(checklist => {
+      const anomalies: Anomaly[] = [];
+      data.forEach((checklist: Record<string, unknown>) => {
         if (checklist.items && Array.isArray(checklist.items)) {
-          checklist.items.forEach(item => {
+          checklist.items.forEach((item: Record<string, unknown>) => {
             if (item.status === 'not_ok' && item.evidences && item.evidences.length > 0) {
               const unit = units.find(u => u.id === checklist.unit_id);
               anomalies.push({

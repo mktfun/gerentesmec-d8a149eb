@@ -3,10 +3,11 @@ import QRCode from 'react-qr-code';
 import { AlertTriangle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Lead, Unit } from '@/context/AppDataContext';
 
 interface Props {
-  leads: any[];
-  units: any[];
+  leads: Lead[];
+  units: Unit[];
 }
 
 export default function TvRadarView({ leads, units }: Props) {

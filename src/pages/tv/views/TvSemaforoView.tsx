@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { Trophy, Skull, Target } from 'lucide-react';
 import { avgScore } from '@/utils/scoreUtils';
+import { Lead, Unit } from '@/context/AppDataContext';
 
 interface Props {
-  leads: any[];
-  units: any[];
+  leads: Lead[];
+  units: Unit[];
 }
 
 export default function TvSemaforoView({ leads, units }: Props) {

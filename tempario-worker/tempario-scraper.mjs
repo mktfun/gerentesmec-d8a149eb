@@ -86,40 +86,26 @@ export class TemparioScraper {
         }
 
         // Step 2b: After plate search, Tempario shows a list of vehicle cards.
-        // We need to click the first vehicle card to select it and enable the Tabela de Preços button.
         console.log('Procurando e selecionando o veículo nos resultados...');
         
-        // Try different selectors for the vehicle result card
-        const vehicleCardSelectors = [
-          'button:has-text("Selecionar")',
-          '[data-testid="vehicle-card"]',
-          'button.vehicle-card',
-          // Generic: any clickable card that appears after search results load
-          'section button:not([disabled]):not(:has-text("Buscar"))',
-        ];
-
-        let vehicleSelected = false;
-        for (const selector of vehicleCardSelectors) {
-          const card = page.locator(selector).first();
-          const isVisible = await card.isVisible().catch(() => false);
-          if (isVisible) {
-            console.log(`Clicando no veículo via seletor: ${selector}`);
-            await card.click();
-            await page.waitForTimeout(2000);
-            vehicleSelected = true;
-            break;
-          }
-        }
-
-        if (!vehicleSelected) {
-          console.log('Nenhum card de veículo clicável encontrado. Continuando sem clicar...');
-        }
-
-        // Tentar extrair os dados do veículo renderizados na tela
+        // Tentar extrair os dados do veículo renderizados na tela e CLICAR no card para habilitar a Tabela
         const modeloLocator = page.locator('span:has-text("Modelo:")');
-        if (await modeloLocator.isVisible()) {
+        if (await modeloLocator.first().isVisible().catch(() => false)) {
+          // Extrair modelo para devolver na API
           queryParams.marca = ""; 
-          queryParams.modelo = (await modeloLocator.textContent()).replace('Modelo: ', '').trim();
+          queryParams.modelo = (await modeloLocator.first().textContent()).replace('Modelo: ', '').trim();
+          
+          // O texto "Modelo:" está dentro do card do veículo. Vamos clicar no próprio span ou no pai dele
+          console.log('Veículo encontrado! Clicando no card...');
+          await modeloLocator.first().click({ force: true });
+          await page.waitForTimeout(2000);
+        } else {
+          console.log('Texto "Modelo:" não encontrado. Tentando clicar em qualquer botão de Selecionar...');
+          const btnSelecionar = page.locator('text="Selecionar"').first();
+          if (await btnSelecionar.isVisible().catch(() => false)) {
+             await btnSelecionar.click({ force: true });
+             await page.waitForTimeout(2000);
+          }
         }
 
       } else {

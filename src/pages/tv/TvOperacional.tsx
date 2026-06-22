@@ -12,7 +12,7 @@ const TvOperacional = () => {
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [dailyScores, setDailyScores] = useState<any[]>([]);
+  const [dailyScores, setDailyScores] = useState<Record<string, unknown>[]>([]);
   const [slideDuration, setSlideDuration] = useState(15000); // 15 seconds per slide default
   const [daysFilter, setDaysFilter] = useState(14); // 14 days default
   
@@ -35,7 +35,7 @@ const TvOperacional = () => {
         .limit(daysFilter);
       
       if (!error && data) {
-        setDailyScores(data);
+        setDailyScores(data as Record<string, unknown>[]);
       }
     };
     fetchHistory();
