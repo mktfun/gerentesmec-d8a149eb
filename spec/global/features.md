@@ -14,3 +14,8 @@
 - Tela `Crm`: Kanban board integrado com LLM.
 - Componentes: `KanbanCard`, `KanbanView`.
 - Script: `autonomous_auditor_v2.mjs` (Zero Trust, Parking Lot para controle estrito de estágios).
+
+## Integração Tempario (n8n + Playwright)
+- Worker Node.js: Microserviço Playwright executado isoladamente (sem dependências de UI React).
+- Integração n8n: Fluxo orquestrador e roteamento de requisições do WhatsApp.
+- Persistência de Sessão: Reutilização de `storageState.json` para evitar relogin constante.

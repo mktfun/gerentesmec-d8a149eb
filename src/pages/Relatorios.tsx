@@ -38,7 +38,7 @@ const Relatorios = () => {
   // PDF Export State
   const [isPreparingPDF, setIsPreparingPDF] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [pdfData, setPdfData] = useState<{ leads: typeof leads, messagesByLead: Record<string, any[]> } | null>(null);
+  const [pdfData, setPdfData] = useState<{ leads: typeof leads, messagesByLead: Record<string, any[]>, insightsByStore: Record<string, any> } | null>(null);
 
   const [isCleaningDB, setIsCleaningDB] = useState(false);
 
@@ -128,7 +128,22 @@ const Relatorios = () => {
         return;
       }
 
-      setPdfData({ leads: finalTargetLeads, messagesByLead });
+      // 3. Buscar os insights semanais (Weekly Roast) mais recentes por loja
+      const { data: insights } = await supabase
+        .from('weekly_critical_insights')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const latestInsightsByStore: Record<string, any> = {};
+      if (insights) {
+        insights.forEach(insight => {
+          if (!latestInsightsByStore[insight.store_id]) {
+            latestInsightsByStore[insight.store_id] = insight;
+          }
+        });
+      }
+
+      setPdfData({ leads: finalTargetLeads, messagesByLead, insightsByStore: latestInsightsByStore });
       
       // Renderizar o PDF por loja em background
       setTimeout(async () => {
@@ -810,6 +825,43 @@ const Relatorios = () => {
                   <p className="text-gray-500 mt-2 font-medium">Filtros aplicados</p>
                 </div>
                 <h2 className="text-2xl font-black border-b-2 border-black pb-2 mb-6">{unitName}</h2>
+                
+                {/* Weekly Roast Section */}
+                {pdfData.insightsByStore && pdfData.insightsByStore[unitId] && (
+                  <div className={`mb-12 break-inside-avoid print:break-inside-avoid border-2 rounded-2xl p-6 ${pdfData.insightsByStore[unitId].critical_failure_found ? 'border-rose-500 bg-rose-50' : 'border-emerald-500 bg-emerald-50'}`}>
+                    {pdfData.insightsByStore[unitId].critical_failure_found ? (
+                      <>
+                        <div className="flex items-center gap-3 mb-4">
+                          <AlertTriangle className="w-8 h-8 text-rose-600" />
+                          <h3 className="text-xl font-black text-rose-700">🚨 FALHA CRÍTICA DA SEMANA (ESTUDO DE CASO)</h3>
+                        </div>
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-sm font-bold uppercase text-rose-600 mb-1">O que aconteceu (Checklist Ignorado)</p>
+                            <p className="text-gray-900 font-medium">{pdfData.insightsByStore[unitId].violation_reason}</p>
+                          </div>
+                          <div className="bg-black/5 p-4 rounded-xl border border-rose-200">
+                            <p className="text-xs font-bold uppercase text-gray-500 mb-2">A Prova (Transcrição Exata)</p>
+                            <p className="text-gray-800 italic leading-relaxed">"{pdfData.insightsByStore[unitId].critical_quote}"</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold uppercase text-rose-600 mb-1">O Veredito e Ação de Melhoria</p>
+                            <p className="text-gray-900 font-bold bg-white p-4 rounded-xl border border-rose-200">{pdfData.insightsByStore[unitId].improvement_action}</p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-3 mb-2">
+                          <ShieldCheck className="w-8 h-8 text-emerald-600" />
+                          <h3 className="text-xl font-black text-emerald-700">🏆 ATENDIMENTO PADRÃO OURO</h3>
+                        </div>
+                        <p className="text-emerald-900 font-medium text-lg">Nenhuma falha crítica de checklist detectada nas conversas resolvidas desta semana. Excelente trabalho da equipe.</p>
+                      </>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-12">
                   {unitLeads.map((lead) => {
                     const managerName = managers.find(m => m.id === lead.manager_id)?.name || 'Gerente Não Atribuído';

@@ -1,0 +1,85 @@
+{
+  "name": "Tempario Automação",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook/whatsapp-in",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "whatsapp-in-123"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você é um assistente de oficina. Colete placa, marca e serviço do usuário e retorne em formato JSON estruturado."
+            }
+          ]
+        }
+      },
+      "id": "2",
+      "name": "IA Coleta Dados",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3033/api/query",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "request_id", "value": "={{ $execution.id }}" },
+            { "name": "query", "value": "={{ $json.ia_result.query }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3",
+      "name": "Chamar Worker Node.js",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.status }}",
+        "rules": {
+          "rules": [
+            { "value2": "ok", "outputKey": "Sucesso" },
+            { "value2": "NOT_FOUND_PLATE", "outputKey": "Placa Não Encontrada" },
+            { "value2": "SERVICE_NOT_FOUND", "outputKey": "Serviço Inexistente" },
+            { "value2": "AMBIGUOUS_SERVICE", "outputKey": "Serviço Ambíguo" },
+            { "value2": "ui_error", "outputKey": "Erro Interface" }
+          ]
+        }
+      },
+      "id": "4",
+      "name": "Switch Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1.1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook WhatsApp": {
+      "main": [ [ { "node": "IA Coleta Dados", "type": "main", "index": 0 } ] ]
+    },
+    "IA Coleta Dados": {
+      "main": [ [ { "node": "Chamar Worker Node.js", "type": "main", "index": 0 } ] ]
+    },
+    "Chamar Worker Node.js": {
+      "main": [ [ { "node": "Switch Status", "type": "main", "index": 0 } ] ]
+    }
+  }
+}

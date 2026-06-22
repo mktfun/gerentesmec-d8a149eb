@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "@tempario-r",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODIxMzI3NTgsImV4cCI6MTc4MjIxOTE1OCwic3ViIjoiNmEzNTZiNzdlNWI3MjJjMDQ4ZTAyYTdmIn0.jJWpw5PtkKQ4EGcswJL8S8KNBiTn5fI6oOFXtML7d_0",
+      "domain": "sistema.tempar.io",
+      "path": "/",
+      "expires": 1782161558.670017,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "@tempario-t",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMTMyNzU4LCJleHAiOjE3ODIxNDM1NTh9.Zwkx1sOOxhE8zuhPE7nSqMS5YQ2debNNQjgcDGP-0Zs",
+      "domain": "sistema.tempar.io",
+      "path": "/",
+      "expires": 1782161558.669217,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    }
+  ],
+  "origins": []
+}
