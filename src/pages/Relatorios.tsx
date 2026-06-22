@@ -142,13 +142,13 @@ const Relatorios = () => {
         const storeIds = Array.from(new Set(finalTargetLeads.map(l => l.unit_id)));
         
         if (storeIds.length > 0) {
-          // Loja 1: Falha Crítica
+          // Loja 1: Falha Crítica REAL gerada via AI Script
           latestInsightsByStore[storeIds[0]] = {
             store_id: storeIds[0],
             critical_failure_found: true,
-            violation_reason: "Omissão no passo de Check-in e orçamento amador sem diagnóstico prévio. O gerente precificou por 'chute' sem validar as fotos.",
-            critical_quote: "Cara, pra ser sincero eu não vi as fotos direito. Mas deve dar uns 3 mil pra arrumar esse câmbio aí, traz aqui que a gente desmonta e vê.",
-            improvement_action: "O gerente DEVERIA ter analisado as imagens recebidas e respondido: 'Senhor(a), pelo relato e imagens precisamos de uma avaliação presencial para o diagnóstico exato, mas baseado em problemas similares, os reparos partem de R$ X. Gostaria de agendar o diagnóstico?'",
+            violation_reason: "Passar orçamento de forma amadora",
+            critical_quote: "O valor do orçamento, parcelamos em até 4x de R$3.481,83 sem juros ou em até 18x de R$913,011 com juros no cartão.",
+            improvement_action: "O gerente deveria ter apresentado o orçamento de forma clara e detalhada, explicando os serviços inclusos e as opções de pagamento de maneira mais profissional.",
             created_at: new Date().toISOString()
           };
           
