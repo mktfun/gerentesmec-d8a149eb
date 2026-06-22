@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuditStorage, AuditPayload, AuditItemData } from '@/hooks/useAuditStorage';
 import { SCHEMA_VERSION } from './constants';
 import AuditoriaItemCard from '@/components/Auditoria/AuditoriaItemCard';
-import { Loader2, UploadCloud, ChevronRight, ChevronLeft, X, Check } from 'lucide-react';
+import { Loader2, UploadCloud, ChevronRight, ChevronLeft, X, Check, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -60,9 +60,44 @@ export default function AuditoriaExecution() {
   const currentItem = flatItems[currentGlobalIndex];
   const progress = Math.round(((currentGlobalIndex) / flatItems.length) * 100);
 
+  const canAdvance = () => {
+    const status = currentItem.data.status;
+    if (!status) return false;
+    
+    const notes = currentItem.data.notes || '';
+    if (status === 'na' || status === 'nao_se_aplica') {
+      return notes.trim().length > 0;
+    }
+    
+    // min_photos defaults to 1 unless specified
+    const minPhotos = ((currentItem.data as unknown) as Record<string, number>).min_photos ?? 1;
+    const photoCount = currentItem.data.photos?.length || 0;
+    
+    if (status === 'ok') {
+      return photoCount >= minPhotos;
+    }
+    
+    if (status === 'nok' || status === 'nao_conforme') {
+      return photoCount >= minPhotos && notes.trim().length > 0;
+    }
+    
+    return false;
+  };
+
   const handleNext = () => {
+    if (!canAdvance()) return;
     if (currentGlobalIndex < flatItems.length - 1) {
-      setCurrentGlobalIndex(prev => prev + 1);
+      const nextItem = flatItems[currentGlobalIndex + 1];
+      if (nextItem.categoryIdx !== currentItem.categoryIdx) {
+        setTransitionTarget(nextItem.catName);
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setCurrentGlobalIndex(prev => prev + 1);
+          setIsTransitioning(false);
+        }, 2000);
+      } else {
+        setCurrentGlobalIndex(prev => prev + 1);
+      }
     }
   };
 
@@ -134,8 +169,9 @@ export default function AuditoriaExecution() {
           >
             <AuditoriaItemCard 
               data={currentItem.data}
-              minPhotos={1}
+              minPhotos={((currentItem.data as unknown) as Record<string, number>).min_photos ?? 1}
               categoryName={currentItem.catName}
+              instruction={((currentItem.data as unknown) as Record<string, string>).instruction || ((currentItem.data as unknown) as Record<string, string>).photo_instruction}
               onChange={(newData) => {
                 if (!draft) return;
                 const newDraft = { ...draft };
@@ -164,7 +200,8 @@ export default function AuditoriaExecution() {
           {currentGlobalIndex === flatItems.length - 1 ? (
             <button 
               onClick={() => setIsSuccess(true)}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 h-14 rounded-xl bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 text-white active:scale-95 transition-all font-bold text-[15px]"
+              disabled={!canAdvance()}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 h-14 rounded-xl bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 text-white active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all font-bold text-[15px]"
             >
               Sincronizar
               <Check className="w-5 h-5" />
@@ -172,7 +209,8 @@ export default function AuditoriaExecution() {
           ) : (
             <button 
               onClick={handleNext}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 h-14 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 text-white active:scale-95 transition-all font-bold text-[15px]"
+              disabled={!canAdvance() || isTransitioning}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 h-14 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 text-white active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all font-bold text-[15px]"
             >
               Próximo Passo
               <ChevronRight className="w-5 h-5" />
@@ -180,6 +218,22 @@ export default function AuditoriaExecution() {
           )}
         </div>
       </div>
+
+      {/* Tela de Transição (Interstício) */}
+      <AnimatePresence>
+        {isTransitioning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[200] bg-black flex flex-col items-center justify-center text-center p-6"
+          >
+            <MapPin className="w-16 h-16 text-indigo-500 mb-6 animate-bounce" />
+            <p className="text-zinc-400 font-bold tracking-widest uppercase text-sm mb-2">Deslocamento Físico Requerido</p>
+            <h2 className="text-4xl font-black text-white">INICIANDO: <br/><span className="text-indigo-400">{transitionTarget}</span></h2>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -74,9 +74,25 @@ export class TemparioScraper {
         const buscarBtn = page.locator('button:has-text("Buscar")');
         await buscarBtn.click();
         
-        // Wait for results to load or error messages to appear
-        await page.waitForTimeout(2000);
+        // Wait dynamically for results or errors to appear
+        console.log('Aguardando resultados da busca...');
+        await Promise.race([
+          page.waitForSelector('span:has-text("Modelo:")', { state: 'visible', timeout: 10000 }).catch(() => null),
+          page.waitForSelector('text="não encontrado"', { state: 'visible', timeout: 10000 }).catch(() => null),
+          page.waitForSelector('text="Placa inválida"', { state: 'visible', timeout: 10000 }).catch(() => null),
+          page.waitForSelector('[role="alertdialog"], [role="dialog"]', { state: 'visible', timeout: 10000 }).catch(() => null)
+        ]);
         
+        // Verifica se apareceu algum alerta/modal na tela (ex: "A placa pertence a uma moto" ou "Atualizar modelo")
+        const dialog = page.locator('[role="alertdialog"], [role="dialog"]').first();
+        if (await dialog.isVisible()) {
+           const dialogText = await dialog.textContent();
+           if (dialogText.includes("Atualizar o modelo")) {
+               throw new Error(JSON.stringify({ code: "UPDATE_VEHICLE_REQUIRED", message: "O Tempario exigiu o preenchimento dos dados (Marca/Modelo) para esta placa." }));
+           }
+           throw new Error(JSON.stringify({ code: "WRONG_CATEGORY_OR_ALERT", message: dialogText.trim() }));
+        }
+
         // Verifica se deu "não encontrado" ou "Placa inválida"
         const notFoundText = await page.locator('text="não encontrado"').isVisible();
         const invalidPlateText = await page.locator('text="Placa inválida"').isVisible();
@@ -90,7 +106,7 @@ export class TemparioScraper {
         
         // Tentar extrair os dados do veículo renderizados na tela e CLICAR no card para habilitar a Tabela
         const modeloLocator = page.locator('span:has-text("Modelo:")');
-        // Usar await page.waitForTimeout para garantir que todos os cards renderizaram
+        // Usar await page.waitForTimeout pequeno extra para garantir que todos os cards renderizaram (caso haja múltiplos)
         await page.waitForTimeout(1000);
         
         const count = await modeloLocator.count();
@@ -237,11 +253,15 @@ export class TemparioScraper {
       return result;
 
     } catch (err) {
-      // Capture screenshot
+      // Capture screenshot and page text
       let screenshotPath = null;
+      let pageText = null;
       if (page) {
         screenshotPath = path.join(this.errorDir, `${requestId}_error.png`);
         try { await page.screenshot({ path: screenshotPath }); } catch (e) {}
+        try { 
+            pageText = await page.evaluate(() => document.body.innerText.substring(0, 1000).replace(/\s+/g, ' ').trim()); 
+        } catch (e) {}
       }
       
       if (browser) {
@@ -249,11 +269,8 @@ export class TemparioScraper {
       }
 
       const isNotFound = err.message.includes("NOT_FOUND_PLATE");
-      let errorObj = {
-        code: isNotFound ? "NOT_FOUND" : "UI_INTERACTION_FAILED",
-        message: err.message
-      };
       let statusStr = isNotFound ? "not_found" : "ui_error";
+      let errorObj = null;
 
       try {
         const parsed = JSON.parse(err.message);
@@ -265,6 +282,16 @@ export class TemparioScraper {
         }
       } catch (e) {
         // Ignorar, não é JSON
+      }
+
+      // Se não for um erro estruturado nosso (JSON), limpar a mensagem do Playwright
+      if (!errorObj) {
+          let cleanMsg = err.message.replace(/\x1b\[[0-9;]*m/g, ''); // Remove cores ANSI
+          cleanMsg = cleanMsg.split('\n')[0].trim(); // Pega só a primeira linha do erro
+          errorObj = {
+            code: isNotFound ? "NOT_FOUND" : "UI_INTERACTION_FAILED",
+            message: `${cleanMsg} | Último texto na tela: ${pageText || 'vazio'}`
+          };
       }
 
       return {
@@ -279,3 +306,5 @@ export class TemparioScraper {
     }
   }
 }
+
+export { TemparioScraper };

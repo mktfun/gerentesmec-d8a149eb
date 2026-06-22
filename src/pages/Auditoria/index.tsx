@@ -12,7 +12,7 @@ interface RecentAudit {
   store_id: string;
   final_score?: number;
   completed_at: string;
-  raw_payload?: any;
+  raw_payload?: Record<string, unknown>;
   units?: { name: string } | null;
 }
 
@@ -189,8 +189,9 @@ export default function AuditoriaApp() {
                 // Calcular score a partir do raw_payload já que final_score não é uma coluna real
                 let totalItems = 0;
                 let conformItems = 0;
-                (audit.raw_payload as any)?.categories?.forEach((cat: any) => {
-                  cat?.items?.forEach((item: any) => {
+                const categories = (audit.raw_payload as Record<string, unknown>)?.categories as Record<string, unknown>[] | undefined;
+                categories?.forEach((cat: Record<string, unknown>) => {
+                  (cat?.items as Record<string, unknown>[])?.forEach((item: Record<string, unknown>) => {
                     if (item?.status === 'ok' || item?.status === 'conforme') conformItems++;
                     if (item?.status !== 'na' && item?.status !== null) totalItems++;
                   });

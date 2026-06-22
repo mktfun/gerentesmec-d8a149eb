@@ -68,7 +68,8 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
       
       {/* Category Header Muted */}
       <div className="absolute top-4 left-4 z-20">
-        <span className="bg-black/60 backdrop-blur text-white/90 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/20 shadow-lg">
+        <span className="bg-black/80 backdrop-blur text-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full border border-white/20 shadow-2xl flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-indigo-400" />
           {categoryName}
         </span>
       </div>
@@ -175,16 +176,18 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
 
         <div className="space-y-2 mt-6">
           <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            Observação {data.status === 'na' && <span className="text-rose-500">* (Obrigatória)</span>}
+            Observação {(data.status === 'na' || data.status === 'nok') && <span className="text-rose-500">* (Obrigatória)</span>}
           </label>
           <textarea
             value={data.notes}
             onChange={(e) => handleNotesChange(e.target.value)}
             placeholder="Adicione um comentário..."
             className={`w-full bg-background dark:bg-black/30 border border-input dark:border-white/10 rounded-xl p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 outline-none resize-none h-24 transition-all ${
-              data.status === 'na' && data.notes.trim().length === 0 
-                ? 'border-rose-500' 
+              ((data.status === 'na' || data.status === 'nok') && data.notes.trim().length === 0)
+                ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.1)]'
                 : ''
+            } ${
+              data.status === 'nok' ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-200 border-rose-500' : ''
             }`}
           />
         </div>
