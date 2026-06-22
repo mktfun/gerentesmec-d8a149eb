@@ -20,6 +20,7 @@ import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
 import TvOperacional from "./pages/tv/TvOperacional";
 import TvDashboard from "./components/Dashboard/TvDashboard";
+import ExecutiveTvMode from "./pages/tv/ExecutiveTvMode";
 import AuditHistory from "./pages/AuditHistory";
 import AuditoriaApp from "./pages/Auditoria";
 import AuditoriaExecution from "./pages/Auditoria/AuditoriaExecution";
@@ -97,6 +98,7 @@ const AppRoutes: React.FC = () => {
           <Route element={<TvLayout />}>
             <Route path="/tv/operacional" element={<TvOperacional />} />
             <Route path="/tv/executivo" element={<TvDashboard />} />
+            <Route path="/executive-tv" element={<ExecutiveTvMode />} />
           </Route>
         </Route>
       )}

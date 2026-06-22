@@ -136,32 +136,7 @@ const Relatorios = () => {
 
       const latestInsightsByStore: Record<string, any> = {};
       
-      // MOCK INJECTION PARA TESTE DO DIRETOR (Sexta-feira virtual)
-      if (!insights || insights.length === 0 || insightsError) {
-        console.log("Mocking insights for validation...");
-        const storeIds = Array.from(new Set(finalTargetLeads.map(l => l.unit_id)));
-        
-        if (storeIds.length > 0) {
-          // Loja 1: Falha Crítica REAL gerada via AI Script
-          latestInsightsByStore[storeIds[0]] = {
-            store_id: storeIds[0],
-            critical_failure_found: true,
-            violation_reason: "Passar orçamento de forma amadora",
-            critical_quote: "O valor do orçamento, parcelamos em até 4x de R$3.481,83 sem juros ou em até 18x de R$913,011 com juros no cartão.",
-            improvement_action: "O gerente deveria ter apresentado o orçamento de forma clara e detalhada, explicando os serviços inclusos e as opções de pagamento de maneira mais profissional.",
-            created_at: new Date().toISOString()
-          };
-          
-          // Loja 2: Padrão Ouro
-          if (storeIds.length > 1) {
-            latestInsightsByStore[storeIds[1]] = {
-              store_id: storeIds[1],
-              critical_failure_found: false,
-              created_at: new Date().toISOString()
-            };
-          }
-        }
-      } else {
+      if (!insightsError && insights) {
         insights.forEach(insight => {
           if (!latestInsightsByStore[insight.store_id]) {
             latestInsightsByStore[insight.store_id] = insight;

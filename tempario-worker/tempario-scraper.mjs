@@ -74,19 +74,51 @@ export class TemparioScraper {
         const buscarBtn = page.locator('button:has-text("Buscar")');
         await buscarBtn.click();
         
-        // Wait for results... 
-        await page.waitForTimeout(3000);
+        // Wait for results to load or error messages to appear
+        await page.waitForTimeout(2000);
         
-        // Verifica se deu "não encontrado"
+        // Verifica se deu "não encontrado" ou "Placa inválida"
         const notFoundText = await page.locator('text="não encontrado"').isVisible();
-        if (notFoundText) {
+        const invalidPlateText = await page.locator('text="Placa inválida"').isVisible();
+        
+        if (notFoundText || invalidPlateText) {
            throw new Error("NOT_FOUND_PLATE");
+        }
+
+        // Step 2b: After plate search, Tempario shows a list of vehicle cards.
+        // We need to click the first vehicle card to select it and enable the Tabela de Preços button.
+        console.log('Procurando e selecionando o veículo nos resultados...');
+        
+        // Try different selectors for the vehicle result card
+        const vehicleCardSelectors = [
+          'button:has-text("Selecionar")',
+          '[data-testid="vehicle-card"]',
+          'button.vehicle-card',
+          // Generic: any clickable card that appears after search results load
+          'section button:not([disabled]):not(:has-text("Buscar"))',
+        ];
+
+        let vehicleSelected = false;
+        for (const selector of vehicleCardSelectors) {
+          const card = page.locator(selector).first();
+          const isVisible = await card.isVisible().catch(() => false);
+          if (isVisible) {
+            console.log(`Clicando no veículo via seletor: ${selector}`);
+            await card.click();
+            await page.waitForTimeout(2000);
+            vehicleSelected = true;
+            break;
+          }
+        }
+
+        if (!vehicleSelected) {
+          console.log('Nenhum card de veículo clicável encontrado. Continuando sem clicar...');
         }
 
         // Tentar extrair os dados do veículo renderizados na tela
         const modeloLocator = page.locator('span:has-text("Modelo:")');
         if (await modeloLocator.isVisible()) {
-          queryParams.marca = "Honda"; // Fixo pra mock rápido se não conseguirmos ler
+          queryParams.marca = ""; 
           queryParams.modelo = (await modeloLocator.textContent()).replace('Modelo: ', '').trim();
         }
 
