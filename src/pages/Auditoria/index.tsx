@@ -71,7 +71,9 @@ export default function AuditoriaApp() {
           category_name: cat.category_name,
           status: null,
           notes: '',
-          photos: []
+          photos: [],
+          instruction: i.instruction,
+          min_photos: i.min_photos
         }))
       }))
     };

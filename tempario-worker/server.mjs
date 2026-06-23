@@ -15,7 +15,9 @@ const QuerySchema = z.object({
   query: z.object({
     placa: z.string().optional(),
     marca: z.string().optional(),
-    modelo: z.string().optional(),
+    modelo: z.string().optional(), // mantido por compatibilidade
+    modelo_pesquisa: z.string().optional(),
+    modelo_exato: z.string().optional(),
     ano: z.number().optional(),
     motor: z.string().optional(),
     servico: z.string()
@@ -56,11 +58,56 @@ app.post('/api/query', async (req, res) => {
         scraper.timeout = options.timeout_ms || 60000;
       }
       const result = await scraper.runQuery(request_id, query);
+      
+      // Se o scraper retornou um erro estruturado de desambiguação
+      if (result.error && result.error.type === "disambiguation") {
+         return res.json({
+             request_id: request_id,
+             status: result.error.status,
+             selection_stage: result.error.selection_stage,
+             resolved_from: {
+               placa: query.placa || "",
+               marca_inferida: query.marca || "",
+               servico_inferido: query.servico || ""
+             },
+             options: result.error.options,
+             message_for_user: result.error.message_for_user
+         });
+      }
+      
       return res.json(result);
     } catch (error) {
       console.error(`[Error] Request ${request_id} failed:`, error.message);
       
-      // Lidar com erros de negócio do Tempario
+      // Catch structured errors from scraper
+      try {
+        const parsedError = JSON.parse(error.message);
+        if (parsedError && parsedError.type === "disambiguation") {
+           return res.status(200).json({
+             request_id: request_id,
+             status: parsedError.status,
+             selection_stage: parsedError.selection_stage,
+             resolved_from: {
+               placa: query.placa || "",
+               marca_inferida: query.marca || "",
+               servico_inferido: query.servico || ""
+             },
+             options: parsedError.options,
+             message_for_user: parsedError.message_for_user
+           });
+        }
+        
+        // Check for other explicit codes (like UPDATE_VEHICLE_REQUIRED)
+        if (parsedError && parsedError.code) {
+           return res.status(200).json({
+             request_id: request_id,
+             status: "ui_error",
+             error: parsedError
+           });
+        }
+      } catch(e) {}
+
+      // Fallback para erros antigos baseados em texto
       if (error.message.includes("NOT_FOUND_PLATE")) {
         return res.status(200).json({
           request_id: request_id,
@@ -74,23 +121,6 @@ app.post('/api/query', async (req, res) => {
           request_id: request_id,
           status: "SERVICE_NOT_FOUND",
           error: { message: "Serviço não consta no catálogo do veículo." }
-        });
-      }
-
-      if (error.message.includes("AMBIGUOUS_SERVICE")) {
-        let optionsList = [];
-        try {
-          const jsonMatch = error.message.match(/(\{.*\})/);
-          if (jsonMatch) {
-            const parsedError = JSON.parse(jsonMatch[1]);
-            optionsList = parsedError.options || [];
-          }
-        } catch(e) {}
-        
-        return res.status(200).json({
-          request_id: request_id,
-          status: "AMBIGUOUS_SERVICE",
-          error: { message: "Várias opções de serviço encontradas.", options: optionsList }
         });
       }
 
@@ -112,7 +142,20 @@ app.post('/api/query', async (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Tempario Worker rodando na porta ${PORT}`);
   console.log(`Endpoint: POST http://localhost:${PORT}/api/query`);
+  
+  // Heartbeat nativo (Keep-alive)
+  // Como o Persistent Context só pode ser aberto por uma aba de cada vez, 
+  // nós enfileiramos a requisição de renovação para que o worker não trombe!
+  const UMA_HORA_MS = 60 * 60 * 1000;
+  setInterval(() => {
+     console.log('[Heartbeat] Agendando renovação de sessão na fila...');
+     const renewId = `renew_${Date.now()}`;
+     requestQueue = requestQueue.then(async () => {
+       await scraper.runQuery(renewId, { action: 'renew', servico: '' });
+     });
+  }, UMA_HORA_MS);
+  console.log(`[Heartbeat] Agendador ativado (rodará a cada 1 hora).`);
 });

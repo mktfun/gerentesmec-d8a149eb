@@ -126,17 +126,15 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
       </div>
 
       <div className="px-6 py-8 pb-12 flex-1 flex flex-col z-20 bg-card dark:bg-[#111116]">
-        <h2 className="text-2xl font-black text-foreground mb-4 flex items-center gap-2">
+        <h2 className="text-2xl font-black text-foreground flex items-center gap-2 mb-1">
           {data.status === 'na' ? <span className="line-through opacity-40">{data.item_name}</span> : data.item_name}
           {isComplete && <Check className="w-5 h-5 text-emerald-500" />}
         </h2>
         
         {instruction && (
-          <div className="bg-muted border border-border rounded-lg p-3 mb-6">
-            <p className="text-muted-foreground text-sm font-medium leading-relaxed italic">
-              "{instruction}"
-            </p>
-          </div>
+          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+            {instruction}
+          </p>
         )}
 
         <div className="grid grid-cols-3 gap-3 mt-auto">

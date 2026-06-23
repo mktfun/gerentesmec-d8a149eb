@@ -1,78 +1,50 @@
 import { NodeSSH } from 'node-ssh';
-import path from 'path';
-import fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const ssh = new NodeSSH();
 
-(async () => {
+async function deploy() {
   try {
-    console.log("🚀 Conectando ao servidor Tailscale (100.114.251.99)...");
+    console.log('Connecting...');
     await ssh.connect({
       host: '100.114.251.99',
       username: 'servidor',
       password: '5010'
     });
-    console.log("✅ Conectado com sucesso!");
+    console.log('Connected!');
 
-    const localDir = process.cwd();
-    const remoteDir = '/home/servidor/tempario-worker';
+    const localFile = path.join(__dirname, 'tempario-scraper.mjs');
+    const remoteFile = '/home/servidor/tempario-worker/tempario-scraper.mjs';
 
-    // Cria a pasta remota
-    await ssh.execCommand(`mkdir -p ${remoteDir}`);
+    console.log('Uploading files...');
+    await ssh.putFile(localFile, remoteFile);
+    await ssh.putDirectory(
+      path.join(__dirname, 'data', 'browser_profile'),
+      '/home/servidor/tempario-worker/data/browser_profile'
+    );
+    await ssh.putFile(
+      path.join(__dirname, 'server.mjs'),
+      '/home/servidor/tempario-worker/server.mjs'
+    );
+    await ssh.putFile(
+      path.join(__dirname, 'ecosystem.config.cjs'),
+      '/home/servidor/tempario-worker/ecosystem.config.cjs'
+    );
+    console.log('Files uploaded successfully!');
 
-    console.log("📦 Enviando arquivos para o servidor (ignorando node_modules)...");
-    
-    // Lista os arquivos que precisamos mandar (evitando node_modules pesada)
-    const files = fs.readdirSync(localDir);
-    for (const file of files) {
-      if (['node_modules', 'data', 'logs', '.git'].includes(file)) continue;
-      
-      const localPath = path.join(localDir, file);
-      const remotePath = `${remoteDir}/${file}`;
-      
-      const stat = fs.statSync(localPath);
-      if (stat.isDirectory()) {
-         console.log(`   Enviando pasta: ${file}...`);
-         await ssh.putDirectory(localPath, remotePath, {
-           validate: (itemPath) => !itemPath.includes('node_modules')
-         });
-      } else {
-         console.log(`   Enviando arquivo: ${file}...`);
-         await ssh.putFile(localPath, remotePath);
-      }
-    }
-    
-    console.log("✅ Arquivos enviados!");
+    console.log('Restarting PM2...');
+    const result = await ssh.execCommand('cd /home/servidor/tempario-worker && pm2 start ecosystem.config.cjs');
+    console.log('PM2 STDOUT:', result.stdout);
+    console.log('PM2 STDERR:', result.stderr);
 
-    console.log("⚙️  Instalando dependências e configurando o PM2 no servidor...");
-    
-    const cmds = [
-      `cd ${remoteDir} && npm install`,
-      `cd ${remoteDir} && npx playwright install chromium --with-deps`,
-      `sudo npm install -g pm2`,
-      `cd ${remoteDir} && pm2 restart ecosystem.config.cjs || pm2 start ecosystem.config.cjs`,
-      `pm2 save`
-    ];
-
-    for (const cmd of cmds) {
-      console.log(`   > Executando: ${cmd}`);
-      // Como o npx playwright precisa de root e pode pedir senha do sudo, 
-      // podemos passar o echo da senha se precisar do sudo. 
-      // O 'sudo npm install -g pm2' vai precisar da senha do sudo.
-      const execCmd = cmd.includes('sudo') || cmd.includes('--with-deps') 
-        ? `echo "5010" | sudo -S -H sh -c "${cmd.replace(/"/g, '\\"')}"`
-        : cmd;
-        
-      const result = await ssh.execCommand(execCmd);
-      if (result.stdout) console.log(result.stdout);
-      if (result.stderr) console.error(result.stderr);
-    }
-
-    console.log("🎉 DEPLOY FINALIZADO COM SUCESSO! O Worker já está rodando no servidor Linux.");
-
-  } catch (error) {
-    console.error("❌ Falha no Deploy:", error);
+  } catch (err) {
+    console.error('Deployment failed:', err);
   } finally {
     ssh.dispose();
   }
-})();
+}
+
+deploy();

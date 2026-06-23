@@ -22,6 +22,16 @@ export class TemparioScraper {
   }
 
   async runQuery(requestId, queryParams) {
+    // Sanitizar entradas "VAZIO" do n8n
+    const sanitize = (val) => (!val || val === 'VAZIO' || val === 'null' || val === '{placa}' || val === '{marca}' || val === '{modelo_pesquisa}' || val === '{modelo_exato}') ? '' : val;
+    queryParams.placa = sanitize(queryParams.placa);
+    queryParams.marca = sanitize(queryParams.marca);
+    queryParams.modelo_pesquisa = sanitize(queryParams.modelo_pesquisa);
+    queryParams.modelo_exato = sanitize(queryParams.modelo_exato);
+    queryParams.servico = sanitize(queryParams.servico);
+
+    console.log(`[Worker] Query: Placa='${queryParams.placa}', Marca='${queryParams.marca}', Modelo='${queryParams.modelo_pesquisa}', Exato='${queryParams.modelo_exato}'`);
+
     if (!(await this.validateSession())) {
       return {
         request_id: requestId,
@@ -31,26 +41,44 @@ export class TemparioScraper {
     }
 
     const startTime = Date.now();
-    let browser;
+    let context;
     let page;
     
     try {
-      browser = await chromium.launch({ headless: this.headless });
-      const context = await browser.newContext({ storageState: this.storageStatePath });
+      console.log('Iniciando o navegador Chromium (Persistent Context)...');
+      const profilePath = path.resolve('data', 'browser_profile');
+      
+      // Usa o diretório persistente
+      context = await chromium.launchPersistentContext(profilePath, {
+        headless: this.headless,
+        userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        permissions: [],
+        viewport: { width: 1280, height: 720 },
+        args: ['--disable-blink-features=AutomationControlled']
+      });
+
       page = await context.newPage();
+
+      // Pre-flight check: Verificar saúde da sessão ANTES de rodar
+      console.log('Realizando Pre-flight Check na sessão...');
+      await page.goto("https://sistema.tempar.io/time-search", { waitUntil: "domcontentloaded", timeout: 30000 });
       
-      // Navigate to time search
-      await page.goto('https://sistema.tempar.io/time-search', { waitUntil: 'networkidle' });
-      
-      // Check if redirected to login
-      if (page.url().includes('login')) {
-        await browser.close();
-        return {
-          request_id: requestId,
-          status: "session_expired",
-          error: { code: "SESSION_EXPIRED", message: "Redirecionado para login" },
-          meta: { duration_ms: Date.now() - startTime }
-        };
+      const currentUrl = page.url();
+      if (currentUrl.includes('login') || currentUrl.includes('sign')) {
+          console.error('❌ Sessão expirada ou Cloudflare bloqueando no Pre-flight.');
+          await context.close();
+          throw new Error(JSON.stringify({ code: "SESSION_EXPIRED", message: "A sessão expirou e o robô foi redirecionado para a tela de login." }));
+      }
+      console.log('✅ Pre-flight Ok! Sessão viva.');
+
+      if (queryParams.action === 'renew') {
+          console.log('🔄 Ação RENEW: Heartbeat concluído com sucesso.');
+          await context.close();
+          return {
+            request_id: requestId,
+            status: "ok",
+            meta: { duration_ms: Date.now() - startTime }
+          };
       }
 
       // Step 1: Select Segment (Automóveis = 1, default)
@@ -63,6 +91,9 @@ export class TemparioScraper {
       const plateInput = page.locator('input[name="plate"]');
       await plateInput.waitFor({ state: 'visible', timeout: 5000 });
       
+      let useMarcaModeloFallback = false;
+      let vehicleSelected = false;
+      let vehicleAssumedInfo = null;
       // Step 2: Search by Plate
       if (queryParams.placa) {
         // Wait until it's not disabled
@@ -88,9 +119,67 @@ export class TemparioScraper {
         if (await dialog.isVisible()) {
            const dialogText = await dialog.textContent();
            if (dialogText.includes("Atualizar o modelo")) {
-               throw new Error(JSON.stringify({ code: "UPDATE_VEHICLE_REQUIRED", message: "O Tempario exigiu o preenchimento dos dados (Marca/Modelo) para esta placa." }));
+               if (queryParams.marca && queryParams.modelo_pesquisa) {
+                   console.log("[Worker] Tempario bloqueou a placa. Tentando extrair as versões da placa diretamente do modal...");
+                   
+                   try {
+                       // O modal deve ter um botão para selecionar o modelo
+                       const selectBtn = dialog.locator('button[aria-haspopup="dialog"], button[role="combobox"]').last();
+                       if (await selectBtn.isVisible({ timeout: 2000 })) {
+                           await selectBtn.click();
+                           await page.waitForTimeout(1000);
+                           
+                           const popover = page.locator('[role="dialog"]').last();
+                           const optionLocator = popover.locator('[role="option"]');
+                           await optionLocator.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+                           
+                           const optionsCount = await optionLocator.count();
+                           if (optionsCount > 0) {
+                               // Auto-fallback: seleciona a primeira opção
+                               const firstOptionText = (await optionLocator.nth(0).textContent()).trim();
+                               console.log(`[Worker] Modal retornou ${optionsCount} opções. Auto-fallback ativado. Assumindo: ${firstOptionText}`);
+                               
+                               await optionLocator.nth(0).click();
+                               await page.waitForTimeout(500);
+                               
+                               const btnAtualizar = dialog.locator('button:has-text("Atualizar")');
+                               if (await btnAtualizar.isVisible()) {
+                                   await btnAtualizar.click();
+                               }
+                               
+                               vehicleAssumedInfo = {
+                                   descricao: firstOptionText,
+                                   candidates_count: optionsCount
+                               };
+                               vehicleSelected = true;
+                               useMarcaModeloFallback = false;
+                               
+                               await dialog.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+                               await page.waitForTimeout(1000);
+                           }
+                       }
+                   } catch (err) {
+                       if (err.message.includes("disambiguation")) throw err;
+                       console.log("[Worker] Falha ao extrair do modal. Usando fallback genérico de Marca/Modelo...");
+                   }
+                   
+                   // Clicar no X do modal se falhou
+                   const closeBtn = dialog.locator('button[aria-label="Close"], button:has-text("✕"), .close-button').first();
+                   if (await closeBtn.isVisible().catch(()=>false)) {
+                       await closeBtn.click({ force: true });
+                   } else {
+                       await page.keyboard.press('Escape');
+                   }
+                   
+                   await dialog.waitFor({ state: 'hidden', timeout: 3000 }).catch(() => {});
+                   await page.waitForTimeout(500);
+                   useMarcaModeloFallback = true;
+               } else {
+                   throw new Error(JSON.stringify({ code: "UPDATE_VEHICLE_REQUIRED", message: "O Tempario exigiu o preenchimento dos dados (Marca/Modelo) para esta placa." }));
+               }
+           } else {
+               throw new Error(JSON.stringify({ code: "WRONG_CATEGORY_OR_ALERT", message: dialogText.trim() }));
            }
-           throw new Error(JSON.stringify({ code: "WRONG_CATEGORY_OR_ALERT", message: dialogText.trim() }));
         }
 
         // Verifica se deu "não encontrado" ou "Placa inválida"
@@ -111,12 +200,36 @@ export class TemparioScraper {
         
         const count = await modeloLocator.count();
         if (count > 1) {
-          console.log(`Múltiplos veículos encontrados (${count}). Lançando erro AMBIGUOUS_VEHICLE...`);
-          const options = [];
-          for (let i = 0; i < count; i++) {
-            options.push((await modeloLocator.nth(i).textContent()).replace('Modelo: ', '').trim());
+          if (queryParams.modelo_exato) {
+            console.log(`Buscando modelo exato: ${queryParams.modelo_exato}`);
+            let clicked = false;
+            for (let i = 0; i < count; i++) {
+              const text = await modeloLocator.nth(i).textContent();
+              if (text.toLowerCase().includes(queryParams.modelo_exato.toLowerCase())) {
+                await modeloLocator.nth(i).click({ force: true });
+                clicked = true;
+                vehicleSelected = true;
+                break;
+              }
+            }
+            if (!clicked) {
+              throw new Error(JSON.stringify({ code: "EXACT_MODEL_NOT_FOUND", message: `O modelo exato '${queryParams.modelo_exato}' não foi encontrado entre as opções da placa.` }));
+            }
+            await page.waitForTimeout(2000);
+          } else {
+            console.log(`Múltiplos veículos encontrados (${count}). Lançando erro AMBIGUOUS_VEHICLE...`);
+            const options = [];
+            for (let i = 0; i < count; i++) {
+              options.push((await modeloLocator.nth(i).textContent()).replace('Modelo: ', '').trim());
+            }
+            throw new Error(JSON.stringify({
+              type: "disambiguation",
+              status: "needs_vehicle_selection",
+              selection_stage: "modelo",
+              message_for_user: "Encontrei mais de um veículo para esta placa. Qual é o correto?",
+              options
+            }));
           }
-          throw new Error(JSON.stringify({ code: "AMBIGUOUS_VEHICLE", options }));
         } else if (count === 1) {
           // Extrair modelo para devolver na API
           queryParams.marca = ""; 
@@ -126,17 +239,106 @@ export class TemparioScraper {
           console.log('Único veículo encontrado! Clicando no card...');
           await modeloLocator.first().click({ force: true });
           await page.waitForTimeout(2000);
+          vehicleSelected = true;
         } else {
           console.log('Texto "Modelo:" não encontrado. Tentando clicar em qualquer botão de Selecionar...');
           const btnSelecionar = page.locator('text="Selecionar"').first();
           if (await btnSelecionar.isVisible().catch(() => false)) {
              await btnSelecionar.click({ force: true });
              await page.waitForTimeout(2000);
+             vehicleSelected = true;
           }
         }
 
-      } else {
-         throw new Error("Busca por marca/modelo não implementada neste mock.");
+      } 
+      
+      if (!vehicleSelected && (!queryParams.placa || useMarcaModeloFallback) && queryParams.marca && queryParams.modelo_pesquisa) {
+         console.log(`Buscando por Marca (${queryParams.marca}) e Modelo (${queryParams.modelo_pesquisa})...`);
+         
+         // 1. Clicar em Marca
+         const marcaBtn = page.locator('label:has-text("Marca")').locator('button[aria-haspopup="dialog"]');
+         await marcaBtn.waitFor({ state: 'visible' });
+         await marcaBtn.click();
+         await page.waitForTimeout(500);
+
+         let popover = page.locator('[role="dialog"]').last();
+         await popover.waitFor({ state: 'visible' });
+         await popover.locator('input').fill(queryParams.marca);
+         await page.waitForTimeout(1000);
+         const marcaOption = popover.locator('[role="option"]').filter({ hasText: new RegExp(queryParams.marca, "i") }).first();
+         await marcaOption.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+         if (await marcaOption.isVisible()) {
+            await marcaOption.click();
+            await page.waitForTimeout(1000);
+         } else {
+            throw new Error(JSON.stringify({ code: "BRAND_NOT_FOUND", message: `A marca '${queryParams.marca}' não foi encontrada.` }));
+         }
+
+         // 2. Clicar em Modelo
+         const modeloBtn = page.locator('label:has-text("Modelo")').locator('button[aria-haspopup="dialog"]');
+         // Verifica se o botão do modelo ativou (deixa de ser disabled quando a marca é selecionada)
+         await modeloBtn.waitFor({ state: 'visible' });
+         if (await modeloBtn.isDisabled()) {
+            throw new Error(JSON.stringify({ code: "MODEL_DISABLED", message: "O campo de modelo não foi habilitado após selecionar a marca." }));
+         }
+         await modeloBtn.click();
+         await page.waitForTimeout(500);
+
+         popover = page.locator('[role="dialog"]').last();
+         await popover.waitFor({ state: 'visible' });
+         await popover.locator('input').fill(queryParams.modelo_pesquisa);
+         await page.waitForTimeout(1000);
+
+         // Pode ter múltiplos modelos com esse texto (ex: "A3" -> "A3 1.8", "A3 2.0")
+         const optionLocator = popover.locator('[role="option"]');
+         await optionLocator.first().waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+         const optionsCount = await optionLocator.count();
+
+         if (optionsCount === 0) {
+            throw new Error(JSON.stringify({ code: "MODEL_NOT_FOUND", message: `Nenhum modelo encontrado para '${queryParams.modelo_pesquisa}'.` }));
+         }
+
+         if (optionsCount > 1) {
+            if (queryParams.modelo_exato) {
+               console.log(`Buscando modelo exato na lista: ${queryParams.modelo_exato}`);
+               let clicked = false;
+               for (let i = 0; i < optionsCount; i++) {
+                 const text = await optionLocator.nth(i).textContent();
+                 if (text.toLowerCase().trim() === queryParams.modelo_exato.toLowerCase().trim()) {
+                   await optionLocator.nth(i).click();
+                   clicked = true;
+                   break;
+                 }
+               }
+               if (!clicked) {
+                 throw new Error(JSON.stringify({ code: "EXACT_MODEL_NOT_FOUND", message: `Modelo exato '${queryParams.modelo_exato}' não encontrado na lista.` }));
+               }
+            } else {
+               console.log(`Múltiplos modelos encontrados (${optionsCount}). Lançando AMBIGUOUS_VEHICLE...`);
+               const options = [];
+               for (let i = 0; i < optionsCount; i++) {
+                 options.push((await optionLocator.nth(i).textContent()).trim());
+               }
+               throw new Error(JSON.stringify({
+                type: "disambiguation",
+                status: "needs_vehicle_selection",
+                selection_stage: "modelo",
+                message_for_user: "Encontrei mais de um modelo possível para esta marca. Qual é o correto?",
+                options
+              }));
+            }
+         } else {
+            console.log('Único modelo encontrado, clicando...');
+            await optionLocator.first().click();
+            vehicleSelected = true;
+         }
+         
+         await page.waitForTimeout(2000); // Aguarda o sistema habilitar a Tabela de Preços
+
+      }
+      
+      if (!vehicleSelected) {
+         throw new Error("Parâmetros insuficientes. Forneça 'placa' ou ('marca' e 'modelo_pesquisa').");
       }
 
       // Passo 3: Tabela de Preços
@@ -177,29 +379,75 @@ export class TemparioScraper {
          throw new Error(`SERVICE_NOT_FOUND`);
       }
 
-      let servicoNome = null;
-      let servicoParaClicar = null;
-      let availableOptions = [];
+      // ---- ALGORITMO DE RANKING ----
+      const sanitize = (str) => (str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s]/gi, ' ');
+      const qTokens = sanitize(queryParams.servico).split(/\s+/).filter(t => t.length > 2);
+      const vehicleDesc = `${queryParams.marca || ''} ${queryParams.modelo || ''} ${queryParams.modelo_exato || ''}`;
+      const vTokens = sanitize(vehicleDesc).split(/\s+/).filter(t => t.length > 2);
+      const isAuto = vTokens.some(t => ['aut', 'automatico', 'automatizado', 'powershift'].includes(t));
 
+      let rankedOptions = [];
       for (let i = 0; i < optionCount; i++) {
         const text = await allOptions.nth(i).textContent();
-        if (text) {
-          const cleanText = text.trim();
-          availableOptions.push(cleanText);
-          if (cleanText.toLowerCase() === queryParams.servico.toLowerCase().trim()) {
-             servicoNome = cleanText;
-             servicoParaClicar = allOptions.nth(i);
-          }
+        if (!text) continue;
+        const cleanText = text.trim();
+        const oTokens = sanitize(cleanText).split(/\s+/).filter(t => t.length > 2);
+
+        let score = 0;
+        qTokens.forEach(qt => { if (oTokens.includes(qt)) score += 10; });
+        
+        if (isAuto && oTokens.some(t => ['automatico', 'automatizado', 'powershift'].includes(t))) {
+          score += 15;
         }
+
+        const diff = oTokens.length - qTokens.length;
+        if (diff > 2) score -= (diff * 1); // penaliza opções enormes cheias de "/", "bancada", "funilaria", etc.
+
+        rankedOptions.push({ text: cleanText, index: i, score });
+      }
+
+      rankedOptions.sort((a, b) => b.score - a.score);
+      console.log("[Worker] Service Ranking: ", rankedOptions.map(r => `${r.score}: ${r.text}`));
+
+      let servicoNome = null;
+      let servicoParaClicar = null;
+
+      if (rankedOptions.length > 0) {
+         // Se só tem 1 opção aceitável ou o primeiro ganha disparado do segundo (> 15 pontos) ou tem score muito alto e o resto é lixo.
+         const first = rankedOptions[0];
+         const second = rankedOptions.length > 1 ? rankedOptions[1] : null;
+         
+         const isUnambiguous = !second || (first.score - second.score >= 10);
+         
+         // Se bateu exato com ignorar case, sobescreve e confia cegamente
+         const exactMatch = rankedOptions.find(r => r.text.toLowerCase() === queryParams.servico.toLowerCase().trim());
+
+         if (exactMatch) {
+             servicoNome = exactMatch.text;
+             servicoParaClicar = allOptions.nth(exactMatch.index);
+         } else if (isUnambiguous && first.score > 0) {
+             servicoNome = first.text;
+             servicoParaClicar = allOptions.nth(first.index);
+         } else {
+             // Ambiguidade detectada
+             const maxOptions = 3;
+             const optionsToReturn = rankedOptions.slice(0, maxOptions).map(r => r.text);
+             if (rankedOptions.length > maxOptions) {
+                 optionsToReturn.push(`... e mais ${rankedOptions.length - maxOptions} opções disponíveis.`);
+             }
+
+             throw new Error(JSON.stringify({
+               type: "disambiguation",
+               status: "needs_service_selection",
+               selection_stage: "servico",
+               message_for_user: `Encontrei mais de um serviço parecido para "${queryParams.servico}". Qual deles você quer consultar?`,
+               options: optionsToReturn
+             }));
+         }
       }
 
       if (!servicoParaClicar) {
-        if (optionCount === 1) {
-           servicoParaClicar = allOptions.nth(0);
-           servicoNome = availableOptions[0];
-        } else {
-           throw new Error(`AMBIGUOUS_SERVICE: ` + JSON.stringify({ options: availableOptions }));
-        }
+         throw new Error(`SERVICE_NOT_FOUND`);
       }
       
       await servicoParaClicar.click();
@@ -236,7 +484,7 @@ export class TemparioScraper {
         status: "ok",
         vehicle: {
           placa: queryParams.placa,
-          descricao: `${queryParams.marca || ''} ${queryParams.modelo || ''}`.trim()
+          descricao: vehicleAssumedInfo ? vehicleAssumedInfo.descricao : `${queryParams.marca || ''} ${queryParams.modelo || ''}`.trim()
         },
         service: {
           descricao: servicoNome,
@@ -249,7 +497,13 @@ export class TemparioScraper {
         meta: { duration_ms: Date.now() - startTime }
       };
 
-      await browser.close();
+      if (vehicleAssumedInfo) {
+          result.vehicle.assumed = true;
+          result.vehicle.candidates_count = vehicleAssumedInfo.candidates_count;
+          result.message_for_user = `Assumi o veículo ${vehicleAssumedInfo.descricao} encontrado pela sua placa. Se não for esse modelo exato, me avise que eu refaço o orçamento.`;
+      }
+
+      await context.close();
       return result;
 
     } catch (err) {
@@ -264,8 +518,8 @@ export class TemparioScraper {
         } catch (e) {}
       }
       
-      if (browser) {
-        try { await browser.close(); } catch (e) {}
+      if (context) {
+        try { await context.close(); } catch (e) {}
       }
 
       const isNotFound = err.message.includes("NOT_FOUND_PLATE");
@@ -274,7 +528,7 @@ export class TemparioScraper {
 
       try {
         const parsed = JSON.parse(err.message);
-        if (parsed.code) {
+        if (parsed.code || parsed.type === "disambiguation") {
           errorObj = parsed;
           if (parsed.code === "AMBIGUOUS_VEHICLE" || parsed.code === "AMBIGUOUS_SERVICE") {
              statusStr = "ambiguous";
@@ -307,4 +561,3 @@ export class TemparioScraper {
   }
 }
 
-export { TemparioScraper };
