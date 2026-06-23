@@ -126,9 +126,9 @@ export default function AuditoriaExecution() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-card dark:bg-[#111116] overflow-hidden fixed inset-0 z-[100]">
+    <div className="flex flex-col h-[100dvh] bg-card dark:bg-[#111116] overflow-hidden fixed inset-0 z-[9999]">
       {/* HEADER SUPERIOR (Progresso e Categoria Atual) */}
-      <div className="shrink-0 bg-card/80 dark:bg-[#121214]/80 backdrop-blur-xl border-b border-border dark:border-zinc-800/50 p-4 pt-safe z-10 flex flex-col gap-3">
+      <div className="shrink-0 bg-card dark:bg-[#111116] border-b border-border dark:border-zinc-800/50 p-4 pt-safe z-50 flex flex-col gap-3 relative">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-0.5 block">
@@ -184,7 +184,7 @@ export default function AuditoriaExecution() {
       </div>
 
       {/* FOOTER INFERIOR (Navegação Rápida Otimizada para Polegar) */}
-      <div className="shrink-0 bg-card/90 dark:bg-[#121214]/90 backdrop-blur-xl border-t border-border dark:border-zinc-800/50 p-4 pb-safe relative z-10">
+      <div className="shrink-0 bg-card dark:bg-[#111116] border-t border-border dark:border-zinc-800/50 p-4 pb-safe relative z-50">
         <div className="flex items-center gap-3 max-w-md mx-auto">
           {/* Botão Secundário: Voltar */}
           <button 
