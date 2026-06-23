@@ -88,7 +88,7 @@ const AuditPanel: React.FC<Props> = ({ lead, onClose }) => {
   useEffect(() => {
     const fetchMessages = async () => {
       setLoadingChat(true);
-      const msgColumns = 'id, lead_id, sender_type, content, created_at, ai_audited, message_type, content_type, private';
+      const msgColumns = 'id, lead_id, sender_type, content, created_at, ai_audited, ai_insight, ai_transcription, chatwoot_message_id, media_type, media_url';
       const { data } = await supabase
         .from('chat_messages')
         .select(msgColumns)
