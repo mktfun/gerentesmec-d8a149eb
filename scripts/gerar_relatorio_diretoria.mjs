@@ -36,11 +36,11 @@ async function main() {
   // Fetch Leads
   const { data: leads, error: leadsErr } = await supabase
     .from('leads')
-    .select('id, customer_name, customer_phone, unit_id, score, closing_summary, ai_feedback, audit_checklist, chatwoot_conversation_id, created_at')
+    .select('id, customer_name, customer_phone, unit_id, score, closing_summary, ai_feedback, audit_checklist, chatwoot_conversation_id, created_at, funnel_stage')
     .gte('created_at', '2026-06-01T00:00:00.000Z')
     .lte('created_at', '2026-06-23T23:59:59.999Z')
-    .not('score', 'is', null); // Apenas os que foram auditados (tem score)
-
+    .in('funnel_stage', ['closed_won', 'closed_lost']) // Filtra apenas conversas completas (começo, meio e fim)
+    .not('score', 'is', null); // Apenas os que foram auditados
   if (leadsErr) {
     console.error("Erro ao buscar leads:", leadsErr);
     return;
@@ -112,8 +112,9 @@ async function main() {
 
     <div class="mb-10 text-gray-700 leading-relaxed text-sm bg-gray-50 p-5 rounded-lg border border-gray-200 avoid-break">
         <strong class="text-gray-900 font-bold block mb-2">💡 Resumo Executivo:</strong>
-        Este relatório consolida a auditoria autônoma de todas as conversas do WhatsApp da rede. O Score de Atendimento (0-100%) avalia o engajamento técnico, velocidade, simpatia e capacidade de fechamento dos vendedores. 
-        As evidências abaixo possuem links de acesso imediato à conversa real no sistema Chatwoot para conferência.
+        Este relatório consolida a auditoria autônoma de todas as conversas maduras (que atingiram finalização Ganha ou Perdida). 
+        Conversas vazias, curiosos ou abandonos no primeiro contato foram removidos (Filtro Qualitativo).
+        O Parecer Especialista da IA consolida os motivos exatos para o ganho ou perda da negociação.
     </div>
   `;
 
@@ -176,12 +177,19 @@ async function main() {
       
       worstLeads.forEach(l => {
         const link = "https://chat.tork.services/app/accounts/5/conversations/" + l.chatwoot_conversation_id;
-        // Pegar a pior justificativa do checklist (caso exista)
+        // Aprofundar Dossiê do Pior Caso
         let piorJustificativa = '';
-        if (l.audit_checklist?.audit_reasons && l.audit_checklist.audit_reasons.length > 0) {
-             piorJustificativa = l.audit_checklist.audit_reasons[0].evidence || l.audit_checklist.audit_reasons[0].reason || l.closing_summary;
+        if (l.ai_feedback) {
+             piorJustificativa = l.ai_feedback;
+        } else if (l.audit_checklist?.audit_reasons && Array.isArray(l.audit_checklist.audit_reasons)) {
+             const motivosFalhos = l.audit_checklist.audit_reasons.filter(r => r.score === 0 || r.passed === false);
+             if (motivosFalhos.length > 0) {
+                 piorJustificativa = motivosFalhos.map(r => "⚠️ " + (r.evidence || r.reason)).join('<br>');
+             } else {
+                 piorJustificativa = l.audit_checklist.audit_reasons[0]?.evidence || l.closing_summary;
+             }
         } else {
-             piorJustificativa = l.closing_summary || l.ai_feedback || "Conversa encerrada prematuramente sem fechamento.";
+             piorJustificativa = l.closing_summary || "Conversa encerrada prematuramente sem fechamento.";
         }
 
         html += `
@@ -221,7 +229,14 @@ async function main() {
       
       bestLeads.forEach(l => {
         const link = "https://chat.tork.services/app/accounts/5/conversations/" + l.chatwoot_conversation_id;
-        const elogio = l.closing_summary || l.ai_feedback || "Atendimento perfeito e conversão garantida de acordo com os padrões da oficina.";
+        let elogio = '';
+        if (l.ai_feedback) {
+             elogio = l.ai_feedback;
+        } else if (l.closing_summary) {
+             elogio = l.closing_summary;
+        } else {
+             elogio = "Atendimento de ponta, engajamento alto e conversão garantida de acordo com os padrões da oficina.";
+        }
         
         html += `
                 <div class="card p-5 border-l-4 border-l-emerald-500 avoid-break">
