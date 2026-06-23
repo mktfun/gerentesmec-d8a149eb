@@ -17,6 +17,7 @@ import Config from "./pages/Config";
 import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import ManagerDashboard from "./pages/ManagerDashboard";
 import AuditHistory from "./pages/AuditHistory";
 import AuditoriaApp from "./pages/Auditoria";
 import AuditoriaExecution from "./pages/Auditoria/AuditoriaExecution";
@@ -65,6 +66,7 @@ const AppRoutes: React.FC = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<ManagerLayout />}>
             <Route path="/" element={<ManagerDashboard />} />
+            <Route path="/tv/operacional" element={<Navigate to="/" replace />} />
             <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
             <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
             <Route path="*" element={<ManagerDashboard />} />
@@ -81,6 +83,10 @@ const AppRoutes: React.FC = () => {
             <Route path="/config" element={<ErrorBoundary><Config /></ErrorBoundary>} />
             <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
             <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
+            <Route path="/manager" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
+            <Route path="/tv/operacional" element={<Navigate to="/manager" replace />} />
+            <Route path="/tv/executivo" element={<Navigate to="/" replace />} />
+            <Route path="/executive-tv" element={<Navigate to="/" replace />} />
             <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
             <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />
