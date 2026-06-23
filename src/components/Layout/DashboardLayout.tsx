@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, MessageSquare, Users, Sun, Moon, Wrench, Settings, BarChart3, Tv, BookOpen, LogOut, ClipboardCheck, ChevronLeft, ChevronRight, History
@@ -27,6 +27,7 @@ const DashboardLayout: React.FC = () => {
     return localStorage.getItem('sidebar_collapsed') === 'true';
   });
 
+
   const toggleSidebar = () => {
     setIsCollapsed(prev => {
       const next = !prev;
@@ -35,6 +36,15 @@ const DashboardLayout: React.FC = () => {
     });
   };
   
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  React.useEffect(() => {
+    if (isHome) {
+      setIsCollapsed(true);
+    }
+  }, [isHome]);
+
   const isUnitManager = user?.user_metadata?.role === 'unit_manager' || managers.some(m => m.auth_user_id === user?.id);
 
   const dangerCount = React.useMemo(() => {
@@ -143,7 +153,7 @@ const DashboardLayout: React.FC = () => {
       <main className={`flex-1 flex flex-col transition-all duration-300 ${isTvMode ? 'h-screen w-full' : (isCollapsed ? 'md:ml-[72px]' : 'md:ml-[220px]') + ' min-h-screen pb-24 md:pb-0'}`}>
 
         {/* Topbar */}
-        {!isTvMode && (
+        {!isTvMode && !isHome && (
           <header className="h-auto min-h-16 py-3 md:py-0 sticky top-0 z-50 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 gap-4 md:gap-0
             bg-background/80 backdrop-blur-xl border-b border-border">
           <div>
