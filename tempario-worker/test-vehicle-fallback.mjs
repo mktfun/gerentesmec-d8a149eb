@@ -2,7 +2,7 @@ const payload = {
   request_id: "test-auto-fallback",
   query: {
     placa: "EZR8759", // Retorna vários Fiestas
-    servico: "bateria" // Serviço fácil e inequívoco
+    servico: "carga bateria" // Serviço fácil e inequívoco
   }
 };
 

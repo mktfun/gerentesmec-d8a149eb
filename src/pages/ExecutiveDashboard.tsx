@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
-import TvRadarView from './views/TvRadarView';
-import TvSemaforoView from './views/TvSemaforoView';
-import TvOperationsView from './views/TvOperationsView';
+import TvRadarView from './tv/views/TvRadarView';
+import TvSemaforoView from './tv/views/TvSemaforoView';
+import TvOperationsView from './tv/views/TvOperationsView';
 
 const SCREENS = [TvRadarView, TvSemaforoView, TvOperationsView];
 
@@ -34,7 +34,7 @@ export default function ExecutiveTvMode() {
   const ActiveComponent = SCREENS[activeScreen];
 
   return (
-    <div className="relative h-screen w-full bg-[#121214] text-white overflow-hidden font-sans">
+    <div className="relative flex-1 min-h-[calc(100vh-64px)] w-full bg-[#121214] text-white overflow-hidden font-sans">
       <AnimatePresence mode="wait">
         <motion.div
           key={activeScreen}

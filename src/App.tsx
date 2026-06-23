@@ -10,17 +10,13 @@ import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import { Login } from "./features/auth/components/Login";
 import DashboardLayout from "./components/Layout/DashboardLayout";
 import ManagerLayout from "./components/Layout/ManagerLayout";
-import TvLayout from "./components/Layout/TvLayout";
-import Index from "./pages/Index";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import Crm from "./pages/Crm";
 import Gerentes from "./pages/Gerentes";
 import Config from "./pages/Config";
 import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
-import TvOperacional from "./pages/tv/TvOperacional";
-import TvDashboard from "./components/Dashboard/TvDashboard";
-import ExecutiveTvMode from "./pages/tv/ExecutiveTvMode";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import AuditHistory from "./pages/AuditHistory";
 import AuditoriaApp from "./pages/Auditoria";
 import AuditoriaExecution from "./pages/Auditoria/AuditoriaExecution";
@@ -79,13 +75,12 @@ const AppRoutes: React.FC = () => {
         /* Admin Routes */
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
+            <Route path="/" element={<ErrorBoundary><ExecutiveDashboard /></ErrorBoundary>} />
             <Route path="/crm" element={<ErrorBoundary><Crm /></ErrorBoundary>} />
             <Route path="/gerentes" element={<ErrorBoundary><Gerentes /></ErrorBoundary>} />
             <Route path="/config" element={<ErrorBoundary><Config /></ErrorBoundary>} />
             <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
             <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
-            <Route path="/manager" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
             <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
             <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />
@@ -93,13 +88,6 @@ const AppRoutes: React.FC = () => {
 
           {/* Full Screen Routes */}
           <Route path="/auditoria/execucao" element={<ErrorBoundary><AuditoriaExecution /></ErrorBoundary>} />
-
-          {/* TV Routes (admin only) */}
-          <Route element={<TvLayout />}>
-            <Route path="/tv/operacional" element={<TvOperacional />} />
-            <Route path="/tv/executivo" element={<TvDashboard />} />
-            <Route path="/executive-tv" element={<ExecutiveTvMode />} />
-          </Route>
         </Route>
       )}
     </Routes>

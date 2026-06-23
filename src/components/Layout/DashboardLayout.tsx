@@ -155,14 +155,6 @@ const DashboardLayout: React.FC = () => {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <a href="/tv/operacional" target="_blank" rel="noopener noreferrer" className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-              <Tv className="w-3.5 h-3.5" />
-              TV Operacional
-            </a>
-            <a href="/tv/executivo" target="_blank" rel="noopener noreferrer" className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-              <Tv className="w-3.5 h-3.5" />
-              TV Executiva
-            </a>
             <button onClick={toggle} className="w-8 h-8 mr-2 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>

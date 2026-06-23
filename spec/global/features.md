@@ -19,3 +19,4 @@
 - Worker Node.js: Microserviço Playwright executado isoladamente (sem dependências de UI React).
 - Integração n8n: Fluxo orquestrador e roteamento de requisições do WhatsApp.
 - Persistência de Sessão: Reutilização de `storageState.json` para evitar relogin constante.
+- ServiceMatcher: Busca híbrida e fuzzy (normalização, sinônimos, trigramas, Levenshtein) para encontrar serviços aproximados e solicitar confirmação do usuário quando necessário.

@@ -1,0 +1,587 @@
+[
+  {
+    "timestamp": "2026-06-23T11:53:17.084Z",
+    "method": "GET",
+    "url": "https://sistema.tempar.io/time-search",
+    "resourceType": "document",
+    "request": {
+      "headers": {
+        ":authority": "sistema.tempar.io",
+        ":method": "GET",
+        ":path": "/time-search",
+        ":scheme": "https",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "cookie": "@tempario-r=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODIyMTQ0ODcsImV4cCI6MTc4MjMwMDg4Nywic3ViIjoiNmEzNTZiNzdlNWI3MjJjMDQ4ZTAyYTdmIn0.QkcjBblt_klrbBCchEcncr106AQvuLgjh3WGMcqAerk; @tempario-t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMjE0NDg3LCJleHAiOjE3ODIyMjUyODd9.QL60ZwzpW8mLGm_kaXPwJomxX0-DZcTcL6bzmqSMcWM; _ga=GA1.1.1396262952.1782215256; _hjSession_5285130=eyJpZCI6ImEwYmYzNWJkLWExNzktNGE4Ny1iMDhhLTEwNWE2ODgxMjA1YiIsImMiOjE3ODIyMTUyNTYyMTcsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=; _hjSessionUser_5285130=eyJpZCI6IjNhYzkxZDkxLTIzNDQtNWQ5OC1hMTQyLWRiODg0Njc4NzU0ZSIsImNyZWF0ZWQiOjE3ODIyMTUyNTYyMTUsImV4aXN0aW5nIjp0cnVlfQ==; _ga_0BSVQDK9LL=GS2.1.s1782215256$o1$g1$t1782215502$j60$l0$h0",
+        "priority": "u=0, i",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "document",
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-site": "none",
+        "sec-fetch-user": "?1",
+        "upgrade-insecure-requests": "1",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": null
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "a1034a96dd82344f-GRU",
+        "content-encoding": "br",
+        "content-type": "text/html; charset=utf-8",
+        "date": "Tue, 23 Jun 2026 11:53:17 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=82F9SMPHDnPlBSK2scDgXfnTqMbjkcPJ1s04YWLIS2xtwnUO9WqBvTpYhqXQOcd3c9W5lq5uBTSakPK2b%2FtWSO6%2BV8Jvob6WGw7mwmkGhMV4dS0lMC4LebaEOCMfICJtUmYs87toi4xUwsj9mM33\"}]}",
+        "server": "cloudflare",
+        "server-timing": "cfCacheStatus;desc=\"DYNAMIC\", cfEdge;dur=209,cfOrigin;dur=212",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "vary": "Accept-Encoding",
+        "x-hikari-trace": "mia1.0twb",
+        "x-railway-edge": "mia1",
+        "x-railway-request-id": "EpDP37_3QvCc2vCKGbGh5g"
+      },
+      "body": null
+    }
+  },
+  {
+    "timestamp": "2026-06-23T11:53:17.422Z",
+    "method": "POST",
+    "url": "https://analytics.google.com/g/collect?v=2&tid=G-0BSVQDK9LL&gtm=45je66h0v9203177392za200zd9203177392&_p=1782215597184&_gaz=1&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAGQC&are=1&cid=1396262952.1782215256&frm=0&pscdl=noapi&rcb=10&sr=1280x720&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Linux&uapv=&uaw=0&ul=pt-br&gaf=2&_s=1&tag_exp=115938465~115938469~119027224~119392696~119392704&dp=%2Ftime-search&sid=1782215256&sct=1&seg=1&dl=https%3A%2F%2Fsistema.tempar.io%2Ftime-search&dt=Consulta%20de%20Servi%C3%A7os%20%7C%20Tempario&en=page_view&_ee=1&tfd=657",
+    "resourceType": "fetch",
+    "request": {
+      "headers": {
+        ":authority": "analytics.google.com",
+        ":method": "POST",
+        ":path": "/g/collect?v=2&tid=G-0BSVQDK9LL&gtm=45je66h0v9203177392za200zd9203177392&_p=1782215597184&_gaz=1&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAGQC&are=1&cid=1396262952.1782215256&frm=0&pscdl=noapi&rcb=10&sr=1280x720&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Linux&uapv=&uaw=0&ul=pt-br&gaf=2&_s=1&tag_exp=115938465~115938469~119027224~119392696~119392704&dp=%2Ftime-search&sid=1782215256&sct=1&seg=1&dl=https%3A%2F%2Fsistema.tempar.io%2Ftime-search&dt=Consulta%20de%20Servi%C3%A7os%20%7C%20Tempario&en=page_view&_ee=1&tfd=657",
+        ":scheme": "https",
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "cache-control": "no-cache",
+        "content-length": "0",
+        "origin": "https://sistema.tempar.io",
+        "pragma": "no-cache",
+        "priority": "u=1, i",
+        "referer": "https://sistema.tempar.io/",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "no-cors",
+        "sec-fetch-site": "cross-site",
+        "sec-fetch-storage-access": "active",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": null
+    },
+    "response": {
+      "status": 204,
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "https://sistema.tempar.io",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-length": "0",
+        "content-security-policy-report-only": "script-src 'none'; form-action 'none'; frame-src 'none'; report-uri https://csp.withgoogle.com/csp/scaffolding/ascnsrsggc:196:0",
+        "content-type": "text/plain",
+        "cross-origin-opener-policy-report-only": "same-origin; report-to=ascnsrsggc:196:0",
+        "cross-origin-resource-policy": "cross-origin",
+        "date": "Tue, 23 Jun 2026 11:53:17 GMT",
+        "expires": "Fri, 01 Jan 1990 00:00:00 GMT",
+        "pragma": "no-cache",
+        "report-to": "{\"group\":\"ascnsrsggc:196:0\",\"max_age\":2592000,\"endpoints\":[{\"url\":\"https://csp.withgoogle.com/csp/report-to/scaffolding/ascnsrsggc:196:0\"}],}",
+        "server": "Golfe2"
+      },
+      "body": null
+    }
+  },
+  {
+    "timestamp": "2026-06-23T11:53:17.450Z",
+    "method": "POST",
+    "url": "https://sistema.tempar.io/cdn-cgi/rum?",
+    "resourceType": "xhr",
+    "request": {
+      "headers": {
+        ":authority": "sistema.tempar.io",
+        ":method": "POST",
+        ":path": "/cdn-cgi/rum?",
+        ":scheme": "https",
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "content-length": "975",
+        "content-type": "application/json",
+        "cookie": "@tempario-r=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODIyMTQ0ODcsImV4cCI6MTc4MjMwMDg4Nywic3ViIjoiNmEzNTZiNzdlNWI3MjJjMDQ4ZTAyYTdmIn0.QkcjBblt_klrbBCchEcncr106AQvuLgjh3WGMcqAerk; @tempario-t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMjE0NDg3LCJleHAiOjE3ODIyMjUyODd9.QL60ZwzpW8mLGm_kaXPwJomxX0-DZcTcL6bzmqSMcWM; _ga=GA1.1.1396262952.1782215256; _hjSession_5285130=eyJpZCI6ImEwYmYzNWJkLWExNzktNGE4Ny1iMDhhLTEwNWE2ODgxMjA1YiIsImMiOjE3ODIyMTUyNTYyMTcsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=; _hjSessionUser_5285130=eyJpZCI6IjNhYzkxZDkxLTIzNDQtNWQ5OC1hMTQyLWRiODg0Njc4NzU0ZSIsImNyZWF0ZWQiOjE3ODIyMTUyNTYyMTUsImV4aXN0aW5nIjp0cnVlfQ==; _ga_0BSVQDK9LL=GS2.1.s1782215256$o1$g1$t1782215597$j60$l0$h0",
+        "origin": "https://sistema.tempar.io",
+        "priority": "u=1, i",
+        "referer": "https://sistema.tempar.io/time-search",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": {
+        "memory": {
+          "totalJSHeapSize": 16100000,
+          "usedJSHeapSize": 11900000,
+          "jsHeapSizeLimit": 3760000000
+        },
+        "resources": [],
+        "referrer": "",
+        "eventType": 1,
+        "firstPaint": 600,
+        "firstContentfulPaint": 600,
+        "startTime": 1782215596592,
+        "versions": {
+          "fl": "2024.11.0",
+          "js": "2026.5.0",
+          "timings": 2
+        },
+        "pageloadId": "d084451f-10eb-4edd-a94d-06fd3b18c825",
+        "location": "https://sistema.tempar.io/time-search",
+        "nt": "navigate",
+        "timingsV2": {
+          "nextHopProtocol": "h2",
+          "domainLookupStart": 3.40000057220459,
+          "domainLookupEnd": 4.90000057220459,
+          "connectStart": 4.90000057220459,
+          "connectEnd": 24.600000381469727,
+          "requestStart": 24.800000190734863,
+          "responseStart": 472.1000003814697,
+          "responseEnd": 475.30000019073486,
+          "domInteractive": 582.1000003814697,
+          "domComplete": 591.7000007629395,
+          "loadEventStart": 591.8000001907349,
+          "loadEventEnd": 595.2000007629395,
+          "finalResponseHeadersStart": 472.1000003814697,
+          "firstInterimResponseStart": 0,
+          "transferSize": 8873,
+          "decodedBodySize": 47326
+        },
+        "dt": "",
+        "siteToken": "30f81867d7c94202a378c994cc18ee3a",
+        "st": 2
+      }
+    },
+    "response": {
+      "status": 204,
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-methods": "POST,OPTIONS",
+        "access-control-allow-origin": "https://sistema.tempar.io",
+        "access-control-max-age": "86400",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ray": "a1034a9bf887a51d-GRU",
+        "content-type": "text/plain",
+        "date": "Tue, 23 Jun 2026 11:53:17 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "priority": "u=1,i",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=d%2FaRV%2BJ6BxK6qJD7chaq2%2F2E3rOsgvxJ75hPNtRBYlTXWvtM%2BYUT2PivjOP7xoC7%2FGnzaaMS95yTWQVlPi5CNOUtFxPmBz0dedGlaOULL3ZezJuO1OMiyT704rhD9s9dlxSYF2Kvho%2F%2BC8IuTfme\"}]}",
+        "server": "cloudflare",
+        "server-timing": "cfExtPri",
+        "vary": "Origin, accept-encoding"
+      },
+      "body": null
+    }
+  },
+  {
+    "timestamp": "2026-06-23T11:53:18.039Z",
+    "method": "GET",
+    "url": "https://authenticator.tempar.io/api/users/by-email",
+    "resourceType": "xhr",
+    "request": {
+      "headers": {
+        ":authority": "authenticator.tempar.io",
+        ":method": "GET",
+        ":path": "/api/users/by-email",
+        ":scheme": "https",
+        "accept": "application/json, text/plain, */*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMjE0NDg3LCJleHAiOjE3ODIyMjUyODd9.QL60ZwzpW8mLGm_kaXPwJomxX0-DZcTcL6bzmqSMcWM",
+        "origin": "https://sistema.tempar.io",
+        "priority": "u=1, i",
+        "referer": "https://sistema.tempar.io/",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": null
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "access-control-allow-origin": "https://sistema.tempar.io",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "a1034a9e2cfe6d53-GRU",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Tue, 23 Jun 2026 11:53:17 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=PJ98F2yJPmtdVV1DKcUhoxf2QhNtOmV%2Bo8oJfHGgTaNjCaBcztoNgkvEnBDTYUzFASm%2F22FpQsDbZbYPnK4d8SBMwfFxeWYExkd0Qa5fAn1GtcQN%2BRfb%2FfjYJqE8DpjTSqGK1Q%2FPyrqfRuDEpNwk5pGEfAEI\"}]}",
+        "server": "cloudflare",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "vary": "Origin, accept-encoding",
+        "x-hikari-trace": "mia1.nv6z",
+        "x-railway-edge": "mia1",
+        "x-railway-request-id": "hL28-i_-QMGsWZRk8u2xcg"
+      },
+      "body": {
+        "id": "6a356b77e5b722c048e02a7f",
+        "can_create": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_destroy": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_manage": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_read": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_update": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "name": "Davi",
+        "email": "mktfunil1@gmail.com",
+        "account_type": "WORKSHOP",
+        "can_add_complementary_services": false,
+        "max_complementary_services_limit": 3,
+        "max_services": 10,
+        "has_legacy_recipes": null
+      }
+    }
+  },
+  {
+    "timestamp": "2026-06-23T11:53:18.223Z",
+    "method": "GET",
+    "url": "https://authenticator.tempar.io/api/users/by-email",
+    "resourceType": "xhr",
+    "request": {
+      "headers": {
+        ":authority": "authenticator.tempar.io",
+        ":method": "GET",
+        ":path": "/api/users/by-email",
+        ":scheme": "https",
+        "accept": "application/json, text/plain, */*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMjE0NDg3LCJleHAiOjE3ODIyMjUyODd9.QL60ZwzpW8mLGm_kaXPwJomxX0-DZcTcL6bzmqSMcWM",
+        "origin": "https://sistema.tempar.io",
+        "priority": "u=1, i",
+        "referer": "https://sistema.tempar.io/",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": null
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "access-control-allow-origin": "https://sistema.tempar.io",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "a1034a9f7930c0df-GRU",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Tue, 23 Jun 2026 11:53:18 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "priority": "u=1,i",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=Hp1ab%2BgS%2BfwRKIQ7o3mjmAFwH8jqwxhBv7nyMVSpClSJwpr1aCp7cFIRaoyMEUoCSrBRYprr4SvZBQwh4XiDggf9LJGA4ICcHVbN74PywPPBaqEp4yjwJEkmgp5wia5XXIsQZqD8jjN1pC4Rn3cljMd88Ae9\"}]}",
+        "server": "cloudflare",
+        "server-timing": "cfExtPri",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "vary": "Origin, accept-encoding",
+        "x-hikari-trace": "mia1.0twb",
+        "x-railway-edge": "mia1",
+        "x-railway-request-id": "AM8J9qeNQgK9FHxuc9o55Q"
+      },
+      "body": {
+        "id": "6a356b77e5b722c048e02a7f",
+        "can_create": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_destroy": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_manage": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_read": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "can_update": [
+          "customers",
+          "employees",
+          "financies",
+          "orders",
+          "permissions",
+          "sales_values",
+          "scenarios",
+          "time_search",
+          "users",
+          "plans"
+        ],
+        "name": "Davi",
+        "email": "mktfunil1@gmail.com",
+        "account_type": "WORKSHOP",
+        "can_add_complementary_services": false,
+        "max_complementary_services_limit": 3,
+        "max_services": 10,
+        "has_legacy_recipes": null
+      }
+    }
+  },
+  {
+    "timestamp": "2026-06-23T11:53:18.521Z",
+    "method": "GET",
+    "url": "https://backend.tempar.io/api/company-segments",
+    "resourceType": "xhr",
+    "request": {
+      "headers": {
+        ":authority": "backend.tempar.io",
+        ":method": "GET",
+        ":path": "/api/company-segments",
+        ":scheme": "https",
+        "accept": "application/json, text/plain, */*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMjE0NDg3LCJleHAiOjE3ODIyMjUyODd9.QL60ZwzpW8mLGm_kaXPwJomxX0-DZcTcL6bzmqSMcWM",
+        "origin": "https://sistema.tempar.io",
+        "priority": "u=1, i",
+        "referer": "https://sistema.tempar.io/",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": null
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "access-control-allow-origin": "https://sistema.tempar.io",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "a1034aa0cfe9b026-GRU",
+        "content-length": "12",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Tue, 23 Jun 2026 11:53:18 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=CRtYujxX1WcSQ5uMpgDak26830l9kCBafpeFVJBCMFOo0XtzD%2BrmfPRZLT2quK6yr3CUsS5DGJIpBg%2BDlWWFDZCV3aS86YVt60I1TQ6mHgxyGd4bMmqxkrys3L5pQTdIH1QHSex%2FwiffmbXr%2Fk0H\"}]}",
+        "server": "cloudflare",
+        "speculation-rules": "\"/cdn-cgi/speculation\"",
+        "vary": "Origin",
+        "x-hikari-trace": "mia1.0twb",
+        "x-railway-edge": "mia1",
+        "x-railway-request-id": "tPyoqPLVSfKzrYvsozsQ6Q"
+      },
+      "body": [
+        1,
+        2,
+        4,
+        6,
+        13
+      ]
+    }
+  },
+  {
+    "timestamp": "2026-06-23T11:53:18.685Z",
+    "method": "GET",
+    "url": "https://subscription.tempar.io/api/v1/subscriptions/time",
+    "resourceType": "xhr",
+    "request": {
+      "headers": {
+        ":authority": "subscription.tempar.io",
+        ":method": "GET",
+        ":path": "/api/v1/subscriptions/time",
+        ":scheme": "https",
+        "accept": "application/json, text/plain, */*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMjE0NDg3LCJleHAiOjE3ODIyMjUyODd9.QL60ZwzpW8mLGm_kaXPwJomxX0-DZcTcL6bzmqSMcWM",
+        "origin": "https://sistema.tempar.io",
+        "priority": "u=1, i",
+        "referer": "https://sistema.tempar.io/",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": null
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "access-control-allow-origin": "https://sistema.tempar.io",
+        "content-length": "37",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Tue, 23 Jun 2026 11:53:18 GMT",
+        "server": "railway-hikari",
+        "vary": "Origin",
+        "x-hikari-trace": "mia1.nv6z",
+        "x-railway-edge": "mia1",
+        "x-railway-request-id": "bOFPOT_TSsC5IilUozsQ6Q",
+        "x-ratelimit-limit": "60",
+        "x-ratelimit-remaining": "58",
+        "x-ratelimit-reset": "6"
+      },
+      "body": {
+        "remainingDays": 3,
+        "isFreePlan": true
+      }
+    }
+  },
+  {
+    "timestamp": "2026-06-23T11:53:22.332Z",
+    "method": "POST",
+    "url": "https://analytics.google.com/g/collect?v=2&tid=G-0BSVQDK9LL&gtm=45je66h0v9203177392za200zd9203177392&_p=1782215597184&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAGQC&ae=a&are=1&cid=1396262952.1782215256&frm=0&pscdl=noapi&rcb=10&sr=1280x720&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Linux&uapv=&uaw=0&ul=pt-br&gaf=2&_s=2&tag_exp=115938465~115938469~119027224~119392696~119392704&dp=%2Ftime-search&sid=1782215256&sct=1&seg=1&dl=https%3A%2F%2Fsistema.tempar.io%2Ftime-search&dt=Consulta%20de%20Servi%C3%A7os%20%7C%20Tempario&en=scroll&epn.percent_scrolled=90&_et=11&tfd=5673",
+    "resourceType": "fetch",
+    "request": {
+      "headers": {
+        ":authority": "analytics.google.com",
+        ":method": "POST",
+        ":path": "/g/collect?v=2&tid=G-0BSVQDK9LL&gtm=45je66h0v9203177392za200zd9203177392&_p=1782215597184&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAGQC&ae=a&are=1&cid=1396262952.1782215256&frm=0&pscdl=noapi&rcb=10&sr=1280x720&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Linux&uapv=&uaw=0&ul=pt-br&gaf=2&_s=2&tag_exp=115938465~115938469~119027224~119392696~119392704&dp=%2Ftime-search&sid=1782215256&sct=1&seg=1&dl=https%3A%2F%2Fsistema.tempar.io%2Ftime-search&dt=Consulta%20de%20Servi%C3%A7os%20%7C%20Tempario&en=scroll&epn.percent_scrolled=90&_et=11&tfd=5673",
+        ":scheme": "https",
+        "accept": "*/*",
+        "accept-encoding": "gzip, deflate, br, zstd",
+        "cache-control": "no-cache",
+        "content-length": "0",
+        "origin": "https://sistema.tempar.io",
+        "pragma": "no-cache",
+        "priority": "u=1, i",
+        "referer": "https://sistema.tempar.io/",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "no-cors",
+        "sec-fetch-site": "cross-site",
+        "sec-fetch-storage-access": "active",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+      },
+      "postData": null
+    },
+    "response": {
+      "status": 204,
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "https://sistema.tempar.io",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "content-length": "0",
+        "content-security-policy-report-only": "script-src 'none'; form-action 'none'; frame-src 'none'; report-uri https://csp.withgoogle.com/csp/scaffolding/ascnsrsggc:196:0",
+        "content-type": "text/plain",
+        "cross-origin-opener-policy-report-only": "same-origin; report-to=ascnsrsggc:196:0",
+        "cross-origin-resource-policy": "cross-origin",
+        "date": "Tue, 23 Jun 2026 11:53:22 GMT",
+        "expires": "Fri, 01 Jan 1990 00:00:00 GMT",
+        "pragma": "no-cache",
+        "report-to": "{\"group\":\"ascnsrsggc:196:0\",\"max_age\":2592000,\"endpoints\":[{\"url\":\"https://csp.withgoogle.com/csp/report-to/scaffolding/ascnsrsggc:196:0\"}],}",
+        "server": "Golfe2"
+      },
+      "body": null
+    }
+  }
+]
