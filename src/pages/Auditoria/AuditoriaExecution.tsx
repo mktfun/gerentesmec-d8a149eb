@@ -156,8 +156,8 @@ export default function AuditoriaExecution() {
         </div>
       </div>
 
-      {/* ÁREA CENTRAL (O Card Principal Edge-to-Edge) */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-32 snap-y snap-mandatory scroll-smooth">
+      {/* ÁREA CENTRAL (O Card Principal) */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden snap-y snap-mandatory scroll-smooth">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentGlobalIndex}
@@ -184,7 +184,7 @@ export default function AuditoriaExecution() {
       </div>
 
       {/* FOOTER INFERIOR (Navegação Rápida Otimizada para Polegar) */}
-      <div className="shrink-0 bg-card/90 dark:bg-[#121214]/90 backdrop-blur-xl border-t border-border dark:border-zinc-800/50 p-4 pb-safe absolute bottom-0 w-full z-10">
+      <div className="shrink-0 bg-card/90 dark:bg-[#121214]/90 backdrop-blur-xl border-t border-border dark:border-zinc-800/50 p-4 pb-safe relative z-10">
         <div className="flex items-center gap-3 max-w-md mx-auto">
           {/* Botão Secundário: Voltar */}
           <button 

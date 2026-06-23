@@ -64,7 +64,7 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
   };
 
   return (
-    <div className="w-full h-full max-w-lg mx-auto bg-card dark:bg-[#111116] relative flex flex-col">
+    <div className="w-full min-h-full max-w-lg mx-auto bg-card dark:bg-[#111116] relative flex flex-col">
       
       {/* Category Header Muted */}
       <div className="absolute top-4 left-4 z-20">
@@ -75,7 +75,7 @@ export default function AuditoriaItemCard({ data, minPhotos, categoryName, instr
       </div>
 
       {/* Hero Image Section (Blur or Photos) */}
-      <div className="h-[40vh] min-h-[300px] w-full bg-zinc-100 dark:bg-black/50 relative overflow-hidden flex items-center justify-center">
+      <div className="h-[40vh] min-h-[220px] w-full bg-zinc-100 dark:bg-black/50 relative overflow-hidden flex items-center justify-center shrink-0">
         
         {/* Render Background Photos */}
         {data.photos.length > 0 ? (
