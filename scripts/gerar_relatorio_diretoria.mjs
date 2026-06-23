@@ -36,7 +36,7 @@ async function main() {
   // Fetch Leads
   const { data: leads, error: leadsErr } = await supabase
     .from('leads')
-    .select('id, customer_name, customer_phone, unit_id, score, closing_summary, ai_feedback, audit_checklist, chatwoot_conversation_id, created_at, funnel_stage')
+    .select('id, customer_name, customer_phone, unit_id, score, closing_summary, ai_feedback, audit_checklist, audit_reasons, chatwoot_conversation_id, created_at, funnel_stage, response_count')
     .gte('created_at', '2026-06-01T00:00:00.000Z')
     .lte('created_at', '2026-06-23T23:59:59.999Z')
     .in('funnel_stage', ['closed_won', 'closed_lost']) // Filtra apenas conversas completas (começo, meio e fim)
@@ -51,7 +51,13 @@ async function main() {
   // Processamento por Unidade
   const reportData = {};
 
-  leads.forEach(lead => {
+  // Filtro de Qualidade de Conversa (Começo, Meio e Fim claros)
+  // Requisito mínimo: O cliente e o agente precisam ter trocado pelo menos 5 mensagens.
+  const filteredLeads = leads.filter(l => (l.response_count || 0) > 4);
+
+  console.log(`🧹 Filtro de Densidade aplicou-se: De ${leads.length} leads maduros, ${filteredLeads.length} tiveram conversa substancial.`);
+
+  filteredLeads.forEach(lead => {
     const uId = lead.unit_id;
     if (!uId) return;
 
@@ -177,19 +183,20 @@ async function main() {
       
       worstLeads.forEach(l => {
         const link = "https://chat.tork.services/app/accounts/5/conversations/" + l.chatwoot_conversation_id;
-        // Aprofundar Dossiê do Pior Caso
+        // Aprofundar Dossiê do Pior Caso usando o dicionário real 'audit_reasons'
         let piorJustificativa = '';
         if (l.ai_feedback) {
              piorJustificativa = l.ai_feedback;
-        } else if (l.audit_checklist?.audit_reasons && Array.isArray(l.audit_checklist.audit_reasons)) {
-             const motivosFalhos = l.audit_checklist.audit_reasons.filter(r => r.score === 0 || r.passed === false);
-             if (motivosFalhos.length > 0) {
-                 piorJustificativa = motivosFalhos.map(r => "⚠️ " + (r.evidence || r.reason)).join('<br>');
+        } else if (l.audit_reasons && typeof l.audit_reasons === 'object') {
+             const reasons = Object.values(l.audit_reasons)
+                .filter(reason => reason && typeof reason === 'string' && reason.length > 5);
+             if (reasons.length > 0) {
+                 piorJustificativa = reasons.map(r => "⚠️ " + r).join('<br><br>');
              } else {
-                 piorJustificativa = l.audit_checklist.audit_reasons[0]?.evidence || l.closing_summary;
+                 piorJustificativa = l.closing_summary || "Parecer não conclusivo.";
              }
         } else {
-             piorJustificativa = l.closing_summary || "Conversa encerrada prematuramente sem fechamento.";
+             piorJustificativa = l.closing_summary || "A negociação não atingiu os gatilhos mínimos de engajamento do funil.";
         }
 
         html += `
