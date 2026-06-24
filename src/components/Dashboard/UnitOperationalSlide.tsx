@@ -35,6 +35,24 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
   
   const todayScore = avgScoreInt(unitLeads, { statusFilter: true });
 
+  const shameLeads = React.useMemo(() => {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 7);
+    const lostStart = new Date(); lostStart.setDate(lostStart.getDate() - 3);
+
+    // 1. Auditados Hoje com Nota < 60
+    const todayBad = unitLeads.filter(l => l.score !== null && l.score < 60 && new Date(l.last_message_at).getTime() >= today.getTime());
+    if (todayBad.length > 0) return todayBad.sort((a,b) => a.score! - b.score!);
+    
+    // 2. Auditados na Semana com Nota < 75
+    const weekBad = unitLeads.filter(l => l.score !== null && l.score < 75 && new Date(l.last_message_at).getTime() >= weekStart.getTime());
+    if (weekBad.length > 0) return weekBad.sort((a,b) => a.score! - b.score!);
+    
+    // 3. Perdidos no Funil recentemente (Lost/Abandonados)
+    const lost = unitLeads.filter(l => l.funnel_stage === 'closed_lost' && new Date(l.last_message_at).getTime() >= lostStart.getTime());
+    return lost.sort((a,b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+  }, [unitLeads]);
+
   // Formatar histórico para o gráfico (Top 14 dias)
   const chartData = dailyScores.map(ds => {
     const breakdown = ds.unit_breakdown?.find((ub: any) => ub.unit_id === unit.id);
@@ -221,36 +239,30 @@ export const UnitOperationalSlide: React.FC<UnitOperationalSlideProps> = ({
                </div>
             </div>
 
-            {/* Funnel Distribution */}
+            {/* Hall of Shame - Quality Painel */}
             <div className="flex-1 rounded-[2rem] bg-white/[0.02] border border-white/10 p-8 flex flex-col relative overflow-hidden">
-               <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none" />
-               <h3 className="text-sm font-bold tracking-widest uppercase text-white/70 mb-6 z-10">Funil em Andamento</h3>
+               <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-500/5 rounded-full blur-[80px] pointer-events-none" />
+               <h3 className="text-sm font-bold tracking-widest uppercase text-white/70 mb-6 z-10">Casos Críticos (Qualidade)</h3>
                
-               <div className="flex flex-col gap-4 flex-1 justify-center z-10">
-                 {[
-                   { id: 'lead_new', label: 'Novos / Fila', color: 'bg-indigo-500', text: 'text-indigo-400' },
-                   { id: 'negotiation', label: 'Em Negociação', color: 'bg-amber-500', text: 'text-amber-400' },
-                   { id: 'quote', label: 'Orçamento Enviado', color: 'bg-emerald-500', text: 'text-emerald-400' },
-                 ].map(stage => {
-                   const count = unitLeads.filter(l => l.funnel_stage === stage.id).length;
-                   const pct = activeLeads.length > 0 ? (count / activeLeads.length) * 100 : 0;
-                   return (
-                     <div key={stage.id} className="flex flex-col gap-2">
-                       <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider">
-                         <span className="text-white/70">{stage.label}</span>
-                         <span className={stage.text}>{count}</span>
-                       </div>
-                       <div className="w-full h-2 rounded-full bg-black/20 overflow-hidden">
-                         <motion.div 
-                           initial={{ width: 0 }}
-                           animate={{ width: `${pct}%` }}
-                           transition={{ duration: 1, ease: "easeOut" }}
-                           className={`h-full rounded-full ${stage.color}`}
-                         />
-                       </div>
-                     </div>
-                   );
-                 })}
+               <div className="flex flex-col gap-3 flex-1 justify-start z-10 overflow-y-auto pr-2 custom-scrollbar">
+                 {shameLeads.length > 0 ? shameLeads.slice(0, 3).map(lead => (
+                   <div key={lead.id} className="p-4 rounded-2xl bg-black/20 border border-white/5 flex flex-col gap-2 relative">
+                     {lead.score !== null ? (
+                        <div className="absolute top-4 right-4 text-2xl font-black text-rose-500">{lead.score}%</div>
+                     ) : (
+                        <div className="absolute top-4 right-4 text-[10px] font-bold tracking-widest uppercase text-rose-500/50">Loss</div>
+                     )}
+                     <span className="font-bold text-white text-sm w-3/4 truncate">{lead.customer_name}</span>
+                     <p className="text-xs text-white/50 w-3/4 line-clamp-2">
+                       {lead.ai_feedback || lead.notes || (lead.score !== null ? 'Reprovado nos critérios de auditoria. Verificar logs.' : 'Cliente perdido no funil sem conversão final.')}
+                     </p>
+                   </div>
+                 )) : (
+                   <div className="flex-1 flex flex-col items-center justify-center text-white/20">
+                     <Target className="w-8 h-8 mb-2 opacity-50" />
+                     <span className="text-[10px] font-bold uppercase tracking-widest">Qualidade OK na semana</span>
+                   </div>
+                 )}
                </div>
             </div>
           </div>

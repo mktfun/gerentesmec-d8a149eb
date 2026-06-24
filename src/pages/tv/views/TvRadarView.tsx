@@ -10,12 +10,23 @@ interface Props {
 }
 
 export default function TvRadarView({ leads, units }: Props) {
-  // Pega os piores leads (com score e audit_reasons)
+  // Filtro Waterfall para nunca exibir Radar Limpo à toa
   const radarLeads = useMemo(() => {
-    return leads
-      .filter(l => l.score !== null && l.audit_checklist?.audit_reasons?.length > 0)
-      .sort((a, b) => a.score - b.score)
-      .slice(0, 6); // Pega as piores 6 para caber na TV em grid de 3 ou 2
+    const today = new Date(); today.setHours(0,0,0,0);
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 7);
+    const lostStart = new Date(); lostStart.setDate(lostStart.getDate() - 3);
+
+    // 1. Auditados Hoje com Score < 60
+    let bad = leads.filter(l => l.score !== null && l.score < 60 && new Date(l.last_message_at).getTime() >= today.getTime());
+    if (bad.length > 0) return bad.sort((a,b) => a.score! - b.score!).slice(0,6);
+
+    // 2. Auditados na Semana com Score < 75
+    bad = leads.filter(l => l.score !== null && l.score < 75 && new Date(l.last_message_at).getTime() >= weekStart.getTime());
+    if (bad.length > 0) return bad.sort((a,b) => a.score! - b.score!).slice(0,6);
+
+    // 3. Perdidos no funil (Loss/Ignorados) nos últimos 3 dias
+    bad = leads.filter(l => l.funnel_stage === 'closed_lost' && new Date(l.last_message_at).getTime() >= lostStart.getTime());
+    return bad.sort((a,b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()).slice(0,6);
   }, [leads]);
 
   if (radarLeads.length === 0) {
@@ -65,21 +76,21 @@ export default function TvRadarView({ leads, units }: Props) {
                   </div>
                 </div>
                 <div className="bg-rose-500 text-white font-black text-4xl px-4 py-2 rounded-xl">
-                  {Math.round(lead.score)}
+                  {lead.score !== null ? Math.round(lead.score) : 'LOSS'}
                 </div>
               </div>
 
               {/* Corpo */}
               <div className="p-8 flex-1 flex flex-col gap-6">
                 <p className="text-3xl font-bold text-white leading-tight">
-                  {reason?.title || "Lead perdido por demora no atendimento."}
+                  {reason?.title || (lead.score !== null ? 'Reprovado nos critérios de auditoria. Possível falha de condução.' : 'Lead perdido ou abandonado sem conversão no funil.')}
                 </p>
 
                 {/* Caixa de Citação */}
-                {reason?.evidence && (
+                {(reason?.evidence || lead.ai_feedback || lead.notes) && (
                   <div className="bg-zinc-900 border-l-8 border-rose-500 p-6 rounded-r-xl mt-auto">
                     <p className="text-2xl text-zinc-300 italic font-medium leading-relaxed">
-                      "{reason.evidence}"
+                      "{reason?.evidence || lead.ai_feedback || lead.notes}"
                     </p>
                   </div>
                 )}

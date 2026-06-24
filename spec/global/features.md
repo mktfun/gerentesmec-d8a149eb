@@ -20,3 +20,8 @@
 - Integração n8n: Fluxo orquestrador e roteamento de requisições do WhatsApp.
 - Persistência de Sessão: Reutilização de `storageState.json` para evitar relogin constante.
 - ServiceMatcher: Busca híbrida e fuzzy (normalização, sinônimos, trigramas, Levenshtein) para encontrar serviços aproximados e solicitar confirmação do usuário quando necessário.
+
+## TV Dashboards (Immersive Mode)
+- `ManagerDashboard` (`/tv/operacional`): TV Operacional (Radar por Unidade e Slides Globais).
+- `ExecutiveDashboard` (`/tv/executivo`): TV Executiva (Radar Limpo, Ranking Semáforo e Operações).
+- Roteamento imersivo (sidebar e header auto-ocultados via hooks de rota).

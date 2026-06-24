@@ -38,6 +38,7 @@ const DashboardLayout: React.FC = () => {
   
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const isTvRoute = location.pathname.startsWith('/tv');
 
   React.useEffect(() => {
     if (isHome) {
@@ -57,10 +58,10 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex text-foreground ${isTvMode ? 'bg-background overflow-hidden' : 'bg-background'}`}>
+    <div className={`min-h-screen flex text-foreground ${isTvMode || isTvRoute ? 'bg-background overflow-hidden' : 'bg-background'}`}>
 
       {/* ── Sidebar ─────────────────────────────────────────── */}
-      {!isTvMode && (
+      {!isTvMode && !isTvRoute && (
         <aside className={`${isCollapsed ? 'w-[72px]' : 'w-[220px]'} shrink-0 fixed inset-y-0 left-0 z-20 hidden md:flex flex-col
           bg-sidebar border-r border-sidebar-border transition-all duration-300`}>
 
@@ -150,10 +151,10 @@ const DashboardLayout: React.FC = () => {
       )}
 
       {/* ── Main ──────────────────────────────────────────────── */}
-      <main className={`flex-1 flex flex-col transition-all duration-300 ${isTvMode ? 'h-screen w-full' : (isCollapsed ? 'md:ml-[72px]' : 'md:ml-[220px]') + ' min-h-screen pb-24 md:pb-0'}`}>
+      <main className={`flex-1 flex flex-col transition-all duration-300 ${isTvMode || isTvRoute ? 'h-screen w-full' : (isCollapsed ? 'md:ml-[72px]' : 'md:ml-[220px]') + ' min-h-screen pb-24 md:pb-0'}`}>
 
         {/* Topbar */}
-        {!isTvMode && (
+        {!isTvMode && !isTvRoute && (
           <header className="h-auto min-h-16 py-3 md:py-0 sticky top-0 z-50 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 gap-4 md:gap-0
             bg-background/80 backdrop-blur-xl border-b border-border">
           <div>
@@ -201,7 +202,7 @@ const DashboardLayout: React.FC = () => {
       </main>
 
       {/* LumaBar for Mobile (Dashboard) */}
-      {!isTvMode && (
+      {!isTvMode && !isTvRoute && (
         <LumaBar
           className="md:hidden"
           items={[
