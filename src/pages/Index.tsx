@@ -9,7 +9,6 @@ import {
 import { useAppData, Lead } from '@/context/AppDataContext';
 import { calculateTmr, calculateDangerLeads } from '@/utils/metrics';
 import { avgScore, avgScoreInt } from '@/utils/scoreUtils';
-import TvDashboard from '@/components/Dashboard/TvDashboard';
 import { filterDashboardLeads } from '@/utils/dashboardFilters';
 
 import { fadeUp } from '@/utils/motion';
@@ -20,20 +19,7 @@ const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); re
 const avg = (nums: number[]) => nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
 
 const Index = () => {
-  const { leads, managers, units, isTvMode, setIsTvMode, businessHours } = useAppData();
-
-  // ── Hooks devem vir antes de qualquer early return (Rules of Hooks) ──
-  
-  if (isTvMode) {
-    return <TvDashboard />;
-  }
-
-  const toggleTvMode = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-      setIsTvMode(true);
-    }
-  };
+  const { leads, managers, units, businessHours } = useAppData();
 
   // --- Real-time Metrics Calculation ---
   const now = new Date();
