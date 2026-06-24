@@ -1,6 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
 import { TemparioScraper } from './tempario-scraper.mjs';
+import { MemoryIngestor } from './MemoryIngestor.mjs';
 
 const app = express();
 app.use(express.json());
@@ -31,6 +32,9 @@ const QuerySchema = z.object({
 
 // Inicializa a classe scraper
 const scraper = new TemparioScraper();
+
+// Inicializa o MemoryIngestor (Self-Learning RAG)
+const memoryIngestor = new MemoryIngestor();
 
 // Fila muito simples para evitar concorrência no Playwright
 let requestQueue = Promise.resolve();
@@ -75,6 +79,11 @@ app.post('/api/query', async (req, res) => {
          });
       }
       
+      // Assíncrono fire-and-forget para não atrasar a resposta
+      if (result && result.status === "ok") {
+        memoryIngestor.saveExperience(result).catch(e => console.error(e));
+      }
+
       return res.json(result);
     } catch (error) {
       console.error(`[Error] Request ${request_id} failed:`, error.message);

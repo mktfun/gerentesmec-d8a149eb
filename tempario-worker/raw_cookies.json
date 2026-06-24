@@ -1,7 +1,7 @@
 [
 {
     "domain": "sistema.tempar.io",
-    "expirationDate": 1782243287.222658,
+    "expirationDate": 1782333561.686582,
     "hostOnly": true,
     "httpOnly": false,
     "name": "@tempario-r",
@@ -10,12 +10,12 @@
     "secure": true,
     "session": false,
     "storeId": "0",
-    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODIyMTQ0ODcsImV4cCI6MTc4MjMwMDg4Nywic3ViIjoiNmEzNTZiNzdlNWI3MjJjMDQ4ZTAyYTdmIn0.QkcjBblt_klrbBCchEcncr106AQvuLgjh3WGMcqAerk",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODIzMDQ3NjEsImV4cCI6MTc4MjM5MTE2MSwic3ViIjoiNmEzYmNlYWJlNWI3MjJjMDQ4ZTA0M2Q3In0.usDMuzTXUtx7jfM0Ic3XEfjdRWCG_DHiF3s8gQhcBOg",
     "id": 1
 },
 {
     "domain": "sistema.tempar.io",
-    "expirationDate": 1782243287.222004,
+    "expirationDate": 1782333561.686024,
     "hostOnly": true,
     "httpOnly": false,
     "name": "@tempario-t",
@@ -24,7 +24,7 @@
     "secure": true,
     "session": false,
     "storeId": "0",
-    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMjE0NDg3LCJleHAiOjE3ODIyMjUyODd9.QL60ZwzpW8mLGm_kaXPwJomxX0-DZcTcL6bzmqSMcWM",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJsb3ZhYmxlZ2l0MDJAZ21haWwuY29tIiwidXNlckVtYWlsIjoibG92YWJsZWdpdDAyQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMzA0NzYxLCJleHAiOjE3ODIzMTU1NjF9.9qgp9ZpPLWZBpqo3V7TsvTNmFDGJZ76LRbA9uJwvvnU",
     "id": 2
 }
 ]

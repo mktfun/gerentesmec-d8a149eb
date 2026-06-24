@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Executivo - Atendimentos por Unidade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @page { size: A4 portrait; margin: 15mm; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #fafafa; color: #111; }
+        .page-break { page-break-after: always; }
+        .avoid-break { page-break-inside: avoid; }
+        .card { background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="p-8 max-w-[210mm] mx-auto bg-white shadow-xl min-h-screen">
+    
+    <!-- HEADER -->
+    <header class="border-b-2 border-gray-900 pb-6 mb-8 avoid-break">
+        <div class="flex justify-between items-end">
+            <div>
+                <h1 class="text-3xl font-black text-gray-900 uppercase tracking-tight">Análise de Atendimento e Vendas</h1>
+                <p class="text-gray-500 mt-1 font-medium">Período de Análise: 01/06/2026 até 23/06/2026</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Gerado por</p>
+                <div class="inline-flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                    <span class="text-xs font-bold text-gray-700">AuditAI Engine</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="mb-10 text-gray-700 leading-relaxed text-sm bg-gray-50 p-5 rounded-lg border border-gray-200 avoid-break">
+        <strong class="text-gray-900 font-bold block mb-2">💡 Resumo Executivo:</strong>
+        Este relatório consolida a auditoria autônoma de todas as conversas maduras (que atingiram finalização Ganha ou Perdida). 
+        Conversas vazias, curiosos ou abandonos no primeiro contato foram removidos (Filtro Qualitativo).
+        O Parecer Especialista da IA consolida os motivos exatos para o ganho ou perda da negociação.
+    </div>
+  
+    <!-- UNIT SECTION -->
+    <div class="mb-12 ">
+        <div class="flex items-center gap-4 mb-6 avoid-break">
+            <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+            <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">DIADEMA</h2>
+        </div>
+
+        <!-- KPIs GRID -->
+        <div class="grid grid-cols-4 gap-4 mb-8 avoid-break">
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Volumetria</span>
+                <span class="text-2xl font-black text-gray-900">5</span>
+                <span class="text-xs text-gray-500 font-medium block">leads auditados</span>
+            </div>
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Média de Qualidade</span>
+                <span class="text-2xl font-black text-blue-600">67.2%</span>
+                <span class="text-xs text-gray-500 font-medium block">score geral</span>
+            </div>
+            <div class="card p-4 bg-emerald-50 border-emerald-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 block mb-1">Conversas de Excelência</span>
+                <span class="text-2xl font-black text-emerald-600">60%</span>
+                <span class="text-xs text-emerald-600/70 font-medium block">Aprovadas (>75pts)</span>
+            </div>
+            <div class="card p-4 bg-red-50 border-red-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-red-600 block mb-1">Vacilos Críticos</span>
+                <span class="text-2xl font-black text-red-600">20%</span>
+                <span class="text-xs text-red-600/70 font-medium block">Risco de Perda (<50pts)</span>
+            </div>
+        </div>
+    
+        <div class="mb-8 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-red-600 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Oportunidades Perdidas (Dossiê de Vacilos)
+            </h3>
+            <div class="space-y-4">
+      
+                <div class="card p-5 border-l-4 border-l-red-500 avoid-break">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-bold text-gray-900">Eduardo Santos - Hitocom</span>
+                            <span class="text-xs text-gray-500 ml-2">ID: #2509</span>
+                        </div>
+                        <span class="px-2.5 py-1 bg-red-100 text-red-700 font-black text-xs rounded border border-red-200">
+                            Nota: 16%
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
+                        "⚠️ O encerramento do atendimento não foi formalizado pelo gerente no chat com o resumo dos serviços.<br><br>⚠️ Não houve envio ou confirmação de faturamento/pagamento no chat, apesar do CNPJ ter sido fornecido anteriormente.<br><br>⚠️ O gerente não formalizou o orçamento ou checklist digital na conversa antes da entrega do serviço.<br><br>⚠️ Não houve registro de fotos do defeito ou do processo de manutenção da mangueira no chat.<br><br>⚠️ Os valores do conserto não foram formalizados ou enviados de forma clara na conversa.<br><br>⚠️ O gerente não enviou mensagem formal de finalização ou agradecimento após a conclusão do serviço.<br><br>⚠️ Não foi enviado o link para captação de avaliação no Google ao término do atendimento."
+                    </p>
+                    <a href="https://chat.tork.services/app/accounts/5/conversations/2509" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Abrir Conversa Real no Chatwoot
+                    </a>
+                </div>
+        
+                <div class="card p-5 border-l-4 border-l-red-500 avoid-break">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-bold text-gray-900">Vendas Hitocom</span>
+                            <span class="text-xs text-gray-500 ml-2">ID: #2508</span>
+                        </div>
+                        <span class="px-2.5 py-1 bg-red-100 text-red-700 font-black text-xs rounded border border-red-200">
+                            Nota: 65%
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
+                        "⚠️ Não foi identificado o envio formal de checklist ou orçamento detalhado ao cliente durante a negociação.<br><br>⚠️ Não foi apresentado nenhum orçamento ou checklist estruturado ao cliente.<br><br>⚠️ O gerente não enviou vídeo explicativo ou educativo sobre o desgaste, pois o atendimento tratou-se de um reparo específico de mangueira sob demanda direta.<br><br>⚠️ Não houve o envio de fotos, vídeos ou checklist técnico avaliando a mangueira de alumínio enviada pelo cliente.<br><br>⚠️ Não foi enviada uma mensagem formal de encerramento ou agradecimento estruturado após a confirmação da entrega da peça.<br><br>⚠️ A Auditoria constatou a ausência do envio do link para avaliação do Google no encerramento deste atendimento."
+                    </p>
+                    <a href="https://chat.tork.services/app/accounts/5/conversations/2508" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Abrir Conversa Real no Chatwoot
+                    </a>
+                </div>
+        </div></div>
+        <div class="mb-4 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Atendimentos de Excelência (Casos de Sucesso)
+            </h3>
+            <div class="space-y-4">
+      
+                <div class="card p-5 border-l-4 border-l-emerald-500 avoid-break">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-bold text-gray-900">5511943080043</span>
+                            <span class="text-xs text-gray-500 ml-2">ID: #2485</span>
+                        </div>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-black text-xs rounded border border-emerald-200">
+                            Nota: 100%
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
+                        "O gerente enviou uma mensagem interna sobre processamento em lote. Não houve interação direta com o cliente, nem apresentação de informações de vendas ou serviços."
+                    </p>
+                    <a href="https://chat.tork.services/app/accounts/5/conversations/2485" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Abrir Conversa Real no Chatwoot
+                    </a>
+                </div>
+        
+                <div class="card p-5 border-l-4 border-l-emerald-500 avoid-break">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-bold text-gray-900">5511980314465</span>
+                            <span class="text-xs text-gray-500 ml-2">ID: #3047</span>
+                        </div>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-black text-xs rounded border border-emerald-200">
+                            Nota: 80%
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
+                        "Atendimento de ponta, engajamento alto e conversão garantida de acordo com os padrões da oficina."
+                    </p>
+                    <a href="https://chat.tork.services/app/accounts/5/conversations/3047" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Abrir Conversa Real no Chatwoot
+                    </a>
+                </div>
+        </div></div></div>
+    <!-- UNIT SECTION -->
+    <div class="mb-12 page-break">
+        <div class="flex items-center gap-4 mb-6 avoid-break">
+            <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+            <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">PLANALTO</h2>
+        </div>
+
+        <!-- KPIs GRID -->
+        <div class="grid grid-cols-4 gap-4 mb-8 avoid-break">
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Volumetria</span>
+                <span class="text-2xl font-black text-gray-900">1</span>
+                <span class="text-xs text-gray-500 font-medium block">leads auditados</span>
+            </div>
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Média de Qualidade</span>
+                <span class="text-2xl font-black text-blue-600">82.0%</span>
+                <span class="text-xs text-gray-500 font-medium block">score geral</span>
+            </div>
+            <div class="card p-4 bg-emerald-50 border-emerald-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 block mb-1">Conversas de Excelência</span>
+                <span class="text-2xl font-black text-emerald-600">100%</span>
+                <span class="text-xs text-emerald-600/70 font-medium block">Aprovadas (>75pts)</span>
+            </div>
+            <div class="card p-4 bg-red-50 border-red-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-red-600 block mb-1">Vacilos Críticos</span>
+                <span class="text-2xl font-black text-red-600">0%</span>
+                <span class="text-xs text-red-600/70 font-medium block">Risco de Perda (<50pts)</span>
+            </div>
+        </div>
+    
+        <div class="mb-4 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Atendimentos de Excelência (Casos de Sucesso)
+            </h3>
+            <div class="space-y-4">
+      
+                <div class="card p-5 border-l-4 border-l-emerald-500 avoid-break">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-bold text-gray-900">5511958731143</span>
+                            <span class="text-xs text-gray-500 ml-2">ID: #2517</span>
+                        </div>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-black text-xs rounded border border-emerald-200">
+                            Nota: 82%
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
+                        "Atendimento de ponta, engajamento alto e conversão garantida de acordo com os padrões da oficina."
+                    </p>
+                    <a href="https://chat.tork.services/app/accounts/5/conversations/2517" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Abrir Conversa Real no Chatwoot
+                    </a>
+                </div>
+        </div></div></div>
+    <!-- UNIT SECTION -->
+    <div class="mb-12 page-break">
+        <div class="flex items-center gap-4 mb-6 avoid-break">
+            <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+            <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">KENNEDY</h2>
+        </div>
+
+        <!-- KPIs GRID -->
+        <div class="grid grid-cols-4 gap-4 mb-8 avoid-break">
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Volumetria</span>
+                <span class="text-2xl font-black text-gray-900">1</span>
+                <span class="text-xs text-gray-500 font-medium block">leads auditados</span>
+            </div>
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Média de Qualidade</span>
+                <span class="text-2xl font-black text-blue-600">80.0%</span>
+                <span class="text-xs text-gray-500 font-medium block">score geral</span>
+            </div>
+            <div class="card p-4 bg-emerald-50 border-emerald-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 block mb-1">Conversas de Excelência</span>
+                <span class="text-2xl font-black text-emerald-600">100%</span>
+                <span class="text-xs text-emerald-600/70 font-medium block">Aprovadas (>75pts)</span>
+            </div>
+            <div class="card p-4 bg-red-50 border-red-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-red-600 block mb-1">Vacilos Críticos</span>
+                <span class="text-2xl font-black text-red-600">0%</span>
+                <span class="text-xs text-red-600/70 font-medium block">Risco de Perda (<50pts)</span>
+            </div>
+        </div>
+    
+        <div class="mb-4 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Atendimentos de Excelência (Casos de Sucesso)
+            </h3>
+            <div class="space-y-4">
+      
+                <div class="card p-5 border-l-4 border-l-emerald-500 avoid-break">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-bold text-gray-900">🙏🏻</span>
+                            <span class="text-xs text-gray-500 ml-2">ID: #747</span>
+                        </div>
+                        <span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-black text-xs rounded border border-emerald-200">
+                            Nota: 80%
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
+                        "Início da negociação. O gerente enviou uma mensagem de sistema interna, indicando atividade no ticket, mas sem interação direta com o cliente."
+                    </p>
+                    <a href="https://chat.tork.services/app/accounts/5/conversations/747" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Abrir Conversa Real no Chatwoot
+                    </a>
+                </div>
+        </div></div></div>
+    <!-- UNIT SECTION -->
+    <div class="mb-12 page-break">
+        <div class="flex items-center gap-4 mb-6 avoid-break">
+            <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+            <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">DOM PEDRO</h2>
+        </div>
+
+        <!-- KPIs GRID -->
+        <div class="grid grid-cols-4 gap-4 mb-8 avoid-break">
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Volumetria</span>
+                <span class="text-2xl font-black text-gray-900">1</span>
+                <span class="text-xs text-gray-500 font-medium block">leads auditados</span>
+            </div>
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Média de Qualidade</span>
+                <span class="text-2xl font-black text-blue-600">75.0%</span>
+                <span class="text-xs text-gray-500 font-medium block">score geral</span>
+            </div>
+            <div class="card p-4 bg-emerald-50 border-emerald-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 block mb-1">Conversas de Excelência</span>
+                <span class="text-2xl font-black text-emerald-600">100%</span>
+                <span class="text-xs text-emerald-600/70 font-medium block">Aprovadas (>75pts)</span>
+            </div>
+            <div class="card p-4 bg-red-50 border-red-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-red-600 block mb-1">Vacilos Críticos</span>
+                <span class="text-2xl font-black text-red-600">0%</span>
+                <span class="text-xs text-red-600/70 font-medium block">Risco de Perda (<50pts)</span>
+            </div>
+        </div>
+    </div>
+    <!-- UNIT SECTION -->
+    <div class="mb-12 page-break">
+        <div class="flex items-center gap-4 mb-6 avoid-break">
+            <div class="w-1.5 h-8 bg-blue-600 rounded-full"></div>
+            <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">JORGE BERETTA</h2>
+        </div>
+
+        <!-- KPIs GRID -->
+        <div class="grid grid-cols-4 gap-4 mb-8 avoid-break">
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Volumetria</span>
+                <span class="text-2xl font-black text-gray-900">1</span>
+                <span class="text-xs text-gray-500 font-medium block">leads auditados</span>
+            </div>
+            <div class="card p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 block mb-1">Média de Qualidade</span>
+                <span class="text-2xl font-black text-blue-600">60.0%</span>
+                <span class="text-xs text-gray-500 font-medium block">score geral</span>
+            </div>
+            <div class="card p-4 bg-emerald-50 border-emerald-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 block mb-1">Conversas de Excelência</span>
+                <span class="text-2xl font-black text-emerald-600">0%</span>
+                <span class="text-xs text-emerald-600/70 font-medium block">Aprovadas (>75pts)</span>
+            </div>
+            <div class="card p-4 bg-red-50 border-red-100">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-red-600 block mb-1">Vacilos Críticos</span>
+                <span class="text-2xl font-black text-red-600">0%</span>
+                <span class="text-xs text-red-600/70 font-medium block">Risco de Perda (<50pts)</span>
+            </div>
+        </div>
+    
+        <div class="mb-8 avoid-break">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-red-600 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Oportunidades Perdidas (Dossiê de Vacilos)
+            </h3>
+            <div class="space-y-4">
+      
+                <div class="card p-5 border-l-4 border-l-red-500 avoid-break">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="font-bold text-gray-900">5511981952926</span>
+                            <span class="text-xs text-gray-500 ml-2">ID: #3011</span>
+                        </div>
+                        <span class="px-2.5 py-1 bg-red-100 text-red-700 font-black text-xs rounded border border-red-200">
+                            Nota: 60%
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
+                        "⚠️ O gerente não explicou tecnicamente as consequências de não realizar o reparo nos retentores, focando apenas no diagnóstico e na conclusão do serviço.<br><br>⚠️ Embora tenha enviado os links, os arquivos não carregaram evidências visuais (fotos ou vídeos) do estado do veículo ou defeitos, falhando em comprovar o checklist.<br><br>⚠️ O gerente não apresentou nenhum suporte visual ou explicação detalhada sobre o diagnóstico antes de enviar o orçamento."
+                    </p>
+                    <a href="https://chat.tork.services/app/accounts/5/conversations/3011" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        Abrir Conversa Real no Chatwoot
+                    </a>
+                </div>
+        </div></div></div>
+    <footer class="mt-12 border-t pt-6 text-center text-xs text-gray-400 font-medium">
+        Relatório gerado automaticamente através da auditoria inteligente (Antigravity Engine). 
+        Os links são válidos e dependem de autenticação no seu portal Tork Services.
+    </footer>
+</body>
+</html>
+  

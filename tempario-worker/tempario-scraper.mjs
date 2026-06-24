@@ -1,6 +1,10 @@
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-extra';
+import stealth from 'puppeteer-extra-plugin-stealth';
 import fs from 'fs';
 import path from 'path';
+import { ServiceMatcher } from './ServiceMatcher.mjs';
+
+chromium.use(stealth());
 
 export class TemparioScraper {
   constructor(options = {}) {
@@ -15,7 +19,8 @@ export class TemparioScraper {
   }
 
   async validateSession() {
-    if (!fs.existsSync(this.storageStatePath)) {
+    const profilePath = path.resolve('data', 'browser_profile');
+    if (!fs.existsSync(profilePath)) {
       return false;
     }
     return true;
@@ -50,7 +55,7 @@ export class TemparioScraper {
       
       // Usa o diretório persistente
       context = await chromium.launchPersistentContext(profilePath, {
-        headless: this.headless,
+        headless: false,
         userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         permissions: [],
         viewport: { width: 1280, height: 720 },
@@ -58,6 +63,16 @@ export class TemparioScraper {
       });
 
       page = await context.newPage();
+
+      // Injetar cookies toda vez para garantir
+      if (fs.existsSync('raw_cookies.json')) {
+         const rawCookies = JSON.parse(fs.readFileSync('raw_cookies.json', 'utf8'));
+         const sanitizedCookies = rawCookies.map(cookie => {
+            if (cookie.sameSite === 'no_restriction' || cookie.sameSite === 'unspecified') cookie.sameSite = 'None';
+            return cookie;
+         });
+         await context.addCookies(sanitizedCookies);
+      }
 
       // Pre-flight check: Verificar saúde da sessão ANTES de rodar
       console.log('Realizando Pre-flight Check na sessão...');
@@ -372,78 +387,62 @@ export class TemparioScraper {
       await servicoSearchInput.fill(queryParams.servico);
       await page.waitForTimeout(2000); // Tempo para filtrar a lista da API
 
-      const allOptions = page.locator('[role="dialog"] [role="option"], [data-radix-popper-content-wrapper] [role="option"]');
-      const optionCount = await allOptions.count();
+      let allOptions = page.locator('[role="dialog"] [role="option"], [data-radix-popper-content-wrapper] [role="option"]');
+      let optionCount = await allOptions.count();
       
+      // Fallback: se não achar nada com o termo completo, tenta com o token mais longo (ex: 'carga de bateria' -> 'bateria')
+      if (optionCount === 0) {
+          const tokens = queryParams.servico.split(' ').filter(t => t.length > 3);
+          if (tokens.length > 0) {
+              const longestToken = tokens.reduce((a, b) => a.length > b.length ? a : b);
+              console.log(`[Worker] Fallback de busca na UI. Tentando token: "${longestToken}"`);
+              await servicoSearchInput.fill(""); // limpa
+              await page.waitForTimeout(500);
+              await servicoSearchInput.fill(longestToken);
+              await page.waitForTimeout(2000);
+              optionCount = await allOptions.count();
+          }
+      }
+
       if (optionCount === 0) {
          throw new Error(`SERVICE_NOT_FOUND`);
       }
 
       // ---- ALGORITMO DE RANKING ----
-      const sanitize = (str) => (str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s]/gi, ' ');
-      const qTokens = sanitize(queryParams.servico).split(/\s+/).filter(t => t.length > 2);
-      const vehicleDesc = `${queryParams.marca || ''} ${queryParams.modelo || ''} ${queryParams.modelo_exato || ''}`;
-      const vTokens = sanitize(vehicleDesc).split(/\s+/).filter(t => t.length > 2);
-      const isAuto = vTokens.some(t => ['aut', 'automatico', 'automatizado', 'powershift'].includes(t));
-
-      let rankedOptions = [];
+      let catalogItems = [];
       for (let i = 0; i < optionCount; i++) {
         const text = await allOptions.nth(i).textContent();
-        if (!text) continue;
-        const cleanText = text.trim();
-        const oTokens = sanitize(cleanText).split(/\s+/).filter(t => t.length > 2);
-
-        let score = 0;
-        qTokens.forEach(qt => { if (oTokens.includes(qt)) score += 10; });
-        
-        if (isAuto && oTokens.some(t => ['automatico', 'automatizado', 'powershift'].includes(t))) {
-          score += 15;
-        }
-
-        const diff = oTokens.length - qTokens.length;
-        if (diff > 2) score -= (diff * 1); // penaliza opções enormes cheias de "/", "bancada", "funilaria", etc.
-
-        rankedOptions.push({ text: cleanText, index: i, score });
+        if (text) catalogItems.push({ service_id: i.toString(), service_name: text.trim(), index: i });
       }
 
-      rankedOptions.sort((a, b) => b.score - a.score);
-      console.log("[Worker] Service Ranking: ", rankedOptions.map(r => `${r.score}: ${r.text}`));
+      const matcher = new ServiceMatcher(catalogItems);
+      const matchResult = matcher.match(queryParams.servico);
+      console.log("[Worker] ServiceMatcher Result:", JSON.stringify(matchResult, null, 2));
 
       let servicoNome = null;
       let servicoParaClicar = null;
 
-      if (rankedOptions.length > 0) {
-         // Se só tem 1 opção aceitável ou o primeiro ganha disparado do segundo (> 15 pontos) ou tem score muito alto e o resto é lixo.
-         const first = rankedOptions[0];
-         const second = rankedOptions.length > 1 ? rankedOptions[1] : null;
-         
-         const isUnambiguous = !second || (first.score - second.score >= 10);
-         
-         // Se bateu exato com ignorar case, sobescreve e confia cegamente
-         const exactMatch = rankedOptions.find(r => r.text.toLowerCase() === queryParams.servico.toLowerCase().trim());
-
-         if (exactMatch) {
-             servicoNome = exactMatch.text;
-             servicoParaClicar = allOptions.nth(exactMatch.index);
-         } else if (isUnambiguous && first.score > 0) {
-             servicoNome = first.text;
-             servicoParaClicar = allOptions.nth(first.index);
-         } else {
-             // Ambiguidade detectada
-             const maxOptions = 3;
-             const optionsToReturn = rankedOptions.slice(0, maxOptions).map(r => r.text);
-             if (rankedOptions.length > maxOptions) {
-                 optionsToReturn.push(`... e mais ${rankedOptions.length - maxOptions} opções disponíveis.`);
-             }
-
-             throw new Error(JSON.stringify({
-               type: "disambiguation",
-               status: "needs_service_selection",
-               selection_stage: "servico",
-               message_for_user: `Encontrei mais de um serviço parecido para "${queryParams.servico}". Qual deles você quer consultar?`,
-               options: optionsToReturn
-             }));
-         }
+      if (matchResult.decision === 'auto_match' || matchResult.decision === 'confirm') {
+          const topIndex = parseInt(matchResult.top_match.service_id, 10);
+          servicoNome = matchResult.top_match.service_name;
+          servicoParaClicar = allOptions.nth(topIndex);
+          
+          // Se for confirm, no futuro podemos travar e mandar pro usuário.
+          // Por enquanto, o worker roda e avisa na mensagem.
+      } else if (matchResult.decision === 'suggest' || matchResult.decision === 'not_found') {
+          const maxOptions = 3;
+          let optionsToReturn = matchResult.alternatives.slice(0, maxOptions).map(r => r.service_name);
+          if (matchResult.top_match) {
+              optionsToReturn.unshift(matchResult.top_match.service_name);
+          }
+          
+          throw new Error(JSON.stringify({
+             type: "disambiguation",
+             status: "needs_service_selection",
+             selection_stage: "servico",
+             message_for_user: `Não encontrei um serviço exato para "${queryParams.servico}". Qual deles você quer consultar?`,
+             options: optionsToReturn
+          }));
       }
 
       if (!servicoParaClicar) {
@@ -479,9 +478,34 @@ export class TemparioScraper {
       if (hMatch) tempoHoras += parseInt(hMatch[1], 10);
       if (mMatch) tempoHoras += parseInt(mMatch[1], 10) / 60;
 
+      // ─── Lógica de Pipeline (Multi-etapas) ───
+      // O Tempario frequentemente agrupa serviços complexos usando barras.
+      // Ex: "Troca Jogo Pastilhas / Limpeza / Lubrificação Pinças"
+      let steps = [];
+      let isPipeline = false;
+      
+      if (servicoNome.includes('/')) {
+        isPipeline = true;
+        // Divide pela barra e limpa os espaços
+        const rawSteps = servicoNome.split('/').map(s => s.trim()).filter(s => s.length > 0);
+        
+        // Vamos distribuir o tempo e o valor de forma proporcional/igual para visualização
+        // (Já que o Tempario só dá o total da linha inteira)
+        const timePerStep = Number((tempoHoras / rawSteps.length).toFixed(2));
+        const valuePerStep = Number((valorServico / rawSteps.length).toFixed(2));
+        
+        steps = rawSteps.map((stepName, index) => ({
+           etapa: index + 1,
+           descricao: stepName,
+           tempo_estimado_horas: timePerStep,
+           valor_estimado: valuePerStep
+        }));
+      }
+
       const result = {
         request_id: requestId,
         status: "ok",
+        service_type: isPipeline ? "pipeline" : "simple",
         vehicle: {
           placa: queryParams.placa,
           descricao: vehicleAssumedInfo ? vehicleAssumedInfo.descricao : `${queryParams.marca || ''} ${queryParams.modelo || ''}`.trim()
@@ -489,10 +513,11 @@ export class TemparioScraper {
         service: {
           descricao: servicoNome,
           tempo_padrao_horas: Number(tempoHoras.toFixed(2)),
-          valor_hora: 0, // Não exibido explicitamente nessa view
+          valor_hora: 0, 
           valor_servico: valorServico,
           moeda: "BRL"
         },
+        pipeline: isPipeline ? steps : null,
         raw: { source: "tempario_ui", tempo_raw: tempoRaw, valor_raw: valorRaw },
         meta: { duration_ms: Date.now() - startTime }
       };

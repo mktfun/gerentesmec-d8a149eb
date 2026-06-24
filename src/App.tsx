@@ -18,6 +18,7 @@ import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
+import Index from "./pages/Index";
 import AuditHistory from "./pages/AuditHistory";
 import AuditoriaApp from "./pages/Auditoria";
 import AuditoriaExecution from "./pages/Auditoria/AuditoriaExecution";
@@ -77,16 +78,16 @@ const AppRoutes: React.FC = () => {
         /* Admin Routes */
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/" element={<ErrorBoundary><ExecutiveDashboard /></ErrorBoundary>} />
+            <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
             <Route path="/crm" element={<ErrorBoundary><Crm /></ErrorBoundary>} />
             <Route path="/gerentes" element={<ErrorBoundary><Gerentes /></ErrorBoundary>} />
             <Route path="/config" element={<ErrorBoundary><Config /></ErrorBoundary>} />
             <Route path="/relatorios" element={<ErrorBoundary><Relatorios /></ErrorBoundary>} />
             <Route path="/apresentacao" element={<ErrorBoundary><Presentation /></ErrorBoundary>} />
             <Route path="/manager" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
-            <Route path="/tv/operacional" element={<Navigate to="/manager" replace />} />
-            <Route path="/tv/executivo" element={<Navigate to="/" replace />} />
-            <Route path="/executive-tv" element={<Navigate to="/" replace />} />
+            <Route path="/tv/operacional" element={<ErrorBoundary><ManagerDashboard /></ErrorBoundary>} />
+            <Route path="/tv/executivo" element={<ErrorBoundary><ExecutiveDashboard /></ErrorBoundary>} />
+            <Route path="/executive-tv" element={<Navigate to="/tv/executivo" replace />} />
             <Route path="/auditoria" element={<ErrorBoundary><AuditoriaApp /></ErrorBoundary>} />
             <Route path="/historico-auditorias" element={<ErrorBoundary><AuditHistory /></ErrorBoundary>} />
             <Route path="*" element={<NotFound />} />

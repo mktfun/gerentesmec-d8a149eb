@@ -1,8 +1,8 @@
 const payload = {
   request_id: "test-service-6215",
   query: {
-    placa: "EZR8759", // Ford Fiesta 1.6 Aut.
-    servico: "desmont"
+    placa: "EZR8759",
+    servico: "carga de bateria"
   }
 };
 

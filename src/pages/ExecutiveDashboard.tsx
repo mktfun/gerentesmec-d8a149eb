@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings } from 'lucide-react';
+import { Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppData } from '@/context/AppDataContext';
 import TvRadarView from './tv/views/TvRadarView';
 import TvSemaforoView from './tv/views/TvSemaforoView';
@@ -15,12 +15,26 @@ export default function ExecutiveTvMode() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        setActiveScreen((prev) => (prev + 1) % SCREENS.length);
+      } else if (e.key === 'ArrowLeft') {
+        setActiveScreen((prev) => (prev === 0 ? SCREENS.length - 1 : prev - 1));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    
     const timer = setInterval(() => {
       if (!isMenuOpen) {
         setActiveScreen((prev) => (prev + 1) % SCREENS.length);
       }
     }, intervalTime);
-    return () => clearInterval(timer);
+    
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [intervalTime, isMenuOpen]);
 
   if (isLoading) {
@@ -62,6 +76,18 @@ export default function ExecutiveTvMode() {
         >
           <Settings className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Controles Laterais Visíveis no Hover */}
+      <div className="absolute inset-y-0 left-0 w-24 flex items-center justify-start opacity-0 hover:opacity-100 transition-opacity z-40">
+         <button onClick={() => setActiveScreen(p => p === 0 ? SCREENS.length - 1 : p - 1)} className="ml-4 p-4 rounded-full bg-black/50 text-white/50 hover:text-white hover:bg-black/80 backdrop-blur transition-all">
+            <ChevronLeft className="w-8 h-8" />
+         </button>
+      </div>
+      <div className="absolute inset-y-0 right-0 w-24 flex items-center justify-end opacity-0 hover:opacity-100 transition-opacity z-40">
+         <button onClick={() => setActiveScreen(p => (p + 1) % SCREENS.length)} className="mr-4 p-4 rounded-full bg-black/50 text-white/50 hover:text-white hover:bg-black/80 backdrop-blur transition-all">
+            <ChevronRight className="w-8 h-8" />
+         </button>
       </div>
 
       {/* Menu de Configuração de Tempo */}

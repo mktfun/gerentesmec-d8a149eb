@@ -16,7 +16,7 @@ async function deploy() {
     });
     console.log('Connected!');
 
-    console.log('Uploading raw_cookies...');
+    console.log('Uploading raw_cookies.json...');
     await ssh.putFile(
       path.join(__dirname, 'raw_cookies.json'),
       '/home/servidor/tempario-worker/raw_cookies.json'
@@ -27,7 +27,7 @@ async function deploy() {
     );
 
     console.log('Initializing profile on Linux Server...');
-    const initResult = await ssh.execCommand('cd /home/servidor/tempario-worker && pm2 stop tempario-worker ; sleep 2 ; rm -rf data/browser_profile ; node init_profile.mjs');
+    const initResult = await ssh.execCommand('cd /home/servidor/tempario-worker && pm2 stop tempario-worker ; sleep 2 ; rm -rf data/browser_profile ; xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" node init_profile.mjs');
     console.log('INIT STDOUT:', initResult.stdout);
     console.log('INIT STDERR:', initResult.stderr);
 

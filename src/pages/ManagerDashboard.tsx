@@ -4,7 +4,7 @@ import { useAppData } from '@/context/AppDataContext';
 import { UnitOperationalSlide } from '@/components/Dashboard/UnitOperationalSlide';
 import { GlobalOperationalSlide } from '@/components/Dashboard/GlobalOperationalSlide';
 import { supabase } from '@/integrations/supabase/client';
-import { Pause, Play, Settings2 } from 'lucide-react';
+import { Pause, Play, Settings2, ChevronLeft, ChevronRight } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 const TvOperacional = () => {
@@ -43,13 +43,27 @@ const TvOperacional = () => {
 
   // Carousel logic
   useEffect(() => {
-    if (isPaused || totalSlides <= 1) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        setCurrentIndex((prev) => (prev + 1) % totalSlides);
+      } else if (e.key === 'ArrowLeft') {
+        setCurrentIndex((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    if (isPaused || totalSlides <= 1) {
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % totalSlides);
     }, slideDuration);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [totalSlides, isPaused, slideDuration]);
 
   return (
@@ -123,6 +137,18 @@ const TvOperacional = () => {
          <div className="text-xs font-bold uppercase tracking-widest text-white/30 flex items-center gap-2">
             Radar Operacional <span className="text-white/10">/</span> Slide {currentIndex + 1} de {totalSlides}
          </div>
+      </div>
+
+      {/* Controles Laterais Visíveis no Hover */}
+      <div className="absolute inset-y-0 left-0 w-24 flex items-center justify-start opacity-0 hover:opacity-100 transition-opacity z-40">
+         <button onClick={() => setCurrentIndex(p => p === 0 ? totalSlides - 1 : p - 1)} className="ml-4 p-4 rounded-full bg-black/50 text-white/50 hover:text-white hover:bg-black/80 backdrop-blur transition-all">
+            <ChevronLeft className="w-8 h-8" />
+         </button>
+      </div>
+      <div className="absolute inset-y-0 right-0 w-24 flex items-center justify-end opacity-0 hover:opacity-100 transition-opacity z-40">
+         <button onClick={() => setCurrentIndex(p => (p + 1) % totalSlides)} className="mr-4 p-4 rounded-full bg-black/50 text-white/50 hover:text-white hover:bg-black/80 backdrop-blur transition-all">
+            <ChevronRight className="w-8 h-8" />
+         </button>
       </div>
 
       {/* Main Content Area */}

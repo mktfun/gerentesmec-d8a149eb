@@ -165,6 +165,18 @@ const DashboardLayout: React.FC = () => {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
+            {!isUnitManager && (
+              <div className="flex items-center gap-2 mr-2">
+                <NavLink to="/tv/executivo" className="px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 transition-colors text-xs font-bold border border-indigo-500/20 flex items-center gap-1.5">
+                  <Tv className="w-3.5 h-3.5" />
+                  TV Executiva
+                </NavLink>
+                <NavLink to="/tv/operacional" className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors text-xs font-bold border border-emerald-500/20 flex items-center gap-1.5">
+                  <Tv className="w-3.5 h-3.5" />
+                  TV Operacional
+                </NavLink>
+              </div>
+            )}
             <button onClick={toggle} className="w-8 h-8 mr-2 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
