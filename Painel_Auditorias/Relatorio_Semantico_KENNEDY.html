@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoria Operacional Completa (12 Regras) - KENNEDY</title>
+    <style>
+        :root {
+            --primary: #1e293b; --border: #e2e8f0; --bg-table: #f8fafc;
+            --text-main: #334155; --text-light: #64748b;
+            --alert: #dc2626; --warn: #d97706; --success: #16a34a;
+        }
+
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f1f5f9; color: var(--text-main); padding: 40px; max-width: 1100px; margin: 0 auto; line-height: 1.5; }
+        .header-doc { text-align: center; margin-bottom: 40px; border-bottom: 2px solid var(--primary); padding-bottom: 20px; }
+        h1 { color: var(--primary); font-size: 1.8rem; text-transform: uppercase; margin-bottom: 8px;}
+        .subtitle { color: var(--text-light); font-size: 1.05rem; }
+        
+        .dossie-card { background: #1e293b; color: white; padding: 25px 30px; margin-bottom: 40px; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
+        .dossie-card h2 { margin-top: 0; color: #f8fafc; font-size: 1.5rem; margin-bottom: 15px; border-bottom: 1px solid #475569; padding-bottom: 10px; }
+        .dossie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .dossie-item h3 { margin-top: 0; margin-bottom: 5px; font-size: 1rem; color: #94a3b8; text-transform: uppercase; }
+        .dossie-item p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: #cbd5e1; }
+        .score-destaque { font-size: 2.5rem; font-weight: bold; color: #fbbf24; }
+
+        .conv-card { background: #ffffff; padding: 25px 30px; margin-bottom: 40px; border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); page-break-inside: avoid; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; }
+        .client-info { font-size: 1.25rem; font-weight: bold; color: var(--primary); }
+        .score-badge { font-weight: bold; padding: 6px 14px; border-radius: 4px; font-size: 1.1rem; }
+        .date-range { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
+        
+        .s-red { background: #fee2e2; color: var(--alert); border: 1px solid #fca5a5; }
+        .s-yellow { background: #fef3c7; color: var(--warn); border: 1px solid #fcd34d; }
+        .s-green { background: #dcfce7; color: var(--success); border: 1px solid #86efac; }
+
+        .section-title { font-weight: 600; font-size: 0.95rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 8px; margin-top: 25px;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+        th { background-color: var(--bg-table); color: var(--text-main); font-weight: bold; text-transform: uppercase;}
+        
+        .c-cat { background-color: #f1f5f9; font-weight: bold; color: var(--primary); font-size: 0.85rem;}
+        
+        .c-status { width: 10%; text-align: center; font-weight: bold; }
+        .c-regra { width: 45%; }
+        .c-just { width: 45%; color: var(--text-light); font-style: italic;}
+
+        .yes { color: var(--success); }
+        .no { color: var(--alert); }
+
+        .btn-link { display: inline-block; margin-top: 20px; color: #0284c7; font-size: 0.9rem; text-decoration: none; font-weight: bold; }
+        .btn-link:hover { text-decoration: underline; }
+        .code-quote { display:block; margin-top:6px; padding:6px 8px; background:#f8fafc; border-left:3px solid #e2e8f0; font-family:monospace; font-size:0.85rem; color:#64748b; }
+
+        @media print { body { background: white; padding: 0; } .conv-card { box-shadow: none; border: 1px solid #ccc; margin-bottom: 30px; } .btn-link { display: none; } .dossie-card { background: #f8fafc; color: #1e293b; border: 2px solid #1e293b; } .dossie-card h2, .dossie-item h3 { color: #1e293b; } .dossie-item p { color: #334155; } .score-destaque { color: #d97706; } }
+    </style>
+</head>
+<body>
+
+    <div class="header-doc">
+        <h1>Auditoria de Processo: Grade de 12 Regras</h1>
+        <div class="subtitle">Unidade: KENNEDY | Gerente Auditado: Roberto | Detalhamento de Etapas Cumpridas</div>
+    </div>
+
+    <!-- DOSSIÊ EXECUTIVO -->
+    <div class="dossie-card">
+        <h2>Dossiê Executivo - Unidade KENNEDY</h2>
+        <div class="dossie-grid">
+            <div class="dossie-item">
+                <h3>Nota Geral (Score Médio)</h3>
+                <div class="score-destaque">48%</div>
+                <p>Abaixo da meta de excelência. Apresenta falhas de processo crônicas, embora demonstre capacidade técnica consultiva pontual.</p>
+            </div>
+            <div class="dossie-item">
+                <h3>Fortalezas</h3>
+                <p>Excelente capacidade de enviar vídeos para evidenciar desgastes e quebras. Argumentação técnica eficiente sobre as consequências de não reparar o veículo (gatilhos de segurança e risco do defeito cascata). Age bem documentando recusas do cliente para isentar a loja de responsabilidade.</p>
+            </div>
+            <div class="dossie-item">
+                <h3>Fraquezas</h3>
+                <p>Muitas oportunidades de up-sell visual perdidas. Baixíssima ou quase nula adesão ao uso dos links de Check-list (OiAPI) nas entradas e saídas. Abandono quase completo da etapa de Review (não solicita Google Maps na devolução das chaves) e encerramentos frios, sem padrão de cortesia de despedida.</p>
+            </div>
+            <div class="dossie-item">
+                <h3>Postura / Relacionamento</h3>
+                <p>Pragmático e técnico. No entanto, apresentou atrito e impaciência severa em cobranças (ex: caso de 60% de sinal em que discutiu duramente com o cliente no balcão digital). Precisa de calibração para não soar predatório nas exigências financeiras sem perder a firmeza e garantir a empatia.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cliente WILSONZOGBI -->
+    <div class="conv-card">
+        <div class="card-header">
+            <span class="client-info">Cliente: WilsonZogbi</span>
+            <div style="text-align:right"><span class="score-badge s-red">Score: 33% (4 de 12 Acertos)</span><div class="date-range">📅 15/04/2026 → 25/06/2026</div></div>
+        </div>
+        <table>
+            <tr><td colspan="3" class="c-cat">1. Recebimento e Diagnóstico</td></tr>
+            <tr>
+                <td class="c-regra">1a: Atendimento foi cordial e respeitoso?</td><td class="c-status yes">✅ SIM</td><td class="c-just">O gerente atendeu com cordialidade, e soube se desculpar ativamente pelos graves atrasos da oficina ("Poxa vida odeio chegar nesse ponto mas infelizmente vou ter que pedir desculpas").</td>
+            </tr>
+            <tr>
+                <td class="c-regra">1b: Registrou no WhatsApp o que foi acordado presencialmente/por telefone?</td><td class="c-status no">❌ NÃO</td><td class="c-just">O cliente pediu "pede para olhar aquilo que te falei na Sexta" e o gerente respondeu apenas "Já avisei lá", omitindo a transcrição formal do que havia sido conversado ao vivo.</td>
+            </tr>
+            <tr>
+                <td class="c-regra">2d: Enviou o link do checklist detalhando defeitos e fotos?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Ausente. Não utilizou a ferramenta de checklist digital da OiAPI.</td>
+            </tr>
+            <tr>
+                <td class="c-regra">2b: Enviou vídeo mostrando o defeito?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Registrou e enviou as mídias em vídeo evidenciando o vazamento no atuador hidráulico ao testar o carro.</td>
+            </tr>
+
+            <tr><td colspan="3" class="c-cat">2. Orçamento e Aprovação</td></tr>
+            <tr>
+                <td class="c-regra">2a: Enviou o link do orçamento?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Enviou o PDF da plataforma formalmente (Orçamento nº 4300).</td>
+            </tr>
+            <tr>
+                <td class="c-regra">2c: Explicou os efeitos/consequências de não fazer o reparo?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Limitou-se a orçar o preço imediato, perdendo a oportunidade de explicar o que o defeito acarreta no dia a dia (consequências técnicas/segurança).</td>
+            </tr>
+            <tr>
+                <td class="c-regra">2e: Obteve resposta (sim/ok) de aprovação após envio?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Cliente autorizou via texto dizendo: "Já ajuda, então pode fazer".</td>
+            </tr>
+
+            <tr><td colspan="3" class="c-cat">3. Checklist Mecânico / Up-sell</td></tr>
+            <tr><td class="c-regra">3a: Enviou o checklist complementar do mecânico?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Nada foi gerado e inspecionado fora da queixa original.</td></tr>
+            <tr><td class="c-regra">3b: Enviou vídeo do que mais precisa ser feito?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não houve nenhum esforço visual de venda cruzada de componentes extras.</td></tr>
+            <tr><td class="c-regra">3c: Explicou o texto justificando serviços extras?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Zero up-sell argumentado na ordem de serviço.</td></tr>
+
+            <tr><td colspan="3" class="c-cat">4. Encerramento + Review</td></tr>
+            <tr><td class="c-regra">4a: Enviou mensagem de agradecimento padrão?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Finalização burocrática ("18h pode vir"). Faltou o protocolo de agradecimento final.</td></tr>
+            <tr><td class="c-regra">4b: Pediu avaliação no Google explicitamente?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não acionou gatilho de avaliação no Google Maps na devolução das chaves.</td></tr>
+        </table>
+    </div>
+
+    <!-- Cliente JOSÉ MERCEDES -->
+    <div class="conv-card">
+        <div class="card-header">
+            <span class="client-info">Cliente: José Mercedes</span>
+            <div style="text-align:right"><span class="score-badge s-red">Score: 25% (3 de 12 Acertos)</span><div class="date-range">📅 11/06/2026 → 26/06/2026</div></div>
+        </div>
+        <table>
+            <tr><td colspan="3" class="c-cat">1. Recebimento e Diagnóstico</td></tr>
+            <tr><td class="c-regra">1a: Atendimento foi cordial e respeitoso?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Início polido pedindo "Preciso de alguns dados para seu cadastro se possível me envie".</td></tr>
+            <tr><td class="c-regra">1b: Registrou no WhatsApp acordos?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Nenhum diagnóstico verbal foi transcrito, apenas passou a chave Pix.</td></tr>
+            <tr><td class="c-regra">2d: Enviou link do checklist c/ fotos?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Omitido.</td></tr>
+            <tr><td class="c-regra">2b: Enviou vídeo mostrando defeito?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Enviou mídias atestando a situação física da batida em outro carro (funilaria/mecânica).</td></tr>
+
+            <tr><td colspan="3" class="c-cat">2. Orçamento e Aprovação</td></tr>
+            <tr><td class="c-regra">2a: Enviou o link do orçamento?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Passou os valores brutos por chat ("Pix de 2800,00"), sem uso de documentação formal OiAPI.</td></tr>
+            <tr><td class="c-regra">2c: Explicou efeitos de não reparar?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Apenas informou da batida, sem detalhes técnicos das avarias internas mecânicas que a pancada causou.</td></tr>
+            <tr><td class="c-regra">2e: Obteve resposta de aprovação?</td><td class="c-status yes">✅ SIM</td><td class="c-just">O cliente efetuou e enviou o comprovante atestando prosseguimento, e o gerente respondeu: "Pode ficar tranquilo".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">3. Checklist Mecânico / Up-sell</td></tr>
+            <tr><td class="c-regra">3a: Enviou checklist complementar mecânico?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não se aplicou nem executou nenhum laudo estrutural extra formalizado.</td></tr>
+            <tr><td class="c-regra">3b: Enviou vídeo do que mais precisa?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Omitido.</td></tr>
+            <tr><td class="c-regra">3c: Explicou texto justificando extras?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Omitido.</td></tr>
+
+            <tr><td colspan="3" class="c-cat">4. Encerramento + Review</td></tr>
+            <tr><td class="c-regra">4a: Agradecimento padrão?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Devolveu informando apenas "pode vir buscar / esta pronto", sem cortesia.</td></tr>
+            <tr><td class="c-regra">4b: Avaliação explícita no Google?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Sem solicitação de review no Google.</td></tr>
+        </table>
+    </div>
+
+    <!-- Cliente EDSON -->
+    <div class="conv-card">
+        <div class="card-header">
+            <span class="client-info">Cliente: Edson</span>
+            <div style="text-align:right"><span class="score-badge s-yellow">Score: 58% (7 de 12 Acertos)</span><div class="date-range">📅 18/06/2026 → 27/06/2026</div></div>
+        </div>
+        <table>
+            <tr><td colspan="3" class="c-cat">1. Recebimento e Diagnóstico</td></tr>
+            <tr><td class="c-regra">1a: Atendimento foi cordial e respeitoso?</td><td class="c-status no">❌ NÃO</td><td class="c-just">O gerente pressionou com certa aspereza a cobrança do adiantamento de 60%, causando confronto com o cliente: <span class="code-quote">"Pela política da empresa não podia nem ter pedido as peças pra vc ter ideia... Se eu adianto as coisas sem o sinal certinho quem paga depois sou eu entendeu"</span>.</td></tr>
+            <tr><td class="c-regra">1b: Registrou acordo presencial?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Escreveu explicitamente que descontaria os 50% combinados da remoção: "Daí vou aplicar o desconto nos 385 de 50% conforme combinamos".</td></tr>
+            <tr><td class="c-regra">2d: Enviou link checklist c/ defeitos?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Disparou apenas os orçamentos (4290 e 4293), pulando a fase do OiAPI (Checklist de Entrada) explícito.</td></tr>
+            <tr><td class="c-regra">2b: Enviou vídeo do defeito?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Foi enviando mídia em cada avanço da desmontagem ("Pra vc ir acompanhando a desmontagem aí").</td></tr>
+
+            <tr><td colspan="3" class="c-cat">2. Orçamento e Aprovação</td></tr>
+            <tr><td class="c-regra">2a: Link do orçamento?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Emissão dos PDFs corretos via sistema em várias fases da retífica e suspensão.</td></tr>
+            <tr><td class="c-regra">2c: Consequências de não reparar?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Argumentou a deficiência técnica do motor: "Está vazando compressão nos cilindros então aqui próximo passo é a remoção do cabeçote, verificação de válvulas e junta".</td></tr>
+            <tr><td class="c-regra">2e: Aprovação após orçamento?</td><td class="c-status yes">✅ SIM</td><td class="c-just">O cliente mandou um enfático "Pode fazer" após a revelação do diagnóstico e pagamentos de sinal alinhados.</td></tr>
+
+            <tr><td colspan="3" class="c-cat">3. Checklist Mecânico / Up-sell</td></tr>
+            <tr><td class="c-regra">3a: Checklist complementar mecânico?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Puxou up-sell, porém negligenciou o uso do link padronizado de Checklist Mecânico para listar o pacote de suspensão.</td></tr>
+            <tr><td class="c-regra">3b: Vídeo do que mais precisa ser feito?</td><td class="c-status yes">✅ SIM</td><td class="c-just">O gerente produziu a mídia focada nas partes alheias ao cabeçote ("sobre a suspensão fiz o video ai já ti mando o orçamento").</td></tr>
+            <tr><td class="c-regra">3c: Explicou extras?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Foi persuasivo: "os kits dos amortecedores estão batendo... se quiser aproveitar pra fazer a parte da suspensão tbm já emenda tudo".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">4. Encerramento + Review</td></tr>
+            <tr><td class="c-regra">4a: Mensagem de agradecimento?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Apenas despachou o cliente num tom mecânico final sem rito de agradecimento ou fidelização.</td></tr>
+            <tr><td class="c-regra">4b: Pediu avaliação explícita no Google?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Perda de oportunidade de captação de review orgânico.</td></tr>
+        </table>
+    </div>
+
+    <!-- Cliente EVERALDO (5511959243763) -->
+    <div class="conv-card">
+        <div class="card-header">
+            <span class="client-info">Cliente: Everaldo</span>
+            <div style="text-align:right"><span class="score-badge s-green">Score: 75% (9 de 12 Acertos)</span><div class="date-range">📅 22/06/2026 → 22/06/2026</div></div>
+        </div>
+        <table>
+            <tr><td colspan="3" class="c-cat">1. Recebimento e Diagnóstico</td></tr>
+            <tr><td class="c-regra">1a: Atendimento foi cordial e respeitoso?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Conduta profissional e extremamente cordial, gerando fluidez excelente com o cliente.</td></tr>
+            <tr><td class="c-regra">1b: Registrou acordo no Whats?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não efetuou transcrição de acordos verbais prévios na abertura.</td></tr>
+            <tr><td class="c-regra">2d: Checklist / defeitos?</td><td class="c-status yes">✅ SIM</td><td class="c-just">O link "Check List entrada" (OiAPI) foi compartilhado perfeitamente com o cliente.</td></tr>
+            <tr><td class="c-regra">2b: Vídeo do defeito?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não providenciou material em vídeo do fluido de freio vencido.</td></tr>
+
+            <tr><td colspan="3" class="c-cat">2. Orçamento e Aprovação</td></tr>
+            <tr><td class="c-regra">2a: Link do orçamento?</td><td class="c-status yes">✅ SIM</td><td class="c-just">PDF de orçamento 4344 enviado via plataforma perfeitamente.</td></tr>
+            <tr><td class="c-regra">2c: Explicou consequências?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Destacou tecnicamente que o problema encontrado residia no fato de que o fluido "está oxidado".</td></tr>
+            <tr><td class="c-regra">2e: Resposta OK de aprovação?</td><td class="c-status yes">✅ SIM</td><td class="c-just">A resposta do cliente foi indubitável: "Ok, pode fazer esse orçamento do fluido de freio sim".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">3. Checklist Mecânico / Up-sell</td></tr>
+            <tr><td class="c-regra">3a: Checklist complementar?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Enviou o "Check List Mecanico" (OiAPI) corretamente após as verificações e apontamentos.</td></tr>
+            <tr><td class="c-regra">3b: Ví extra up-sell?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não evidenciou em gravação a oferta adicional.</td></tr>
+            <tr><td class="c-regra">3c: Explicou texto de extras?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Deixou o up-sell evidente de forma leve: "se quiser posso fazer um orçamento aproveitando que o veiculo está aqui já".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">4. Encerramento + Review</td></tr>
+            <tr><td class="c-regra">4a: Msg agradecimento (Follow-up)?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Invocou o cliente ativamente para saber se a caixa funcionou: "Engatou todas as marchas certinho? Tudo certo com o carro?". Excelente pós-venda técnico.</td></tr>
+            <tr><td class="c-regra">4b: Avaliação explícita no Google?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Disparou o template pedindo apoio de 5 estrelas ("Ajuda agente aí nas avaliações temos meta mensal") junto ao link oficial.</td></tr>
+        </table>
+    </div>
+
+    <!-- Cliente NELSON ANDRE -->
+    <div class="conv-card">
+        <div class="card-header">
+            <span class="client-info">Cliente: Nelson André</span>
+            <div style="text-align:right"><span class="score-badge s-red">Score: 41% (5 de 12 Acertos)</span><div class="date-range">📅 24/06/2026 → 25/06/2026</div></div>
+        </div>
+        <table>
+            <tr><td colspan="3" class="c-cat">1. Recebimento e Diagnóstico</td></tr>
+            <tr><td class="c-regra">1a: Atendimento foi cordial e respeitoso?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Muito empático ao lidar com prazos e com a objeção de preço, agindo em modo proativo para ajudar nos descontos ("Por exemplo... Consigo fazer assim").</td></tr>
+            <tr><td class="c-regra">1b: Registrou acordo no Whats?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Nenhum rastro das combinações anteriores foi digitalizado no balcão de WhatsApp.</td></tr>
+            <tr><td class="c-regra">2d: Checklist / defeitos?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Ausente. Nenhuma URL do checklist de recebimento OiAPI.</td></tr>
+            <tr><td class="c-regra">2b: Vídeo do defeito?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Mandou a evidência visual: "Esse foi o vídeo feito do diagnóstico pra vc ter ideia".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">2. Orçamento e Aprovação</td></tr>
+            <tr><td class="c-regra">2a: Link do orçamento?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Gerou atrito de processo por não usar PDF da plataforma, preferindo digitar à mão as linhas de peças e serviços, o que remove o peso institucional.</td></tr>
+            <tr><td class="c-regra">2c: Explicou consequências?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Usou fortes gatilhos mentais ensinando a raiz do problema elétrico: "o problema se tornou maior pq com a falha dos bicos as velas ficaram queimadas forçando as bobinas entendeu... A luz irá continuar acessa".</td></tr>
+            <tr><td class="c-regra">2e: Resposta OK de aprovação?</td><td class="c-status yes">✅ SIM</td><td class="c-just">O cliente acatou a compra: "Beleza então Roberto pode pedir. Seja o que Deus quiser".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">3. Checklist Mecânico / Up-sell</td></tr>
+            <tr><td class="c-regra">3a: Checklist complementar?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Nenhum checklist digital gerado sobre a TBI e periféricos.</td></tr>
+            <tr><td class="c-regra">3b: Vídeo extra up-sell?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não sustentou a oferta da TBI com vídeo que provasse visualmente a "muita carbonização" que argumentou.</td></tr>
+            <tr><td class="c-regra">3c: Explicou texto de extras?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Manteve a ética e o poder de persuasão na limpeza do corpo: "vc não tem obrigação nenhuma de fazer apenas informei pois tem muita carbonização... então o consumo tende a ser maior".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">4. Encerramento + Review</td></tr>
+            <tr><td class="c-regra">4a: Msg agradecimento/Follow Up?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Final da ordem foi concluída de maneira abrupta.</td></tr>
+            <tr><td class="c-regra">4b: Avaliação explícita no Google?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não disparou engajamento para captura de reviews.</td></tr>
+        </table>
+    </div>
+
+    <!-- Cliente EVERTON -->
+    <div class="conv-card">
+        <div class="card-header">
+            <span class="client-info">Cliente: Everton</span>
+            <div style="text-align:right"><span class="score-badge s-yellow">Score: 58% (7 de 12 Acertos)</span><div class="date-range">📅 25/06/2026 → 26/06/2026</div></div>
+        </div>
+        <table>
+            <tr><td colspan="3" class="c-cat">1. Recebimento e Diagnóstico</td></tr>
+            <tr><td class="c-regra">1a: Atendimento foi cordial e respeitoso?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Fluidez conversacional em alta, informando agilmente que era vizinho ("Agora que vi seu endereço aqui, sou seu vizinho").</td></tr>
+            <tr><td class="c-regra">1b: Registrou acordo no WhatsApp?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Documentou eximiamente a recusa do cliente de executar o pacote inteiro, protegendo a empresa: "vou deixar anotado na OS q vc optou por não fazer e caso tenha qualquer tipo de problema ou acidente nós nos isentamos blz".</td></tr>
+            <tr><td class="c-regra">2d: Enviou link do checklist c/ defeitos e fotos?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Ausência completa do checklist OiAPI de admissão do veículo.</td></tr>
+            <tr><td class="c-regra">2b: Enviou vídeo mostrando o defeito?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Mídia encaminhada debaixo do veículo mostrando os eixos em colapso.</td></tr>
+
+            <tr><td colspan="3" class="c-cat">2. Orçamento e Aprovação</td></tr>
+            <tr><td class="c-regra">2a: Enviou o link do orçamento?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Compartilhamento da plataforma: Orçamento nº 4302 (OiAPI).</td></tr>
+            <tr><td class="c-regra">2c: Explicou efeitos de não reparar?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Cravou a isenção sobre acidentes para blindar a loja face à quebra total do eixo e tulipa não reparados.</td></tr>
+            <tr><td class="c-regra">2e: Obteve resposta de aprovação?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Resposta imperativa de autorização parcial: "Beleza pode trocar".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">3. Checklist Mecânico / Up-sell</td></tr>
+            <tr><td class="c-regra">3a: Checklist complementar do mecânico?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não utilizou o checklist complementar para registrar formalmente a tulipa oposta condenada.</td></tr>
+            <tr><td class="c-regra">3b: Vídeo do que mais precisa ser feito?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Apenas se limitou a falar, sem demonstrar com um segundo vídeo a segunda falha que gerava a vibração secundária no carro.</td></tr>
+            <tr><td class="c-regra">3c: Explicou texto justificando extras?</td><td class="c-status yes">✅ SIM</td><td class="c-just">Justificou o efeito alavanca em texto: "Tem folga por isso estourou a homocinética aí / A vibração que vc sente é da tulipa da ponta contrário do eixo".</td></tr>
+
+            <tr><td colspan="3" class="c-cat">4. Encerramento + Review</td></tr>
+            <tr><td class="c-regra">4a: Mensagem de agradecimento padrão?</td><td class="c-status no">❌ NÃO</td><td class="c-just">O encerramento foi brusco. O cliente pediu novo preço para filtro/óleo e o rito de fechamento e devolução de chave do serviço mecânico nunca ocorreu de forma amigável.</td></tr>
+            <tr><td class="c-regra">4b: Pediu avaliação no Google explicitamente?</td><td class="c-status no">❌ NÃO</td><td class="c-just">Não se aproveitou da conexão estabelecida (vizinho) para converter em Review 5 estrelas no Maps.</td></tr>
+        </table>
+    </div>
+
+</body>
+</html>

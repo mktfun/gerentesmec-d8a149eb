@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Comparativo - Rede Tork</title>
+    <style>
+        :root {
+            --primary: #0f172a; --secondary: #334155; --bg: #f8fafc;
+            --border: #cbd5e1; --text-main: #1e293b; --text-light: #64748b;
+            --alert: #ef4444; --warn: #f59e0b; --success: #10b981;
+        }
+
+        body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg); color: var(--text-main); padding: 40px; max-width: 1200px; margin: 0 auto; line-height: 1.6; }
+        
+        .header-doc { text-align: center; margin-bottom: 50px; border-bottom: 3px solid var(--primary); padding-bottom: 25px; }
+        h1 { color: var(--primary); font-size: 2.2rem; text-transform: uppercase; margin-bottom: 10px; letter-spacing: -0.5px;}
+        .subtitle { color: var(--text-light); font-size: 1.15rem; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 50px; }
+        
+        .panel { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+        .panel h2 { margin-top: 0; color: var(--primary); font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;}
+        
+        .ranking-list { list-style: none; padding: 0; margin: 0; }
+        .ranking-list li { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; }
+        .ranking-list li:last-child { border-bottom: none; }
+        .ranking-list li .score { font-weight: bold; border-radius: 4px; padding: 2px 8px; }
+        
+        .sc-high { background: #dcfce7; color: #166534; }
+        .sc-med { background: #fef3c7; color: #92400e; }
+        .sc-low { background: #fee2e2; color: #991b1b; }
+
+        .alert-box { background: #fef2f2; border-left: 5px solid var(--alert); padding: 20px; border-radius: 4px; margin-bottom: 40px; }
+        .alert-box h3 { color: #991b1b; margin-top: 0; margin-bottom: 10px; }
+        .alert-box p { margin: 0; color: #7f1d1d; font-size: 0.95rem; }
+
+        .managers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        
+        .manager-card { background: white; border: 1px solid var(--border); border-top: 4px solid var(--secondary); border-radius: 6px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .manager-card.highlight { border-top-color: var(--success); }
+        .manager-card.critical { border-top-color: var(--alert); }
+        
+        .manager-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .manager-name { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+        .manager-score { font-size: 1.2rem; font-weight: 800; }
+        
+        .manager-desc { font-size: 0.9rem; color: var(--text-light); margin-bottom: 20px; min-height: 65px; }
+        
+        .trait-box { margin-bottom: 15px; }
+        .trait-title { font-size: 0.85rem; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+        .t-green { color: var(--success); }
+        .t-red { color: var(--alert); }
+        
+        .trait-list { margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--text-main); }
+        .trait-list li { margin-bottom: 4px; }
+
+        .footer-note { text-align: center; margin-top: 50px; font-size: 0.85rem; color: var(--text-light); }
+
+        @media print { body { background: white; padding: 0; } .panel, .manager-card { box-shadow: none; } }
+    </style>
+</head>
+<body>
+
+    <div class="header-doc">
+        <h1>Painel Comparativo de Rede</h1>
+        <div class="subtitle">Auditoria Semântica QA - Visão Consolidada de 9 Unidades</div>
+    </div>
+
+    <div class="alert-box">
+        <h3>⚠️ Diagnóstico Crítico da Rede (Risco de Lucratividade)</h3>
+        <p>A auditoria em massa revelou uma falha sistêmica transversal: <strong>100% da rede sofre da Síndrome do "Tirador de Pedido"</strong>. Os gerentes falham drasticamente no Pilar de Up-Sell (oferecimento ativo e checklist secundário de prevenção). Eles resolvem o problema inicial reclamado pelo cliente e encerram a conversa logo após o PIX. Adicionalmente, <strong>nenhuma unidade possui rotina consolidada de envio de link do Google Maps</strong> para captura de Reviews, perdendo dezenas de avaliações 5 estrelas semanais orgânicas.</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="panel">
+            <h2>🏆 Ranking de Qualidade (Score)</h2>
+            <ul class="ranking-list">
+                <li><span>1. Carijós</span> <span class="score sc-med">54.0%</span></li>
+                <li><span>2. Jabaquara (Vanessa)</span> <span class="score sc-med">50.0%</span></li>
+                <li><span>3. Jorge Beretta (Erik)</span> <span class="score sc-med">48.7%</span></li>
+                <li><span>4. Kennedy (Roberto)</span> <span class="score sc-med">48.0%</span></li>
+                <li><span>5. Rudge Ramos (Lucas)</span> <span class="score sc-med">47.0%</span></li>
+                <li><span>6. Mauá</span> <span class="score sc-low">46.6%</span></li>
+                <li><span>7. Planalto (Paulo)</span> <span class="score sc-low">38.0%</span></li>
+                <li><span>8. Dom Pedro</span> <span class="score sc-low">38.0%</span></li>
+                <li><span>9. Diadema (Anderson)</span> <span class="score sc-low">33.0%</span></li>
+            </ul>
+        </div>
+        
+        <div class="panel">
+            <h2>📈 Raio-X dos Pilares</h2>
+            <div style="margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span><strong>Recebimento (Cordialidade)</strong></span><span style="color: #10b981; font-weight: bold;">Forte (80%+)</span>
+                </div>
+                <div style="background: #e2e8f0; height: 10px; border-radius: 5px; margin-bottom: 20px;"><div style="background: #10b981; height: 10px; border-radius: 5px; width: 85%;"></div></div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span><strong>Envio de Orçamentos/Vídeos</strong></span><span style="color: #f59e0b; font-weight: bold;">Médio (65%)</span>
+                </div>
+                <div style="background: #e2e8f0; height: 10px; border-radius: 5px; margin-bottom: 20px;"><div style="background: #f59e0b; height: 10px; border-radius: 5px; width: 65%;"></div></div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span><strong>Uso Estrito do OiAPI</strong></span><span style="color: #ef4444; font-weight: bold;">Baixo (20%)</span>
+                </div>
+                <div style="background: #e2e8f0; height: 10px; border-radius: 5px; margin-bottom: 20px;"><div style="background: #ef4444; height: 10px; border-radius: 5px; width: 20%;"></div></div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span><strong>Up-Sell & Fechamento Google</strong></span><span style="color: #ef4444; font-weight: bold;">Crítico (< 5%)</span>
+                </div>
+                <div style="background: #e2e8f0; height: 10px; border-radius: 5px;"><div style="background: #7f1d1d; height: 10px; border-radius: 5px; width: 5%;"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color: var(--primary); margin-bottom: 25px; border-bottom: 2px solid var(--border); padding-bottom: 10px;">Perfil Comportamental por Gerente</h2>
+    
+    <div class="managers-grid">
+        
+        <!-- CARIJOS -->
+        <div class="manager-card highlight">
+            <div class="manager-header">
+                <div class="manager-name">Carijós</div>
+                <div class="manager-score t-green">54.0%</div>
+            </div>
+            <div class="manager-desc">Apresenta o melhor fluxo base da rede. Consegue conciliar extrema cordialidade com o uso rigoroso e formal do OiAPI nas aberturas.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Alto nível de respeito e recepção calorosa.</li>
+                    <li>Referência na rede em formalizar checklists via OiAPI.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Não insiste na venda cruzada (Up-sell zero).</li>
+                    <li>Abandona a conversa sem o "Call to Action" de review.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- JABAQUARA -->
+        <div class="manager-card">
+            <div class="manager-header">
+                <div class="manager-name">Vanessa (Jabaquara)</div>
+                <div class="manager-score" style="color: #d97706;">50.0%</div>
+            </div>
+            <div class="manager-desc">Muito técnica na constatação visual, apoiando-se pesadamente no envio de vídeos para justificar problemas ao cliente.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Uso impecável de envio de vídeos de defeitos.</li>
+                    <li>Utilização consistente das rotinas de OiAPI.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Baixa argumentação persuasiva sobre riscos (foca só no mecânico).</li>
+                    <li>Ausência de checklists secundários guiados para aumento de ticket.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- JORGE BERETTA -->
+        <div class="manager-card">
+            <div class="manager-header">
+                <div class="manager-name">Erik (J. Beretta)</div>
+                <div class="manager-score" style="color: #d97706;">48.7%</div>
+            </div>
+            <div class="manager-desc">Perfil rápido, objetivo e ágil na entrega de orçamentos, mas age predominantemente de forma reativa aos problemas trazidos pelo cliente.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Alta velocidade em enviar orçamentos (Regra 2a).</li>
+                    <li>Consegue confirmações textuais ("OK") eficientes.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Taxa crítica de abandono do link OiAPI.</li>
+                    <li>Perde tração e se esquiva em momentos de conflito.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- KENNEDY -->
+        <div class="manager-card">
+            <div class="manager-header">
+                <div class="manager-name">Roberto (Kennedy)</div>
+                <div class="manager-score" style="color: #d97706;">48.0%</div>
+            </div>
+            <div class="manager-desc">Educado e claro, mas foca muito no atendimento de balcão físico, deixando as comprovações do WhatsApp em segundo plano.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Mantém o cliente atualizado (status do carro).</li>
+                    <li>Comunicação limpa e sem ruídos.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Não documenta via chat o que foi acordado no balcão.</li>
+                    <li>Perda total de rastreabilidade de orçamentos fechados verbalmente.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RUDGE -->
+        <div class="manager-card">
+            <div class="manager-header">
+                <div class="manager-name">Lucas (Rudge)</div>
+                <div class="manager-score" style="color: #d97706;">47.0%</div>
+            </div>
+            <div class="manager-desc">Abordagem amigável mas burocrática. Falha na apresentação visual dos problemas, preferindo orçamentos textuais rasos.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Recebimento muito empático.</li>
+                    <li>Pega os "OKs" de autorização de forma precisa.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Zero envio de vídeos ou fotos para corroborar defeitos.</li>
+                    <li>Pouca argumentação para fechamento de itens pesados.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MAUA -->
+        <div class="manager-card">
+            <div class="manager-header">
+                <div class="manager-name">Mauá</div>
+                <div class="manager-score" style="color: #d97706;">46.6%</div>
+            </div>
+            <div class="manager-desc">Atendimento extremamente focado em peças e "trocação". Possui a veia de auto-peças, ignorando o processo de clínica automotiva.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Extremamente rápido e transacional.</li>
+                    <li>Garante os pagamentos de forma incisiva.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Atendimento engessado e mecânico.</li>
+                    <li>Abandono completo do processo do OiAPI e Checklists.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- PLANALTO -->
+        <div class="manager-card critical">
+            <div class="manager-header">
+                <div class="manager-name">Paulo (Planalto)</div>
+                <div class="manager-score t-red">38.0%</div>
+            </div>
+            <div class="manager-desc">Atua essencialmente como "Tirador de Pedidos". Fecha orçamentos básicos facilmente, mas perde o controle do processo na oficina.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Alta educação formal e polidez.</li>
+                    <li>Converte serviços básicos sem atrito.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Zero checklists de entrada ou saída.</li>
+                    <li>Não formaliza acordos presencias no WhatsApp.</li>
+                    <li>Desperdício colossal de Up-sells.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DOM PEDRO -->
+        <div class="manager-card critical">
+            <div class="manager-header">
+                <div class="manager-name">Dom Pedro</div>
+                <div class="manager-score t-red">38.0%</div>
+            </div>
+            <div class="manager-desc">Apesar de ágil no envio de orçamentos e vídeos, falha completamente na retenção, prevenção e pós-venda. Atendimento passivo.</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Usa vídeos ativamente.</li>
+                    <li>Manda os Orçamentos em PDF com agilidade.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Esquecimento crônico do checklist.</li>
+                    <li>Zero pós-venda ou argumento para aumentar ticket.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DIADEMA -->
+        <div class="manager-card critical">
+            <div class="manager-header">
+                <div class="manager-name">Anderson (Diadema)</div>
+                <div class="manager-score t-red">33.0%</div>
+            </div>
+            <div class="manager-desc">Atendimento precário nos processos digitais. Realiza vendas no balcão e usa o WhatsApp apenas para avisar que "o carro tá pronto".</div>
+            <div class="trait-box">
+                <div class="trait-title t-green">Destaques Positivos</div>
+                <ul class="trait-list">
+                    <li>Resolve o defeito do carro de fato.</li>
+                </ul>
+            </div>
+            <div class="trait-box">
+                <div class="trait-title t-red">Pontos Cegos</div>
+                <ul class="trait-list">
+                    <li>Processo completamente cego para a auditoria.</li>
+                    <li>Sem orçamentos formais e sem fotos via chat.</li>
+                    <li>Nenhuma documentação das negociações para a retaguarda.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-note">
+        Relatório gerado via Auditoria Semântica Multi-Agente QA • Tork
+    </div>
+</body>
+</html>

@@ -187,6 +187,7 @@ async function main() {
         let piorJustificativa = '';
         if (l.ai_feedback) {
              piorJustificativa = l.ai_feedback;
+        }
         let falhas = l.manager_failures || l.closing_summary || "A negociação não atingiu os gatilhos mínimos de engajamento do funil.";
         let resumo = l.conversation_summary || "Sem resumo disponível.";
 

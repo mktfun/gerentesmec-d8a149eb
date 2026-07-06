@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Auditoria — DOM_PEDRO — 29/06/2026, 11:25</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; background: #f1f5f9; margin: 0; padding: 24px; color: #1e293b; }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0; }
+  h2 { font-size: 18px; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .container { max-width: 100%; }
+    .no-print { display: none !important; }
+    .page-break { page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- CABEÇALHO -->
+  <div style="background:#1e293b;color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+      <div>
+        <p style="margin:0 0 4px;font-size:12px;letter-spacing:1px;color:#94a3b8;text-transform:uppercase;">Relatório de Auditoria de Atendimento</p>
+        <h1>Unidade DOM_PEDRO</h1>
+        <p style="margin:8px 0 0;font-size:13px;color:#cbd5e1;">Gerado em 29/06/2026, 11:25 &nbsp;|&nbsp; 6 conversas auditadas</p>
+      </div>
+      <div style="background:#fee2e2;border:2px solid #fca5a5;border-radius:12px;padding:16px 28px;text-align:center;">
+        <div style="font-size:42px;font-weight:800;color:#dc2626;">18%</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px;">SCORE MÉDIO GERAL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PÁGINA 1: VISÃO GERENCIAL -->
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:28px;margin-bottom:24px;">
+    <h2 style="margin:0 0 20px;color:#1e293b;font-size:20px;">📊 Visão Gerencial — Desempenho por Regra</h2>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f8fafc;">
+          <th style="padding:10px 14px;text-align:left;font-size:12px;color:#64748b;font-weight:600;width:40%;">REGRA</th>
+          <th style="padding:10px 14px;text-align:center;font-size:12px;color:#64748b;font-weight:600;width:12%;">ACERTOS</th>
+          <th style="padding:10px 14px;font-size:12px;color:#64748b;font-weight:600;width:36%;">ADERÊNCIA</th>
+          <th style="padding:10px 14px;text-align:center;font-size:12px;color:#64748b;font-weight:600;width:12%;">%</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">1a — Cordialidade</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#16a34a;">5/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#16a34a;border-radius:4px;height:8px;width:83%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#16a34a;">83%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">1b — Registro de acordo</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">2d — Checklist/laudo de entrada</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">2b — Vídeo do defeito</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">2a — Orçamento formal</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#d97706;">4/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#d97706;border-radius:4px;height:8px;width:67%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#d97706;">67%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">2c — Consequências do não reparo</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">2e — Aprovação explícita</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#d97706;">4/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#d97706;border-radius:4px;height:8px;width:67%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#d97706;">67%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">3a — Checklist mecânico</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">3b — Vídeo up-sell</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">3c — Serviços extras em texto</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">4a — Agradecimento/follow-up</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:10px 14px;font-size:13px;color:#374151;">4b — Avaliação Google</td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;">0/6</td>
+        <td style="padding:10px 14px;">
+          <div style="background:#e2e8f0;border-radius:4px;height:8px;width:100%;">
+            <div style="background:#dc2626;border-radius:4px;height:8px;width:2%;"></div>
+          </div>
+        </td>
+        <td style="padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:#dc2626;">0%</td>
+      </tr></tbody>
+    </table>
+  </div>
+
+  <!-- DESTAQUES -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:20px;">
+      <h3 style="margin:0 0 8px;color:#16a34a;font-size:14px;">💪 Ponto Forte Mais Consistente</h3>
+      <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#166534;">1a — Cordialidade</p>
+      <p style="margin:0;font-size:13px;color:#15803d;">Aderência: 5/6 conversas (83%)</p>
+    </div>
+    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:20px;">
+      <h3 style="margin:0 0 8px;color:#dc2626;font-size:14px;">⚠️ Ponto Fraco Mais Crítico</h3>
+      <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#991b1b;">1b — Registro de acordo</p>
+      <p style="margin:0;font-size:13px;color:#b91c1c;">Aderência: 0/6 conversas (0%)</p>
+    </div>
+  </div>
+
+  <!-- MELHOR E PIOR OS -->
+  
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+    <div style="background:#fff;border:1px solid #86efac;border-radius:10px;padding:20px;">
+      <h3 style="margin:0 0 8px;color:#16a34a;font-size:14px;">🏆 Melhor OS</h3>
+      <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#166534;">Carlos</p>
+      <p style="margin:0 0 4px;font-size:13px;color:#15803d;">OS #3933 — Score: 25% (3/12 regras)</p>
+      <p style="margin:0;font-size:12px;color:#64748b;">Exemplo positivo de atendimento completo e estruturado.</p>
+    </div>
+    <div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;padding:20px;">
+      <h3 style="margin:0 0 8px;color:#dc2626;font-size:14px;">⚠️ OS com Maior Déficit</h3>
+      <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#991b1b;">Câmbios Fort</p>
+      <p style="margin:0 0 4px;font-size:13px;color:#b91c1c;">OS #3446 — Score: 8% (1/12 regras)</p>
+      <p style="margin:0;font-size:12px;color:#64748b;">Necessita atenção imediata e acompanhamento de supervisor.</p>
+    </div>
+  </div>
+
+  
+    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px 20px;margin-top:16px;">
+      <h3 style="margin:0 0 8px;color:#dc2626;font-size:15px;">⚠️ Ação Corretiva Recomendada</h3>
+      <p style="margin:0;font-size:13px;color:#7f1d1d;">Score médio abaixo de 70%. Recomenda-se treinamento imediato focado nas regras de menor aderência: <strong>1b — Registro de acordo</strong>. Implementar checklist de verificação diária com supervisor de turno.</p>
+    </div>
+
+  <!-- PÁGINA 2+: CARDS POR CONVERSA -->
+  <div class="page-break" style="margin-top:32px;">
+    <h2 style="font-size:20px;color:#1e293b;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #e2e8f0;">📋 Auditoria Individual por Cliente</h2>
+    
+    <div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;padding:24px;margin-bottom:28px;page-break-inside:avoid;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;color:#1e293b;">🔴 Ligia Tironi</h2>
+          <p style="margin:4px 0 0;font-size:13px;color:#64748b;">OS #3934 &nbsp;|&nbsp; 📅 26/06/2026 15:02 → 29/06/2026 11:17</p>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#dc2626;">17%</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">2/12 regras</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;width:35%;">REGRA</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;">EVIDÊNCIA / CITAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 1a — Cordialidade e respeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem cumprimento ou cordialidade registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 1b — Registrou acordo por escrito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Nenhum registro explícito de combinado anterior</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2d — Enviou checklist/laudo de entrada</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem menção a checklist ou laudo de vistoria</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2b — Enviou vídeo do defeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de vídeo do defeito</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2a — Enviou orçamento formal (PDF/link)</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=5y/nyWUeM81chAwFEbsQDA==)</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2c — Explicou consequências de não reparar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem explicação de consequências</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2e — Obteve aprovação explícita do cliente</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[26/06/2026 15:04] Cliente (Ligia Tironi): Orçamento aprovado</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3a — Enviou checklist mecânico complementar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem checklist complementar do mecânico</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3b — Enviou vídeo de up-sell</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem vídeo de itens adicionais</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3c — Explicou serviços extras em texto</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem descrição textual de serviços extras</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4a — Agradecimento / follow-up pós-entrega</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem mensagem de agradecimento registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4b — Pediu avaliação no Google Maps</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem pedido de avaliação no Google</td>
+        </tr></tbody>
+      </table>
+      <div style="margin-top:14px;text-align:right;">
+        <a href="https://chat.tork.services/app/accounts/5/conversations/3934" style="font-size:12px;color:#3b82f6;text-decoration:none;">🔗 Ver histórico no Chatwoot →</a>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;padding:24px;margin-bottom:28px;page-break-inside:avoid;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;color:#1e293b;">🔴 Carlos</h2>
+          <p style="margin:4px 0 0;font-size:13px;color:#64748b;">OS #3933 &nbsp;|&nbsp; 📅 26/06/2026 14:56 → 29/06/2026 10:58</p>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#dc2626;">25%</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">3/12 regras</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;width:35%;">REGRA</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;">EVIDÊNCIA / CITAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 1a — Cordialidade e respeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[26/06/2026 15:56] Gerente: Olá CARLOS, segue Orçamento 524 de 26/06/2026 placa: AVH0657</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 1b — Registrou acordo por escrito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Nenhum registro explícito de combinado anterior</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2d — Enviou checklist/laudo de entrada</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem menção a checklist ou laudo de vistoria</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2b — Enviou vídeo do defeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de vídeo do defeito</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2a — Enviou orçamento formal (PDF/link)</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=5y/nyWUeM816wJLHpAJIlQ==)</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2c — Explicou consequências de não reparar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem explicação de consequências</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2e — Obteve aprovação explícita do cliente</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[26/06/2026 15:58] Cliente (Carlos): Aprovado</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3a — Enviou checklist mecânico complementar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem checklist complementar do mecânico</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3b — Enviou vídeo de up-sell</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem vídeo de itens adicionais</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3c — Explicou serviços extras em texto</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem descrição textual de serviços extras</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4a — Agradecimento / follow-up pós-entrega</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem mensagem de agradecimento registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4b — Pediu avaliação no Google Maps</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem pedido de avaliação no Google</td>
+        </tr></tbody>
+      </table>
+      <div style="margin-top:14px;text-align:right;">
+        <a href="https://chat.tork.services/app/accounts/5/conversations/3933" style="font-size:12px;color:#3b82f6;text-decoration:none;">🔗 Ver histórico no Chatwoot →</a>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;padding:24px;margin-bottom:28px;page-break-inside:avoid;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;color:#1e293b;">🔴 Rosa e Isaias</h2>
+          <p style="margin:4px 0 0;font-size:13px;color:#64748b;">OS #3398 &nbsp;|&nbsp; 📅 18/06/2026 12:56 → 26/06/2026 13:53</p>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#dc2626;">25%</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">3/12 regras</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;width:35%;">REGRA</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;">EVIDÊNCIA / CITAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 1a — Cordialidade e respeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[18/06/2026 13:06] Gerente: Boa tarde</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 1b — Registrou acordo por escrito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Nenhum registro explícito de combinado anterior</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2d — Enviou checklist/laudo de entrada</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem menção a checklist ou laudo de vistoria</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2b — Enviou vídeo do defeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de vídeo do defeito</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2a — Enviou orçamento formal (PDF/link)</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=5F33O+ucegmyfDPc1GGpFw==)</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2c — Explicou consequências de não reparar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem explicação de consequências</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2e — Obteve aprovação explícita do cliente</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[18/06/2026 12:56] Cliente (Rosa e Isaias): Aprovado</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3a — Enviou checklist mecânico complementar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem checklist complementar do mecânico</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3b — Enviou vídeo de up-sell</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem vídeo de itens adicionais</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3c — Explicou serviços extras em texto</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem descrição textual de serviços extras</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4a — Agradecimento / follow-up pós-entrega</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem mensagem de agradecimento registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4b — Pediu avaliação no Google Maps</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem pedido de avaliação no Google</td>
+        </tr></tbody>
+      </table>
+      <div style="margin-top:14px;text-align:right;">
+        <a href="https://chat.tork.services/app/accounts/5/conversations/3398" style="font-size:12px;color:#3b82f6;text-decoration:none;">🔗 Ver histórico no Chatwoot →</a>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;padding:24px;margin-bottom:28px;page-break-inside:avoid;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;color:#1e293b;">🔴 Câmbios Fort</h2>
+          <p style="margin:4px 0 0;font-size:13px;color:#64748b;">OS #3446 &nbsp;|&nbsp; 📅 18/06/2026 13:07 → 25/06/2026 09:33</p>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#dc2626;">8%</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">1/12 regras</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;width:35%;">REGRA</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;">EVIDÊNCIA / CITAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 1a — Cordialidade e respeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[18/06/2026 13:07] Gerente: Boa tarde</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 1b — Registrou acordo por escrito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Nenhum registro explícito de combinado anterior</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2d — Enviou checklist/laudo de entrada</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem menção a checklist ou laudo de vistoria</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2b — Enviou vídeo do defeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de vídeo do defeito</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2a — Enviou orçamento formal (PDF/link)</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de link ou PDF de orçamento</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2c — Explicou consequências de não reparar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem explicação de consequências</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2e — Obteve aprovação explícita do cliente</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem aprovação explícita registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3a — Enviou checklist mecânico complementar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem checklist complementar do mecânico</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3b — Enviou vídeo de up-sell</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem vídeo de itens adicionais</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3c — Explicou serviços extras em texto</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem descrição textual de serviços extras</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4a — Agradecimento / follow-up pós-entrega</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem mensagem de agradecimento registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4b — Pediu avaliação no Google Maps</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem pedido de avaliação no Google</td>
+        </tr></tbody>
+      </table>
+      <div style="margin-top:14px;text-align:right;">
+        <a href="https://chat.tork.services/app/accounts/5/conversations/3446" style="font-size:12px;color:#3b82f6;text-decoration:none;">🔗 Ver histórico no Chatwoot →</a>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;padding:24px;margin-bottom:28px;page-break-inside:avoid;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;color:#1e293b;">🔴 Anisio Ap  v  da Silva</h2>
+          <p style="margin:4px 0 0;font-size:13px;color:#64748b;">OS #3307 &nbsp;|&nbsp; 📅 18/06/2026 12:37 → 19/06/2026 15:14</p>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#dc2626;">25%</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">3/12 regras</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;width:35%;">REGRA</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;">EVIDÊNCIA / CITAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 1a — Cordialidade e respeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[18/06/2026 12:38] Cliente (Anisio Ap  v  da Silva): Obrigado</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 1b — Registrou acordo por escrito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Nenhum registro explícito de combinado anterior</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2d — Enviou checklist/laudo de entrada</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem menção a checklist ou laudo de vistoria</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2b — Enviou vídeo do defeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de vídeo do defeito</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2a — Enviou orçamento formal (PDF/link)</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=6cXvM4OHeAX4co5eBzvtwQ==)</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2c — Explicou consequências de não reparar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem explicação de consequências</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 2e — Obteve aprovação explícita do cliente</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[18/06/2026 12:38] Cliente (Anisio Ap  v  da Silva): Pode fazer👍</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3a — Enviou checklist mecânico complementar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem checklist complementar do mecânico</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3b — Enviou vídeo de up-sell</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem vídeo de itens adicionais</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3c — Explicou serviços extras em texto</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem descrição textual de serviços extras</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4a — Agradecimento / follow-up pós-entrega</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem mensagem de agradecimento registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4b — Pediu avaliação no Google Maps</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem pedido de avaliação no Google</td>
+        </tr></tbody>
+      </table>
+      <div style="margin-top:14px;text-align:right;">
+        <a href="https://chat.tork.services/app/accounts/5/conversations/3307" style="font-size:12px;color:#3b82f6;text-decoration:none;">🔗 Ver histórico no Chatwoot →</a>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #fca5a5;border-radius:10px;padding:24px;margin-bottom:28px;page-break-inside:avoid;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;font-size:18px;color:#1e293b;">🔴 5511945581584</h2>
+          <p style="margin:4px 0 0;font-size:13px;color:#64748b;">OS #3433 &nbsp;|&nbsp; 📅 18/06/2026 13:04 → 18/06/2026 13:39</p>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 20px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:#dc2626;">8%</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">1/12 regras</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;width:35%;">REGRA</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#64748b;font-weight:600;">EVIDÊNCIA / CITAÇÃO</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">✅ 1a — Cordialidade e respeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">[18/06/2026 13:04] Gerente: Boa tarde ricardo</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 1b — Registrou acordo por escrito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Nenhum registro explícito de combinado anterior</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2d — Enviou checklist/laudo de entrada</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem menção a checklist ou laudo de vistoria</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2b — Enviou vídeo do defeito</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de vídeo do defeito</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2a — Enviou orçamento formal (PDF/link)</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem envio de link ou PDF de orçamento</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2c — Explicou consequências de não reparar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem explicação de consequências</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 2e — Obteve aprovação explícita do cliente</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem aprovação explícita registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3a — Enviou checklist mecânico complementar</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem checklist complementar do mecânico</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3b — Enviou vídeo de up-sell</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem vídeo de itens adicionais</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 3c — Explicou serviços extras em texto</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem descrição textual de serviços extras</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4a — Agradecimento / follow-up pós-entrega</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem mensagem de agradecimento registrada</td>
+        </tr>
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:8px 12px;font-size:13px;color:#374151;white-space:nowrap;">❌ 4b — Pediu avaliação no Google Maps</td>
+          <td style="padding:8px 12px;font-size:12px;color:#6b7280;font-style:italic;">❌ Sem pedido de avaliação no Google</td>
+        </tr></tbody>
+      </table>
+      <div style="margin-top:14px;text-align:right;">
+        <a href="https://chat.tork.services/app/accounts/5/conversations/3433" style="font-size:12px;color:#3b82f6;text-decoration:none;">🔗 Ver histórico no Chatwoot →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RODAPÉ -->
+  <div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px;margin-top:16px;border-top:1px solid #e2e8f0;">
+    Relatório gerado automaticamente em 29/06/2026, 11:25 — Auditoria de Qualidade de Atendimento — DOM_PEDRO
+  </div>
+
+</div>
+</body>
+</html>
