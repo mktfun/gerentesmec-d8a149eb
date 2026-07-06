@@ -1,0 +1,32 @@
+==============================================
+Cliente: Palma Loggi
+ID Conversa: 3644
+Total de Mensagens: 20
+==============================================
+
+[Oficina (Gerente)]: Ok, combinado.
+[Cliente (Palma Loggi)]: Ok 👍🏻, estou externo fazendo um serviço, mais assim que finalizar já vou buscar o carro beleza
+[Oficina (Gerente)]: Sim
+[Oficina (Gerente)]: Si
+[Cliente (Palma Loggi)]: Bom dia, tudo bem e você? Ok , combinado assim, você zerou as falhas também que me falou ontem?
+[Oficina (Gerente)]: Bom dia, Sr. Luís, tudo bem?
+
+Realizamos a substituição do terminal da bateria e, até o momento, o veículo não voltou a apresentar a falha relatada. Dessa forma, faremos a liberação do veículo.
+
+Será cobrado apenas o valor referente ao diagnóstico realizado e à substituição do terminal da bateria.
+
+Caso o defeito volte a ocorrer, pedimos que nos traga o veículo novamente para darmos continuidade ao diagnóstico e prosseguirmos com os testes necessários.
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Palma Loggi)]: 👍🏻
+[Oficina (Gerente)]: Eu que agradeço, vou avisando
+[Cliente (Palma Loggi)]: Obrigado
+[Cliente (Palma Loggi)]: Entendi, tá ok, amanhã temos um compromisso precisaria do carro, mais aguardo me avisar
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Boa tarde Sr. Luis, tudo bem?
+[Cliente (Palma Loggi)]: Boa tarde, já tem a confirmação se o carro ficou pronto?
+[Cliente (Palma Loggi)]: Daqui a pouco eu chego por aí para retirar o carro
+[Cliente (Palma Loggi)]: Bom dia
+[Oficina (Gerente)]: Bom dia Sr. Luis, tudo bem?
+[Cliente (Palma Loggi)]: Infelizmente não tenho recursos no momento
+[Cliente (Palma Loggi)]: Então não farei o serviço agora
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)

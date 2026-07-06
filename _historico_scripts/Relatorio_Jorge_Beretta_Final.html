@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline de Auditoria Mestre - Jorge Beretta</title>
+    <style>
+        body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0f19; color: #e2e8f0; padding: 30px; line-height: 1.6; }
+        h1 { text-align: center; color: #38bdf8; margin-bottom: 5px; font-size: 2.5em; text-transform: uppercase; letter-spacing: 2px;}
+        h3 { text-align: center; color: #94a3b8; font-weight: 400; margin-top: 0; margin-bottom: 40px;}
+        .unit-container { background-color: #1e293b; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        .unit-title { font-size: 1.6em; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 25px; color: #38bdf8; font-weight: 600;}
+        .conv-card { background-color: #0f172a; border-left: 6px solid #ef4444; padding: 20px; margin-bottom: 20px; border-radius: 8px; position: relative;}
+        .conv-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;}
+        .customer-name { font-size: 1.3em; color: #f8fafc; font-weight: 500;}
+        .score { font-size: 1.5em; font-weight: 800; color: #ef4444; background: #450a0a; padding: 4px 10px; border-radius: 6px;}
+        .gatekeeper-badge { font-size: 0.8em; background-color: #22c55e; color: #000; padding: 3px 8px; border-radius: 4px; font-weight: 800; margin-left: 10px; }
+        .summary-box { background-color: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid #ef4444;}
+        .falha-box { margin-bottom: 15px; background: #182335; padding: 10px; border-radius: 6px; border-left: 3px solid #f59e0b; }
+        .falha-regra { color: #fca5a5; font-weight: bold; }
+        .quote { font-family: monospace; color: #94a3b8; margin-top: 5px; font-style: italic; background: #0b0f19; padding: 5px; border-radius: 4px; }
+        .btn { display: inline-flex; align-items: center; background-color: #0ea5e9; color: white; text-decoration: none; padding: 10px 20px; border-radius: 6px; margin-top: 15px; font-weight: 600; transition: all 0.2s;}
+        .btn:hover { background-color: #0284c7; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <h1>Painel de Governança (Zero Alucinação)</h1>
+    <h3>Unidade: Jorge Beretta | Apenas Bottom-3 Validadas</h3>
+
+    <div class="unit-container">
+        <div class="unit-title">🏢 JORGE BERETTA</div>
+        <div class="conv-card">
+            <div class="conv-header">
+                <span class="customer-name">👤 Cliente: Daniel <span style="font-size: 0.7em; color: #64748b;">(#2560)</span> <span class="gatekeeper-badge">PASS (Finalizado)</span></span>
+                <span class="score">Score: 35</span>
+            </div>
+            
+            <div class="summary-box">
+                <strong>🤖 Veredito da IA (Mestre):</strong> ⚠️ GATEKEEPER PASS: OS encerrada/negociada. AUDITORIA: Orçamento alto jogado de forma abrupta ("Ficou 7.600"). Falta de clareza na explicação dos itens cobrados.
+            </div>
+
+            <strong>❌ Falhas (Evidências Quote-Based):</strong>
+            <div>
+                
+                    <div class="falha-box">
+                        <div class="falha-regra">Faltou 2b: Enviou vídeo defeito (-10 pts)</div>
+                        <div class="quote">📜 Evidência Extraída: (Arquivo/Mídia anexado) - LLM leu os anexos, porém em nenhum momento o Gerente explicou em texto ou áudio transcrito o que era o vídeo. O protocolo exige explicar o vídeo.</div>
+                    </div>
+                
+                    <div class="falha-box">
+                        <div class="falha-regra">Faltou 1b: Registrou resumo do acordado (-10 pts)</div>
+                        <div class="quote">📜 Evidência Extraída: "Ficou 7.600" - LLM acusa falha porque apenas jogar o valor final não resume o serviço acordado.</div>
+                    </div>
+                
+            </div>
+            <a class="btn" href="https://chat.tork.services/app/accounts/5/conversations/2560" target="_blank">🔍 Abrir no Chatwoot</a>
+        </div>
+        <div class="conv-card">
+            <div class="conv-header">
+                <span class="customer-name">👤 Cliente: Gerson <span style="font-size: 0.7em; color: #64748b;">(#3664)</span> <span class="gatekeeper-badge">PASS (Finalizado)</span></span>
+                <span class="score">Score: 40</span>
+            </div>
+            
+            <div class="summary-box">
+                <strong>🤖 Veredito da IA (Mestre):</strong> ⚠️ GATEKEEPER PASS: OS encerrada. AUDITORIA: Falha crítica de compliance. O Gerente não exigiu a aprovação textual explícita do cliente após orçar o Eixo Cardan.
+            </div>
+
+            <strong>❌ Falhas (Evidências Quote-Based):</strong>
+            <div>
+                
+                    <div class="falha-box">
+                        <div class="falha-regra">Faltou 2e: Obteve aprovação explícita (sim/ok) (-10 pts)</div>
+                        <div class="quote">📜 Evidência Extraída: O cliente disse "Eixo cardan da capitiva a base de troca fica 1.400", o gerente respondeu "Pode ser tipo assim". Não houve a captura da palavra "Aprovado" ou "Pode fazer" por parte do cliente para segurança jurídica.</div>
+                    </div>
+                
+                    <div class="falha-box">
+                        <div class="falha-regra">Faltou 2d: Enviou link checklist (-8 pts)</div>
+                        <div class="quote">📜 Evidência Extraída: Buscando pela string 'http' ou '.aspx' no texto da oficina. Resultado nulo. Não enviado.</div>
+                    </div>
+                
+            </div>
+            <a class="btn" href="https://chat.tork.services/app/accounts/5/conversations/3664" target="_blank">🔍 Abrir no Chatwoot</a>
+        </div>
+        <div class="conv-card">
+            <div class="conv-header">
+                <span class="customer-name">👤 Cliente: Erivan <span style="font-size: 0.7em; color: #64748b;">(#3089)</span> <span class="gatekeeper-badge">PASS (Finalizado)</span></span>
+                <span class="score">Score: 50</span>
+            </div>
+            
+            <div class="summary-box">
+                <strong>🤖 Veredito da IA (Mestre):</strong> ⚠️ GATEKEEPER PASS: Carro liberado/Problema reportado como crônico. AUDITORIA: Falha na empatia e documentação textual do diagnóstico.
+            </div>
+
+            <strong>❌ Falhas (Evidências Quote-Based):</strong>
+            <div>
+                
+                    <div class="falha-box">
+                        <div class="falha-regra">Faltou 1a: Cordial/respeitoso na recepção (-8 pts)</div>
+                        <div class="quote">📜 Evidência Extraída: O cliente clamou: "Preciso que você resolva por favor qualquer coisa vc pode mim liga amanhã" e o gerente apenas soltou uma mensagem genérica sem empatia ao problema recorrente.</div>
+                    </div>
+                
+            </div>
+            <a class="btn" href="https://chat.tork.services/app/accounts/5/conversations/3089" target="_blank">🔍 Abrir no Chatwoot</a>
+        </div>
+    </div>
+</body>
+</html>

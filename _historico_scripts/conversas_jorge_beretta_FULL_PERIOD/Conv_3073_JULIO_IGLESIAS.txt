@@ -1,0 +1,35 @@
+==============================================
+Cliente: JULIO IGLESIAS
+ID Conversa: 3073
+Total de Mensagens: 23
+Status de Triagem: APROVADO
+==============================================
+
+[29/06/2026 10:39] [Cliente (JULIO IGLESIAS)]: Obrigado
+[29/06/2026 10:39] [Cliente (JULIO IGLESIAS)]: Ok
+[29/06/2026 10:28] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[29/06/2026 10:27] [Cliente (JULIO IGLESIAS)]: (Arquivo/Mídia anexado)
+[29/06/2026 09:11] [Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem? Como está o carro, tudo certo?
+[15/06/2026 09:26] [Cliente (JULIO IGLESIAS)]: Obrigado
+[15/06/2026 09:26] [Oficina (Gerente)]: Combinado, sem problemas, vamos nos falando.
+[15/06/2026 08:38] [Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem?
+
+Como está o carro até o momento, tudo certo?
+[11/06/2026 15:28] [Oficina (Gerente)]: Combinado, sem problemas.
+[11/06/2026 15:27] [Cliente (JULIO IGLESIAS)]: Irei passar aí 16:30 ok?
+[11/06/2026 15:27] [Cliente (JULIO IGLESIAS)]: Obrigado
+[11/06/2026 15:27] [Cliente (JULIO IGLESIAS)]: Ok
+[11/06/2026 15:26] [Cliente (JULIO IGLESIAS)]: Boa tarde
+[11/06/2026 15:25] [Oficina (Gerente)]: Sr. Julio, conforme conversamos por telefone, rodamos cerca de 100km com o veículo após a substituição da lâmpada e o veículo até o momento não nos apresentou mais o defeito.
+
+Vamos realizar a liberação do veículo ficando apenas o diagnóstico e a lâmpada e o veículo permanece em observação.
+Andar com veículo e caso houver alguma anomalia ou apresentar o defeito novamente, trazer de volta para darmos continuidade ao diagnóstico, tudo bem?
+[11/06/2026 12:54] [Cliente (JULIO IGLESIAS)]: 🙏
+[11/06/2026 12:54] [Oficina (Gerente)]: Só finalizando um atendimento
+[11/06/2026 12:54] [Oficina (Gerente)]: Um min, já te retorno
+[11/06/2026 12:53] [Cliente (JULIO IGLESIAS)]: Alguma previsão?
+[11/06/2026 12:46] [Cliente (JULIO IGLESIAS)]: Bom dia
+[11/06/2026 12:45] [Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem?
+[11/06/2026 12:36] [Cliente (JULIO IGLESIAS)]: (Arquivo/Mídia anexado)
+[10/06/2026 16:49] [Cliente (JULIO IGLESIAS)]: Oi
+[10/06/2026 16:44] [Oficina (Gerente)]: Oi, aqui é Erik

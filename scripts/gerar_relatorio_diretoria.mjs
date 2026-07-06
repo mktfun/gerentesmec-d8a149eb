@@ -187,20 +187,11 @@ async function main() {
         let piorJustificativa = '';
         if (l.ai_feedback) {
              piorJustificativa = l.ai_feedback;
-        } else if (l.audit_reasons && typeof l.audit_reasons === 'object') {
-             const reasons = Object.values(l.audit_reasons)
-                .filter(reason => reason && typeof reason === 'string' && reason.length > 5);
-             if (reasons.length > 0) {
-                 piorJustificativa = reasons.map(r => "⚠️ " + r).join('<br><br>');
-             } else {
-                 piorJustificativa = l.closing_summary || "Parecer não conclusivo.";
-             }
-        } else {
-             piorJustificativa = l.closing_summary || "A negociação não atingiu os gatilhos mínimos de engajamento do funil.";
-        }
+        let falhas = l.manager_failures || l.closing_summary || "A negociação não atingiu os gatilhos mínimos de engajamento do funil.";
+        let resumo = l.conversation_summary || "Sem resumo disponível.";
 
         html += `
-                <div class="card p-5 border-l-4 border-l-red-500 avoid-break">
+                <div class="card p-5 border-l-4 border-l-red-500 avoid-break mb-4">
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <span class="font-bold text-gray-900">${l.customer_name}</span>
@@ -210,8 +201,11 @@ async function main() {
                             Nota: ${l.score}%
                         </span>
                     </div>
-                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
-                        "${piorJustificativa}"
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-2 mb-2 bg-gray-50">
+                        <strong>📝 Resumo da Conversa:</strong><br>${resumo}
+                    </p>
+                    <p class="text-sm text-red-800 border-l-2 border-red-400 pl-3 py-2 mb-4 bg-red-50 font-medium">
+                        <strong>⚠️ O que o Gerente Vacilou:</strong><br>${falhas}
                     </p>
                     <a href="${link}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
@@ -236,17 +230,11 @@ async function main() {
       
       bestLeads.forEach(l => {
         const link = "https://chat.tork.services/app/accounts/5/conversations/" + l.chatwoot_conversation_id;
-        let elogio = '';
-        if (l.ai_feedback) {
-             elogio = l.ai_feedback;
-        } else if (l.closing_summary) {
-             elogio = l.closing_summary;
-        } else {
-             elogio = "Atendimento de ponta, engajamento alto e conversão garantida de acordo com os padrões da oficina.";
-        }
+        let analise = l.manager_failures || l.closing_summary || "Atendimento de excelência sem falhas detectadas.";
+        let resumo = l.conversation_summary || "Sem resumo disponível.";
         
         html += `
-                <div class="card p-5 border-l-4 border-l-emerald-500 avoid-break">
+                <div class="card p-5 border-l-4 border-l-emerald-500 avoid-break mb-4">
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <span class="font-bold text-gray-900">${l.customer_name}</span>
@@ -256,8 +244,11 @@ async function main() {
                             Nota: ${l.score}%
                         </span>
                     </div>
-                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-1 mb-4 bg-gray-50">
-                        "${elogio}"
+                    <p class="text-sm text-gray-700 italic border-l-2 border-gray-200 pl-3 py-2 mb-2 bg-gray-50">
+                        <strong>📝 Resumo da Conversa:</strong><br>${resumo}
+                    </p>
+                    <p class="text-sm text-emerald-800 border-l-2 border-emerald-400 pl-3 py-2 mb-4 bg-emerald-50 font-medium">
+                        <strong>✅ Análise de Postura:</strong><br>${analise}
                     </p>
                     <a href="${link}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded border border-blue-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>

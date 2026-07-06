@@ -1,0 +1,36 @@
+==============================================
+Cliente: Ivan
+ID Conversa: 3244
+Total de Mensagens: 20
+==============================================
+
+[Cliente (Ivan)]: Ok
+[Oficina (Gerente)]: Entendo, por está relacionado ao tempo frio, acompanha e vai me avisando, qualquer dúvida pode nos trazer
+[Cliente (Ivan)]: Quando gelado
+[Cliente (Ivan)]: Bom hj pela manhã quando liguei , deu umas falhadas
+[Cliente (Ivan)]: Bom dia
+[Oficina (Gerente)]: Bom dia Sr. Ivan, tudo bem?
+
+Como está o carro, tudo certo?
+[Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=&gs_lcrp=EgZjaHJvbWUqBggBEEUYQTIGCAAQRRg8MgYIARBFGEEyBwgCEC4YgAQyFwgDEC4YChgLGIMBGMcBGLEDGNEDGIAEMgYIBBBFGDwyBggFEEUYQTIGCAYQRRg8MgYIBxBFGDzSAQgxODE1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[Cliente (Ivan)]: Feito ok
+[Cliente (Ivan)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Isso a mesma.
+
+CNPJ: 55.143.159/0001-57
+Mecânica Popular ou DHJV Serviços Automotivos LTDA
+[Cliente (Ivan)]: Ok na mesma chave pix ?
+[Oficina (Gerente)]: R$1.829,45 com o desconto
+[Cliente (Ivan)]: Vc me passa o valor do restante , pra mim já fazer o pix , vc vai me dar aquele 5% né rsrs
+[Oficina (Gerente)]: Pode sim
+[Cliente (Ivan)]: Tá  , posso então ir direto nesse horario
+[Oficina (Gerente)]: Por volta das 16:00 está pronto para retirada
+[Oficina (Gerente)]: Sem problemas, Sr. Ivan. O orçamento permanecerá registrado. Quando desejar realizar o serviço, ficaremos à disposição. Recomendo apenas atenção ao sistema de freios por se tratar de item de segurança.
+[Cliente (Ivan)]: Vou esperar um pouco mais ok , por hora somente o que já foi feito ok
+[Oficina (Gerente)]: Prezado(a) IVAN, segue Orçamento nº 1881 de 19/06/2026 placa: EXB7354
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHYJUKP7n6MQzg==) 
+
+
+Aqui segue o orçamento formalizado, referente ao freio dianteiro.
+[Oficina (Gerente)]: Pelo menos fica mais seguro e as bandejas programamos um dia que possa parar

@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoria de Qualidade - Jorge Beretta (Novo Filtro)</title>
+    <style>
+        body { font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f1115; color: #e2e8f0; padding: 30px; line-height: 1.6; }
+        h1 { text-align: center; color: #38bdf8; margin-bottom: 5px; font-size: 2.5em; text-transform: uppercase; letter-spacing: 2px;}
+        h3 { text-align: center; color: #94a3b8; font-weight: 400; margin-top: 0; margin-bottom: 40px;}
+        .unit-container { background-color: #1e293b; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); border: 1px solid #334155; }
+        .unit-title { font-size: 1.6em; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 25px; color: #7dd3fc; font-weight: 600;}
+        .conv-card { background-color: #0f172a; border-left: 6px solid #ef4444; padding: 20px; margin-bottom: 20px; border-radius: 8px; position: relative;}
+        .conv-card.good { border-left: 6px solid #22c55e; }
+        .conv-card.medium { border-left: 6px solid #f59e0b; }
+        .conv-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;}
+        .customer-name { font-size: 1.3em; color: #f8fafc; font-weight: 500;}
+        .score { font-size: 1.5em; font-weight: 800; color: #ef4444; }
+        .score.medium { color: #f59e0b; }
+        .score.good { color: #22c55e; }
+        .summary-box { background-color: #1e293b; padding: 15px; border-radius: 6px; margin-bottom: 15px; font-style: italic; color: #cbd5e1; border-left: 3px solid #38bdf8;}
+        ul { margin: 0; padding-left: 20px; color: #fca5a5; }
+        li { margin-bottom: 8px; }
+        .btn { display: inline-flex; align-items: center; background-color: #0ea5e9; color: white; text-decoration: none; padding: 10px 20px; border-radius: 6px; margin-top: 15px; font-weight: 600; transition: all 0.2s;}
+        .btn:hover { background-color: #0284c7; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <h1>Auditoria Tork: Jorge Beretta</h1>
+    <h3>Somente Leads Verificados pelo Filtro V4</h3>
+
+    <div class="unit-container">
+        <div class="unit-title">🏢 Unidade: JORGE BERETTA</div>
+        <div class="conv-card ">
+            <div class="conv-header">
+                <span class="customer-name">👤 Cliente: Fabiana <span style="font-size: 0.7em; color: #64748b;">(#3978)</span></span>
+                <span class="score ">20/100</span>
+            </div>
+            
+            <div class="summary-box">
+                <strong>🤖 Resumo da IA:</strong> Cliente Fabiana queria trocar os dois rolamentos do C3 e as bandejas. Atendente informou que só faz orçamento com avaliação prévia. A conversa encerrou sem dar continuidade no checklist ou aprovação.
+            </div>
+
+            <strong>❌ Falhas Identificadas no Protocolo:</strong>
+            <ul>
+                <li>Faltou 1b: Registrou resumo do acordado (-10)</li><li>Faltou 2a: Enviou link orçamento (-8)</li><li>Faltou 2b: Enviou vídeo defeito (-10)</li><li>Faltou 2c: Explicou consequências (-9)</li><li>Faltou 2d: Enviou link checklist (-8)</li><li>Faltou 2e: Obteve aprovação explícita (sim/ok) (-10)</li>
+            </ul>
+            <a class="btn" href="https://chat.tork.services/app/accounts/5/conversations/3978" target="_blank">🔍 Abrir no Chatwoot</a>
+        </div>
+        <div class="conv-card medium">
+            <div class="conv-header">
+                <span class="customer-name">👤 Cliente: Neto <span style="font-size: 0.7em; color: #64748b;">(#3684)</span></span>
+                <span class="score medium">60/100</span>
+            </div>
+            
+            <div class="summary-box">
+                <strong>🤖 Resumo da IA:</strong> Cliente Neto. Orçamento Ford Fusion. O atendente enviou o link do PDF do orçamento, explicou as regras de estadia e pediu aprovação, mas não enviou o link do checklist e nem o vídeo do defeito antes de pedir a aprovação.
+            </div>
+
+            <strong>❌ Falhas Identificadas no Protocolo:</strong>
+            <ul>
+                <li>Faltou 2b: Enviou vídeo defeito (-10)</li><li>Faltou 2d: Enviou link checklist (-8)</li><li>Faltou 4b: Pediu avaliação no Google (-8)</li>
+            </ul>
+            <a class="btn" href="https://chat.tork.services/app/accounts/5/conversations/3684" target="_blank">🔍 Abrir no Chatwoot</a>
+        </div>
+        <div class="conv-card good">
+            <div class="conv-header">
+                <span class="customer-name">👤 Cliente: JULIO IGLESIAS <span style="font-size: 0.7em; color: #64748b;">(#3073)</span></span>
+                <span class="score good">85/100</span>
+            </div>
+            
+            <div class="summary-box">
+                <strong>🤖 Resumo da IA:</strong> Cliente Julio Iglesias. Carro ficou em observação e rodou 100km sem defeito. Atendente explicou perfeitamente as consequências, orientou o cliente sobre a liberação condicional. Excelente condução técnica, faltou apenas pedir o review do Google.
+            </div>
+
+            <strong>❌ Falhas Identificadas no Protocolo:</strong>
+            <ul>
+                <li>Faltou 4b: Pediu avaliação no Google (-8)</li><li>Faltou 1a: Cordial/respeitoso na recepção (-7)</li>
+            </ul>
+            <a class="btn" href="https://chat.tork.services/app/accounts/5/conversations/3073" target="_blank">🔍 Abrir no Chatwoot</a>
+        </div>
+    </div>
+</body>
+</html>

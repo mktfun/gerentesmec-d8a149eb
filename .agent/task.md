@@ -1,0 +1,9 @@
+- `[x]` Plano de estruturação na Área de Trabalho
+- `[x]` Criar script `run_pipeline.mjs` com organização de diretórios estrita
+- `[x]` Automatizar a execução em cascata de todos os processadores e módulos visuais
+- `[x]` Rotina de cópia/movimentação dos artefatos (HTML, JSON, TXT) para os subdiretórios finais
+- `[x]` Limpeza do espaço de trabalho (Scratch) após exportação
+- `[x]` Validar a geração da pasta na Área de Trabalho (Teste concluído com sucesso e Whisper baixado 100%)
+- `[x]` VIBE-APPLY: Refatorar Cérebro de Auditoria (`autonomous_auditor_v2.mjs`) adicionando Resumo e Crítica Gerencial.
+- `[x]` VIBE-APPLY: Alterar cartões front-end (`gerar_relatorio_diretoria.mjs`) para exibir os novos pontos cruciais do prompt.
+- `[x]` VIBE-APPLY: Criar `run_weekly_audit.ps1` e a `.agent/skills/auditor-autonomo/SKILL.md` para suportar agendamento do SO ou ativação por IA.

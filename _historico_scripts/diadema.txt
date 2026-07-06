@@ -1,0 +1,243 @@
+CONV_ID: 408
+[Cliente]: Blz
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: Estou mandando o cambio da tiggo 5x
+[Cliente]: Bom dia
+[Oficina]: Mano bom dia
+[Oficina]: Demoro
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: ???
+[Oficina]: Troca a embreagem aí se precisar?
+[Oficina]: Vc já pegou esse b.o
+[Oficina]: Fala comigo mano
+[Oficina]: A oo que é embreagem na9 é?
+[Oficina]: Faz ai
+[Oficina]: Fala comigo mano
+================
+CONV_ID: 2501
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: Sim mano,justamente, eu sei que você precisa pra isso mesmo
+[Cliente]: Seria mesmo para pagar a fatura do conserto do carro que ainda não foi feito
+[Cliente]: Não estou nem precisar para uso pessoal
+[Cliente]: Cara não sei nem oq falar
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Boa tarde
+[Oficina]: Sim mano,eu entendo,mas estamos correndo aqui
+[Cliente]: Entendo, tbm não contava que precisava fazer uma entrada tão alta por isso estou preocupado de pegar o carro
+[Cliente]: Se não estivesse feito a entra conseguia até segurar mais tempo
+[Cliente]: Você pediu o uma entrada e fiz já
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Sei que foi um serviço bem complicado
+[Cliente]: Preciso pegar o carro amanhã
+[Cliente]: Preciso arcar com os gastos que foram gerados
+[Cliente]: Não consigo esperar
+================
+CONV_ID: 298
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: Há blz mano
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Eu chamei ele pra saber do Siena dependendo do que ele falar já levo e trago o Siena
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Blz
+[Oficina]: Biluga
+[Oficina]: Bom dia mano vou da uma passada no médico acordei com febre e garganta enflamada
+[Cliente]: Blz
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Ta
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Vai q o cara bate o carro
+[Cliente]: Bom dia ok , o certo seria o carro ficar , caixa é item de segurança
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+================
+CONV_ID: 3919
+[Oficina]: Bom dia chefe,tranquilo
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: Boa tarde Evanildo 
+Por favor na segunda se puder no primeiro horário tenta vir passar a entrada no cartão,preciso laçar essa ordem de serviço se não vou ter problema com meu financeiro
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Blz irmao
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: Só clicar no azul
+[Oficina]: O link aí
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: Não conseguiu ainda
+[Cliente]: Oi
+[Oficina]: Se for cartão no seu nome o link da pra pagar normal,se yor em outro nome aí vai ter que passar o cartão aqui mesmo porque se não não aceita,ele bloqueia o pagamento
+[Oficina]: Tem que sair no nome de evanildo
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: OS40236. R$ 2.376,90. Realize o pagamento para concluir sua compra com o Link de Pagamento Rede https://www.userede.com.br/pagamentos/pt/grdlghib
+[Oficina]: Fecho
+[Oficina]: Já vamos começar a desmontar,aí fico no aguardo da entrada em 18x136,70 até o final do dia ta,estou aqui até as 18:00
+================
+CONV_ID: 1757
+[Oficina]: Ok,combinado 
+Bom dia
+[Cliente]: Ai vou deixar pra ele resolver isso primeiro
+[Cliente]: Bom dia irmão o auto elétrico disse que tem que fazer uns reparos antes parece que é problema de sensor e um tal de BPS
+[Cliente]: Irmão vou levar ai na segunda cedo
+[Oficina]: 🙏🏻
+[Cliente]: Valeu eu te aviso antes blz 👍🏽
+[Oficina]: Fecho mano
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: Pode mandar ele
+[Oficina]: Sim,segunda das 8 às 12:00
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: Se quiser o valor final parcelamos em até 18x no cartão
+================
+CONV_ID: 1453
+[Cliente]: Não dá pra andar nele assim, vou levar aí
+[Cliente]: Fui pegar o carro agora, ele tá com muita dificuldade pra ligar e quando liga tá batendo meio seco e sem força pra andar...
+[Cliente]: Boa noite, Anderson
+[Oficina]: Sim,faz tempo o sentido mesmo
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: O carro tá tremendo quando para...
+[Cliente]: (Arquivo/Mídia anexado)
+================
+CONV_ID: 343
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: Esta mensagem foi excluída
+[Oficina]: Esta mensagem foi excluída
+[Oficina]: Esta mensagem foi excluída
+[Oficina]: Esta mensagem foi excluída
+[Oficina]: **Todos a meu redor estão falando sobre esta notícia!**
+https://kwai-video.com/p/TXumyClE
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: Acabei de falar e mostrar para a portaria
+================
+CONV_ID: 3968
+[Oficina]: Tranquilo
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: Sim,pode trazer
+[Cliente]: Na segunda sir eu chega às 08:00 vcs conseguem troca
+[Cliente]: Ok
+[Oficina]: Segunda feira vai funcionar das 8 às 12:00
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: Jajá chego aí
+[Oficina]: Estamos até as 14:00
+[Oficina]: Sim
+[Oficina]: Bom dia
+[Cliente]: Vcs conseguem trocar óleo de uma Saveiro as 13:00 horas
+[Cliente]: Bom dia
+================
+CONV_ID: 3047
+[Cliente]: Não tô conseguindo ligar
+[Oficina]: Há fecho
+[Cliente]: Ja tô chegando
+[Cliente]: Tô indo
+[Oficina]: (Arquivo/Mídia anexado)
+[Oficina]: Ok
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: 1.125,00
+[Oficina]: Pix cnpj 
+17.953.410/0001-50 
+Empório do oleo ou brasicar
+[Cliente]: so vou fazer uma ligação aqui e ja pego
+[Cliente]: jaja eu vou
+[Cliente]: me manda o numero do pix?
+[Cliente]: oieee
+[Oficina]: Quando quiser pode vir buscar
+[Oficina]: Acabei de testar ele na rua,perfeito
+[Oficina]: O carro tá pronto
+[Oficina]: Oi Renata boa tarde
+[Oficina]: Blz
+[Cliente]: Obrigada
+[Cliente]: Blz, me avisa
+================
+CONV_ID: 258
+[Oficina]: Troca de óleo Motor :
+
+NIVUS 2023 GFO3J25
+
+-Qnt de litros:4
+-Valor por litro:70
+-Óleo cotado:shell VW 5w40 
+-Filtro de óleo50
+Mão de obra 60
+
+
+VALOR TOTAL:390,00
+COTAÇÃO VÁLIDA POR 5 DIAS
+[Cliente]: Troca de óleo Motor :
+
+NIVUS 2023 GFO3J25
+
+-Qnt de litros:
+-Valor por litro:
+-Óleo cotado:
+-Filtro de óleo
+
+
+VALOR TOTAL:
+COTAÇÃO VÁLIDA POR 5 DIAS
+[Cliente]: Bom dia Mb, blz brigaduuuuu😉
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: (Arquivo/Mídia anexado)
+[Oficina]: Ok
+[Cliente]: (11) 98736-1053
+geslayne
+[Cliente]: (Arquivo/Mídia anexado)
+[Cliente]: João
+[Oficina]: Tá ok
+[Cliente]: 11945533915
+jão felipe vai te chamar ai
+[Oficina]: Atf
+[Cliente]: e quantos litros ?
+[Cliente]: Atf ou cvt ?
+[Cliente]: Sportage 2008
+[Oficina]: (Arquivo/Mídia anexado)
+[Cliente]: qual o valor da maão de obra pra troca so o filtro desse cambio ?
+[Oficina]: Sim
+[Cliente]: blz
+[Cliente]: Civic 2015 faz só a troca de filtro do cambio ?
+================

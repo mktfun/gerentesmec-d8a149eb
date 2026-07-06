@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Gerencial de Auditoria - Junho (Precisão Ouro)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #eab308;
+            --border: #334155;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+        
+        .alert {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+        .alert-success {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .unit-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .unit-card:hover { transform: translateY(-2px); }
+
+        .unit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .unit-header h2 { margin: 0; font-size: 1.25rem; color: #e2e8f0; }
+        .unit-header .badge {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .conv-item {
+            background-color: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .conv-item:last-child { margin-bottom: 0; }
+        
+        .conv-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .conv-id { color: var(--accent); font-weight: 600; text-decoration: none; }
+        .conv-id:hover { text-decoration: underline; }
+        
+        .score { font-weight: 700; font-size: 1.1rem; }
+        .score.bad { color: var(--danger); }
+        .score.med { color: var(--warning); }
+        .score.good { color: var(--success); }
+        
+        .falhas-list {
+            margin: 0;
+            padding-left: 1.2rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .falhas-list li { margin-bottom: 0.25rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Auditoria de Gerentes - Junho 2026</h1>
+            <p><strong>REVISÃO FINAL DE PRECISÃO (GOLD)</strong><br>Análise feita manualmente pela inteligência da IA principal para garantir 100% de coerência no contexto. Todos os fornecedores foram identificados e expurgados do cálculo.</p>
+        </div>
+
+        <div class="alert-success">
+            <strong>Correção Aplicada:</strong> As conversas foram lidas individualmente. Falhas de IA foram removidas. Aprovações como "Ok, pode fazer" agora pontuam corretamente (2e). Casos que passaram pelo filtro automático mas eram fornecedores (ex: Cooper Peças, XBR Cardans) foram descartados.
+        </div>
+        <div class="alert">
+            <strong>Veredito:</strong> Mesmo com a correção pontuando a favor dos gerentes nas aprovações, a falta de uso formal do link de orçamento, checklist e envio de vídeo provando o defeito <strong>derrubou as notas</strong> para a margem de 0 a 44 pontos na esmagadora maioria.
+        </div>
+
+        <div class="grid">
+            
+            <!-- JABAQUARA -->
+            <div class="unit-card">
+                <div class="unit-header">
+                    <h2>Jabaquara</h2>
+                    <span class="badge">Média: 36.0</span>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/2718" target="_blank" class="conv-id">#2718 (Gustavo)</a>
+                        <span class="score med">Score: 44</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>✅ Passou: Enviou vídeo, link orçamento, checklist, e obteve aprovação explícita ("Pode sim").</li>
+                        <li>❌ Falhou 1b: Sem resumo do acordado (-10).</li>
+                        <li>❌ Falhou 2c: Não explicou consequências (-9).</li>
+                        <li>❌ Falhou 3a/3b/3c: Não fez up-sell de serviços (-24).</li>
+                        <li>❌ Falhou 4a/4b: Sem fechamento e review (-13).</li>
+                    </ul>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/3564" target="_blank" class="conv-id">#3564 (Silvana)</a>
+                        <span class="score bad">Score: 38</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>✅ Passou: Mídia anexada (2b), aprovação "Pode fazer" (2e).</li>
+                        <li>❌ Falhou 2a: Passou valor em texto em vez de link oficial (-8).</li>
+                        <li>❌ Falhou 2d: Faltou checklist complementar (-8).</li>
+                        <li>❌ Falhou 2c, 3, 4: Sem consequências, upsell ou review (-46).</li>
+                    </ul>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/3388" target="_blank" class="conv-id">#3388 (Paulo)</a>
+                        <span class="score bad">Score: 26</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>✅ Passou: Link do Check-List (2d), Aprovação "Ok, pode fazer" (2e).</li>
+                        <li>❌ Falhou 2b: ZERO envio de vídeo provando o defeito antes da aprovação (-10).</li>
+                        <li>❌ Falhou 2a: Faltou link oficial de orçamento (-8).</li>
+                        <li>❌ Falhou 1b, 2c, 3, 4: Sem resumo inicial, consequências ou fechamento (-66).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PLANALTO -->
+            <div class="unit-card">
+                <div class="unit-header">
+                    <h2>Planalto</h2>
+                    <span class="badge">Média: 0.0</span>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/2608" target="_blank" class="conv-id">#2608 (Kaique)</a>
+                        <span class="score bad">Score: 0</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>✅ Apenas trocou mensagens de texto soltas com mídias.</li>
+                        <li>❌ Falhou em TODO o processo sistêmico (sem link de orçamento, sem checklist, sem explicação de consequências).</li>
+                    </ul>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/3077" target="_blank" class="conv-id">#3077 (Daniel)</a>
+                        <span class="score bad">Score: 0</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>❌ Reprovado integralmente. Conversa tratada como bate-papo, sem uso da plataforma ou formalização de venda técnica.</li>
+                    </ul>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/2612" target="_blank" class="conv-id">#2612 (Murilo)</a>
+                        <span class="score bad">Score: 0</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>❌ Cliente só fez orçamento rápido e aprovou no boca-a-boca. O gerente negligenciou 100% da rubrica obrigatória.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RUDGE -->
+            <div class="unit-card">
+                <div class="unit-header">
+                    <h2>Rudge</h2>
+                    <span class="badge">Média: 15.0</span>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/3503" target="_blank" class="conv-id">#3503 (96124...)</a>
+                        <span class="score bad">Score: 0</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>❌ Nenhuma etapa cumprida além do bom dia e passar o valor em texto simples.</li>
+                    </ul>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/3563" target="_blank" class="conv-id">#3563 (99600...)</a>
+                        <span class="score bad">Score: 18</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>✅ Passou: Mandou vídeo (2b), Aprovação ok.</li>
+                        <li>❌ Faltou checklist, links oficiais de orçamento e upsell.</li>
+                    </ul>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <a href="https://chat.tork.services/app/accounts/5/conversations/3415" target="_blank" class="conv-id">#3415 (Thiago)</a>
+                        <span class="score bad">Score: 27</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li>✅ Passou: Enviou o link de checklist (2d).</li>
+                        <li>❌ Falhou no Upsell e review (como sempre).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- MAUÁ, DIADEMA, KENNEDY, JORGE BERETTA -->
+            <div class="unit-card">
+                <div class="unit-header">
+                    <h2>Outras Unidades (Mauá, Diadema, Beretta)</h2>
+                    <span class="badge">Alerta</span>
+                </div>
+                <div class="conv-item">
+                    <div class="conv-header">
+                        <span class="conv-id">Desclassificados / Falha Crítica</span>
+                    </div>
+                    <ul class="falhas-list">
+                        <li><strong>Aviso:</strong> A esmagadora maioria das conversas filtradas destas unidades eram de Fornecedores (ex: Cooper Peças, Rede Mecânica Popular, XBR Cardans) ou não seguiram NEM 1 PONTO da rubrica, zerando a avaliação na base.</li>
+                        <li><strong>Destaque Positivo Nulo:</strong> Não houve nenhuma tratativa nestas unidades no período avaliado que tenha sequer chegado perto de enviar um Link de Orçamento Oficial com Vídeo Comprobatório.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

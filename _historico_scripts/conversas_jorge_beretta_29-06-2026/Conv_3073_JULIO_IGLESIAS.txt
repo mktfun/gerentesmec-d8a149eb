@@ -1,0 +1,30 @@
+==============================================
+Cliente: JULIO IGLESIAS
+ID Conversa: 3073
+Total de Mensagens: 19
+==============================================
+
+[Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem? Como está o carro, tudo certo?
+[Cliente (JULIO IGLESIAS)]: Obrigado
+[Oficina (Gerente)]: Combinado, sem problemas, vamos nos falando.
+[Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem?
+
+Como está o carro até o momento, tudo certo?
+[Oficina (Gerente)]: Combinado, sem problemas.
+[Cliente (JULIO IGLESIAS)]: Irei passar aí 16:30 ok?
+[Cliente (JULIO IGLESIAS)]: Obrigado
+[Cliente (JULIO IGLESIAS)]: Ok
+[Cliente (JULIO IGLESIAS)]: Boa tarde
+[Oficina (Gerente)]: Sr. Julio, conforme conversamos por telefone, rodamos cerca de 100km com o veículo após a substituição da lâmpada e o veículo até o momento não nos apresentou mais o defeito.
+
+Vamos realizar a liberação do veículo ficando apenas o diagnóstico e a lâmpada e o veículo permanece em observação.
+Andar com veículo e caso houver alguma anomalia ou apresentar o defeito novamente, trazer de volta para darmos continuidade ao diagnóstico, tudo bem?
+[Cliente (JULIO IGLESIAS)]: 🙏
+[Oficina (Gerente)]: Só finalizando um atendimento
+[Oficina (Gerente)]: Um min, já te retorno
+[Cliente (JULIO IGLESIAS)]: Alguma previsão?
+[Cliente (JULIO IGLESIAS)]: Bom dia
+[Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem?
+[Cliente (JULIO IGLESIAS)]: (Arquivo/Mídia anexado)
+[Cliente (JULIO IGLESIAS)]: Oi
+[Oficina (Gerente)]: Oi, aqui é Erik

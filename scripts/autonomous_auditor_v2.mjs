@@ -102,20 +102,21 @@ Veículo: ${leadData.customer_vehicle || 'Não informado'}
 Estágio Atual: ${leadData.funnel_stage}
 
 TAREFA 1: AVALIAÇÃO GLOBAL (Checklist)
-1a: Gerente se apresentou e perguntou como pode ajudar?
-1b: Solicitou placa do veículo?
-2a: Explicou a necessidade do diagnóstico?
-2b: Enviou o link/PDF do Checklist de Diagnóstico?
-2c: Informou os problemas com clareza?
-2d: Enviou vídeo demonstrando o defeito?
-2e: Enviou orçamento detalhado com peças e mão de obra?
-3a: Respondeu objeções técnicas do cliente?
-3b: Ofereceu alternativas de pagamento?
-3c: Passou confiança e profissionalismo?
+1a: Atendeu em menos de 10 minutos após a primeira mensagem?
+1b: Acolheu o cliente com empatia e entusiasmo?
+2a: Fez perguntas investigativas para entender o problema real?
+2b: Evitou passar preços exatos antes de ver o veículo?
+2c: Puxou a responsabilidade da venda pro WhatsApp (e não apenas mandou vir na loja)?
+2d: Usou áudio ou vídeo para criar autoridade técnica?
+2e: Fez o quebra-objeções após o cliente relutar no preço?
+3a: Tentou oferecer revisão de outros itens preventivos (Up-Sell/Cross-Sell)?
 4a: Agradeceu após finalizar atendimento? (Apenas se fechar ou perder)
 4b: Enviou link de avaliação do Google? (Apenas se fechar ou perder)
 
-TAREFA 2: NOTINHAS E RESUMOS DE MÍDIA
+TAREFA 2: CRÍTICA GERENCIAL (O QUE ELE VACILOU)
+Preencha a chave 'manager_failures' focando em expor exatamente o que faltou na atuação do gerente. A diretoria quer saber se ele deixou dinheiro na mesa.
+
+TAREFA 3: NOTINHAS E RESUMOS DE MÍDIA
 Para cada mensagem ID acima, se for relevante, gere:
 - ai_insight: Insight de vendas ou observação de comportamento (ex: "Ancorou preço", "Objeção financeira forte").
 - ai_summary: Se houver MÍDIA (audio/video/image), resuma o conteúdo baseado no contexto da conversa.
@@ -124,7 +125,7 @@ REGRAS DE CONFIANÇA ZERO (ZERO TRUST):
 - PROIBIDO INFERIR: Só marque 'true' no checklist se houver PROVA EXPLÍCITA no texto da conversa. O que não está no texto, não aconteceu.
 - MÍNGUA DE CONTEXTO: Se a conversa for muito curta, um pós-venda solto ou não mostrar a negociação do orçamento e do fechamento, OBRIGATORIAMENTE IGNORAR O ESTÁGIO ATUAL e retornar o estágio 'parking_lot' e score nulo. NENHUMA EXCEÇÃO. Mesmo se o lead estiver como Ganho, DERRUBE para 'parking_lot'.
 - Quando o funnel_stage for 'parking_lot', use o campo 'closing_summary' para gerar até 2 perguntas curtas e diretas que o auditor humano deve fazer ao mecânico para descobrir o que aconteceu fora do WhatsApp (ex: "Foi feito diagnóstico presencial? Qual o valor aprovado?").
-- AVALIAÇÃO SOMENTE NO FECHAMENTO: Você está ESTRITAMENTE PROIBIDO de preencher o `audit_checklist` ou dar `score` se o estágio deduzido não for `closed_won` ou `closed_lost`. Enquanto o lead estiver rolando (em `lead_new`, `negotiation`, `quote` ou `parking_lot`), você DEVE retornar `audit_checklist: {}` e `score: null`. Nessas etapas, seu trabalho é APENAS mover o funil e gerar as notinhas (`message_insights`).
+- AVALIAÇÃO SOMENTE NO FECHAMENTO: Você está ESTRITAMENTE PROIBIDO de preencher o 'audit_checklist' ou dar 'score' se o estágio deduzido não for 'closed_won' ou 'closed_lost'. Enquanto o lead estiver rolando (em 'lead_new', 'negotiation', 'quote' ou 'parking_lot'), você DEVE retornar 'audit_checklist: {}' e 'score: null'. Nessas etapas, seu trabalho é APENAS mover o funil e gerar as notinhas ('message_insights').
 
 REGRAS DE FUNIL:
 - 'closed_won': Aprovação explícita ("Pode fazer") após orçamento (2e).
@@ -136,15 +137,19 @@ REGRAS DE FUNIL:
 
 IMPORTANTE: NUNCA sugira um estágio inferior ao atual (${leadData.funnel_stage}). A ÚNICA EXCEÇÃO ABSOLUTA É O 'parking_lot'. Se faltar contexto, VOCÊ DEVE rebaixar para 'parking_lot' sem hesitar.
 
-RETORNE APENAS JSON:
+Você deve retornar ESTRITAMENTE um JSON válido com o seguinte schema:
 {
+  "funnel_stage": "lead_new | negotiation | quote | closed_won | closed_lost | parking_lot",
   "reasoning": "Breve explicação",
-  "audit_checklist": { "1a": true, "1b": false, "2a": true, "2b": false, "2c": true, "2d": false, "2e": true, "3a": false, "3b": false, "3c": true, "4a": false, "4b": false },
-  "score": 85,
+  "audit_checklist": { "1a": true, "1b": false, "2a": true, "2b": false, "2c": true, "2d": false, "2e": true, "3a": false },
+  "score": 8,
   "funnel_stage": "quote",
   "closing_summary": "Parecer ou perguntas pro mecânico (se for parking_lot)",
   "customer_vehicle": "Modelo",
   "ticket_value": 0,
+  "conversation_summary": "Resumo objetivo de quem é o cliente, o que ele queria e qual foi o desfecho.",
+  "manager_failures": "Seja implacável: Liste os erros, demoras, falta de quebra de objeção ou negligências do gerente. Se foi perfeito, elogie.",
+  "unit_insight": "Insight gerencial de macro visão sobre essa negociação.",
   "message_insights": [
     { "id": "UUID_DA_MENSAGEM", "ai_insight": "Insight aqui", "ai_summary": "Resumo se mídia" }
   ]

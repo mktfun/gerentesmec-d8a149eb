@@ -17,7 +17,6 @@ import Config from "./pages/Config";
 import Relatorios from "./pages/Relatorios";
 import Presentation from "./pages/Presentation";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
-import ManagerDashboard from "./pages/ManagerDashboard";
 import Index from "./pages/Index";
 import AuditHistory from "./pages/AuditHistory";
 import AuditoriaApp from "./pages/Auditoria";

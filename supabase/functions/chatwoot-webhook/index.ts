@@ -112,14 +112,15 @@ serve(async (req) => {
 
     // 1. Validate event types we care about
     const event = payload.event
-    if (event !== 'conversation_created' && event !== 'message_created' && event !== 'conversation_updated') {
+    const isMessageEvent = event === 'message_created' || event === 'new_message';
+    if (event !== 'conversation_created' && !isMessageEvent && event !== 'conversation_updated') {
       return new Response(JSON.stringify({ message: "Event ignored" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
 
     // Ignore activity messages (message_type: 2) and private notes
     const messageObj = payload.message || payload;
     const rawMsgType = messageObj.message_type ?? payload.message_type;
-    if (event === 'message_created' && (rawMsgType === 2 || rawMsgType === '2' || rawMsgType === 'activity' || messageObj.private === true)) {
+    if (isMessageEvent && (rawMsgType === 2 || rawMsgType === '2' || rawMsgType === 'activity' || messageObj.private === true)) {
       console.log('Ignored activity/private message');
       return new Response(JSON.stringify({ message: "Activity or private message ignored" }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 })
     }
@@ -332,7 +333,7 @@ serve(async (req) => {
     }
 
     // 6. Insert Message History if it's a message
-    if (event === 'message_created' && messageId) {
+    if (isMessageEvent && messageId) {
       let mediaUrl = null;
       let mediaType = null;
       if (message.attachments && message.attachments.length > 0) {

@@ -1,0 +1,53 @@
+==============================================
+Cliente: A.Dantas
+ID Conversa: 2546
+Total de Mensagens: 20
+==============================================
+
+[Oficina (Gerente)]: Prezado(a) AGABO, segue Orçamento nº 1896 de 25/06/2026 placa: EHX2J16
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=JCfX5sG0O5CF4dff3e0IRQ==) 
+
+Sr. Agabo em link acima eu lhe encaminho orçamento referente ao laudo de garantia, conforme conversado e aprovado em loja.
+[Oficina (Gerente)]: Sr. Agabo, tudo bem? Aqui no link acima eu te encaminho a segunda via de check-list de entrada do veículo.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=JCfX5sG0O5C0CMpLc7IJhw==)
+[Oficina (Gerente)]: Segue a nota de serviços e produtos correta.
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Me perdoe, duas mensagens enviadas erradas, um minuto.
+[Oficina (Gerente)]: Esta mensagem foi excluída
+[Oficina (Gerente)]: Esta mensagem foi excluída
+[Cliente (A.Dantas)]: Daqui a pouco estarei aí
+[Cliente (A.Dantas)]: Blz
+[Oficina (Gerente)]: Hoje estamos com o horário reduzido até as 17:00, ok
+[Cliente (A.Dantas)]: Sim
+[Oficina (Gerente)]: Sr. Agabo, conforme conversamos por telefone.
+
+Apenas recomendo que o reparo seja realizado o quanto antes, pois essa avaria interfere diretamente na leitura de temperatura utilizada pela injeção eletrônica. Mesmo com a abertura mecânica da válvula funcionando corretamente, a leitura incorreta do sensor pode fazer a central receber informações inconsistentes, ocasionando funcionamento irregular do sistema, dificuldade de partida e o aparecimento de outras avarias relacionadas ao gerenciamento do motor.
+
+De qualquer forma, a decisão fica a seu critério. Caso prefira agendar para a próxima semana, podemos programar o atendimento sem problemas.
+[Cliente (A.Dantas)]: Eu ia precisar do carro hoje,podemos fazer na semana que vem
+[Oficina (Gerente)]: Mais dependente fica a chegada da válvula, tudo dando certo, amanhã até a parte da tarde
+[Cliente (A.Dantas)]: Fica pronto quando, se for fazer
+[Cliente (A.Dantas)]: Deixa pra depois,tá muito caro
+[Oficina (Gerente)]: Prezado(a) AGABO, segue Orçamento nº 1890 de 23/06/2026 placa: EHX2J16
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=vVPkyl47Tto0MRhsNIu1Fw==) 
+
+Sr. Agabo no link acima eu encaminho o orçamento referente a substituição da válvula termostática.
+Vamos realizar a substituição e deixar o funcionamento do veículo em observação.
+
+Esse valor parcelamos em até 4x de R$299,15 sem juros ou em até 18x de R$78,45 com juros no cartão.
+[Cliente (A.Dantas)]: Bom dia, Erik
+[Oficina (Gerente)]: Bom dia Sr. Agabo, tudo bem?
+
+Estou encaminhando um vídeo referente à avaliação do seu veículo.
+
+Foi identificada uma avaria relacionada ao termostato do sistema de arrefecimento (válvula termostática).
+
+O módulo de injeção monitora o tempo de abertura da válvula através de um sensor, verificando se sua atuação ocorre dentro dos parâmetros programados. Embora, mecanicamente, a válvula esteja realizando a abertura de forma correta, o sinal de leitura apresentado pelo sensor encontra-se irregular.
+
+Essa divergência interfere no controle da temperatura do motor, fazendo com que o módulo de injeção receba informações incorretas e realize ajustes inadequados de funcionamento, podendo ocasionar falhas de desempenho e o registro da avaria no sistema.
+
+Sendo assim, recomendamos a substituição do conjunto para restabelecer o funcionamento correto do sistema de arrefecimento e da gestão eletrônica do motor.
+[Cliente (A.Dantas)]: Valeu

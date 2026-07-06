@@ -1,0 +1,937 @@
+
+
+====== ARQUIVO: Conv_2559_Cayo_Carvalho.txt ======
+==============================================
+Cliente: Cayo Carvalho
+ID Conversa: 2559
+Total de Mensagens: 34
+Status de Triagem: APROVADO
+==============================================
+
+[06/06/2026 12:39] [Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=mecanica+popular&gs_lcrp=EgZjaHJvbWUqDggAECMYJxhBGIAEGIoFMg4IABAjGCcYQRiABBiKBTIJCAEQRRg5GIAEMgYIAhBFGDsyDggDEEUYJxg7GIAEGIoFMgkIBBBFGDsYgAQyBggFEEUYPDIGCAYQRRg8MgYIBxBFGDzSAQgyMzU3ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[06/06/2026 12:09] [Oficina (Gerente)]: Ok
+[06/06/2026 12:08] [Cliente (Cayo Carvalho)]: Já pedi um Uber, tô indo pra ai
+[06/06/2026 12:08] [Cliente (Cayo Carvalho)]: Blzz
+[06/06/2026 12:08] [Oficina (Gerente)]: As peças velhas
+[06/06/2026 10:57] [Cliente (Cayo Carvalho)]: Okay
+[06/06/2026 10:52] [Oficina (Gerente)]: R$1.736,80
+[06/06/2026 10:51] [Cliente (Cayo Carvalho)]: Qual ficou o valor total?
+[06/06/2026 10:50] [Oficina (Gerente)]: Combinado, estamos aqui até as 14:00
+[06/06/2026 10:50] [Cliente (Cayo Carvalho)]: Daqui a pouco vou buscar então
+[06/06/2026 10:50] [Cliente (Cayo Carvalho)]: Fechoo
+[06/06/2026 10:49] [Cliente (Cayo Carvalho)]: Tranquilo?
+[06/06/2026 10:49] [Cliente (Cayo Carvalho)]: Bom dia Eric
+[06/06/2026 10:49] [Oficina (Gerente)]: Referente ao serviço realizado está pronto
+[06/06/2026 10:49] [Oficina (Gerente)]: Bom dia Cayo, tudo bem?
+
+No link acima, segue um check-list referente ao veículo.
+No momento não foi identificado nada visualmente ruim, somente ir mantendo as revisões.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=531nudGv8gD8F8i1veS16w==)
+[05/06/2026 16:15] [Cliente (Cayo Carvalho)]: Fecho
+[05/06/2026 16:15] [Oficina (Gerente)]: Estando tudo certo amanhã, por volta das 10:00 está pronto, ok
+[05/06/2026 16:15] [Cliente (Cayo Carvalho)]: Boa tarde Eric, hoje ele não fica  pronto né?
+[05/06/2026 14:23] [Cliente (Cayo Carvalho)]: Beleza então, qualquer coisa vai me avisando
+[05/06/2026 14:23] [Cliente (Cayo Carvalho)]: Opa, boa tarde
+[05/06/2026 14:21] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 12:06] [Cliente (Cayo Carvalho)]: Showw, muito obrigado
+[05/06/2026 12:06] [Cliente (Cayo Carvalho)]: Tranquilo tbm
+[05/06/2026 12:06] [Oficina (Gerente)]: Bom dia Cayo, tudo bem? A tampa chegou, está montando, daqui a pouco já te atualizo, ok
+[05/06/2026 12:06] [Cliente (Cayo Carvalho)]: Se tem alguma previsão pra mim?
+[05/06/2026 12:05] [Cliente (Cayo Carvalho)]: Boa tarde Eric, tranquilo?
+[03/06/2026 16:56] [Cliente (Cayo Carvalho)]: Valeu🤙🏻
+[03/06/2026 16:56] [Cliente (Cayo Carvalho)]: Fechoo
+[03/06/2026 16:55] [Oficina (Gerente)]: Dando tudo certo até sexta-feira fica pronto, amanhã não vamos abrir devido ao feriado, mas na sexta estamos aqui novamente
+[03/06/2026 16:55] [Cliente (Cayo Carvalho)]: Vc acha q fica pronto quando?
+[03/06/2026 16:55] [Cliente (Cayo Carvalho)]: Ahh tranquilo
+[03/06/2026 16:55] [Cliente (Cayo Carvalho)]: Tranquilo?
+[03/06/2026 16:54] [Oficina (Gerente)]: Boa tarde Cayo, tudo bem?
+Estou aguardando a tampa chegar, para conseguirmos montar
+[03/06/2026 16:54] [Cliente (Cayo Carvalho)]: Boa tarde Eric
+
+====== ARQUIVO: Conv_2650_Murillo_Beluchi.txt ======
+==============================================
+Cliente: Murillo Beluchi
+ID Conversa: 2650
+Total de Mensagens: 54
+Status de Triagem: APROVADO
+==============================================
+
+[06/06/2026 14:03] [Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=mecanica+popular&gs_lcrp=EgZjaHJvbWUqDggAECMYJxhBGIAEGIoFMg4IABAjGCcYQRiABBiKBTIJCAEQRRg5GIAEMgYIAhBFGDsyDggDEEUYJxg7GIAEGIoFMgkIBBBFGDsYgAQyBggFEEUYPDIGCAYQRRg8MgYIBxBFGDzSAQgyMzU3ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+
+Oi Murilo a avaliação foi para a unidade errada depois se conseguir fazer aqui na Jorge Bereta, muito obrigado e um ótimo final de semana!
+[06/06/2026 13:56] [Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=mecanica+popular&gs_lcrp=EgZjaHJvbWUqDggAECMYJxhBGIAEGIoFMg4IABAjGCcYQRiABBiKBTIJCAEQRRg5GIAEMgYIAhBFGDsyDggDEEUYJxg7GIAEGIoFMgkIBBBFGDsYgAQyBggFEEUYPDIGCAYQRRg8MgYIBxBFGDzSAQgyMzU3ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[06/06/2026 13:29] [Oficina (Gerente)]: Sem problemas, ok
+[06/06/2026 13:22] [Cliente (Murillo Beluchi)]: To esperando o Uber aqui já
+[06/06/2026 12:29] [Oficina (Gerente)]: Combinado, obrigado
+[06/06/2026 12:19] [Cliente (Murillo Beluchi)]: Beleza Jajá eu vou ai buscar então
+[06/06/2026 11:52] [Oficina (Gerente)]: Hoje ficamos até as 14:00
+[06/06/2026 11:52] [Cliente (Murillo Beluchi)]: Opa ficou pronto chefe? Cês ficam até qual horário aí?
+[06/06/2026 11:51] [Oficina (Gerente)]: Sr. Murillo, tudo bem?
+
+Estou te encaminhando um link referente ao check-list visual do mecânico.
+
+No momento não foi identificado nada irregular visualmente, somente ir mantendo as revisões preventivas.
+
+O veículo está pronto.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=531nudGv8gB55k+4DbZ/jw==)
+[06/06/2026 10:01] [Oficina (Gerente)]: Combinado, já vou te atualizandi aqui, pode deixar
+[06/06/2026 10:01] [Cliente (Murillo Beluchi)]: É que eu trabalho em Pinheiros então complica um pouco
+[06/06/2026 10:00] [Cliente (Murillo Beluchi)]: Mas tranquilo vai me avisando então
+[06/06/2026 09:59] [Cliente (Murillo Beluchi)]: Blz mas se pudesse ser hoje me ajudaria muito, pq segunda eu trabalho e aí não vai ter ninguém pra buscar. Se não tiver jeito eu saio mais cedo do trampo segunda pra pegar ele mas como eu já cheguei atrasado ontem, pq ele quebrou, queria evitar kkkk
+[06/06/2026 09:58] [Oficina (Gerente)]: Estando tudo certo hj até o final do expediente ou segunda-feira, já vou te atualizando aqui
+[06/06/2026 09:58] [Oficina (Gerente)]: Bom dia Murillo, tudo bem?
+[06/06/2026 09:57] [Cliente (Murillo Beluchi)]: Só pra ter uma ideia mesmo pra eu me organizar aqui
+[06/06/2026 09:57] [Cliente (Murillo Beluchi)]: Tem uma estimativa que horas fica pronto?
+[06/06/2026 09:57] [Cliente (Murillo Beluchi)]: Blz?
+[06/06/2026 09:57] [Cliente (Murillo Beluchi)]: Bom dia doutor
+[05/06/2026 16:11] [Cliente (Murillo Beluchi)]: Beleza obrigado
+[05/06/2026 15:37] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 15:34] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 15:33] [Oficina (Gerente)]: Sim, estamos agilizando e vou atualizando o senhor
+[05/06/2026 15:32] [Cliente (Murillo Beluchi)]: Provável que fique pronto só amanhã né chefe
+[05/06/2026 14:59] [Oficina (Gerente)]: Combinado
+[05/06/2026 14:58] [Cliente (Murillo Beluchi)]: Deu certo
+[05/06/2026 14:58] [Cliente (Murillo Beluchi)]: Fica tranquilo pode seguir
+[05/06/2026 14:47] [Oficina (Gerente)]: Como amanhã nosso horário é reduzido procuramos agilizar o máximo
+[05/06/2026 14:47] [Oficina (Gerente)]: Oi Murillo, vi agora a mensagem desculpe o mecânico já havia dado andamento ao serviço
+[05/06/2026 14:09] [Cliente (Murillo Beluchi)]: Chefe, por favor, segura um pouco aí. Me surgiu um imprevisto. Não sei se vou ter todo o limite no cartão. Vc já começou o serviço? Dá pra segurar um pouco? Pq aí to vendo aqui se consigo dar mais uma parte a vista pra diminuir do cartão
+[05/06/2026 13:51] [Cliente (Murillo Beluchi)]: Obrigado
+[05/06/2026 13:50] [Cliente (Murillo Beluchi)]: Ok
+[05/06/2026 13:50] [Oficina (Gerente)]: Combinado, sem problemas!
+Vamos agilizar e vou atualizando o senhor aqui, ok?
+[05/06/2026 13:50] [Cliente (Murillo Beluchi)]: Beleza. Pode fazer então. Eu vou pagar R$1250,00 a vista e parcelar R$846,00 em 4x sem juros. Pode ser?
+[05/06/2026 13:47] [Oficina (Gerente)]: A equalização, é necessária, porque a diferença é alta na injeção e a reprogramação é onde reprogramamos e realizamos as adaptações de fábrica dos componentes.
+[05/06/2026 13:40] [Cliente (Murillo Beluchi)]: Dá pra remover a equalização dos bicos, e deixar só a limpeza? E sobre a reprogramação do módulo, é necessário fazer?
+[05/06/2026 13:30] [Oficina (Gerente)]: É sim, vamos agilizar caso dê tudo certo, até amanhã fica pronto.
+[05/06/2026 13:30] [Cliente (Murillo Beluchi)]: É possível eu pagar 1000 a vista e parcelar o restante em 4x sem juros? E fica pronto quando, caso eu autorize o serviço?
+[05/06/2026 13:10] [Oficina (Gerente)]: Prezado(a) MURILLO, segue Orçamento nº 1850 de 05/06/2026 placa: FKO1E96
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=531nudGv8gBUJsn+gCpqXA==) 
+
+
+Sr. Murillo, no link acima te encaminho o orçamento referente ao reparo.
+Esse valor parcelamos em até 4x de R$524,23 sem juros ou em até 18x de R$137,46 com juros no cartão.
+[05/06/2026 12:45] [Cliente (Murillo Beluchi)]: Beleza
+[05/06/2026 12:45] [Oficina (Gerente)]: Será necessário substituir, estão gastas, vou gerar aqui e já te encaminho
+[05/06/2026 12:43] [Cliente (Murillo Beluchi)]: Quanto fica pra substituir essas velas? Compensa só fazer limpeza já que tá no fim da vida útil?
+[05/06/2026 12:43] [Oficina (Gerente)]: Boa tarde Sr. Murillo, tudo bem? 
+Estou encaminhando alguns vídeos e foto referente ao seu veículo.
+
+Identificamos alguns pontos referente a injeção.
+
+Tbi está com excesso de sujeira, velas no fim da vída útil, bicos injentando a quantidade incorreta de combustível.
+
+Primeiro passo realizar esses passos e testar o veículo, mas provavelmente já resolva tudo.
+[05/06/2026 12:42] [Cliente (Murillo Beluchi)]: Boa tarde
+[05/06/2026 12:42] [Cliente (Murillo Beluchi)]: Fala meu brother
+[05/06/2026 12:40] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 12:40] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 12:40] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 12:40] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 12:40] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 12:40] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 08:55] [Oficina (Gerente)]: Sr. Murillo, conforme conversamos em loja, segue no link acima a segunda via do orçamento de diagnóstico.
+[05/06/2026 08:55] [Oficina (Gerente)]: Prezado(a) MURILLO, segue Orçamento nº 1846 de 05/06/2026 placa: FKO1E96
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=531nudGv8gAkGPJxw5mdHA==)
+[05/06/2026 08:54] [Oficina (Gerente)]: Bom dia Sr. Murillo, aqui segue o link com o check-list de entrada do veículo.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=531nudGv8gAV6WJBxC1jQg==)
+
+====== ARQUIVO: Conv_2682_Karina.txt ======
+==============================================
+Cliente: Karina
+ID Conversa: 2682
+Total de Mensagens: 43
+Status de Triagem: APROVADO
+==============================================
+
+[06/06/2026 12:08] [Oficina (Gerente)]: As peças velhas
+[06/06/2026 11:38] [Cliente (Karina)]: Ok, chego antes
+[06/06/2026 11:34] [Oficina (Gerente)]: Estamos até as 14:00 hj, ok
+[06/06/2026 11:14] [Cliente (Karina)]: Tá bom, obrigada
+[06/06/2026 11:09] [Oficina (Gerente)]: Sra Karina, está pronto, ok
+[06/06/2026 10:41] [Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=mecanica+popular+j&gs_lcrp=EgZjaHJvbWUqDggAECMYJxhBGIAEGIoFMg4IABAjGCcYQRiABBiKBTIGCAEQRRg7MgwIAhAjGCcYgAQYigUyBggDEEUYOTIHCAQQABiABDIGCAUQRRg9MgYIBhBFGDwyBggHEEUYPNIBCTExMzUxajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[06/06/2026 10:27] [Cliente (Karina)]: 👍
+[06/06/2026 10:25] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[06/06/2026 09:16] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[06/06/2026 09:15] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[06/06/2026 09:13] [Cliente (Karina)]: Obrigada
+[06/06/2026 09:10] [Oficina (Gerente)]: Aviso sim
+[06/06/2026 09:09] [Cliente (Karina)]: Vc me avisa quando estiver liberado?
+[06/06/2026 09:09] [Cliente (Karina)]: Tudo bem tbm, obrigada
+[06/06/2026 09:09] [Oficina (Gerente)]: Bom dia Sra. Karina, tudo bem obrigado e com a Sra?
+[06/06/2026 09:08] [Cliente (Karina)]: Bom dia! Tudo bem?
+[05/06/2026 16:28] [Cliente (Karina)]: Obrigada
+[05/06/2026 16:28] [Oficina (Gerente)]: Vou avisando aqui
+[05/06/2026 16:28] [Oficina (Gerente)]: Sim, sim
+[05/06/2026 16:28] [Cliente (Karina)]: O prazo mantém o msm?
+[05/06/2026 16:27] [Oficina (Gerente)]: Ta bom, vou agilizar aqui e voua vidando
+[05/06/2026 16:26] [Cliente (Karina)]: Pode fazer
+[05/06/2026 16:26] [Cliente (Karina)]: Meu Deus
+[05/06/2026 16:26] [Oficina (Gerente)]: Tudo indica que sim
+[05/06/2026 16:26] [Oficina (Gerente)]: Infelizmente não tem
+[05/06/2026 16:26] [Cliente (Karina)]: Será q foi aberto antes?
+[05/06/2026 16:26] [Cliente (Karina)]: Não tem o q fazer né?
+[05/06/2026 16:25] [Cliente (Karina)]: (Arquivo/Mídia anexado)
+[05/06/2026 16:22] [Oficina (Gerente)]: Oi, foi feita a desmontagem, indentificamos dois itens danificados a tampa ela está empenada e com excesso de cola e tem uma bobina trincada, onde da fuga de centelha
+[05/06/2026 16:20] [Cliente (Karina)]: Oi
+[05/06/2026 15:23] [Oficina (Gerente)]: Prezado(a) KARINA, segue Orçamento nº 1853 de 05/06/2026 placa: FOT8D23
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=531nudGv8gC4nCdBZl3GyQ==)
+[05/06/2026 15:22] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[05/06/2026 14:07] [Cliente (Karina)]: 👍
+[05/06/2026 14:03] [Oficina (Gerente)]: Prezado(a) KARINA, segue Orçamento nº 1851 de 05/06/2026 placa: FOT8D23
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=531nudGv8gA9W1c9oGW3Fw==) 
+
+
+Sra. Karina, aqui segue a segunda via do orçamento referente ao veículo.
+Única, coisa que vou acrescentar será a troca de óleo R$199,90
+[05/06/2026 12:05] [Cliente (Karina)]: Combinado
+[05/06/2026 11:51] [Oficina (Gerente)]: Combinado, pode ser as 14:00?
+[05/06/2026 10:28] [Cliente (Karina)]: Tenho sim, na parte da tarde
+[05/06/2026 10:26] [Oficina (Gerente)]: Entendi, o ideal é avaliar para verificarmos oque vaza, a senhora tem disponibilidade de vir em loja?
+[05/06/2026 10:25] [Cliente (Karina)]: Não sei se é óleo ou fluido
+[05/06/2026 10:25] [Cliente (Karina)]: Eu observei hoje, que quando sai com o carro, na garagem tem um vazamento, parece óleo
+[05/06/2026 10:24] [Cliente (Karina)]: Bem tbm
+[05/06/2026 10:24] [Oficina (Gerente)]: Bom dia Sra. Karina, tudo bem e com a Sra?
+[05/06/2026 10:23] [Cliente (Karina)]: Bom dia! Tudo bem?
+
+====== ARQUIVO: Conv_3073_JULIO_IGLESIAS.txt ======
+==============================================
+Cliente: JULIO IGLESIAS
+ID Conversa: 3073
+Total de Mensagens: 23
+Status de Triagem: APROVADO
+==============================================
+
+[29/06/2026 10:39] [Cliente (JULIO IGLESIAS)]: Obrigado
+[29/06/2026 10:39] [Cliente (JULIO IGLESIAS)]: Ok
+[29/06/2026 10:28] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[29/06/2026 10:27] [Cliente (JULIO IGLESIAS)]: (Arquivo/Mídia anexado)
+[29/06/2026 09:11] [Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem? Como está o carro, tudo certo?
+[15/06/2026 09:26] [Cliente (JULIO IGLESIAS)]: Obrigado
+[15/06/2026 09:26] [Oficina (Gerente)]: Combinado, sem problemas, vamos nos falando.
+[15/06/2026 08:38] [Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem?
+
+Como está o carro até o momento, tudo certo?
+[11/06/2026 15:28] [Oficina (Gerente)]: Combinado, sem problemas.
+[11/06/2026 15:27] [Cliente (JULIO IGLESIAS)]: Irei passar aí 16:30 ok?
+[11/06/2026 15:27] [Cliente (JULIO IGLESIAS)]: Obrigado
+[11/06/2026 15:27] [Cliente (JULIO IGLESIAS)]: Ok
+[11/06/2026 15:26] [Cliente (JULIO IGLESIAS)]: Boa tarde
+[11/06/2026 15:25] [Oficina (Gerente)]: Sr. Julio, conforme conversamos por telefone, rodamos cerca de 100km com o veículo após a substituição da lâmpada e o veículo até o momento não nos apresentou mais o defeito.
+
+Vamos realizar a liberação do veículo ficando apenas o diagnóstico e a lâmpada e o veículo permanece em observação.
+Andar com veículo e caso houver alguma anomalia ou apresentar o defeito novamente, trazer de volta para darmos continuidade ao diagnóstico, tudo bem?
+[11/06/2026 12:54] [Cliente (JULIO IGLESIAS)]: 🙏
+[11/06/2026 12:54] [Oficina (Gerente)]: Só finalizando um atendimento
+[11/06/2026 12:54] [Oficina (Gerente)]: Um min, já te retorno
+[11/06/2026 12:53] [Cliente (JULIO IGLESIAS)]: Alguma previsão?
+[11/06/2026 12:46] [Cliente (JULIO IGLESIAS)]: Bom dia
+[11/06/2026 12:45] [Oficina (Gerente)]: Bom dia Sr. Julio, tudo bem?
+[11/06/2026 12:36] [Cliente (JULIO IGLESIAS)]: (Arquivo/Mídia anexado)
+[10/06/2026 16:49] [Cliente (JULIO IGLESIAS)]: Oi
+[10/06/2026 16:44] [Oficina (Gerente)]: Oi, aqui é Erik
+
+====== ARQUIVO: Conv_3231_Sergio.txt ======
+==============================================
+Cliente: Sergio
+ID Conversa: 3231
+Total de Mensagens: 67
+Status de Triagem: APROVADO
+==============================================
+
+[26/06/2026 13:21] [Oficina (Gerente)]: Boa tarde Sr. Sérgio, tudo bem?
+
+Referente a embreagem tem os modelos corretos, que é possível identificar após a remoção da transmissão.
+
+Remoção do câmbio para avaliação R$700,00 
+Troca junta da tampa de Valvulas R$280,00 
+
+Transmissão pode haver alterações após desmontagem para analise dos serviços que serão necessário ser realizados.
+[22/06/2026 18:31] [Cliente (Sergio)]: Show 
+Vou deixar sim a avaliação 
+Vou fazer com calma,  pode deixar 
+
+Depois me envia o orçamento 
+
+Muito obrigado 
+
+Bom descanso
+[22/06/2026 18:21] [Oficina (Gerente)]: Se o senhor conseguir deixar a avaliação nos ajuda muito
+[22/06/2026 18:21] [Oficina (Gerente)]: Vamos nos falando
+[22/06/2026 18:21] [Oficina (Gerente)]: Muito obrigado, hoje cotei o orçamento combinado e amanhã cedo te encaminho aqui
+[22/06/2026 18:18] [Cliente (Sergio)]: Oi Erik,  como vai? Tudo bem?
+Ficou muito bom mesmo 
+
+100% agora 
+
+Parabéns pelo excelente trabalho. 
+
+Nota 10
+[22/06/2026 16:35] [Oficina (Gerente)]: Boa tarde Sr. Sergio, tudo bem?
+Como está o veículo, tudo certo?
+[20/06/2026 14:00] [Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=&gs_lcrp=EgZjaHJvbWUqBggAEEUYQTIGCAAQRRhBMgYIARBFGDwyBggCEEUYOzIGCAMQRRg7MgYIBBBFGDsyBggFEEUYPDIGCAYQRRg8MgYIBxAFGEDSAQgxNjk1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[20/06/2026 13:52] [Oficina (Gerente)]: Sr. Sergio, aqui segue em link acima o check-list de mecânico.
+
+Pontuados até o momento visível para próximas revisões um vazamento inicial da junta da tampa de valvulas e a embreagem gasta.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHbyyo9G9U8yDA==)
+[20/06/2026 13:51] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[20/06/2026 08:51] [Cliente (Sergio)]: Beleza 
+Obrigado
+[20/06/2026 08:50] [Oficina (Gerente)]: Combinado, vou atualizando o senhor aqui
+[20/06/2026 08:49] [Cliente (Sergio)]: 13:00 estarei por aí
+[20/06/2026 08:45] [Cliente (Sergio)]: Oi Erik,  bom dia,  tudo bem? E contigo 
+
+Pode executar 
+
+Aprovado
+[20/06/2026 08:38] [Oficina (Gerente)]: Segue o orçamento referente a bomba de água, caso a aprovação por volta de 13:00 o veículo fica pronto.
+[20/06/2026 08:37] [Oficina (Gerente)]: Bom dia Sr. Sérgio, tudo bem?
+[20/06/2026 08:37] [Oficina (Gerente)]: Prezado(a) SERGIO, segue Orçamento nº 1882 de 20/06/2026 placa: EZR8759
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHadIARCAaBPiw==)
+[19/06/2026 18:37] [Cliente (Sergio)]: Show 
+Perfeito 
+Parabéns, excelente
+[19/06/2026 18:30] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:30] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:29] [Cliente (Sergio)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:28] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:27] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:21] [Cliente (Sergio)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:19] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:17] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 18:00] [Cliente (Sergio)]: Show Erik
+Bacana 
+
+Amanhã me dá um alô 
+
+Um bom descanso pra ti
+[19/06/2026 17:45] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 16:24] [Cliente (Sergio)]: Ta ok Erik
+[19/06/2026 16:21] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 16:08] [Cliente (Sergio)]: (Arquivo/Mídia anexado)
+[19/06/2026 16:01] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 16:00] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 15:58] [Cliente (Sergio)]: Boa tarde Erik, tudo bem?
+Fica pronto hoje?
+[18/06/2026 19:09] [Cliente (Sergio)]: (Arquivo/Mídia anexado)
+[18/06/2026 17:20] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 17:20] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 17:19] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 16:02] [Cliente (Sergio)]: Orçamento aprovado
+[17/06/2026 15:43] [Oficina (Gerente)]: Sem problemas, pode vir
+[17/06/2026 15:37] [Cliente (Sergio)]: Me de alguns minutos 
+Vou passar ai para vermos juntos
+[17/06/2026 15:21] [Oficina (Gerente)]: Podemos prosseguir?
+[17/06/2026 15:04] [Oficina (Gerente)]: Prezado(a) SERGIO, segue Orçamento nº 1876 de 17/06/2026 placa: EZR8759
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=cTdBpxmh2NWl6LFVjBsiaw==) 
+
+
+Sr. Sérgio, estou encaminhando um orçamento referente ao reparo do veículo.
+
+Lembrando que vamos retirar os vazamentos principais do sistema de arrefecimento e testar o sistema novamente, deixando-o em observação.
+
+Junto, também incluí, conforme solicitado, a substituição do óleo e de todos os filtros.
+
+O valor do orçamento parcelamos em até 4x de R$ 799,24 sem juros ou em até 18x de R$ 209,58 com juros no cartão.
+[17/06/2026 14:45] [Cliente (Sergio)]: (Arquivo/Mídia anexado)
+[17/06/2026 14:44] [Cliente (Sergio)]: (Arquivo/Mídia anexado)
+[17/06/2026 14:19] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 14:18] [Cliente (Sergio)]: (Arquivo/Mídia anexado)
+[17/06/2026 13:56] [Oficina (Gerente)]: Boa tarde Sr. Sergio, tudo bem?
+
+Estou te encaminhando alguns vídeos e fotos referente ao seu veículo.
+
+Realizando o teste de pressão com manômetro de arrefecimento identificamos alguns pontos de vazamentos, sendo assim necessário sanar estes pontos para conseguirmos retirar as entradas de Ar e testar o funcionamento correto do sistema.
+[17/06/2026 13:55] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 13:54] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 13:54] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 13:54] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 13:54] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 13:54] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 11:47] [Cliente (Sergio)]: Obrigado
+[17/06/2026 11:06] [Oficina (Gerente)]: Prezado(a) SERGIO, segue Orçamento nº 1873 de 17/06/2026 placa: EZR8759
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chZ3y/WYb82dtA==) 
+
+
+Sr. Sergio, conforme aprovação em loja segue a segunda via de orçamento de diagnóstico.
+[17/06/2026 11:04] [Oficina (Gerente)]: Sr. Sergio, segue a segunda via do chck-list de entrada.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chbXZBcr4kJTrQ==)
+[17/06/2026 09:25] [Oficina (Gerente)]: Combinado
+[17/06/2026 09:24] [Cliente (Sergio)]: Acredito que até antes do almoço estarei por aí  Erik
+[17/06/2026 09:20] [Oficina (Gerente)]: Tudo bem também, obrigado pelo retorno.
+
+Combinado, vamos nos falando.
+[17/06/2026 09:19] [Cliente (Sergio)]: Bom dia Erik,  como vai? Tudo bem?
+
+Vou levar sim ainda hoje 
+
+Estou um pouco atarefado no trabalho agora,  mais tarde estarei por aí.
+[17/06/2026 09:14] [Oficina (Gerente)]: Podemos manter a agenda?
+[17/06/2026 09:14] [Oficina (Gerente)]: Bom dia Sr. Sérgio, tudo bem?
+[15/06/2026 16:30] [Cliente (Sergio)]: Fechado 
+Um abraço
+[15/06/2026 16:30] [Oficina (Gerente)]: Tudo bem, obrigado por perguntar.
+
+Combinado, ficamos aguardando!
+[15/06/2026 16:29] [Cliente (Sergio)]: Oi Erik, tudo bem?
+Contato salvo aqui. 
+
+Amanhã ou Quarta feira estarei por aí. 
+
+Obrigado
+[15/06/2026 16:05] [Oficina (Gerente)]: Boa tarde Sr. Sergio, aqui é Erik
+
+====== ARQUIVO: Conv_3244_Ivan.txt ======
+==============================================
+Cliente: Ivan
+ID Conversa: 3244
+Total de Mensagens: 88
+Status de Triagem: APROVADO
+==============================================
+
+[22/06/2026 11:34] [Cliente (Ivan)]: Ok
+[22/06/2026 11:34] [Oficina (Gerente)]: Entendo, por está relacionado ao tempo frio, acompanha e vai me avisando, qualquer dúvida pode nos trazer
+[22/06/2026 11:33] [Cliente (Ivan)]: Quando gelado
+[22/06/2026 11:33] [Cliente (Ivan)]: Bom hj pela manhã quando liguei , deu umas falhadas
+[22/06/2026 11:32] [Cliente (Ivan)]: Bom dia
+[22/06/2026 11:30] [Oficina (Gerente)]: Bom dia Sr. Ivan, tudo bem?
+
+Como está o carro, tudo certo?
+[19/06/2026 16:28] [Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=&gs_lcrp=EgZjaHJvbWUqBggBEEUYQTIGCAAQRRg8MgYIARBFGEEyBwgCEC4YgAQyFwgDEC4YChgLGIMBGMcBGLEDGNEDGIAEMgYIBBBFGDwyBggFEEUYQTIGCAYQRRg8MgYIBxBFGDzSAQgxODE1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[19/06/2026 14:46] [Cliente (Ivan)]: Feito ok
+[19/06/2026 14:46] [Cliente (Ivan)]: (Arquivo/Mídia anexado)
+[19/06/2026 14:42] [Oficina (Gerente)]: Isso a mesma.
+
+CNPJ: 55.143.159/0001-57
+Mecânica Popular ou DHJV Serviços Automotivos LTDA
+[19/06/2026 14:42] [Cliente (Ivan)]: Ok na mesma chave pix ?
+[19/06/2026 14:41] [Oficina (Gerente)]: R$1.829,45 com o desconto
+[19/06/2026 14:38] [Cliente (Ivan)]: Vc me passa o valor do restante , pra mim já fazer o pix , vc vai me dar aquele 5% né rsrs
+[19/06/2026 14:37] [Oficina (Gerente)]: Pode sim
+[19/06/2026 14:37] [Cliente (Ivan)]: Tá  , posso então ir direto nesse horario
+[19/06/2026 14:36] [Oficina (Gerente)]: Por volta das 16:00 está pronto para retirada
+[19/06/2026 14:36] [Oficina (Gerente)]: Sem problemas, Sr. Ivan. O orçamento permanecerá registrado. Quando desejar realizar o serviço, ficaremos à disposição. Recomendo apenas atenção ao sistema de freios por se tratar de item de segurança.
+[19/06/2026 14:35] [Cliente (Ivan)]: Vou esperar um pouco mais ok , por hora somente o que já foi feito ok
+[19/06/2026 14:33] [Oficina (Gerente)]: Prezado(a) IVAN, segue Orçamento nº 1881 de 19/06/2026 placa: EXB7354
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHYJUKP7n6MQzg==) 
+
+
+Aqui segue o orçamento formalizado, referente ao freio dianteiro.
+[19/06/2026 14:32] [Oficina (Gerente)]: Pelo menos fica mais seguro e as bandejas programamos um dia que possa parar
+[19/06/2026 14:32] [Oficina (Gerente)]: A parte de freio, conseguimos finalizar hoje ainda
+[19/06/2026 14:31] [Cliente (Ivan)]: Vou deixar pra depois , pois tenho compromisso , e necessito do carro hoje amanhã pela manhã tambem
+[19/06/2026 14:28] [Oficina (Gerente)]: Prezado(a) IVAN, segue Orçamento nº 1881 de 19/06/2026 placa: EXB7354
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHbKqBW6aHhhQQ==) 
+
+
+Sr. Ivan no link acima estou lhe encaminhando um orçamento referente as bandejas dianteiras e o freio dianteiro.
+
+Em caso de aprovação a previsão de finalização fica de hoje para amanhã por volta das 12:00
+[19/06/2026 14:07] [Cliente (Ivan)]: Ok
+[19/06/2026 14:06] [Oficina (Gerente)]: Vou montar dos dois, se ficar acessível ao senhor já faz ambos e vai apenas mantendo as trocas de óleo, manutenções básicas e fica o veículo seguro, ok
+[19/06/2026 14:00] [Oficina (Gerente)]: Vou gerar o orçamento e já encaminho ao Sr
+[19/06/2026 13:59] [Cliente (Ivan)]: Só o freio ficaria quanto
+[19/06/2026 13:58] [Oficina (Gerente)]: O ideal seria pelo menos fazer o freio, por se item de segurança e está no fim da vida útil e o restante pode ir fazendo aos poucos
+[19/06/2026 13:57] [Cliente (Ivan)]: Ok , no momento não vou fazer esses itens , tá
+[19/06/2026 13:52] [Oficina (Gerente)]: Sr. Ivan, tudo bem?
+
+Estou te encaminhando um check-list do mecânico e um vídeo referente ao seu veículo.
+
+Realizando um check-up geral visual, identificamos alguns pontos de segurança irregulares, discos e pastilhas dianteiras no fim da vida útil e bandejas danificadas, sendo assim recomendado as substituições e após ir apenas mantendo as revisões preventivas.
+
+
+ (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHbkyPCQskZWfg==)
+[19/06/2026 13:51] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 12:31] [Cliente (Ivan)]: Ok no aguardo
+[19/06/2026 12:30] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 12:23] [Cliente (Ivan)]: Maravilha heim
+[19/06/2026 12:21] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 12:21] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[19/06/2026 09:00] [Cliente (Ivan)]: Ahh ok no aguardo
+[19/06/2026 09:00] [Oficina (Gerente)]: Vai para teste daqui a pouco
+[19/06/2026 09:00] [Oficina (Gerente)]: Bom dia Sr. Ivan, tudo bem?
+[19/06/2026 08:58] [Cliente (Ivan)]: Bom dia , tudo  bem ?
+Meu veículo fica pronto hoje
+[18/06/2026 13:46] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 13:46] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 12:35] [Cliente (Ivan)]: 👍🏻
+[18/06/2026 12:35] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 12:34] [Cliente (Ivan)]: Ok
+[18/06/2026 12:34] [Cliente (Ivan)]: Bom dia
+[18/06/2026 12:34] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[17/06/2026 13:41] [Cliente (Ivan)]: Ok no aguardo
+[17/06/2026 13:41] [Oficina (Gerente)]: Combinado, vamos remover o coletor de admissão testar os bicos e já atualizo sobre o próximo com o diagnóstico concluído.
+[17/06/2026 13:39] [Cliente (Ivan)]: Ah ok pode fazer
+[17/06/2026 13:39] [Oficina (Gerente)]: Será abatido em 50% caso o orçamento reparo aprovado
+[17/06/2026 13:38] [Cliente (Ivan)]: Nesse caso sobre o valor que vc falou do diagnóstico é abatido ou não
+[17/06/2026 13:35] [Oficina (Gerente)]: Prezado(a) IVAN, segue Orçamento nº 1875 de 17/06/2026 placa: EXB7354
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chZGLtrA2hRo8w==) 
+
+Sr. Ivan, no link acima segue o orçamento referente a remoção do coletor de admissão para acesso aos bicos injetores.
+[17/06/2026 13:34] [Cliente (Ivan)]: Ok
+[17/06/2026 13:34] [Oficina (Gerente)]: Vou gerar o orçamento já encaminho ao senhor, um instante.
+[17/06/2026 13:32] [Cliente (Ivan)]: Ok
+[17/06/2026 13:31] [Cliente (Ivan)]: Boa tarde
+[17/06/2026 13:21] [Oficina (Gerente)]: Neste segundo vídeo falo sobre a necessidade de remoção do coletor de admissão, para teste de equalização e quantidade injetada dos bicos injetores.
+[17/06/2026 13:20] [Oficina (Gerente)]: Boa tarde Sr. Ivan, tudo bem? Estou encaminhando um vídeo referente ao seu veículo.
+
+A principio as sondas lambdas estão realizando a leitura correta, porém identificamos que a porcentagem de álcool no combustível está muito elevada, assim faz com que o veículo crie a mistura rica, aumentando consumo e ocasionando avarias.
+[17/06/2026 08:21] [Oficina (Gerente)]: Prezado(a) IVAN, segue Orçamento nº 1872 de 17/06/2026 placa: EXB7354
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chanBWZ6pcySLw==) 
+
+Sr. Ivan, conforme aprovação em loja, estou encaminhando a segunda via do orçamento de diagnóstico em link acima.
+[17/06/2026 08:19] [Oficina (Gerente)]: Sr. Ivan, segue em link acima a segunda via do check-list de entrada do veículo.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chbyfUg+xZvwsg==)
+[16/06/2026 16:10] [Cliente (Ivan)]: Ok obrigado
+[16/06/2026 16:09] [Oficina (Gerente)]: Agendamento confirmado Sr. Ivan, ficamos aguardando. 
+Até amanhã!
+[16/06/2026 16:07] [Cliente (Ivan)]: EXB 7354
+[16/06/2026 16:07] [Oficina (Gerente)]: Pode procurar por Erik, me informa a placa para colocar na agenda
+[16/06/2026 16:06] [Cliente (Ivan)]: Quem eu procuro
+[16/06/2026 16:05] [Oficina (Gerente)]: Nosso endereço Rua Jorge beretta, 627 - Parque Erasmo Assunção - Santo André/SP
+[16/06/2026 16:05] [Oficina (Gerente)]: Ok
+[16/06/2026 16:02] [Cliente (Ivan)]: As 8 por favor
+[16/06/2026 16:02] [Oficina (Gerente)]: Quaria melhor?
+[16/06/2026 16:02] [Oficina (Gerente)]: Tenho horario as 08:00 e outro as 09:0]
+[16/06/2026 15:52] [Cliente (Ivan)]: Manhã logo cedo
+[16/06/2026 15:52] [Oficina (Gerente)]: Pode sim, parte da manhã ou da tarde?
+[16/06/2026 15:47] [Cliente (Ivan)]: Amanhã pode ser
+[16/06/2026 15:47] [Oficina (Gerente)]: Quando teria?
+[16/06/2026 15:45] [Cliente (Ivan)]: Sim
+[16/06/2026 15:45] [Oficina (Gerente)]: O Sr teria disponibilidade de comparecer em loja?
+[16/06/2026 15:45] [Cliente (Ivan)]: Ok
+[16/06/2026 15:44] [Oficina (Gerente)]: Entendo, no caso o ideal seria avaliar e entender melhor oque está acontecendo, acessamos com o scanner para ver paremetros ou algo relacionado adulterado.
+[16/06/2026 15:43] [Cliente (Ivan)]: Foi trocado as velas e a válvula termostatics
+[16/06/2026 15:43] [Cliente (Ivan)]: Estava com pequenos engasgou quando frio e demorando para aumentar a temperatura no painel
+[16/06/2026 15:41] [Oficina (Gerente)]: Falha ou acende algo no painel?
+[16/06/2026 15:41] [Cliente (Ivan)]: Está consumindo mais do que normal
+[16/06/2026 15:40] [Cliente (Ivan)]: Peugeot 2008 ano 2020 com quase 33.000 km
+[16/06/2026 15:40] [Oficina (Gerente)]: Oque está acontecendo com ele?
+[16/06/2026 15:40] [Oficina (Gerente)]: Qual o veículo
+[16/06/2026 15:40] [Oficina (Gerente)]: Boa tarde Sr. Ivan, tudo bem?
+[16/06/2026 15:39] [Cliente (Ivan)]: Boa tarde
+Estou precisando fazer um diagnóstico em meu veiculo
+
+====== ARQUIVO: Conv_3248_Willian_Martins________.txt ======
+==============================================
+Cliente: Willian Martins 👳🏾‍♂️
+ID Conversa: 3248
+Total de Mensagens: 158
+Status de Triagem: APROVADO
+==============================================
+
+[24/06/2026 12:14] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[24/06/2026 12:14] [Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[24/06/2026 12:13] [Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[24/06/2026 12:13] [Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[24/06/2026 11:31] [Oficina (Gerente)]: Aqui são as peças velhas
+[24/06/2026 11:30] [Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[23/06/2026 17:29] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[23/06/2026 17:29] [Oficina (Gerente)]: O alinhamento permaneceu o mesmo, mas para ficar correto, precisa trocar os pneus e alinhar, ok?
+[23/06/2026 17:26] [Cliente (Willian Martins 👳🏾‍♂️)]: O carro deu alinhamento?
+[23/06/2026 17:26] [Oficina (Gerente)]: Combinado, sem problemas.
+[23/06/2026 17:26] [Oficina (Gerente)]: Ficou restante R$1.547,56
+[23/06/2026 17:23] [Cliente (Willian Martins 👳🏾‍♂️)]: Nao consigo ir ai
+[23/06/2026 17:23] [Cliente (Willian Martins 👳🏾‍♂️)]: Vou passar amanha cedo pra retirar, no momento estou em santo amaro
+[23/06/2026 17:22] [Cliente (Willian Martins 👳🏾‍♂️)]: E quanto ficou?
+[23/06/2026 17:22] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[23/06/2026 17:22] [Oficina (Gerente)]: Quando vier retirar, explicamos melhor para entender.
+
+Por isso realizamos os serviços anteriores e deixamos em observação alguns componentes.
+[23/06/2026 17:21] [Oficina (Gerente)]: O amortecedor é distinto do conjunto, não desmontamos o acesso é diferente
+[23/06/2026 17:21] [Cliente (Willian Martins 👳🏾‍♂️)]: O amortecedor?
+[23/06/2026 17:20] [Cliente (Willian Martins 👳🏾‍♂️)]: E nao deu pra verificar?
+[23/06/2026 17:20] [Cliente (Willian Martins 👳🏾‍♂️)]: Mas espera, vcs trocaram a bandeja que fica ali praticamente junta
+[23/06/2026 17:18] [Oficina (Gerente)]: Dos kit de amortecedor
+[23/06/2026 17:18] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[23/06/2026 17:18] [Oficina (Gerente)]: Somente o barulho pequeno
+[23/06/2026 17:18] [Oficina (Gerente)]: Amortecedor só tem como saber após desmontagem se tem folga ou se está com a pressão comprometida, mas até então, está ok
+[23/06/2026 17:17] [Cliente (Willian Martins 👳🏾‍♂️)]: Mas o amortecedor ta com defeito?
+[23/06/2026 17:17] [Oficina (Gerente)]: Está sim
+[23/06/2026 17:15] [Cliente (Willian Martins 👳🏾‍♂️)]: Ta pronto?
+[23/06/2026 17:15] [Cliente (Willian Martins 👳🏾‍♂️)]: Nao entendi
+[23/06/2026 17:00] [Oficina (Gerente)]: Boa tarde Sr. Willian, tudo bem?
+
+Estou te encaminhando um check-list do mecânico referente ao seu veículo.
+
+Identificado visivelmente vazamento de água e para substuição posteriormente os kits de amortecedores (em observação os amortecedores após desmontagem).
+
+Sobre a injeção o primeiro passo se torna a colocar o catalisador no lugar, para dar continuidade aos testes.
+
+
+
+ (https://www.oiapi.com.br/WA.aspx?tk=vVPkyl47TtqwG8KqxDElxg==)
+[23/06/2026 09:09] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[23/06/2026 09:09] [Oficina (Gerente)]: Bom dia Sr. Willian, está em execução ainda, estando tudo certo pela parte da tarde já finaliza, ok
+[23/06/2026 09:08] [Cliente (Willian Martins 👳🏾‍♂️)]: O carro está pronto?
+[23/06/2026 09:08] [Cliente (Willian Martins 👳🏾‍♂️)]: Bom dia
+[22/06/2026 16:56] [Cliente (Willian Martins 👳🏾‍♂️)]: Show
+[22/06/2026 16:46] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[22/06/2026 14:33] [Cliente (Willian Martins 👳🏾‍♂️)]: Blza
+[22/06/2026 14:10] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[22/06/2026 09:37] [Cliente (Willian Martins 👳🏾‍♂️)]: 👍
+[22/06/2026 09:37] [Oficina (Gerente)]: Combinado, ficamos aguardando
+[22/06/2026 09:37] [Oficina (Gerente)]: Bom dia Sr. Willian, tudo bem?
+[22/06/2026 09:37] [Cliente (Willian Martins 👳🏾‍♂️)]: Essa é a palavra chave
+[22/06/2026 09:37] [Cliente (Willian Martins 👳🏾‍♂️)]: Vão chegar hj,
+[22/06/2026 09:37] [Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[22/06/2026 09:37] [Cliente (Willian Martins 👳🏾‍♂️)]: Bom dia
+[19/06/2026 11:31] [Oficina (Gerente)]: Sem problemas, antes da liberação do veículo realizamos um check-up
+[19/06/2026 11:30] [Cliente (Willian Martins 👳🏾‍♂️)]: Vou fazer em outro momento
+[19/06/2026 11:30] [Cliente (Willian Martins 👳🏾‍♂️)]: Sobre injeção, nao precisa realizar diagnóstico ok?
+[19/06/2026 09:07] [Cliente (Willian Martins 👳🏾‍♂️)]: 👍
+[19/06/2026 09:06] [Oficina (Gerente)]: Entendo.
+
+Conforme consta no orçamento aprovado, o prazo para entrega da peça fornecida pelo cliente é de até 48 horas. Porém, considerando que o vencimento ocorre durante o fim de semana, vamos considerar uma tolerância até o final do expediente de segunda-feira.
+
+Caso a peça não seja entregue até esse momento, passarão a ser aplicadas as condições de permanência previstas no orçamento aprovado.
+Peço apenas que nos mantenha informados sobre a previsão de entrega.
+[19/06/2026 09:01] [Cliente (Willian Martins 👳🏾‍♂️)]: Entre Segunda feira e quarta, mas creio que segunda feira ja esteja
+[19/06/2026 08:59] [Oficina (Gerente)]: Correto, não abrimos aos domingos e aos sábados trabalhamos em meio período.
+
+Conforme consta no orçamento aprovado, o prazo para entrega da peça fornecida pelo cliente é de até 48 horas. Após esse período, o veículo fica sujeito à cobrança de diária, especialmente quando ocupa o elevador e impede a realização de novos serviços.
+
+Peço apenas que nos informe a previsão de chegada da peça para que possamos nos programar.
+[19/06/2026 08:52] [Cliente (Willian Martins 👳🏾‍♂️)]: Domingo vcs nao abrem, correto? E sabado funcionam meio período, entao tenho até segunda, correto?
+[19/06/2026 08:51] [Oficina (Gerente)]: Para fornecimento de peças 48 horas corridas
+[19/06/2026 08:45] [Cliente (Willian Martins 👳🏾‍♂️)]: 48 horas úteis?
+[19/06/2026 08:44] [Oficina (Gerente)]: Bom dia Sr. Willian, tudo bem? 
+Obrigado, ficamos aguardando, lembrando que a peça deve chegar em uma prazo de até 48 horas, para evitar o custo de pátio de elevador (conforme orçamento). 
+Pois ficamos impossibilitados de realizar novos serviços.
+[18/06/2026 21:25] [Cliente (Willian Martins 👳🏾‍♂️)]: Já fiz a compra, parece que vai chegar na segunda feira
+[18/06/2026 21:25] [Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[18/06/2026 17:34] [Oficina (Gerente)]: Combinado, vamos nos falando
+[18/06/2026 17:34] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok no momento eu estou trabalhando, depois que terminar vou procurar a caixa
+[18/06/2026 17:27] [Oficina (Gerente)]: Ficam todas as informações em negrito destacado na parte inferior ao orçamento
+[18/06/2026 17:26] [Oficina (Gerente)]: O senhor pode clicar no link de acesso ao orçamento, ficam todas as informações sobre, peças e outros detalhes.
+[18/06/2026 17:25] [Cliente (Willian Martins 👳🏾‍♂️)]: Onde foi dito, agradeço
+[18/06/2026 17:25] [Cliente (Willian Martins 👳🏾‍♂️)]: Se puder me mostrar aqui no histórico pfv
+[18/06/2026 17:25] [Cliente (Willian Martins 👳🏾‍♂️)]: Nao esta em histórico que vcs nao aceitam pecas recondicionadas, vcs apenas me informaram que deveria ter nota
+[18/06/2026 17:15] [Oficina (Gerente)]: Está em histórico acima nas conversas
+[18/06/2026 17:14] [Oficina (Gerente)]: Tudo fica descrito no orçamento de entrada do veículo e ontem quando me pediu para realizar a compra das peça avisei que aceitamos desde que sejam novas e com nota fiscal.
+[18/06/2026 17:13] [Cliente (Willian Martins 👳🏾‍♂️)]: Pra depois avisar?
+[18/06/2026 17:13] [Cliente (Willian Martins 👳🏾‍♂️)]: Esperaram eu pagar pela desinstalação e análise da minha caixa
+[18/06/2026 17:13] [Cliente (Willian Martins 👳🏾‍♂️)]: Bom eu garanto a nota fiscal da peça,  agora vcs nao aceitarem recondicionada, pq nao me avisaram sobre isso antes?
+[18/06/2026 17:11] [Oficina (Gerente)]: Entendo, mas não podemos realizar o serviço com peças recondicionadas ou usadas fornecidas pelo cliente.
+
+Mas o senhor pode consultar caso encontre uma nova
+[18/06/2026 17:09] [Cliente (Willian Martins 👳🏾‍♂️)]: Mas de qualquer forma estou pesquisando
+[18/06/2026 17:09] [Cliente (Willian Martins 👳🏾‍♂️)]: Da direção
+[18/06/2026 17:09] [Cliente (Willian Martins 👳🏾‍♂️)]: Bom eu estou ciente e sei que nao terá garantia
+[18/06/2026 17:08] [Oficina (Gerente)]: A diferença é que as caixas recondicionadas que trabalhamos são de fornecedores homologados por nós, com padrão de qualidade, histórico e garantia que conhecemos.
+
+Quando a peça é fornecida pelo cliente, não temos como validar o processo de recondicionamento, os componentes utilizados, as tolerâncias aplicadas nem os testes realizados. Por isso não conseguimos assumir a mesma responsabilidade e garantia que assumimos quando fornecemos a peça.
+
+Além disso, estamos tratando de um componente diretamente ligado à direção do veículo. Por uma questão de segurança, trabalhamos apenas com peças cuja procedência e qualidade conseguimos rastrear e garantir.
+
+Não é uma questão de instalar ou não instalar, mas sim de conseguir garantir o serviço executado, a confiabilidade da peça aplicada e a segurança do veículo após o reparo.
+[18/06/2026 17:06] [Cliente (Willian Martins 👳🏾‍♂️)]: E outra qualquer q eu entregar ai?
+[18/06/2026 17:06] [Cliente (Willian Martins 👳🏾‍♂️)]: Qual a diferença de vcs instalarem a minha
+[18/06/2026 17:05] [Cliente (Willian Martins 👳🏾‍♂️)]: Pq vcs nao aceitam recondicionadas se eu paguei pela desinstalação e instalação da caixa?
+[18/06/2026 17:05] [Oficina (Gerente)]: Combinado, lembrando que tem que ser nova, ok?
+
+Não aceitamos peças usadas, recondicionada e sem nota fiscal.
+E não nos responsabilizamos pela garantia das peças fornecidas pelo cliente, tudo bem?
+[18/06/2026 17:04] [Cliente (Willian Martins 👳🏾‍♂️)]: Eu vou pesquisar por aqui e tentar comprar por aqui mesmo
+[18/06/2026 17:04] [Cliente (Willian Martins 👳🏾‍♂️)]: Abri sim, só que o preço é praticamente igual
+[18/06/2026 17:04] [Oficina (Gerente)]: Encaminhei duas opções, ambas de excelente qualidade
+[18/06/2026 17:02] [Oficina (Gerente)]: O senhor chegou a abrir os dois orçamentos?
+[18/06/2026 17:02] [Cliente (Willian Martins 👳🏾‍♂️)]: Se for mto caro eu aviso pra vcs montarem
+[18/06/2026 17:02] [Cliente (Willian Martins 👳🏾‍♂️)]: Vou verificar quanto custa uma aqui
+[18/06/2026 17:02] [Oficina (Gerente)]: Com nota fiscal
+[18/06/2026 17:02] [Oficina (Gerente)]: Que seria a mesma coisa, mas o senhor pode nos fornecer uma nova
+[18/06/2026 17:02] [Cliente (Willian Martins 👳🏾‍♂️)]: Entao, pode montar
+[18/06/2026 17:02] [Oficina (Gerente)]: Encaminhei o orçamento da revisada
+[18/06/2026 17:01] [Oficina (Gerente)]: Não, realizamos desta forma.
+
+A caixa fazemos quando há qualidade, para reparo
+[18/06/2026 17:01] [Cliente (Willian Martins 👳🏾‍♂️)]: Coifas *
+[18/06/2026 17:00] [Cliente (Willian Martins 👳🏾‍♂️)]: Nao tenho grana pra caixa nova, vou comprar a cremalheira e as coisas e mandar entregar ai, blza?
+[18/06/2026 16:58] [Oficina (Gerente)]: Ambas 03 meses de garantia peças e mão de obra, excelentes qualidades.
+[18/06/2026 16:58] [Oficina (Gerente)]: Prezado(a) WILLIAN, segue Orçamento nº 1880 de 18/06/2026 placa: HGK5D72
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=cTdBpxmh2NWaZp2QYwQHZg==) 
+Prezado(a) WILLIAN, segue Orçamento nº 1880 de 18/06/2026 placa: HGK5D72
+
+Aqui em link acima segue a opção da caixa de direção nova genuina. 
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=cTdBpxmh2NW3Vc3tm+lTCQ==)
+[18/06/2026 16:57] [Oficina (Gerente)]: Prezado(a) WILLIAN, segue Orçamento nº 1880 de 18/06/2026 placa: HGK5D72
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=cTdBpxmh2NX0RjwmEFFwpQ==) 
+
+Essa opção a revisada a base de troca e vou lhe enviar da nova genuina também.
+Sr. Willian em link acima segue o orçamento complementar referente a direção do veículo.
+[18/06/2026 16:42] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[18/06/2026 16:41] [Oficina (Gerente)]: Nesse caso realizasse a substituição, porque gera um efeito "cascata", a cremalheira danificada ela da folga na caixa de direção e ocasiona os vazamentos a retifica neste cenário não ficaria boa.
+
+Vou gerar o orçamento e já encaminho ao Sr
+[18/06/2026 16:37] [Cliente (Willian Martins 👳🏾‍♂️)]: Entendi, e o que deve ser feito pra conserto?
+[18/06/2026 16:36] [Oficina (Gerente)]: Sr. Willian, segue um vídeo acima referente a caixa de direção do veículo.
+
+Houve um desgaste excessivo na cremalheira assim dando a passagem de óleo pelo restante dos componentes.
+[18/06/2026 16:35] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 15:17] [Cliente (Willian Martins 👳🏾‍♂️)]: 🙏🏾
+[18/06/2026 15:15] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 14:29] [Cliente (Willian Martins 👳🏾‍♂️)]: Show
+[18/06/2026 13:56] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 12:46] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok, pq vcs me cobraram 320 em cada bandeja com pivot, a perfect eu acho por 300 o par com pivo, 
+
+Entao o ideal e justo seria a original ou a nakata que se aproximam desse preço
+[18/06/2026 12:44] [Oficina (Gerente)]: Vou verificar a disponibilidade e daqui a pouco lhe atualizo
+[18/06/2026 12:42] [Cliente (Willian Martins 👳🏾‍♂️)]: Pego muitas ruas esburacadas
+[18/06/2026 12:42] [Cliente (Willian Martins 👳🏾‍♂️)]: Eu uso o carro pra trabalhar, precisa ter durabilidade
+[18/06/2026 12:42] [Cliente (Willian Martins 👳🏾‍♂️)]: Nakata*
+[18/06/2026 12:42] [Cliente (Willian Martins 👳🏾‍♂️)]: Nada tá ou genuina
+[18/06/2026 12:41] [Cliente (Willian Martins 👳🏾‍♂️)]: Perfect nao hein, perfect custa 250 o par kkkkkkkk
+[18/06/2026 12:41] [Oficina (Gerente)]: Pode vir nakata, perfect ou genuína de acordo com a disponibilidade das 03 marcas, mas todas de primeira.
+[18/06/2026 12:40] [Cliente (Willian Martins 👳🏾‍♂️)]: ?
+[18/06/2026 12:40] [Cliente (Willian Martins 👳🏾‍♂️)]: Ou alguma outra linha premium
+[18/06/2026 12:40] [Cliente (Willian Martins 👳🏾‍♂️)]: A marca das bandejas? Nakata?
+[18/06/2026 12:39] [Cliente (Willian Martins 👳🏾‍♂️)]: Irmao, duvida
+[18/06/2026 12:37] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[18/06/2026 12:37] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 12:37] [Cliente (Willian Martins 👳🏾‍♂️)]: Blza, vcs viram tbm o lance do carro afogar?
+[18/06/2026 12:37] [Oficina (Gerente)]: Apenas um vídeo atualizativo
+[18/06/2026 12:37] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[18/06/2026 12:33] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[18/06/2026 12:32] [Oficina (Gerente)]: Muito obrigado, vamos agilizar e vou atualizando por aqui, ok
+[18/06/2026 12:32] [Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[18/06/2026 12:32] [Oficina (Gerente)]: PIX CNPJ: 55.143.159.0001/57 
+
+Mecânica Popular ou DHJV Serviços automotivos LTDA
+
+R$1.880,69
+[18/06/2026 12:32] [Cliente (Willian Martins 👳🏾‍♂️)]: Sim, mande os dados
+[18/06/2026 12:32] [Oficina (Gerente)]: Combinado, como o valor passa de R$2.600,00 por regras da empresa, pedimos pelo menos 60% de sinal o senhor consegue fazer pix?
+[18/06/2026 12:32] [Cliente (Willian Martins 👳🏾‍♂️)]: Ok. Pode prosseguir entao com a manutenção pfv vou fazer o pagamento a vista no pix
+[18/06/2026 12:31] [Oficina (Gerente)]: Infelizmente no crédito nós não conseguimos, mas consigo dar o desconto sobre o valor que irá pagar a vista
+[18/06/2026 12:30] [Cliente (Willian Martins 👳🏾‍♂️)]: Podemos chegar nesse mesmo valor comigo pagando metade no pix e metade no crédito?
+[18/06/2026 12:30] [Oficina (Gerente)]: Para pagamento em dinheiro ou pix consigo 6% de desconto.
+sobre o valor total do orçamento, no caso R$3.134,49
+[18/06/2026 12:30] [Cliente (Willian Martins 👳🏾‍♂️)]: Se o desconto for bom eu pago tudo no pix, ou pago metade no pix e metade no crédito...
+[18/06/2026 12:30] [Oficina (Gerente)]: Qual seria a forma de pagamento?
+[18/06/2026 12:30] [Cliente (Willian Martins 👳🏾‍♂️)]: Queria ver com vc, se é possível me dar algum desconto
+[18/06/2026 12:30] [Cliente (Willian Martins 👳🏾‍♂️)]: Opa. Bom dia
+[18/06/2026 12:29] [Oficina (Gerente)]: Bom dia Sr. Willian, tudo bem?
+[18/06/2026 12:29] [Cliente (Willian Martins 👳🏾‍♂️)]: Entendi
+[18/06/2026 12:28] [Oficina (Gerente)]: Remoção e instalação
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: 600 reais é só pra sacar a caixa de direcao ?
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Um minuto
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Deixa eu sair aqui fora q eu te ligo
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Eu estou fazendo isso por falta de recurso mesmo, olha o orçamento ta salgado, a troca da bieleta é mais caro que a bieleta em sí
+[18/06/2026 12:28] [Oficina (Gerente)]: Consigo te explicar e orientar melhor
+[18/06/2026 12:28] [Oficina (Gerente)]: Não compra ainda, amanhã cedo te ligo então e vemos a melhor opção, pode ser?
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Mais pro fim do ano
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Outro momento
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: E a caixa mais tarde eu vejo
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Tudo bem vou pesquisar as peças e pedir pra entregar ai
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: É que estou em um atendimento no cliente agora.
+[18/06/2026 12:28] [Oficina (Gerente)]: Posso te ligar?
+[18/06/2026 12:28] [Oficina (Gerente)]: Referente a caixa de direção, ela não impacta apenas no vazamento, há folga no conjunto também que ocasiona o problema de direção e ajuda desgastar irregularmente os pneus.
+
+Sim o Sr tem a opção de nos trazer as peças novas, desde que sejam novas e com nota fiscal, lembrando que não nos responsabilizamos pela garantia de peças fornecidas pelo cliente.
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: E eu tenho a opção de eu comprar as peças aqui fora?
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Seguinte. Por falta de recurso, vou cancelar a desmontagem da caixa de direção
+[18/06/2026 12:28] [Oficina (Gerente)]: Estou sim
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Esta online ainda?
+[18/06/2026 12:28] [Cliente (Willian Martins 👳🏾‍♂️)]: Opa
+[17/06/2026 11:39] [Oficina (Gerente)]: Sr. Willian, segue a via correta da segunda via do check-list de entrada do veículo.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chZxy5iITjMsng==)
+[17/06/2026 11:38] [Oficina (Gerente)]: Prezado(a) WILLIAN, segue Orçamento nº 1874 de 17/06/2026 placa: HGK5D72
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chYGM4m4uE55CQ==) 
+
+
+Sr. William, conforme aprovação em loja, estou lhe encaminhando em link acima a segunda via do orçamento.
+[17/06/2026 11:36] [Oficina (Gerente)]: Prezado(a) WILLIAN, segue Orçamento nº 1874 de 17/06/2026 placa: HGK5D72
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=k1jmdwi8chbSk5IqyHqFXw==) 
+
+Sr. Willian estou te encaminhando em link acima a segunda via do check-list de entrada do veículo.
+
+====== ARQUIVO: Conv_3646_Michel.txt ======
+==============================================
+Cliente: Michel
+ID Conversa: 3646
+Total de Mensagens: 110
+Status de Triagem: APROVADO
+==============================================
+
+[27/06/2026 11:05] [Oficina (Gerente)]: Entendo a sua chateação e peço desculpas pelo transtorno.
+
+A previsão era realmente entregar antes, porém a transportadora não realizou a coleta da peça conforme programado, o que acabou atrasando o serviço.
+
+Na segunda-feira, assim que a peça chegar, faremos a montagem com prioridade para liberar o veículo o mais rápido possível.
+[27/06/2026 11:03] [Cliente (Michel)]: Bom dia 
+O grande problema amigo e que vcs ficaram me pressionando pra pagar a entrada e falou que entregaria no dia seguinte eu fiz um corre danado pra conseguir o dinheiro pra não ficar sem carro e ai vc me fala que só segunda 
+Cara estou muito chateado com isso
+[27/06/2026 08:14] [Oficina (Gerente)]: Bom dia Sr. Michel, tudo bem?
+Sim, estava realizando o alinhamento já, mas a transportadora não coletou ontem.
+
+Mas segunda-feira está aqui e na segunda mesmo já montamos.
+[26/06/2026 18:26] [Cliente (Michel)]: (Arquivo/Mídia anexado)
+[26/06/2026 18:17] [Cliente (Michel)]: Sério isso
+[26/06/2026 16:47] [Oficina (Gerente)]: A previsão do nosso fornecedor, estava para amanhã, mas acabo de ser informado que alterou para entre amanhã e segunda, vou atualizando o senhor auqi.
+[26/06/2026 16:43] [Oficina (Gerente)]: Boa tarde Sr. Michel, tudo bem?
+[26/06/2026 12:18] [Oficina (Gerente)]: Vamos fazer o possível
+[26/06/2026 12:12] [Cliente (Michel)]: Faz um esforço aí pra me ajudar pra entregar o carro por favor
+[26/06/2026 12:12] [Oficina (Gerente)]: Obrigado, vou te atualizando por aqui
+[26/06/2026 11:54] [Cliente (Michel)]: Tá feito
+[26/06/2026 11:54] [Cliente (Michel)]: (Arquivo/Mídia anexado)
+[26/06/2026 11:53] [Oficina (Gerente)]: O senhor consegue fazer pix?
+[26/06/2026 11:53] [Oficina (Gerente)]: Já está alinhando e balanceando o cardan
+[26/06/2026 11:53] [Oficina (Gerente)]: Estamos fazendo o possível
+[26/06/2026 11:51] [Cliente (Michel)]: (Arquivo/Mídia anexado)
+[26/06/2026 11:51] [Cliente (Michel)]: Consigo sim
+[26/06/2026 11:36] [Oficina (Gerente)]: Previsão até amanhã, estamos agilizando o senhor conseguiu realizar o restante do sinal?
+[26/06/2026 11:36] [Cliente (Michel)]: Se ficou vou buscar e já pago o restante
+[26/06/2026 11:36] [Cliente (Michel)]: Carro ficou pronto?
+[26/06/2026 11:34] [Cliente (Michel)]: Tudo sim
+[26/06/2026 11:34] [Cliente (Michel)]: Bom dia
+[26/06/2026 11:26] [Oficina (Gerente)]: Bom dia Sr. Michel, tudo bem?
+[25/06/2026 16:03] [Cliente (Michel)]: Ok
+[25/06/2026 16:03] [Cliente (Michel)]: 9k
+[25/06/2026 15:47] [Oficina (Gerente)]: Os 60% é regra geral da empresa, mas vamos adiantando aqui ficando pendente R$932,80 para amanhã, ok
+[25/06/2026 15:46] [Cliente (Michel)]: Posso pagar tudo quando for retirar amanhã ou sábado?
+[25/06/2026 15:45] [Oficina (Gerente)]: Muito obrigado, vamos agilizar mas fica restante R$932,80 para amanhã, conforme combinado. Ok?
+[25/06/2026 15:44] [Cliente (Michel)]: quando tiver pronta pago aí na hora blz
+[25/06/2026 15:44] [Cliente (Michel)]: Feito
+[25/06/2026 15:44] [Cliente (Michel)]: (Arquivo/Mídia anexado)
+[25/06/2026 15:20] [Oficina (Gerente)]: CNPJ: 55.143.159/0001-57
+Mecânica Popular ou DHJV Serviços automotivos LTDA.
+[25/06/2026 15:05] [Cliente (Michel)]: Ok
+[25/06/2026 15:05] [Oficina (Gerente)]: Ok, só um minuto, por favor
+[25/06/2026 14:54] [Cliente (Michel)]: Vou mandar 2.000
+[25/06/2026 14:54] [Cliente (Michel)]: Passa o Pix por favor
+[25/06/2026 14:27] [Cliente (Michel)]: Irei te levar
+[25/06/2026 14:25] [Oficina (Gerente)]: Ficamos dependentes do sinal para prosseguir com o pedido da peça, provavelmente entre amanhã e sábado
+[25/06/2026 14:24] [Cliente (Michel)]: Carro fica pronto ainda hoje ?
+[25/06/2026 14:03] [Oficina (Gerente)]: Ok
+[25/06/2026 14:00] [Cliente (Michel)]: Vou te levar 2.000 e amanhã o restante pode ser
+[25/06/2026 14:00] [Oficina (Gerente)]: Oi, infelizmente não consigo, está no minimo mesmo R$4.888,00
+[25/06/2026 13:59] [Cliente (Michel)]: Vou pagar a vista
+[25/06/2026 13:59] [Cliente (Michel)]: Consegue melhorar mas um pouquinho
+[25/06/2026 13:59] [Cliente (Michel)]: Blz
+[25/06/2026 13:59] [Cliente (Michel)]: Opa
+[25/06/2026 09:41] [Cliente (Michel)]: Vai ter que te um pouco de paciência
+[25/06/2026 09:38] [Cliente (Michel)]: Espera um pouquinho aí pois estou tentando esse valor
+[25/06/2026 09:35] [Cliente (Michel)]: Bom dia
+[25/06/2026 09:34] [Oficina (Gerente)]: Bom dia Sr. Michel, tudo bem?
+[24/06/2026 11:39] [Oficina (Gerente)]: Combinado, ficamos aguardando.
+[24/06/2026 11:39] [Cliente (Michel)]: Até final do dia já falo com vc
+[24/06/2026 11:38] [Cliente (Michel)]: Vai ter que esperar um pouquinho blz
+[24/06/2026 11:38] [Oficina (Gerente)]: Combinado, como o valor passa de R$2.600,00 pedimos pelo menos 60% de sinal o senhor consegue fazer pix?
+[24/06/2026 11:37] [Cliente (Michel)]: (Arquivo/Mídia anexado)
+[24/06/2026 11:37] [Cliente (Michel)]: Tá aprovado amigo
+[24/06/2026 11:36] [Oficina (Gerente)]: Combinado, fico aguardando a aprovação
+[24/06/2026 11:21] [Cliente (Michel)]: (Arquivo/Mídia anexado)
+[24/06/2026 11:21] [Oficina (Gerente)]: ?
+[24/06/2026 11:20] [Oficina (Gerente)]: Podemos prosseguir com o serviço.
+[24/06/2026 11:20] [Cliente (Michel)]: Tudo bem
+[24/06/2026 11:19] [Oficina (Gerente)]: Bom dia Sr. Michel, tudo bem, obrigado por perguntar
+[24/06/2026 11:18] [Cliente (Michel)]: Tudo bem?
+[24/06/2026 11:18] [Cliente (Michel)]: Bom dia
+[24/06/2026 10:09] [Oficina (Gerente)]: Bom dia Sr. Michel, tudo bem?
+[23/06/2026 16:49] [Cliente (Michel)]: Amigo vai ter que esperar uns dias vou ter que levantar essa grana
+[23/06/2026 16:46] [Cliente (Michel)]: E já te falo
+[23/06/2026 16:46] [Cliente (Michel)]: Vou ver oque fazer
+[23/06/2026 16:45] [Cliente (Michel)]: De qualquer forma esse valor não resolve o problema
+[23/06/2026 16:45] [Oficina (Gerente)]: Ficaria R$5.258,36
+[23/06/2026 16:44] [Oficina (Gerente)]: Consigo 6% de desconto a vista para pagamento dinheiro ou pix.
+[23/06/2026 16:44] [Cliente (Michel)]: Provavelmente a vista
+[23/06/2026 16:44] [Oficina (Gerente)]: Qual seria a forma de pagamento?
+[23/06/2026 16:43] [Oficina (Gerente)]: Aprovando hoje ainda o prazo são de 02 dias, mas provavemente amanhã até o final do dia fique pronto
+[23/06/2026 16:43] [Cliente (Michel)]: Tem como melhorar esse valor?
+[23/06/2026 16:42] [Cliente (Michel)]: Quantos dias pra ficar pronto
+[23/06/2026 16:41] [Cliente (Michel)]: Cara vou ver oque vou fazer
+[23/06/2026 16:40] [Cliente (Michel)]: Agora tô até assustado com valor
+Ficou muito salgado
+[23/06/2026 16:40] [Oficina (Gerente)]: Qual seria a forma de pagamento?
+[23/06/2026 16:36] [Cliente (Michel)]: Eu não tenho esse valor no cartão 
+Meu limite e baixo
+[23/06/2026 16:35] [Cliente (Michel)]: Tá muito fora do meu ordenado
+[23/06/2026 16:34] [Cliente (Michel)]: Cara ficou tudo isso
+[23/06/2026 16:32] [Oficina (Gerente)]: Prezado(a) MICHEL, segue Orçamento nº 1893 de 23/06/2026 placa: BRZ5000
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=vVPkyl47TtowuVnV2eY+rA==) 
+
+
+Sr. Michel, no link acima segue o orçamento referente ao cardan do seu veículo.
+
+Esse valor parcelamos em até 4x de R$1.398,50 sem juros ou em até 18x de R$366,72 com juros no cartão.
+
+O orçamento está incluso os itens da aprovados e o diagnóstico abatido em 50%.
+[23/06/2026 16:31] [Cliente (Michel)]: Ok
+[23/06/2026 16:30] [Oficina (Gerente)]: Boa tarde Sr. Michel, tudo bem?
+Encaminhando um vídeo referente ao seu cardan.
+
+
+A trizeta está enroscando, fica mais viavel a substituição a base de troca.
+
+Mais viável e mais rápido também, vou gerar o orçamento e já encaminho.
+[23/06/2026 16:29] [Cliente (Michel)]: Ok
+[23/06/2026 16:27] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[23/06/2026 11:47] [Cliente (Michel)]: Ok fico no aguardo
+[23/06/2026 11:47] [Cliente (Michel)]: Opa bom dia
+[23/06/2026 11:35] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[22/06/2026 13:21] [Cliente (Michel)]: Ok
+[22/06/2026 13:20] [Oficina (Gerente)]: Obrigado, vamos agilizar e já vou te atualizando
+[22/06/2026 13:09] [Cliente (Michel)]: Tudo sim
+[22/06/2026 13:07] [Oficina (Gerente)]: Combinado, Sr. Michel. Vamos prosseguir.
+
+Conforme informado, o cardan será desmontado para análise técnica e verificação da viabilidade de reparo. Em razão da natureza do serviço, após a desmontagem podem ser identificados componentes danificados, juntas, vedações ou demais peças sem condições de reaproveitamento.
+
+Dessa forma, em caso de não aprovação do orçamento de reparo ou substituição, não será possível realizar a remontagem do conjunto apenas para devolução do veículo nas condições originais. Nessa situação, o veículo deverá ser retirado por meio de guincho, com os componentes desmontados acondicionados no porta-malas.
+
+Ficará pendente para pagamento o valor de R$ 1.920,00, referente ao orçamento nº 1887, correspondente aos serviços de desmontagem e análise.
+
+Tudo bem para darmos sequência?
+[22/06/2026 12:49] [Cliente (Michel)]: Ok 
+Manda bala
+[22/06/2026 12:38] [Oficina (Gerente)]: Prezado(a) MICHEL, segue Orçamento nº 1887 de 22/06/2026 placa: BRZ5000
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHZeMgJdV0dL+Q==) 
+
+
+Sr. Michel, no link acima estou encaminhando o orçamento referente à desmontagem do conjunto para análise e diagnóstico detalhado, com possível necessidade de reparo.
+
+Caso seja aprovado posteriormente o orçamento de reparo ou de substituição do componente, se necessário, o serviço de montagem será bonificado e não será cobrado separadamente.
+[22/06/2026 12:30] [Oficina (Gerente)]: Vou gerar o orçamento da desmontagem e já te encaminho, um minuto
+[22/06/2026 12:29] [Cliente (Michel)]: Manda bala
+[22/06/2026 12:29] [Cliente (Michel)]: Ok
+[22/06/2026 12:24] [Oficina (Gerente)]: Identificamos que alem dos suporte danificado, também há vazamento de graxa/óleo, sendo assim necessário a remoção do cardan para análise e possível reparo.
+[22/06/2026 12:22] [Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[22/06/2026 12:07] [Cliente (Michel)]: Ok
+[22/06/2026 11:53] [Oficina (Gerente)]: Daqui a pouco já te atualizo em vídeo
+[22/06/2026 11:52] [Cliente (Michel)]: Consegue mandar pra mim oque precisa fazer
+[22/06/2026 11:52] [Cliente (Michel)]: Ok
+[22/06/2026 11:52] [Cliente (Michel)]: Bom dia
+[22/06/2026 11:50] [Oficina (Gerente)]: Seu carro já está em diagnóstico, já lhe atualizo
+[22/06/2026 11:50] [Oficina (Gerente)]: Bom dia Sr. Michel, tudo bem?
+[20/06/2026 10:48] [Oficina (Gerente)]: Prezado(a) MICHEL, segue Orçamento nº 1885 de 20/06/2026 placa: BRZ5000
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHb2vx25Nwx5Ig==) 
+
+
+Aqui no link acima estou lhe encaminhando a segunda via do orçamento de diagnóstico, conforme aprovação em loja.
+[20/06/2026 10:45] [Oficina (Gerente)]: Sr. Michel segue em link acima a segunda via do check-list de entrada do veículo.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHZ8Hjx2GcQKeg==)

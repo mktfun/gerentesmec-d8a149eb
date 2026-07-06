@@ -1,0 +1,591 @@
+
+--- ARQUIVO: Conv_3210_Adriano_FIAT_SINAL.txt ---
+==============================================
+Cliente: Adriano FIAT SINAL
+ID Conversa: 3210
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Adriano FIAT SINAL)]: DIANTEIRO NAO
+[Oficina (Gerente)]: Tem?
+[Oficina (Gerente)]: Cubo vc trm?
+[Oficina (Gerente)]: Boa tarde adiano, tudo bem?
+[Cliente (Adriano FIAT SINAL)]: 269,00 MENOS 15%
+[Cliente (Adriano FIAT SINAL)]: boa tarde
+[Oficina (Gerente)]: Pode ver pra mim o rolamento dianteiro
+[Oficina (Gerente)]: Boa tarde Adriano, tudo bem?
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Adriano FIAT SINAL)]: SIM
+[Oficina (Gerente)]: São leds né
+[Cliente (Adriano FIAT SINAL)]: LANTERNA LATERAL DIREITA R$ 1.490,52 CONSIGO FAZER R$ 1.162,61
+[Cliente (Adriano FIAT SINAL)]: LANTERNA TAMPA DIREITA R$ 839,19 CONSIGO FAZER R$ 654,57
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Adriano FIAT SINAL)]: lateral ou tampa
+[Oficina (Gerente)]: Não vende somente a lampada?
+[Oficina (Gerente)]: Acho que sim
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Adriano FIAT SINAL)]: so lanterna completa
+[Cliente (Adriano FIAT SINAL)]: led
+--- ARQUIVO: Conv_3225_Vetter_Imotions_dualogic.txt ---
+==============================================
+Cliente: Vetter Imotions,dualogic
+ID Conversa: 3225
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: 🙏🏻
+[Oficina (Gerente)]: Trocou
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Vetter Imotions,dualogic)]: Dia bom pra nós
+[Cliente (Vetter Imotions,dualogic)]: Ok
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Enviando uber ai
+[Oficina (Gerente)]: Bom dia, tudo bem?
+[Cliente (Vetter Imotions,dualogic)]: (Arquivo/Mídia anexado)
+[Cliente (Vetter Imotions,dualogic)]: (Arquivo/Mídia anexado)
+[Cliente (Vetter Imotions,dualogic)]: (Arquivo/Mídia anexado)
+[Cliente (Vetter Imotions,dualogic)]: Pode retirar sim
+[Oficina (Gerente)]: Conseguiu verificar?
+[Oficina (Gerente)]: Pode ser? Preciso muito, iniciar a montagem hoje deste carro...
+[Oficina (Gerente)]: Nas próximas abatemos
+[Oficina (Gerente)]: Nosso financeiro já encerrou hoje
+[Oficina (Gerente)]: Consegue ver pra mim desta vez? Não me deu a opção, como me enviou meu endereço imaginei que entregariam
+[Cliente (Vetter Imotions,dualogic)]: Me passa por favor
+[Cliente (Vetter Imotions,dualogic)]: Quando tiver o nome do motoboy
+[Cliente (Vetter Imotions,dualogic)]: CEP: 04716-001.
+--- ARQUIVO: Conv_3231_Sergio.txt ---
+==============================================
+Cliente: Sergio
+ID Conversa: 3231
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: Boa tarde Sr. Sérgio, tudo bem?
+
+Referente a embreagem tem os modelos corretos, que é possível identificar após a remoção da transmissão.
+
+Remoção do câmbio para avaliação R$700,00 
+Troca junta da tampa de Valvulas R$280,00 
+
+Transmissão pode haver alterações após desmontagem para analise dos serviços que serão necessário ser realizados.
+[Cliente (Sergio)]: Show 
+Vou deixar sim a avaliação 
+Vou fazer com calma,  pode deixar 
+
+Depois me envia o orçamento 
+
+Muito obrigado 
+
+Bom descanso
+[Oficina (Gerente)]: Se o senhor conseguir deixar a avaliação nos ajuda muito
+[Oficina (Gerente)]: Vamos nos falando
+[Oficina (Gerente)]: Muito obrigado, hoje cotei o orçamento combinado e amanhã cedo te encaminho aqui
+[Cliente (Sergio)]: Oi Erik,  como vai? Tudo bem?
+Ficou muito bom mesmo 
+
+100% agora 
+
+Parabéns pelo excelente trabalho. 
+
+Nota 10
+[Oficina (Gerente)]: Boa tarde Sr. Sergio, tudo bem?
+Como está o veículo, tudo certo?
+[Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=&gs_lcrp=EgZjaHJvbWUqBggAEEUYQTIGCAAQRRhBMgYIARBFGDwyBggCEEUYOzIGCAMQRRg7MgYIBBBFGDsyBggFEEUYPDIGCAYQRRg8MgYIBxAFGEDSAQgxNjk1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[Oficina (Gerente)]: Sr. Sergio, aqui segue em link acima o check-list de mecânico.
+
+Pontuados até o momento visível para próximas revisões um vazamento inicial da junta da tampa de valvulas e a embreagem gasta.
+
+ (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHbyyo9G9U8yDA==)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Sergio)]: Beleza 
+Obrigado
+[Oficina (Gerente)]: Combinado, vou atualizando o senhor aqui
+[Cliente (Sergio)]: 13:00 estarei por aí
+[Cliente (Sergio)]: Oi Erik,  bom dia,  tudo bem? E contigo 
+
+Pode executar 
+
+Aprovado
+[Oficina (Gerente)]: Segue o orçamento referente a bomba de água, caso a aprovação por volta de 13:00 o veículo fica pronto.
+[Oficina (Gerente)]: Bom dia Sr. Sérgio, tudo bem?
+[Oficina (Gerente)]: Prezado(a) SERGIO, segue Orçamento nº 1882 de 20/06/2026 placa: EZR8759
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHadIARCAaBPiw==)
+[Cliente (Sergio)]: Show 
+Perfeito 
+Parabéns, excelente
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+--- ARQUIVO: Conv_3233_Braulio_Rodrigues.txt ---
+==============================================
+Cliente: Braulio Rodrigues
+ID Conversa: 3233
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Braulio Rodrigues)]: Obrigado
+[Cliente (Braulio Rodrigues)]: Combinado
+[Oficina (Gerente)]: Pode ser sim, sem problemas
+[Cliente (Braulio Rodrigues)]: Nao vou conseguir levar o carro hoje. Podemos marcar para o próximo sábado?
+[Cliente (Braulio Rodrigues)]: Bom dia! Tudo certo!
+[Oficina (Gerente)]: Bom dia Sr. Braulio, tudo bem?
+[Oficina (Gerente)]: Combinado, obrigado.
+[Cliente (Braulio Rodrigues)]: Abraço
+[Cliente (Braulio Rodrigues)]: As 08:00 estarei por aí
+[Cliente (Braulio Rodrigues)]: Combinado
+[Oficina (Gerente)]: Bom dia Sr. Braulio, tudo bem? 
+
+Não tem custo sera realizado o check-list do mecânico uma inspenção visual onde verificamos mais de 60 itens do veículo.
+
+Combinado, pode vir amanhã e já verificamos, se conseguir nos trazer as 08:00
+[Cliente (Braulio Rodrigues)]: (Arquivo/Mídia anexado)
+[Cliente (Braulio Rodrigues)]: (Arquivo/Mídia anexado)
+[Cliente (Braulio Rodrigues)]: 👍🏻
+[Oficina (Gerente)]: Combinado, pode vir
+[Cliente (Braulio Rodrigues)]: Acabou de chega do guincho
+[Cliente (Braulio Rodrigues)]: Pedi o guincho do seguro. Daqui a pouco estou chegando por ai
+[Cliente (Braulio Rodrigues)]: Aí parei o carro
+[Cliente (Braulio Rodrigues)]: E agora no trajeto para o trabalho além de piorar bastante, começou a frear sozinho
+[Cliente (Braulio Rodrigues)]: O freio começou a chiar bastante, mesmo sem eu pisar no pedal
+--- ARQUIVO: Conv_3234_Fe.txt ---
+==============================================
+Cliente: Fe
+ID Conversa: 3234
+Total de Mensagens: 15
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Fe)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Fe)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Deu uma melhorada, mas caso persista recomendamos a substituíção da embreagem
+[Cliente (Fe)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: O carro está pronto, ok
+[Oficina (Gerente)]: Boa tarde Alan, tudo bem?
+[Oficina (Gerente)]: Abrimos as 08:00
+[Cliente (Fe)]: Que horas vc abre ?
+[Cliente (Fe)]: Blz
+[Oficina (Gerente)]: Pode sim, passa aqui para avaliarmos
+[Cliente (Fe)]: Td bem sim graças adeus
+[Oficina (Gerente)]: Bom dia Alan, tudo bem?
+[Cliente (Fe)]: (Arquivo/Mídia anexado)
+--- ARQUIVO: Conv_3241_Edgar.txt ---
+==============================================
+Cliente: Edgar
+ID Conversa: 3241
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: Posso confirmar a agenda?
+[Oficina (Gerente)]: Bom dia Sr. Edgar, tudo bem?
+[Cliente (Edgar)]: Blz
+[Oficina (Gerente)]: Agendado, ficamos aguardando.
+
+Rua Jorge Beretta, 627 - Parque Erasmo Assunção - Santo André/SP
+[Cliente (Edgar)]: BDQ2G90
+[Oficina (Gerente)]: para colocar na agenda, por favor
+[Oficina (Gerente)]: Me informa a placa
+[Oficina (Gerente)]: Pode sim
+[Cliente (Edgar)]: Pode ser essa hora?
+[Cliente (Edgar)]: As 11 e melhor
+[Cliente (Edgar)]: Posso me atrasar
+[Cliente (Edgar)]: As 10 e meio encima
+[Cliente (Edgar)]: Deixa as 11
+[Oficina (Gerente)]: Posso deixar agendado para as 10:00?
+[Cliente (Edgar)]: Amanhã a partir das 10 horas da manhã até as 15 horas tenho disponibilidade
+[Cliente (Edgar)]: Posso comparecer sim
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Edgar)]: E manual o carro
+[Cliente (Edgar)]: Sem luz nenhuma
+[Cliente (Edgar)]: Renaut logan zen 1.6 16v motor sce 2019/2020
+--- ARQUIVO: Conv_3244_Ivan.txt ---
+==============================================
+Cliente: Ivan
+ID Conversa: 3244
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Ivan)]: Ok
+[Oficina (Gerente)]: Entendo, por está relacionado ao tempo frio, acompanha e vai me avisando, qualquer dúvida pode nos trazer
+[Cliente (Ivan)]: Quando gelado
+[Cliente (Ivan)]: Bom hj pela manhã quando liguei , deu umas falhadas
+[Cliente (Ivan)]: Bom dia
+[Oficina (Gerente)]: Bom dia Sr. Ivan, tudo bem?
+
+Como está o carro, tudo certo?
+[Oficina (Gerente)]: https://www.google.com/search?q=mecanica+popular+jorge+beretta&oq=&gs_lcrp=EgZjaHJvbWUqBggBEEUYQTIGCAAQRRg8MgYIARBFGEEyBwgCEC4YgAQyFwgDEC4YChgLGIMBGMcBGLEDGNEDGIAEMgYIBBBFGDwyBggFEEUYQTIGCAYQRRg8MgYIBxBFGDzSAQgxODE1ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8#lrd=0x94ce476f7eed5e7f:0x25b82ef873e19ce,1,,,,
+[Cliente (Ivan)]: Feito ok
+[Cliente (Ivan)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Isso a mesma.
+
+CNPJ: 55.143.159/0001-57
+Mecânica Popular ou DHJV Serviços Automotivos LTDA
+[Cliente (Ivan)]: Ok na mesma chave pix ?
+[Oficina (Gerente)]: R$1.829,45 com o desconto
+[Cliente (Ivan)]: Vc me passa o valor do restante , pra mim já fazer o pix , vc vai me dar aquele 5% né rsrs
+[Oficina (Gerente)]: Pode sim
+[Cliente (Ivan)]: Tá  , posso então ir direto nesse horario
+[Oficina (Gerente)]: Por volta das 16:00 está pronto para retirada
+[Oficina (Gerente)]: Sem problemas, Sr. Ivan. O orçamento permanecerá registrado. Quando desejar realizar o serviço, ficaremos à disposição. Recomendo apenas atenção ao sistema de freios por se tratar de item de segurança.
+[Cliente (Ivan)]: Vou esperar um pouco mais ok , por hora somente o que já foi feito ok
+[Oficina (Gerente)]: Prezado(a) IVAN, segue Orçamento nº 1881 de 19/06/2026 placa: EXB7354
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=MXvuxM50NHYJUKP7n6MQzg==) 
+
+
+Aqui segue o orçamento formalizado, referente ao freio dianteiro.
+[Oficina (Gerente)]: Pelo menos fica mais seguro e as bandejas programamos um dia que possa parar
+--- ARQUIVO: Conv_3248_Willian_Martins________.txt ---
+==============================================
+Cliente: Willian Martins 👳🏾‍♂️
+ID Conversa: 3248
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Aqui são as peças velhas
+[Cliente (Willian Martins 👳🏾‍♂️)]: (Arquivo/Mídia anexado)
+[Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[Oficina (Gerente)]: O alinhamento permaneceu o mesmo, mas para ficar correto, precisa trocar os pneus e alinhar, ok?
+[Cliente (Willian Martins 👳🏾‍♂️)]: O carro deu alinhamento?
+[Oficina (Gerente)]: Combinado, sem problemas.
+[Oficina (Gerente)]: Ficou restante R$1.547,56
+[Cliente (Willian Martins 👳🏾‍♂️)]: Nao consigo ir ai
+[Cliente (Willian Martins 👳🏾‍♂️)]: Vou passar amanha cedo pra retirar, no momento estou em santo amaro
+[Cliente (Willian Martins 👳🏾‍♂️)]: E quanto ficou?
+[Cliente (Willian Martins 👳🏾‍♂️)]: Ok
+[Oficina (Gerente)]: Quando vier retirar, explicamos melhor para entender.
+
+Por isso realizamos os serviços anteriores e deixamos em observação alguns componentes.
+[Oficina (Gerente)]: O amortecedor é distinto do conjunto, não desmontamos o acesso é diferente
+[Cliente (Willian Martins 👳🏾‍♂️)]: O amortecedor?
+[Cliente (Willian Martins 👳🏾‍♂️)]: E nao deu pra verificar?
+[Cliente (Willian Martins 👳🏾‍♂️)]: Mas espera, vcs trocaram a bandeja que fica ali praticamente junta
+--- ARQUIVO: Conv_3301_Marcos_Henrique.txt ---
+==============================================
+Cliente: Marcos Henrique
+ID Conversa: 3301
+Total de Mensagens: 15
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Marcos Henrique)]: Blz
+[Oficina (Gerente)]: Pode sim, claro
+[Cliente (Marcos Henrique)]: Pode ser na terça
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Marcos Henrique)]: (Arquivo/Mídia anexado)
+[Cliente (Marcos Henrique)]: (Arquivo/Mídia anexado)
+[Cliente (Marcos Henrique)]: Blz
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Marcos Henrique)]: (Arquivo/Mídia anexado)
+[Cliente (Marcos Henrique)]: (Arquivo/Mídia anexado)
+[Cliente (Marcos Henrique)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Consegue me trazer ela na terça-feira? Na parte da manhã?
+[Oficina (Gerente)]: Bom dia Marcos, tudo bem?
+[Cliente (Marcos Henrique)]: (Arquivo/Mídia anexado)
+[Cliente (Marcos Henrique)]: Bom dia
+--- ARQUIVO: Conv_3627_Luis_Guilherme__.txt ---
+==============================================
+Cliente: Luis Guilherme😎
+ID Conversa: 3627
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: Combinado, ficamos aguardando
+[Cliente (Luis Guilherme😎)]: Saindo agora, prévia 18 minutos estamos ai blz
+[Oficina (Gerente)]: Combinado, sem problemas.
+[Cliente (Luis Guilherme😎)]: Quando ele chegar te aviso na hora
+[Cliente (Luis Guilherme😎)]: Bom dia, tudo certo e você? Solicitei o guincho desde as 6:30h tô aqui aguardando blz chegando já vou direto ai
+[Oficina (Gerente)]: Bom dia Sr. Luis, tudo bem?
+[Cliente (Luis Guilherme😎)]: 👍🏻
+[Oficina (Gerente)]: Isso!
+
+Rua Jorge beretta, 627 - Parque Erasmo Assunção - Santo André/SP
+[Cliente (Luis Guilherme😎)]: É no pq Erasmo carlos correto?
+[Oficina (Gerente)]: 🤜🏻
+[Cliente (Luis Guilherme😎)]: Muito obrigado 👍🏻👍🏻
+[Oficina (Gerente)]: Agendado, para o primeiro horário.
+Pela manhã vamos no falando, tudo bem?
+[Cliente (Luis Guilherme😎)]: Placa é PYI 6J45
+[Cliente (Luis Guilherme😎)]: Certo, então vou tentar deixar agendado o guincho tbm
+[Oficina (Gerente)]: Me informa a placa vou agendar para 08:00 e quando o guincho retirar o senhor me avisa para conseguir organizar um espaço para ela
+[Cliente (Luis Guilherme😎)]: Quero sim, posso te mandar qual horário? Assim vc analisa pra mim
+[Oficina (Gerente)]: Consigo recebe-la
+[Oficina (Gerente)]: Quer deixar agendado para amanhã cedo?
+[Oficina (Gerente)]: Isso, não arrisca para não correr o risco de acabar danificando
+[Cliente (Luis Guilherme😎)]: Só que se hoje eu pedir o guincho vai chegar aí depois do horário de vcs né
+--- ARQUIVO: Conv_3631_Rosana_Ferreira.txt ---
+==============================================
+Cliente: Rosana Ferreira
+ID Conversa: 3631
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: Combinado Sra. Rosana, qualquer dúvida é só chamamar
+[Cliente (Rosana Ferreira)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Bom dia Sra. Rosana, tudo bem? A senhora não veio
+[Oficina (Gerente)]: Rua Jorge Beretta, 627 - Parque Erasmo Assunção - Santo André/SP
+[Cliente (Rosana Ferreira)]: Qual endereço mesmo
+[Cliente (Rosana Ferreira)]: Obrigada
+[Cliente (Rosana Ferreira)]: Ok
+[Oficina (Gerente)]: Entendo, pode vir as 11:00 para avaliarmos
+[Cliente (Rosana Ferreira)]: Pois peguei trauma do manual
+[Cliente (Rosana Ferreira)]: Tenho medo de pegar trauma
+[Cliente (Rosana Ferreira)]: Sabe
+[Cliente (Rosana Ferreira)]: Dirigir
+[Cliente (Rosana Ferreira)]: Estou até doente esse carro era meu sonho
+[Cliente (Rosana Ferreira)]: Sim
+[Cliente (Rosana Ferreira)]: Só pra darem uma olhadinha um parecer pra mim
+[Oficina (Gerente)]: A senhora consegue vir na parte da manhã 11:00 hoje?
+[Cliente (Rosana Ferreira)]: Aí eu pediria pro meu filho levar
+[Cliente (Rosana Ferreira)]: Hj vcs não sbre
+[Cliente (Rosana Ferreira)]: E tenho medo de andar com ele
+[Cliente (Rosana Ferreira)]: Entro no serviço as 9.30
+--- ARQUIVO: Conv_3641_Tha_s_Clemente.txt ---
+==============================================
+Cliente: Thaís Clemente
+ID Conversa: 3641
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: Combinado, qualquer dúvida é só me chamar.
+[Cliente (Thaís Clemente)]: Obrigava
+[Cliente (Thaís Clemente)]: Meu cunhado já resolveu pra mim
+[Cliente (Thaís Clemente)]: Não precisa não
+[Cliente (Thaís Clemente)]: Bom dia
+[Oficina (Gerente)]: Bom dia Sra. Thais, tudo bem? Não veio ao sábado, gostaria de remarcar?
+[Oficina (Gerente)]: Hoje estamos até as 14:00
+[Cliente (Thaís Clemente)]: Vcs ficam aberto até q hrs?
+[Cliente (Thaís Clemente)]: Jaja vou aí então
+[Cliente (Thaís Clemente)]: Perfeito
+[Oficina (Gerente)]: 04 LITROS DE ÓLEO 20W50 R$199,60 
+01 FILTRO DE ÓLEO R$59,90
+
+TOTAL: R$259,50
+
+Esse valor parcelamos em até 2x sem juros.
+[Cliente (Thaís Clemente)]: (Arquivo/Mídia anexado)
+[Cliente (Thaís Clemente)]: O motor é vhc
+[Oficina (Gerente)]: Só um minuto, já te passo
+[Cliente (Thaís Clemente)]: O motor eu já te passo, deixa eu olhar aqui
+[Cliente (Thaís Clemente)]: Um celta spirit 2005
+[Oficina (Gerente)]: Por favor
+[Oficina (Gerente)]: Qual o veículo? Me informa o ano e motor
+[Cliente (Thaís Clemente)]: Tem uma média de valor q vc possa me passar?
+[Cliente (Thaís Clemente)]: Ah sim
+--- ARQUIVO: Conv_3646_Michel.txt ---
+==============================================
+Cliente: Michel
+ID Conversa: 3646
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: Entendo a sua chateação e peço desculpas pelo transtorno.
+
+A previsão era realmente entregar antes, porém a transportadora não realizou a coleta da peça conforme programado, o que acabou atrasando o serviço.
+
+Na segunda-feira, assim que a peça chegar, faremos a montagem com prioridade para liberar o veículo o mais rápido possível.
+[Cliente (Michel)]: Bom dia 
+O grande problema amigo e que vcs ficaram me pressionando pra pagar a entrada e falou que entregaria no dia seguinte eu fiz um corre danado pra conseguir o dinheiro pra não ficar sem carro e ai vc me fala que só segunda 
+Cara estou muito chateado com isso
+[Oficina (Gerente)]: Bom dia Sr. Michel, tudo bem?
+Sim, estava realizando o alinhamento já, mas a transportadora não coletou ontem.
+
+Mas segunda-feira está aqui e na segunda mesmo já montamos.
+[Cliente (Michel)]: (Arquivo/Mídia anexado)
+[Cliente (Michel)]: Sério isso
+[Oficina (Gerente)]: A previsão do nosso fornecedor, estava para amanhã, mas acabo de ser informado que alterou para entre amanhã e segunda, vou atualizando o senhor auqi.
+[Oficina (Gerente)]: Boa tarde Sr. Michel, tudo bem?
+[Oficina (Gerente)]: Vamos fazer o possível
+[Cliente (Michel)]: Faz um esforço aí pra me ajudar pra entregar o carro por favor
+[Oficina (Gerente)]: Obrigado, vou te atualizando por aqui
+[Cliente (Michel)]: Tá feito
+[Cliente (Michel)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: O senhor consegue fazer pix?
+[Oficina (Gerente)]: Já está alinhando e balanceando o cardan
+[Oficina (Gerente)]: Estamos fazendo o possível
+[Cliente (Michel)]: (Arquivo/Mídia anexado)
+[Cliente (Michel)]: Consigo sim
+[Oficina (Gerente)]: Previsão até amanhã, estamos agilizando o senhor conseguiu realizar o restante do sinal?
+[Cliente (Michel)]: Se ficou vou buscar e já pago o restante
+[Cliente (Michel)]: Carro ficou pronto?
+--- ARQUIVO: Conv_3664_Gerson.txt ---
+==============================================
+Cliente: Gerson
+ID Conversa: 3664
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Gerson)]: (Arquivo/Mídia anexado)
+[Cliente (Gerson)]: Bom dia
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Precisa ser orçamento formal só para encaminhar ao financeiro
+[Cliente (Gerson)]: (Arquivo/Mídia anexado)
+[Cliente (Gerson)]: Orçamento 
+Eixo cardan da capitiva a base de troca fica 1.400
+[Oficina (Gerente)]: Pode ser tipo assim
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Gerson)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Pode ser a base de troca
+[Oficina (Gerente)]: Vou encaminhar para o financeiro
+[Oficina (Gerente)]: Fornaliza o orçamento e me envia aqui por favor
+[Cliente (Gerson)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Consegue me dar uma resposta até as 16:20, por favor 🙏🏻
+[Cliente (Gerson)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Gerson)]: (Arquivo/Mídia anexado)
+[Cliente (Gerson)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Deu certo?
+--- ARQUIVO: Conv_3684_Neto.txt ---
+==============================================
+Cliente: Neto
+ID Conversa: 3684
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Oficina (Gerente)]: Hoje nosso expediente será até às 12h, em razão do jogo.
+
+Aproveito para lembrar que, conforme o orçamento encaminhado na sexta-feira, a partir de amanhã será começa a gerar a estádia de pátio, pois o elevador se encontra ocupado nos impedindo de realizar novos serviços.
+
+Também gostaria de informar que, conforme nossas normas internas, para orçamentos acima de R$ 2.600,00 solicitamos um adiantamento de 60% do valor no momento da aprovação, para iniciarmos os reparos.
+[Cliente (Neto)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Podemos prosseguir com os serviços?
+[Oficina (Gerente)]: Bom dia Sr. Neto, tudo bem?
+[Oficina (Gerente)]: Prezado(a) JOAQUIM, segue Orçamento nº 1897 de 26/06/2026 placa: FTO0741
+
+Orcamento.pdf (https://www.oiapi.com.br/WA.aspx?tk=9i3V8U5kW3D3VaEDRsRWGQ==) 
+
+Sr. Neto, estou te encaminhando o orçamento conforme solicitado, lembrando que alguns dos componentes não apresentam desgaste visiveis e o ideal seria realizar a avaliação com o veículo em funcionamento para evitar a troca de peças desnecessárias.
+[Cliente (Neto)]: Ok
+[Oficina (Gerente)]: Fizemos uma avaliação em elevador, alguns componentes que citou não apresentam folga ou desgaste visíveis vou gerar o orçamento e já lhe encaminho.
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Neto)]: Ok
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Neto)]: Segue orçamento Ford Fusion 2014
+Kit batente dianteiro completo 
+2 terminal de direção 2 braço AXIAL 
+2 Bieleta nakata 
+Coxinho do câmbio 
+Coxinho do motor lado esquerdo do câmbio
+[Cliente (Neto)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Este aqui junto com os relatos em vídeos
+[Cliente (Neto)]: Me passa o diagnostico do que vc  ja fez
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Neto)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Após o veículo em funcionamento conseguimos fazer um check-up
+[Oficina (Gerente)]: Porque se eu te passo esse orçamento e os barulhos continuar, não resolve o problema
+[Oficina (Gerente)]: Justamente para evitar a troca de peças desnecessárias
+--- ARQUIVO: Conv_3696_Ederson_Raimundo_____.txt ---
+==============================================
+Cliente: Ederson Raimundo 💎⭐️
+ID Conversa: 3696
+Total de Mensagens: 18
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Ederson Raimundo 💎⭐️)]: Beleza, obrigado amigo
+[Oficina (Gerente)]: Sim
+[Cliente (Ederson Raimundo 💎⭐️)]: Tem que trocar a bomba inteira ?
+[Oficina (Gerente)]: Nós não realizamos
+[Oficina (Gerente)]: Geralmente esse serviço ai é necessário realizar a substituição da bomba
+[Cliente (Ederson Raimundo 💎⭐️)]: Hb20s premium 1.6 automático 2014
+[Oficina (Gerente)]: Tudo bem também, obrigado.
+Qual o veículo?
+[Cliente (Ederson Raimundo 💎⭐️)]: Estou bem e você ?
+[Cliente (Ederson Raimundo 💎⭐️)]: Eu precisaria trocar ou ter uma forma de apertar essa peça com algo pra deixar bem encaixada
+[Cliente (Ederson Raimundo 💎⭐️)]: Essa peça está solta e com a peça solta a direção fica fazendo ruído.. portanto, quando encaixo, o ruído pára, o problema que a peça fica saindo e consequentemente o ruído aparecendo novamente
+[Oficina (Gerente)]: Boa tarde Sr. Ederson, tudo bem? Oque está acontecendo com o veículo e qual o veículo?
+[Cliente (Ederson Raimundo 💎⭐️)]: Essa peça
+[Cliente (Ederson Raimundo 💎⭐️)]: (Arquivo/Mídia anexado)
+[Cliente (Ederson Raimundo 💎⭐️)]: (Arquivo/Mídia anexado)
+[Cliente (Ederson Raimundo 💎⭐️)]: Erik
+[Cliente (Ederson Raimundo 💎⭐️)]: Boa tarde
+[Cliente (Ederson Raimundo 💎⭐️)]: Olá
+[Oficina (Gerente)]: Bom dia Sr. Ederson, tudo bem?
+Aqui é Erik, vi que o senhor entrou em contato com a nossa central de atendimento e eu gostaria de entender melhor oque está acontecendo com o seu veículo?
+--- ARQUIVO: Conv_3758_Selma_Farias.txt ---
+==============================================
+Cliente: Selma Farias
+ID Conversa: 3758
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Selma Farias)]: Ok.
+[Oficina (Gerente)]: Compreendo perfeitamente a situação e entendo que ficar sem o único veículo da família é muito complicado.
+
+Não posso garantir 100%, mas estou acompanhando de perto para analise ser concluída o mais rápido possível, mas amanhã já tenho algum retorno.
+[Cliente (Selma Farias)]: Só temos um carro. Não dá pra ficar na dependência da boa vontade. É certeza que vem  amanhã?
+[Oficina (Gerente)]: Sra. Selma, o veículo se encontra em processo de analise de garantia, peço que aguarde para que o garantista verifique o veículo amanhã tenho algum retorno e já informo a senhora.
+[Cliente (Selma Farias)]: Não vou aguardar . Vou pedir pro Júnior buscar o carro hoje
+[Oficina (Gerente)]: Estou aguardando o garantista, por enquanto.
+
+Hoje como funcionamos até as 12h, por conta do jogo.
+
+Amanhã provavelmente devo ter algum retorno, para poder atualiza-los.
+[Oficina (Gerente)]: Bom dia Sra. Selma, tudo bem?
+[Cliente (Selma Farias)]: Alguma novidade sobre o carro?
+[Cliente (Selma Farias)]: Eric, bom dia.
+[Oficina (Gerente)]: Boa tarde, Sra. Selma. Entendemos sua colocação.
+Conforme o seu relato inicial, o veículo apresentou falha de funcionamento (desligando e posteriormente não dando partida), além da luz de injeção acesa no painel.
+
+O veículo já foi recebido e está sob análise do setor garantista, que é responsável por realizar o diagnóstico técnico completo e identificar a causa da falha apresentada.
+
+Após essa análise, retornaremos com o posicionamento e as definições necessárias conforme procedimento.
+[Cliente (Selma Farias)]: Eric, boa tarde. Como deixei bem claro ontem, não aceito pagar mão de obra. A minha queixa desde o início menciona a luz de injeção acesa no painel.
+[Cliente (Selma Farias)]: (Arquivo/Mídia anexado)
+[Cliente (Selma Farias)]: Ah ok, vou verificar
+[Oficina (Gerente)]: São 2 anexos
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Selma Farias)]: Valor pago foi 4620,80, não 3810,00
+[Cliente (Selma Farias)]: (Arquivo/Mídia anexado)
+[Cliente (Selma Farias)]: Valor da nota está incorreto
+[Cliente (Selma Farias)]: (Arquivo/Mídia anexado)
+[Cliente (Selma Farias)]: Cadê a garantia?
+--- ARQUIVO: Conv_3763_Washington_Vigorito.txt ---
+==============================================
+Cliente: Washington Vigorito
+ID Conversa: 3763
+Total de Mensagens: 20
+Status de Triagem: APROVADO PELO ALGORITMO
+==============================================
+
+[Cliente (Washington Vigorito)]: 👍🏻
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Maravilha, muito obrigado
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Opa, corinthians
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: Ok
+[Oficina (Gerente)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Oficina (Gerente)]: Blz, vou ver com o cliente e te falo
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
+[Cliente (Washington Vigorito)]: R$ 2250,00  Original Ford
+[Cliente (Washington Vigorito)]: (Arquivo/Mídia anexado)
