@@ -402,6 +402,7 @@ async function processAll() {
   for (const subdir of subdirs) {
     const unitName = subdir.replace('conversas_', '').replace(/_/g, ' ');
     const dirPath = path.join(DIR_BASE, subdir);
+    if (!fs.existsSync(dirPath)) continue;
     const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.txt'));
     
     if (files.length === 0) continue;
@@ -483,19 +484,34 @@ Formato:
         required: ["analiseGeral", "resumosDasConversas"]
     };
     
-    // Espera 10s antes de cada chamada para não estourar o Free Tier Rate Limit
+    // Espera 15s antes de cada chamada para não estourar o Free Tier Rate Limit
     if (subdir !== subdirs[0]) {
-        console.log('Esperando 10s para respeitar a cota da API...');
-        await new Promise(r => setTimeout(r, 10000));
+        console.log('Esperando 15s para respeitar a cota da API...');
+        await new Promise(r => setTimeout(r, 15000));
     }
-    const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: promptPayload,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: schema
-            }
-        });
+    
+    let response;
+    let retries = 5;
+    let delay = 10000;
+    while (retries > 0) {
+        try {
+            response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: promptPayload,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema
+                }
+            });
+            break;
+        } catch (apiErr) {
+            retries--;
+            if (retries === 0) throw apiErr;
+            console.warn(`[⚠️] Erro na API do Gemini para a unidade ${unitName}: ${apiErr.message || apiErr}. Tentando novamente em ${delay/1000} segundos... (${retries} tentativas restantes)`);
+            await new Promise(r => setTimeout(r, delay));
+            delay *= 1.5;
+        }
+    }
         
         const resText = response.text;
         const result = JSON.parse(resText);
@@ -509,6 +525,7 @@ Formato:
         const html = gerarHTMLFull(todasAuditorias, unitName, worstId, resumos, analise);
         
         const htmlName = `Relatorio_Semantico_${subdir.replace('conversas_','')}.html`;
+        if (!fs.existsSync(DIR_PAINEL)) fs.mkdirSync(DIR_PAINEL, { recursive: true });
         fs.writeFileSync(path.join(DIR_PAINEL, htmlName), html);
         console.log(`[+] Salvo ${htmlName} com Análise Executiva e Resumos Individuais.`);
         

@@ -25,3 +25,11 @@
 - `ManagerDashboard` (`/tv/operacional`): TV Operacional (Radar por Unidade e Slides Globais).
 - `ExecutiveDashboard` (`/tv/executivo`): TV Executiva (Radar Limpo, Ranking Semáforo e Operações).
 - Roteamento imersivo (sidebar e header auto-ocultados via hooks de rota).
+
+## Supabase Cloud Infrastructure (Ref: ijomsruroyeaapurnbqu)
+- **Instância Cloud**: `https://ijomsruroyeaapurnbqu.supabase.co`
+- **Extensões Ativas**: `uuid-ossp`, `pgvector`
+- **Storage Buckets**: `audits` (público), `inspections` (público)
+- **Tabelas do Schema**: `units`, `store_inspections`, `inspection_items`, `inspection_photos`, `audits`, `weekly_critical_insights`, `ai_settings`, `system_configs`, `leads`, `profiles`, `user_roles`, `business_hours`
+- **Cliente**: `src/integrations/supabase/client.ts`
+

@@ -72,9 +72,27 @@ async function getFullMessages(convId) {
 
 async function run() {
     console.log("[*] Buscando Inboxes ativas...");
-    const inboxesRaw = await getAllInboxes();
-    const inboxes = inboxesRaw.map(i => ({ id: i.id, name: i.name.toUpperCase() }));
-    console.log(`[+] Encontradas ${inboxes.length} inboxes:`, inboxes.map(i => i.name).join(', '));
+    let inboxes;
+    let offlineMode = false;
+    try {
+        const inboxesRaw = await getAllInboxes();
+        inboxes = inboxesRaw.map(i => ({ id: i.id, name: i.name.toUpperCase() }));
+        console.log(`[+] Encontradas ${inboxes.length} inboxes:`, inboxes.map(i => i.name).join(', '));
+    } catch (err) {
+        console.warn(`[⚠️] Erro ao buscar inboxes da API (${err.message}). Ativando modo offline/fallback com backups locais...`);
+        offlineMode = true;
+        inboxes = [
+            { id: 1, name: 'CARIJOS' },
+            { id: 2, name: 'DIADEMA' },
+            { id: 3, name: 'DOM PEDRO' },
+            { id: 4, name: 'JABAQUARA' },
+            { id: 5, name: 'KENNEDY' },
+            { id: 6, name: 'MAUÁ' },
+            { id: 7, name: 'MECANICA' },
+            { id: 8, name: 'PLANALTO' },
+            { id: 9, name: 'RUDGE' }
+        ];
+    }
     
     const inboxArg = process.argv.find(a => a.startsWith('--inbox='));
     const targetInbox = inboxArg ? inboxArg.split('=')[1].toUpperCase() : null;
@@ -92,6 +110,20 @@ async function run() {
             fs.rmSync(dirName, { recursive: true, force: true });
         }
         fs.mkdirSync(dirName);
+
+        if (offlineMode) {
+            const backupDir = path.join('C:', 'Users', 'admin', 'Desktop', 'Auditorias_Rede', 'Auditoria_Semanal_2026-07-10', 'Históricos_Brutos', inbox.name.replace(/[^A-Z0-9]/g, '_'));
+            if (fs.existsSync(backupDir)) {
+                const files = fs.readdirSync(backupDir);
+                for (const file of files) {
+                    fs.copyFileSync(path.join(backupDir, file), path.join(dirName, file));
+                }
+                console.log(`    [+] Restauradas ${files.length} conversas do backup offline.`);
+            } else {
+                console.error(`    [❌] Pasta de backup não encontrada: ${backupDir}`);
+            }
+            continue;
+        }
         
         let validosCount = 0;
         let page = 1;
@@ -205,7 +237,7 @@ async function run() {
                 let startStr = msgsOrdenadas[0].created_at;
                 let endStr = msgsOrdenadas[msgsOrdenadas.length-1].created_at;
                 
-                let fullText = `--- METADADOS ---\nUnidade: ${inbox.name}\nCliente: ${senderName}\nID da Conversa: ${c.id}\nPeríodo: ${formatD(startStr)} até ${formatD(endStr)}\n------------------\n\n`;
+                let fullText = `--- METADADOS ---\nUnidade: ${inbox.name}\nCLIENTE: ${senderName}\nCONVERSA ID: ${c.id}\nPERÍODO: ${formatD(startStr)} → ${formatD(endStr)}\n------------------\n\n`;
                 
                 msgsOrdenadas.forEach(m => {
                     const type = m.message_type === 1 ? 'Mecânico (Gerente)' : 'Cliente';
@@ -213,7 +245,7 @@ async function run() {
                     fullText += `[${dataFormatada}] ${type}:\n${m.content || '(Sem Mensagem/Midia não transcrita)'}\n\n`;
                 });
                 
-                const fPath = path.join(dirName, `ID${c.id}_${senderName.replace(/[^A-Za-z0-9_]/g, '')}.txt`);
+                const fPath = path.join(dirName, `Conv_${c.id}_${senderName.replace(/[^A-Za-z0-9_]/g, '')}.txt`);
                 fs.writeFileSync(fPath, fullText);
                 validosCount++;
                 console.log(`    [+] Exportado (${validosCount}/15): ${senderName} (ID: ${c.id}) - Entropia OK`);

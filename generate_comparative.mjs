@@ -15,8 +15,8 @@ for (const f of files) {
     const titleMatch = html.match(/<title>.*?-\s*([^<]+)<\/title>/i);
     if (titleMatch) name = titleMatch[1].trim();
     
-    const allScores = [...html.matchAll(/Score:\s*(\d+)%/gi)].map(m => parseInt(m[1], 10));
-    let score = allScores.length ? Math.round(allScores.reduce((a,b)=>a+b,0)/allScores.length) : 0;
+    const scoreMatch = html.match(/Score\s+m.dio[^\d]*(\d+)%/i);
+    let score = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
     
     let granularHtml = '';
     const startIdx = html.indexOf('<!-- GRAFICO LATERAL -->');
@@ -116,6 +116,9 @@ const dashboardHtml = `
 <head>
     <meta charset="UTF-8">
     <title>Ranking Comparativo - Rede</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', 'Segoe UI', sans-serif; background-color: #f1f5f9; margin: 0; padding: 40px; }
         .container { max-width: 1100px; margin: 0 auto; }
