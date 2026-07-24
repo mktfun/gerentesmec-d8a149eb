@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Wifi, WifiOff, Eye, EyeOff, Plus, Clock, Info, Cpu, X, RefreshCw, Copy, Check, AlertTriangle } from 'lucide-react';
 import UnitMappingCard from '@/components/Config/UnitMappingCard';
@@ -40,7 +40,7 @@ const Config = () => {
 
   const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://[SEU-PROJETO].supabase.co';
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ijomsruroyeaapurnbqu.supabase.co';
   const webhookUrl = `${supabaseUrl}/functions/v1/chatwoot-webhook`;
 
   const handleCopyWebhook = () => {

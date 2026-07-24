@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Plus, Key, Trash2, User, Loader2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://ijomsruroyeaapurnbqu.supabase.co";
+const serviceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlqb21zcnVyb3llYWFwdXJuYnF1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4Mjc5Mzc5NywiZXhwIjoyMDk4MzY5Nzk3fQ.u2RHcTbkqDcNt8PWu4tvXxXMpbHz-Csm6yI4YF7S8HU";
 
 // Admin client para gerenciar usuários (apenas para uso restrito em configs/admin)
 const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
