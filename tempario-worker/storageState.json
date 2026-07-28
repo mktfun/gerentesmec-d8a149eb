@@ -1,31 +1,55 @@
 {
   "cookies": [
     {
-        "domain": "sistema.tempar.io",
-        "expirationDate": 1782190303.154921,
-        "hostOnly": true,
-        "httpOnly": false,
-        "name": "@tempario-r",
-        "path": "/",
-        "sameSite": "None",
-        "secure": true,
-        "session": false,
-        "storeId": "0",
-        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3ODIxNjE1MDMsImV4cCI6MTc4MjI0NzkwMywic3ViIjoiNmEzNTZiNzdlNWI3MjJjMDQ4ZTAyYTdmIn0.sGEOW1vpVH8yc9PkoLpcAFWyc2XPqFMpAejnma-SdjU"
+      "name": "_ga",
+      "value": "GA1.1.1342687717.1785240860",
+      "domain": ".tempar.io",
+      "path": "/",
+      "expires": 1819800859.991739,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
     },
     {
-        "domain": "sistema.tempar.io",
-        "expirationDate": 1782190303.154572,
-        "hostOnly": true,
-        "httpOnly": false,
-        "name": "@tempario-t",
-        "path": "/",
-        "sameSite": "None",
-        "secure": true,
-        "session": false,
-        "storeId": "0",
-        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb21wYW55RW1haWwiOiJta3RmdW5pbDFAZ21haWwuY29tIiwidXNlckVtYWlsIjoibWt0ZnVuaWwxQGdtYWlsLmNvbSIsImFjY291bnRfdHlwZSI6IldPUktTSE9QIiwiY2FuX2NyZWF0ZSI6WyJjdXN0b21lcnMiLCJlbXBsb3llZXMiLCJmaW5hbmNpZXMiLCJvcmRlcnMiLCJwZXJtaXNzaW9ucyIsInNhbGVzX3ZhbHVlcyIsInNjZW5hcmlvcyIsInRpbWVfc2VhcmNoIiwidXNlcnMiLCJwbGFucyJdLCJjYW5fdXBkYXRlIjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9kZXN0cm95IjpbImN1c3RvbWVycyIsImVtcGxveWVlcyIsImZpbmFuY2llcyIsIm9yZGVycyIsInBlcm1pc3Npb25zIiwic2FsZXNfdmFsdWVzIiwic2NlbmFyaW9zIiwidGltZV9zZWFyY2giLCJ1c2VycyIsInBsYW5zIl0sImNhbl9tYW5hZ2UiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwiY2FuX3JlYWQiOlsiY3VzdG9tZXJzIiwiZW1wbG95ZWVzIiwiZmluYW5jaWVzIiwib3JkZXJzIiwicGVybWlzc2lvbnMiLCJzYWxlc192YWx1ZXMiLCJzY2VuYXJpb3MiLCJ0aW1lX3NlYXJjaCIsInVzZXJzIiwicGxhbnMiXSwic3RhdHVzIjoiYWN0aXZhdGVkIiwibWF4X3NlcnZpY2VzIjoxMCwiaWF0IjoxNzgyMTYxNTAzLCJleHAiOjE3ODIxNzIzMDN9.DMCRbfY-s4alVaLYiJvZmxodPabz1W_TgETxTK-7gGc"
+      "name": "_hjSessionUser_5285130",
+      "value": "eyJpZCI6ImIxYjAxNzc5LWRhMTktNTZmYS05ZTM4LTljMzYzNjExZGMwZCIsImNyZWF0ZWQiOjE3ODUyNDA4NjAxMzcsImV4aXN0aW5nIjpmYWxzZX0=",
+      "domain": ".tempar.io",
+      "path": "/",
+      "expires": 1816776860,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_hjSession_5285130",
+      "value": "eyJpZCI6IjI0OWJmNDg2LTk1MmEtNGYyNC1iYzNiLWE4NGM4MzU3ZjA2MyIsImMiOjE3ODUyNDA4NjAxMzgsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=",
+      "domain": ".tempar.io",
+      "path": "/",
+      "expires": 1785242660,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_ga_0BSVQDK9LL",
+      "value": "GS2.1.s1785240859$o1$g1$t1785240862$j57$l0$h0",
+      "domain": ".tempar.io",
+      "path": "/",
+      "expires": 1819800862.195183,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
     }
   ],
-  "origins": []
+  "origins": [
+    {
+      "origin": "https://challenges.cloudflare.com",
+      "localStorage": [
+        {
+          "name": "cf.turnstile.u",
+          "value": "ketd9f5pUSEI0RADMDQNTHTEZOMlI5Nmh4FsvuWnyrU-1785240862-1.3.1.1-fbYAFA95fbkFqMacDMoNjg4uzwXg4xfIKIrtllVnipq.18Ff1LTDhYKDO4hPt8IzGkT0PJhGYc.7EisXXU2ohw"
+        }
+      ]
+    }
+  ]
 }

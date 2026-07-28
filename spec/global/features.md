@@ -5,7 +5,7 @@
 - Componente `AuditItem`: Controla as evidências e validação por quantidade mínima de fotos.
 - Componente `CameraCapture`: Bloqueia galeria e exige foto nativa com GPS.
 - Hook `useAuditStorage`: Grava drafts no IndexedDB (localforage) antes do upload final para garantir integridade.
-- Tabela Supabase: `store_inspections` (com `raw_payload`), `inspection_items`, `inspection_photos`.
+- Tabela Supabase: `store_inspections` (com `completed_at`, `started_at`, `store_id`, `unit_id`, `status`, `device_info`, `score`, `raw_payload`), `inspection_items`, `inspection_photos`.
 
 ## Dashboards de Vistorias
 - Tela `AuditHistory` (`/historico-auditorias`): Lista vistorias finalizadas.
