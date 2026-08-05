@@ -33,3 +33,5 @@
 - **Tabelas do Schema**: `units`, `store_inspections`, `inspection_items`, `inspection_photos`, `audits`, `weekly_critical_insights`, `ai_settings`, `system_configs`, `leads`, `profiles`, `user_roles`, `business_hours`
 - **Cliente**: `src/integrations/supabase/client.ts`
 
+  
+- **Regra de Neg¢cio (Auditorias):** Score ‚ calculado h¡brido (coluna \score\ nativa para IA, ou fallback \aw_payload.categories\ para manuais via PWA). Filtro de UI abrange status \synced\ e \completed\. 

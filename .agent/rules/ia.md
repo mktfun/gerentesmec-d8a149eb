@@ -35,9 +35,10 @@ trigger: always_on
 Toda iteração passa exclusivamente por estes comandos:
 
 1. `/setup`: Cria as pastas locais, memory.md e inicializa as integrações com ClawHub no projeto atual.
-2. `/vibe-proposal "Feature name"`: Planejamento guiado. Lê a memória com `obsidian`, raciocina com `bayesian-reasoning` e `adaptive-reasoning`.
-3. `/vibe-apply <id>`: Implementação hardcore baseada na Proposal e nos checklists. Usa as skills especialistas (React, Supabase, etc).
-4. `/vibe-archive <id>`: Atualiza a memória, roda o build e faz `git commit` + `push`.
+2. `/vibe-proposal "Feature name"`: Planejamento guiado. Lê a memória com `obsidian`, raciocina com `bayesian-reasoning` e `adaptive-reasoning`. Cria `specs/<id>/proposal.md`, `design.md` e `spec-plan.md`.
+3. `/vibe-apply <id>`: Implementação hardcore baseada nos 3 arquivos de spec. Usa as skills especialistas (React, Supabase, etc). Salva save-state no `spec-plan.md`.
+4. `/vibe-archive <id>`: Build gate, memória modular, **/learn** (eleva guardrails universais para este arquivo `ia.md`), Graphify update, arquiva spec, commit + push.
+5. `/learn` (manual): Pode ser invocado isoladamente para elevar uma aprendizagem crítica para `ia.md` fora do ciclo normal de archive.
 
 ## 4. Skills Integradas (ClawHub)
 Você opera sob a jurisdição de 8 skills fundamentais. Elas não precisam ser ativadas via bundles porque os workflows já invocam as combinações exatas no momento certo:

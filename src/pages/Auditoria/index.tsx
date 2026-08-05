@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 interface RecentAudit {
   id: string;
   store_id: string;
+  score?: number | null;
   final_score?: number;
   completed_at: string;
   raw_payload?: Record<string, unknown>;
@@ -36,7 +37,8 @@ export default function AuditoriaApp() {
       setLoadingRecent(true);
       const { data } = await supabase
         .from('store_inspections')
-        .select('id, store_id, completed_at, raw_payload')
+        .select('id, store_id, completed_at, raw_payload, score')
+        .in('status', ['synced', 'completed'])
         .order('completed_at', { ascending: false })
         .limit(3);
       if (data) setRecentAudits(data as unknown as RecentAudit[]);
@@ -188,7 +190,7 @@ export default function AuditoriaApp() {
               </div>
             ) : (
               recentAudits.map(audit => {
-                // Calcular score a partir do raw_payload já que final_score não é uma coluna real
+                // Calcular score nativo ou via raw_payload
                 let totalItems = 0;
                 let conformItems = 0;
                 const categories = (audit.raw_payload as Record<string, unknown>)?.categories as Record<string, unknown>[] | undefined;
@@ -198,9 +200,11 @@ export default function AuditoriaApp() {
                     if (item?.status !== 'na' && item?.status !== null) totalItems++;
                   });
                 });
-                const score = totalItems > 0 ? Math.round((conformItems / totalItems) * 100) : null;
-                const scoreColor = !score ? 'text-zinc-500' : score >= 75 ? 'text-emerald-700 dark:text-emerald-400' : score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
-                const bgScore = !score ? 'bg-zinc-100 dark:bg-zinc-800' : score >= 75 ? 'bg-emerald-500/20 dark:bg-emerald-400/10' : score >= 50 ? 'bg-amber-500/20 dark:bg-amber-400/10' : 'bg-rose-500/20 dark:bg-rose-400/10';
+                const fallbackScore = totalItems > 0 ? Math.round((conformItems / totalItems) * 100) : null;
+                const score = (audit.score !== undefined && audit.score !== null) ? audit.score : fallbackScore;
+                
+                const scoreColor = score === null ? 'text-zinc-500' : score >= 75 ? 'text-emerald-700 dark:text-emerald-400' : score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
+                const bgScore = score === null ? 'bg-zinc-100 dark:bg-zinc-800' : score >= 75 ? 'bg-emerald-500/20 dark:bg-emerald-400/10' : score >= 50 ? 'bg-amber-500/20 dark:bg-amber-400/10' : 'bg-rose-500/20 dark:bg-rose-400/10';
                 
                 // Nome da unidade via units (se disponível) ou via store_id matching
                 const unitName = units.find(u => u.id === audit.store_id)?.name || 'Unidade';

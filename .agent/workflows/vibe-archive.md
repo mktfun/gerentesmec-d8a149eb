@@ -56,7 +56,46 @@ Ex: "FITIDs de OFX devem ser deduplicados por chave composta antes do INSERT par
 
 ---
 
-## Step 3 — Atualização do Grafo (Graphify)
+## Step 3 — /learn: Elevação para a Constituição (`ia.md`)
+
+Apenas regras **universais** sobem para `ia.md`. O critério é claro:
+
+| Tipo de Conhecimento | Onde vai |
+|---|---|
+| Regra específica do projeto (ex: lógica OFX desta base) | `memory/<categoria>.md` |
+| Anti-pattern universal (ex: nunca usar `push --force`) | `ia.md` (Constituição) |
+| Comportamento que a IA não deve repetir em **nenhum** projeto | `ia.md` (Constituição) |
+| Configuração do ambiente (ex: Graphify é Python) | `ia.md` (Constituição) |
+
+**Processo obrigatório:**
+
+1. Revise o que aconteceu durante o `/vibe-apply` desta iteração
+2. Pergunte: *"Algum comportamento da IA causou erro que não deveria acontecer em nenhum projeto futuro?"*
+3. Se sim, proponha a regra ao usuário com este formato ANTES de escrever no arquivo:
+
+```
+🧠 /learn proposta:
+
+**Regra:** [Nome curto da regra]
+**Comportamento proibido:** [O que a IA fez de errado]
+**Guardrail:** [O que a IA deve fazer sempre]
+**Por quê universal:** [Por que isso vale em qualquer projeto]
+```
+
+4. Se o usuário aprovar (ou se for óbvio que deve ser universal), injete a regra no arquivo `ia.md` sob a seção mais adequada:
+   - Anti-alucinação → Seção `## 2`
+   - CLI / Ambiente → Seção `## 1. Core Principles`
+   - Regra de raciocínio / workflow → Crie uma nova seção enumerada
+5. Se não houver aprendizado universal nesta iteração, registre explicitamente: *"Nenhum guardrail universal identificado nesta iteração."* e continue.
+
+**Não eleve para `ia.md`:**
+- Regras específicas de uma tabela, componente ou módulo do projeto
+- Preferências estéticas do usuário (ficam em `memory/ui.md`)
+- Detalhes de implementação que só fazem sentido neste contexto
+
+---
+
+## Step 4 — Atualização do Grafo (Graphify)
 
 ```bash
 graphify update
@@ -67,7 +106,7 @@ graphify update
 
 ---
 
-## Step 4 — Atualização de `spec/global/features.md`
+## Step 5 — Atualização de `spec/global/features.md`
 
 Adicione os artefatos novos criados nesta iteração:
 - Componentes React novos (nome + localização)
@@ -80,7 +119,7 @@ Isso alimenta o **bloqueio anti-duplicação** do próximo `/vibe-proposal`. Sem
 
 ---
 
-## Step 5 — Arquivamento da Spec
+## Step 6 — Arquivamento da Spec
 
 ```bash
 # Mova a pasta de spec ativa para o arquivo histórico
@@ -92,7 +131,7 @@ Move-Item "specs/<id>" "specs/archive/<id>"
 
 ---
 
-## Step 6 — Commit & Push Controlado
+## Step 7 — Commit & Push Controlado
 
 ```bash
 git add .
@@ -100,18 +139,19 @@ git commit -m "feat(<id>): <resumo do que foi implementado>"
 git push origin main
 ```
 
-- Inclua no `git add .`: arquivos modificados, `graphify-out/`, `specs/archive/`, `.agent/memory/`
+- Inclua no `git add .`: arquivos modificados, `graphify-out/`, `specs/archive/`, `.agent/memory/`, `.agent/rules/ia.md` (se o /learn gerou alguma regra nova)
 - **Fallback Windows:** Se `git` não estiver no PATH, use `C:\Users\admin\.gemini\antigravity\scratch\mingit\cmd\git.exe`
 - **JAMAIS use `push --force`**
 - Se ocorrer "Author identity unknown": `git config user.email "ai@clawhub.com"` e `git config user.name "ClawHub Agent"` antes do commit
 
 ---
 
-## Step 7 — Notificação Final
+## Step 8 — Notificação Final
 
 Avise o usuário:
 - ✅ Build passou
 - 📝 O que foi registrado na memória e em qual categoria
+- 🧠 Regras elevadas para `ia.md` (ou "nenhum guardrail universal nesta iteração")
 - 📦 Spec arquivada em `specs/archive/<id>/`
 - 🔗 Hash do commit
 

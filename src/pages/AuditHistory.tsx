@@ -23,6 +23,7 @@ interface StoreInspection {
   started_at: string;
   completed_at: string;
   status: string;
+  score?: number | null;
   raw_payload: AuditPayload;
 }
 
@@ -49,7 +50,7 @@ export default function AuditHistory() {
       let query = supabase
         .from('store_inspections')
         .select('*')
-        .eq('status', 'synced')
+        .in('status', ['synced', 'completed'])
         .order('completed_at', { ascending: false });
 
       if (isUnitManager && managerUnitId) {
@@ -140,7 +141,8 @@ export default function AuditHistory() {
                 });
               });
               
-              const score = totalItems > 0 ? Math.round((conformItems / totalItems) * 100) : 0;
+              const fallbackScore = totalItems > 0 ? Math.round((conformItems / totalItems) * 100) : 0;
+              const score = (audit.score !== undefined && audit.score !== null) ? audit.score : fallbackScore;
               const scoreColor = score >= 75 ? 'text-emerald-700 dark:text-emerald-400' : score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400';
               const bgScore = score >= 75 ? 'bg-emerald-500/20 dark:bg-emerald-400/10' : score >= 50 ? 'bg-amber-500/20 dark:bg-amber-400/10' : 'bg-rose-500/20 dark:bg-rose-400/10';
 
@@ -187,7 +189,12 @@ export default function AuditHistory() {
           </DrawerHeader>
           <ScrollArea className="flex-1 p-6">
             <div className="max-w-2xl mx-auto space-y-8 pb-10">
-              {(selectedAudit?.raw_payload?.categories || []).filter(Boolean).map(cat => (
+              {(!selectedAudit?.raw_payload?.categories || selectedAudit.raw_payload.categories.length === 0) ? (
+                <div className="bg-zinc-950 text-emerald-400 p-6 rounded-2xl font-mono text-xs overflow-x-auto whitespace-pre-wrap border border-zinc-800 shadow-xl">
+                  {JSON.stringify(selectedAudit?.raw_payload, null, 2)}
+                </div>
+              ) : (
+                (selectedAudit?.raw_payload?.categories || []).filter(Boolean).map(cat => (
                 <div key={cat.category_name} className="space-y-4">
                   {/* Category header */}
                   <div className="flex items-center gap-3 pb-2 border-b border-border">
@@ -273,7 +280,7 @@ export default function AuditHistory() {
                     })}
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           </ScrollArea>
         </DrawerContent>
